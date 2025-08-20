@@ -24,6 +24,109 @@ const createTenantSchema = insertTenantSchema.extend({
 
 type CreateTenantForm = z.infer<typeof createTenantSchema>;
 
+// Admin Users List Component
+function AdminUsersList() {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  
+  const { data: users = [], isLoading } = useQuery({
+    queryKey: ["/api/admin/users"],
+    retry: false,
+  });
+
+  const deleteUserMutation = useMutation({
+    mutationFn: async (userId: string) => {
+      const response = await apiRequest("DELETE", `/api/admin/users/${userId}`);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+      toast({
+        title: "Sucesso",
+        description: "Usuário excluído com sucesso",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erro",
+        description: error.message || "Erro ao excluir usuário",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleDeleteUser = (userId: string) => {
+    if (confirm("Tem certeza que deseja excluir este usuário?")) {
+      deleteUserMutation.mutate(userId);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      {Array.isArray(users) && users.length > 0 ? (
+        <div className="grid gap-4">
+          {users.map((user: any) => (
+            <Card key={user.id} data-testid={`card-user-${user.id}`}>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-4">
+                    <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                      <Users className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="font-medium" data-testid={`text-user-name-${user.id}`}>
+                        {user.firstName} {user.lastName}
+                      </h3>
+                      <p className="text-sm text-muted-foreground" data-testid={`text-user-email-${user.id}`}>
+                        {user.email}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    {user.isSocUser && (
+                      <Badge variant="secondary" data-testid={`badge-soc-${user.id}`}>
+                        <Shield className="h-3 w-3 mr-1" />
+                        SOC
+                      </Badge>
+                    )}
+                    <Badge variant={user.isActive ? "default" : "secondary"} data-testid={`badge-status-${user.id}`}>
+                      {user.isActive ? "Ativo" : "Inativo"}
+                    </Badge>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => handleDeleteUser(user.id)}
+                      data-testid={`button-delete-user-${user.id}`}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-12">
+          <Users className="mx-auto h-12 w-12 text-muted-foreground" />
+          <h3 className="mt-4 text-lg font-semibold">Nenhum usuário encontrado</h3>
+          <p className="mt-2 text-muted-foreground">
+            Clique em "Criar Usuário" para adicionar novos usuários ao sistema.
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function AdminDashboard() {
   const [createTenantDialogOpen, setCreateTenantDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -315,7 +418,13 @@ export default function AdminDashboard() {
                         variant="outline" 
                         size="sm" 
                         className="flex-1"
-                        onClick={() => setLocation(`/admin/tenants/${tenant.id}/users`)}
+                        onClick={() => {
+                          // Navegar para a aba de usuários do dashboard
+                          const tabsElement = document.querySelector('[data-tabs-value="users"]');
+                          if (tabsElement) {
+                            (tabsElement as HTMLElement).click();
+                          }
+                        }}
                         data-testid={`button-users-${tenant.id}`}
                       >
                         <Users className="mr-2 h-4 w-4" />
@@ -340,19 +449,15 @@ export default function AdminDashboard() {
           </TabsContent>
 
           <TabsContent value="users">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-semibold">Usuários do Sistema</h2>
-              <Button onClick={() => setLocation("/admin/users/create")} data-testid="button-create-user">
-                <Plus className="mr-2 h-4 w-4" />
-                Criar Usuário
-              </Button>
-            </div>
-            <div className="text-center py-12">
-              <Users className="mx-auto h-12 w-12 text-muted-foreground" />
-              <h3 className="mt-4 text-lg font-semibold">Gestão de Usuários</h3>
-              <p className="mt-2 text-muted-foreground">
-                Clique em "Criar Usuário" para adicionar novos usuários ao sistema.
-              </p>
+            <div className="space-y-6">
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-semibold">Usuários do Sistema</h2>
+                <Button onClick={() => setLocation("/admin/users/create")} data-testid="button-create-user">
+                  <Plus className="mr-2 h-4 w-4" />
+                  Criar Usuário
+                </Button>
+              </div>
+              <AdminUsersList />
             </div>
           </TabsContent>
         </Tabs>
