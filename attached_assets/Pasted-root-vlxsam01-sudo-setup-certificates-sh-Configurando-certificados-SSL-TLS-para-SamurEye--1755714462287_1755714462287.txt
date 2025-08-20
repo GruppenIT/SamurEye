@@ -1,0 +1,83 @@
+root@vlxsam01:~# sudo ./setup-certificates.sh
+🔒 Configurando certificados SSL/TLS para SamurEye...
+[2025-08-20 15:25:35] Verificando pré-requisitos...
+[2025-08-20 15:25:35] Verificando configuração DNS...
+[2025-08-20 15:25:35] DNS OK para app.samureye.com.br
+[2025-08-20 15:25:35] DNS OK para api.samureye.com.br
+[2025-08-20 15:25:35] DNS OK para scanner.samureye.com.br
+
+🔒 Setup de Certificados SSL/TLS para SamurEye
+
+Escolha uma opção:
+1) Let's Encrypt via DNS Challenge (Produção - Recomendado)
+2) Certificados Auto-assinados (Desenvolvimento/Teste)
+3) Configurar step-ca (CA Interna para mTLS)
+4) Apenas configurar NGINX
+5) Verificar certificados existentes
+6) Migrar certificados individuais para wildcard
+
+Digite sua escolha (1-6): 1
+[2025-08-20 15:25:39] Configurando certificados Let's Encrypt via DNS Challenge...
+Saving debug log to /var/log/letsencrypt/letsencrypt.log
+
+🌐 CONFIGURAÇÃO DNS CHALLENGE
+
+Para usar DNS-01 challenge, você precisa configurar credenciais do seu provedor DNS:
+
+Provedores suportados:
+1) Cloudflare
+2) Route53 (AWS)
+3) Google Cloud DNS
+4) Manual (para outros provedores)
+
+Escolha seu provedor DNS (1-4): 4
+[2025-08-20 15:25:49] Configurando DNS Manual...
+
+📋 CONFIGURAÇÃO MANUAL DNS
+
+ATENÇÃO: Você precisará criar registros TXT manualmente durante o processo.
+Tenha acesso ao painel DNS do seu provedor aberto.
+
+Pressione ENTER para continuar...
+Saving debug log to /var/log/letsencrypt/letsencrypt.log
+Requesting a certificate for *.samureye.com.br and samureye.com.br
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+Please deploy a DNS TXT record under the name:
+
+_acme-challenge.samureye.com.br.
+
+with the following value:
+
+UQERuNT2MAr3ZibDKN8u4mhlXZTR0EyMG1tPS4svPa0
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+Press Enter to Continue
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+Please deploy a DNS TXT record under the name:
+
+_acme-challenge.samureye.com.br.
+
+with the following value:
+
+ri7DS3EW0vrtgyhKQzKHJymNCuV34fAdMoV-6QOIGSY
+
+(This must be set up in addition to the previous challenges; do not remove,
+replace, or undo the previous challenge tasks yet. Note that you might be
+asked to create multiple distinct TXT records with the same name. This is
+permitted by DNS standards.)
+
+Before continuing, verify the TXT record has been deployed. Depending on the DNS
+provider, this may take some time, from a few seconds to multiple minutes. You can
+check if it has finished deploying with aid of online tools, such as the Google
+Admin Toolbox: https://toolbox.googleapps.com/apps/dig/#TXT/_acme-challenge.samureye.com.br.
+Look for one or more bolded line(s) below the line ';ANSWER'. It should show the
+value(s) you've just added.
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+Press Enter to Continue
+An unexpected error occurred:
+Service busy; retry later.
+Ask for help or search for solutions at https://community.letsencrypt.org. See the logfile /var/log/letsencrypt/letsencrypt.log or re-run Certbot with -v for more details.
+root@vlxsam01:~#

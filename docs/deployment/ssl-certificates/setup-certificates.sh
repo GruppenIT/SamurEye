@@ -56,6 +56,80 @@ for domain in $DOMAINS; do
     fi
 done
 
+# Função para verificar rate limit
+check_rate_limit() {
+    log "Verificando rate limits do Let's Encrypt..."
+    
+    # Verificar certificados existentes
+    local existing_certs=$(certbot certificates 2>/dev/null | grep "samureye.com.br" | wc -l)
+    
+    if [ "$existing_certs" -ge 3 ]; then
+        warn "Detectados $existing_certs certificados para samureye.com.br. Cuidado com rate limit."
+        echo ""
+        echo "Let's Encrypt permite 5 certificados por domínio por semana."
+        echo "Recomendamos aguardar algumas horas se você já tentou hoje."
+        echo ""
+        read -p "Continuar mesmo assim? (s/N): " continue_anyway
+        if [[ ! "$continue_anyway" =~ ^[Ss]$ ]]; then
+            error "Operação cancelada. Aguarde algumas horas e tente novamente."
+        fi
+    fi
+    
+    # Verificar logs recentes de erro
+    if [ -f "/var/log/letsencrypt/letsencrypt.log" ]; then
+        local recent_errors=$(grep -c "Service busy\|rate limit" /var/log/letsencrypt/letsencrypt.log 2>/dev/null || echo "0")
+        if [ "$recent_errors" -gt 0 ]; then
+            warn "Encontrados $recent_errors erros de rate limit no log recente."
+            echo "Recomendamos aguardar 1-24 horas antes de tentar novamente."
+            echo ""
+            read -p "Tentar mesmo assim? (s/N): " force_attempt
+            if [[ ! "$force_attempt" =~ ^[Ss]$ ]]; then
+                error "Operação cancelada devido ao rate limiting."
+            fi
+        fi
+    fi
+}
+
+# Função para aguardar propagação DNS
+wait_dns_propagation() {
+    local challenge_domain="$1"
+    local expected_value="$2"
+    local max_attempts=30
+    local attempt=1
+    
+    echo ""
+    echo "🔄 Aguardando propagação DNS..."
+    echo "Verificando: $challenge_domain"
+    echo "Valor esperado: $expected_value"
+    echo ""
+    
+    while [ $attempt -le $max_attempts ]; do
+        echo -n "Tentativa $attempt/$max_attempts: "
+        
+        local dns_result=$(dig +short TXT "$challenge_domain" @8.8.8.8 2>/dev/null | tr -d '"' | head -1)
+        
+        if [ "$dns_result" = "$expected_value" ]; then
+            echo "✅ DNS propagado com sucesso!"
+            return 0
+        else
+            echo "❌ Ainda propagando... (encontrado: '$dns_result')"
+            sleep 10
+        fi
+        
+        ((attempt++))
+    done
+    
+    warn "DNS pode não estar totalmente propagado após ${max_attempts} tentativas"
+    echo "Valor encontrado: '$dns_result'"
+    echo "Valor esperado: '$expected_value'"
+    echo ""
+    read -p "Continuar mesmo assim? (s/N): " continue_anyway
+    if [[ ! "$continue_anyway" =~ ^[Ss]$ ]]; then
+        return 1
+    fi
+    return 0
+}
+
 # Opção 1: Certificados Let's Encrypt via DNS-01 Challenge (Recomendado para produção)
 setup_letsencrypt() {
     log "Configurando certificados Let's Encrypt via DNS Challenge..."
@@ -226,21 +300,161 @@ setup_manual_dns() {
     echo "📋 CONFIGURAÇÃO MANUAL DNS"
     echo ""
     echo "ATENÇÃO: Você precisará criar registros TXT manualmente durante o processo."
+    echo "IMPORTANTE: O Let's Encrypt pode solicitar MÚLTIPLOS registros TXT com o MESMO nome."
+    echo "Alguns provedores DNS exigem que você mantenha AMBOS os registros."
+    echo ""
     echo "Tenha acesso ao painel DNS do seu provedor aberto."
     echo ""
     read -p "Pressione ENTER para continuar..."
     
-    # Obter certificado com validação manual
+    # Verificar rate limits antes de prosseguir
+    check_rate_limit
+    
+    echo ""
+    echo "🔄 INICIANDO PROCESSO DE VALIDAÇÃO DNS"
+    echo "Você precisará adicionar os registros TXT conforme solicitado..."
+    echo ""
+    
+    # Obter certificado com validação manual - usando apenas o domínio principal primeiro
+    log "Obtendo certificado wildcard..."
     certbot certonly \
         --manual \
         --preferred-challenges dns \
         --email $EMAIL \
         --agree-tos \
         --no-eff-email \
+        --manual-public-ip-logging-ok \
         -d "*.samureye.com.br" \
         -d "samureye.com.br"
     
-    setup_letsencrypt_success
+    local result=$?
+    
+    if [ $result -eq 0 ]; then
+        setup_letsencrypt_success
+    else
+        echo ""
+        echo "❌ ERRO NA OBTENÇÃO DO CERTIFICADO"
+        echo ""
+        echo "Possíveis causas:"
+        echo "1. Rate limit do Let's Encrypt (5 certs/domínio/semana)"
+        echo "2. Registros DNS não configurados corretamente"
+        echo "3. Propagação DNS ainda em andamento"
+        echo ""
+        echo "Soluções:"
+        echo "- Aguarde algumas horas se hit rate limit"
+        echo "- Verifique se TODOS os registros TXT foram adicionados"
+        echo "- Use: dig TXT _acme-challenge.samureye.com.br"
+        echo "- Tente novamente com staging: certbot --staging"
+        echo ""
+        error "Falha na obtenção do certificado"
+    fi
+}
+
+# DNS Manual Assistido - Evita rate limiting e melhora a experiência
+setup_dns_assisted() {
+    log "Configurando DNS Manual Assistido..."
+    
+    echo ""
+    echo "📋 DNS MANUAL ASSISTIDO"
+    echo ""
+    echo "Este método evita problemas de rate limiting criando um processo passo a passo."
+    echo "Vamos usar certificado de staging primeiro, depois o real."
+    echo ""
+    
+    # Verificar rate limits
+    check_rate_limit
+    
+    echo "🔬 PASSO 1: TESTE COM CERTIFICADO DE STAGING"
+    echo ""
+    echo "Primeiro vamos obter um certificado de teste para validar o processo."
+    echo "Isso não conta para o limite de rate do Let's Encrypt."
+    echo ""
+    read -p "Pressione ENTER para iniciar o teste com staging..."
+    
+    # Passo 1: Certificado de staging
+    log "Obtendo certificado de staging para teste..."
+    certbot certonly \
+        --manual \
+        --preferred-challenges dns \
+        --email $EMAIL \
+        --agree-tos \
+        --no-eff-email \
+        --staging \
+        --manual-public-ip-logging-ok \
+        -d "*.samureye.com.br" \
+        -d "samureye.com.br"
+    
+    local staging_result=$?
+    
+    if [ $staging_result -ne 0 ]; then
+        error "Falha no certificado de staging. Verifique os registros DNS e tente novamente."
+    fi
+    
+    log "✅ Certificado de staging obtido com sucesso!"
+    echo ""
+    echo "🎯 PASSO 2: CERTIFICADO DE PRODUÇÃO"
+    echo ""
+    echo "Agora que o processo foi validado, vamos obter o certificado real."
+    echo "IMPORTANTE: Use os MESMOS registros DNS do teste anterior."
+    echo ""
+    
+    # Limpar certificado de staging
+    certbot delete --cert-name samureye.com.br --non-interactive 2>/dev/null || true
+    
+    read -p "Pressione ENTER para obter o certificado de produção..."
+    
+    # Passo 2: Certificado de produção
+    log "Obtendo certificado de produção..."
+    certbot certonly \
+        --manual \
+        --preferred-challenges dns \
+        --email $EMAIL \
+        --agree-tos \
+        --no-eff-email \
+        --manual-public-ip-logging-ok \
+        -d "*.samureye.com.br" \
+        -d "samureye.com.br"
+    
+    local prod_result=$?
+    
+    if [ $prod_result -eq 0 ]; then
+        log "✅ Certificado de produção obtido com sucesso!"
+        setup_letsencrypt_success
+    else
+        echo ""
+        echo "❌ ERRO NO CERTIFICADO DE PRODUÇÃO"
+        echo ""
+        echo "Possíveis soluções:"
+        echo "1. Aguarde 10-15 minutos e tente novamente"
+        echo "2. Verifique se os registros DNS ainda estão ativos"
+        echo "3. Use: dig TXT _acme-challenge.samureye.com.br @8.8.8.8"
+        echo "4. Se hit rate limit, aguarde 1-24 horas"
+        echo ""
+        
+        read -p "Tentar novamente agora? (s/N): " retry_now
+        if [[ "$retry_now" =~ ^[Ss]$ ]]; then
+            log "Tentando novamente..."
+            sleep 30
+            certbot certonly \
+                --manual \
+                --preferred-challenges dns \
+                --email $EMAIL \
+                --agree-tos \
+                --no-eff-email \
+                --manual-public-ip-logging-ok \
+                -d "*.samureye.com.br" \
+                -d "samureye.com.br"
+            
+            if [ $? -eq 0 ]; then
+                log "✅ Sucesso na segunda tentativa!"
+                setup_letsencrypt_success
+            else
+                error "Falha persistente. Aguarde algumas horas e tente novamente."
+            fi
+        else
+            error "Processo cancelado. Execute o script novamente quando estiver pronto."
+        fi
+    fi
 }
 
 setup_letsencrypt_success() {
@@ -561,8 +775,9 @@ echo "3) Configurar step-ca (CA Interna para mTLS)"
 echo "4) Apenas configurar NGINX"
 echo "5) Verificar certificados existentes"
 echo "6) Migrar certificados individuais para wildcard"
+echo "7) DNS Manual Assistido (recomendado para primeiro uso)"
 echo ""
-read -p "Digite sua escolha (1-6): " choice
+read -p "Digite sua escolha (1-7): " choice
 
 case $choice in
     1)
@@ -586,6 +801,9 @@ case $choice in
         ;;
     6)
         migrate_to_wildcard
+        ;;
+    7)
+        setup_dns_assisted
         ;;
     *)
         error "Opção inválida"
