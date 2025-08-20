@@ -399,7 +399,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/admin/tenants', isAuthenticated, async (req: any, res) => {
     try {
       const user = await storage.getUser(req.user.claims.sub);
-      if (!user?.isGlobalUser || user.globalRole !== 'global_admin') {
+      if (!user?.globalRole || !['global_admin', 'global_auditor'].includes(user.globalRole)) {
         return res.status(403).json({ message: "Global admin access required" });
       }
 
@@ -414,7 +414,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/admin/tenants', isAuthenticated, async (req: any, res) => {
     try {
       const user = await storage.getUser(req.user.claims.sub);
-      if (!user?.isGlobalUser || user.globalRole !== 'global_admin') {
+      if (!user?.globalRole || !['global_admin', 'global_auditor'].includes(user.globalRole)) {
         return res.status(403).json({ message: "Global admin access required" });
       }
 
@@ -615,7 +615,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
       
-      if (!user?.globalRole || user.globalRole !== 'global_admin') {
+      if (!user?.globalRole || !['global_admin', 'global_auditor'].includes(user.globalRole)) {
         return res.status(403).json({ message: "Access denied" });
       }
 
