@@ -214,7 +214,7 @@ export default function GlobalAdmin() {
                   {tenant.isActive ? "Ativo" : "Inativo"}
                 </Badge>
               </div>
-              <CardDescription>{tenant.description}</CardDescription>
+              <CardDescription>{tenant.description || "Sem descrição"}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-2 text-sm">
