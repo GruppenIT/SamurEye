@@ -15,6 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import { insertTenantSchema } from "@shared/schema";
 import { z } from "zod";
 import { Building2, Users, Plus, Activity } from "lucide-react";
+import { useLocation } from "wouter";
 
 const createTenantSchema = insertTenantSchema.extend({
   name: z.string().min(1, "Nome é obrigatório"),
@@ -27,6 +28,7 @@ export default function GlobalAdmin() {
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [, setLocation] = useLocation();
 
   const form = useForm<CreateTenantForm>({
     resolver: zodResolver(createTenantSchema),
@@ -249,7 +251,13 @@ export default function GlobalAdmin() {
                   <Plus className="mr-2 h-4 w-4" />
                   Dados Exemplo
                 </Button>
-                <Button variant="outline" size="sm" className="flex-1">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="flex-1"
+                  onClick={() => setLocation(`/admin/tenants/${tenant.id}/users`)}
+                  data-testid={`button-users-${tenant.id}`}
+                >
                   <Users className="mr-2 h-4 w-4" />
                   Usuários
                 </Button>

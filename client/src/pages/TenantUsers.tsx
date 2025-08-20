@@ -61,9 +61,13 @@ export default function TenantUsers() {
     retry: false,
   });
 
+  // Ensure tenantUsers is always an array
+  const userList = Array.isArray(tenantUsers) ? tenantUsers : [];
+
   const createUserMutation = useMutation({
     mutationFn: async (data: CreateUserForm) => {
-      return apiRequest("/api/tenant/users", "POST", data);
+      const response = await apiRequest("POST", "/api/tenant/users", data);
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/tenant/users"] });
@@ -259,7 +263,7 @@ export default function TenantUsers() {
       </div>
 
       <div className="grid gap-4">
-        {tenantUsers?.map((tenantUser: any) => {
+        {userList.map((tenantUser: any) => {
           const RoleIcon = roleIcons[tenantUser.role as keyof typeof roleIcons];
           return (
             <Card key={tenantUser.id} data-testid={`card-user-${tenantUser.id}`}>
@@ -312,7 +316,7 @@ export default function TenantUsers() {
         })}
       </div>
 
-      {tenantUsers?.length === 0 && (
+      {userList.length === 0 && (
         <div className="text-center py-12">
           <Users className="mx-auto h-12 w-12 text-muted-foreground" />
           <h3 className="mt-4 text-lg font-semibold">Nenhum usuário encontrado</h3>

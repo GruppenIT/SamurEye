@@ -30,6 +30,7 @@ function Router() {
           <Route path="/credentials" component={Credentials} />
           <Route path="/intelligence" component={ThreatIntelligence} />
           <Route path="/admin" component={GlobalAdmin} />
+          <Route path="/admin/tenants/:tenantId/users" component={TenantUsers} />
           <Route path="/users" component={TenantUsers} />
         </TenantProvider>
       )}
