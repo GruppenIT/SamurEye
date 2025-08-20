@@ -47,6 +47,7 @@ export default function GlobalAdmin() {
 
   const createTenantMutation = useMutation({
     mutationFn: async (data: CreateTenantForm) => {
+      console.log("Sending tenant data:", data);
       return apiRequest("/api/admin/tenants", "POST", data);
     },
     onSuccess: () => {
@@ -58,10 +59,11 @@ export default function GlobalAdmin() {
         description: "Tenant criado com sucesso",
       });
     },
-    onError: (error) => {
+    onError: (error: any) => {
+      console.error("Tenant creation error:", error);
       toast({
         title: "Erro",
-        description: "Falha ao criar tenant",
+        description: error?.message || "Falha ao criar tenant",
         variant: "destructive",
       });
     },
