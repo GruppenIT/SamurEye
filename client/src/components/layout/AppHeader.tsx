@@ -26,6 +26,8 @@ export function AppHeader({ activeTab, onTabChange }: AppHeaderProps) {
     { id: 'journeys', label: t('nav.journeys') },
     { id: 'intelligence', label: t('nav.intelligence') },
     { id: 'credentials', label: t('nav.credentials') },
+    { id: 'admin', label: 'Global Admin' },
+    { id: 'users', label: 'Usuários' },
   ];
 
   const handleLogout = () => {
