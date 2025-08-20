@@ -26,6 +26,10 @@ export const sessions = pgTable(
   (table) => [index("IDX_session_expire").on(table.expire)],
 );
 
+// User roles enum - Global and Tenant-specific
+export const globalRoleEnum = pgEnum("global_role", ["global_admin", "global_auditor"]);
+export const tenantRoleEnum = pgEnum("tenant_role", ["tenant_admin", "operator", "viewer", "tenant_auditor"]);
+
 // User storage table (mandatory for Replit Auth)
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -35,6 +39,8 @@ export const users = pgTable("users", {
   profileImageUrl: varchar("profile_image_url"),
   currentTenantId: varchar("current_tenant_id"),
   preferredLanguage: varchar("preferred_language").default('pt-BR'),
+  globalRole: globalRoleEnum("global_role"), // Global admin/auditor via SSO
+  isGlobalUser: boolean("is_global_user").default(false), // SSO users vs tenant users
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -45,20 +51,20 @@ export const tenants = pgTable("tenants", {
   name: varchar("name").notNull(),
   slug: varchar("slug").unique().notNull(),
   description: text("description"),
+  logoUrl: varchar("logo_url"), // Tenant-specific logo
   settings: jsonb("settings"),
+  isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
-
-// User roles enum
-export const userRoleEnum = pgEnum("user_role", ["admin", "operador", "visualizador"]);
 
 // Tenant users (many-to-many with roles)
 export const tenantUsers = pgTable("tenant_users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   tenantId: varchar("tenant_id").notNull().references(() => tenants.id, { onDelete: 'cascade' }),
   userId: varchar("user_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
-  role: userRoleEnum("role").notNull().default('visualizador'),
+  role: tenantRoleEnum("role").notNull().default('viewer'),
+  isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -143,15 +149,42 @@ export const threatIntelligence = pgTable("threat_intelligence", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Global system settings (for platform-wide configuration)
+export const systemSettings = pgTable("system_settings", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  key: varchar("key").unique().notNull(),
+  value: text("value"),
+  description: text("description"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Tenant users authentication (for local users with MFA)
+export const tenantUserAuth = pgTable("tenant_user_auth", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tenantUserId: varchar("tenant_user_id").notNull().references(() => tenantUsers.id, { onDelete: 'cascade' }),
+  username: varchar("username").notNull(),
+  passwordHash: varchar("password_hash"),
+  totpSecret: varchar("totp_secret"),
+  emailVerified: boolean("email_verified").default(false),
+  lastLogin: timestamp("last_login"),
+  loginAttempts: integer("login_attempts").default(0),
+  lockedUntil: timestamp("locked_until"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Activities/Audit Log
 export const activities = pgTable("activities", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  tenantId: varchar("tenant_id").notNull().references(() => tenants.id, { onDelete: 'cascade' }),
+  tenantId: varchar("tenant_id").references(() => tenants.id, { onDelete: 'cascade' }), // Nullable for global actions
   userId: varchar("user_id").notNull().references(() => users.id),
   action: varchar("action").notNull(),
   resource: varchar("resource").notNull(),
   resourceId: varchar("resource_id"),
   metadata: jsonb("metadata"),
+  ipAddress: varchar("ip_address"),
+  userAgent: varchar("user_agent"),
   timestamp: timestamp("timestamp").defaultNow(),
 });
 
@@ -172,9 +205,16 @@ export const tenantsRelations = relations(tenants, ({ many }) => ({
   activities: many(activities),
 }));
 
-export const tenantUsersRelations = relations(tenantUsers, ({ one }) => ({
+export const systemSettingsRelations = relations(systemSettings, ({ many }) => ({}));
+
+export const tenantUserAuthRelations = relations(tenantUserAuth, ({ one }) => ({
+  tenantUser: one(tenantUsers, { fields: [tenantUserAuth.tenantUserId], references: [tenantUsers.id] }),
+}));
+
+export const tenantUsersRelations = relations(tenantUsers, ({ one, many }) => ({
   tenant: one(tenants, { fields: [tenantUsers.tenantId], references: [tenants.id] }),
   user: one(users, { fields: [tenantUsers.userId], references: [users.id] }),
+  auth: one(tenantUserAuth),
 }));
 
 export const collectorsRelations = relations(collectors, ({ one, many }) => ({
@@ -214,6 +254,20 @@ export type User = typeof users.$inferSelect;
 export type Tenant = typeof tenants.$inferSelect;
 export type InsertTenant = typeof tenants.$inferInsert;
 export const insertTenantSchema = createInsertSchema(tenants).omit({ id: true, createdAt: true, updatedAt: true });
+
+export type SystemSettings = typeof systemSettings.$inferSelect;
+export type InsertSystemSettings = typeof systemSettings.$inferInsert;
+export const insertSystemSettingsSchema = createInsertSchema(systemSettings).omit({ id: true, createdAt: true, updatedAt: true });
+
+export type TenantUserAuth = typeof tenantUserAuth.$inferSelect;
+export type InsertTenantUserAuth = typeof tenantUserAuth.$inferInsert;
+export const insertTenantUserAuthSchema = createInsertSchema(tenantUserAuth).omit({ 
+  id: true, 
+  createdAt: true, 
+  updatedAt: true,
+  passwordHash: true,
+  totpSecret: true
+});
 
 export type TenantUser = typeof tenantUsers.$inferSelect;
 export type InsertTenantUser = typeof tenantUsers.$inferInsert;

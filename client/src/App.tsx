@@ -12,6 +12,8 @@ import Collectors from "@/pages/Collectors";
 import Journeys from "@/pages/Journeys";
 import Credentials from "@/pages/Credentials";
 import ThreatIntelligence from "@/pages/ThreatIntelligence";
+import GlobalAdmin from "@/pages/GlobalAdmin";
+import TenantUsers from "@/pages/TenantUsers";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -27,6 +29,8 @@ function Router() {
           <Route path="/journeys" component={Journeys} />
           <Route path="/credentials" component={Credentials} />
           <Route path="/intelligence" component={ThreatIntelligence} />
+          <Route path="/admin" component={GlobalAdmin} />
+          <Route path="/users" component={TenantUsers} />
         </TenantProvider>
       )}
       <Route component={NotFound} />

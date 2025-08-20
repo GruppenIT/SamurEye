@@ -8,6 +8,8 @@ import {
   credentials,
   threatIntelligence,
   activities,
+  systemSettings,
+  tenantUserAuth,
   type User,
   type UpsertUser,
   type Tenant,
@@ -26,6 +28,10 @@ import {
   type InsertThreatIntelligence,
   type Activity,
   type InsertActivity,
+  type SystemSettings,
+  type InsertSystemSettings,
+  type TenantUserAuth,
+  type InsertTenantUserAuth,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, gte, isNotNull } from "drizzle-orm";
@@ -38,10 +44,20 @@ export interface IStorage {
 
   // Tenant operations
   getTenant(id: string): Promise<Tenant | undefined>;
+  getAllTenants(): Promise<Tenant[]>;
   getUserTenants(userId: string): Promise<(TenantUser & { tenant: Tenant })[]>;
   createTenant(tenant: InsertTenant): Promise<Tenant>;
+  updateTenant(id: string, updates: Partial<Tenant>): Promise<void>;
   addUserToTenant(tenantUser: InsertTenantUser): Promise<TenantUser>;
   updateUserCurrentTenant(userId: string, tenantId: string): Promise<void>;
+  getTenantUsers(tenantId: string): Promise<(TenantUser & { user: User })[]>;
+  updateTenantUserRole(tenantUserId: string, role: string): Promise<void>;
+  removeTenantUser(tenantUserId: string): Promise<void>;
+
+  // System settings operations  
+  getSystemSetting(key: string): Promise<SystemSettings | undefined>;
+  setSystemSetting(key: string, value: string, description?: string): Promise<SystemSettings>;
+  getAllSystemSettings(): Promise<SystemSettings[]>;
 
   // Collector operations
   getCollectorsByTenant(tenantId: string): Promise<Collector[]>;
@@ -115,7 +131,7 @@ export class DatabaseStorage implements IStorage {
       await this.addUserToTenant({
         tenantId: defaultTenant.id,
         userId: user.id,
-        role: 'admin'
+        role: 'tenant_admin'
       });
       
       // Set as current tenant
@@ -144,6 +160,7 @@ export class DatabaseStorage implements IStorage {
         tenantId: tenantUsers.tenantId,
         userId: tenantUsers.userId,
         role: tenantUsers.role,
+        isActive: tenantUsers.isActive,
         createdAt: tenantUsers.createdAt,
         tenant: tenants,
       })
@@ -167,6 +184,66 @@ export class DatabaseStorage implements IStorage {
       .update(users)
       .set({ currentTenantId: tenantId, updatedAt: new Date() })
       .where(eq(users.id, userId));
+  }
+
+  async getAllTenants(): Promise<Tenant[]> {
+    return await db.select().from(tenants);
+  }
+
+  async updateTenant(id: string, updates: Partial<Tenant>): Promise<void> {
+    await db
+      .update(tenants)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(tenants.id, id));
+  }
+
+  async getTenantUsers(tenantId: string): Promise<(TenantUser & { user: User })[]> {
+    return await db
+      .select({
+        id: tenantUsers.id,
+        tenantId: tenantUsers.tenantId,
+        userId: tenantUsers.userId,
+        role: tenantUsers.role,
+        isActive: tenantUsers.isActive,
+        createdAt: tenantUsers.createdAt,
+        user: users,
+      })
+      .from(tenantUsers)
+      .innerJoin(users, eq(tenantUsers.userId, users.id))
+      .where(eq(tenantUsers.tenantId, tenantId));
+  }
+
+  async updateTenantUserRole(tenantUserId: string, role: string): Promise<void> {
+    await db
+      .update(tenantUsers)
+      .set({ role: role as any })
+      .where(eq(tenantUsers.id, tenantUserId));
+  }
+
+  async removeTenantUser(tenantUserId: string): Promise<void> {
+    await db.delete(tenantUsers).where(eq(tenantUsers.id, tenantUserId));
+  }
+
+  // System settings operations
+  async getSystemSetting(key: string): Promise<SystemSettings | undefined> {
+    const [setting] = await db.select().from(systemSettings).where(eq(systemSettings.key, key));
+    return setting;
+  }
+
+  async setSystemSetting(key: string, value: string, description?: string): Promise<SystemSettings> {
+    const [setting] = await db
+      .insert(systemSettings)
+      .values({ key, value, description })
+      .onConflictDoUpdate({
+        target: systemSettings.key,
+        set: { value, description, updatedAt: new Date() },
+      })
+      .returning();
+    return setting;
+  }
+
+  async getAllSystemSettings(): Promise<SystemSettings[]> {
+    return await db.select().from(systemSettings);
   }
 
   // Collector operations

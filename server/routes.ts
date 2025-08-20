@@ -4,8 +4,16 @@ import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { z } from "zod";
-import { insertCollectorSchema, insertJourneySchema, insertCredentialSchema } from "@shared/schema";
+import { 
+  insertCollectorSchema, 
+  insertJourneySchema, 
+  insertCredentialSchema,
+  insertTenantSchema,
+  tenantRoleEnum 
+} from "@shared/schema";
 import axios from "axios";
+import { randomUUID } from "crypto";
+import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
 
 // Tenant middleware
 const requireTenant: RequestHandler = async (req: any, res, next) => {
@@ -298,7 +306,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const credential = await storage.createCredential({
         ...validatedData,
         delineaSecretId: secretId,
-        delineaPath: path
+        delineaPath: path,
+        createdBy: req.userId
       });
 
       // Log activity
@@ -383,6 +392,220 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching dashboard metrics:", error);
       res.status(500).json({ message: "Failed to fetch dashboard metrics" });
+    }
+  });
+
+  // Global Admin Routes (for system management)
+  app.get('/api/admin/tenants', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims.sub);
+      if (!user?.isGlobalUser || user.globalRole !== 'global_admin') {
+        return res.status(403).json({ message: "Global admin access required" });
+      }
+
+      const tenants = await storage.getAllTenants();
+      res.json(tenants);
+    } catch (error) {
+      console.error("Error fetching tenants:", error);
+      res.status(500).json({ message: "Failed to fetch tenants" });
+    }
+  });
+
+  app.post('/api/admin/tenants', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims.sub);
+      if (!user?.isGlobalUser || user.globalRole !== 'global_admin') {
+        return res.status(403).json({ message: "Global admin access required" });
+      }
+
+      const validatedData = insertTenantSchema.parse(req.body);
+      const tenant = await storage.createTenant(validatedData);
+
+      // Log activity
+      await storage.createActivity({
+        userId: req.user.claims.sub,
+        action: 'create',
+        resource: 'tenant',
+        resourceId: tenant.id,
+        metadata: { tenantName: tenant.name }
+      });
+
+      res.json(tenant);
+    } catch (error) {
+      console.error("Error creating tenant:", error);
+      res.status(500).json({ message: "Failed to create tenant" });
+    }
+  });
+
+  // Tenant management routes
+  app.get('/api/tenant/users', isAuthenticated, requireTenant, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.userId);
+      const userTenants = await storage.getUserTenants(req.userId);
+      const currentTenant = userTenants.find(ut => ut.tenantId === req.tenant.id);
+      
+      if (!currentTenant || !['tenant_admin'].includes(currentTenant.role)) {
+        return res.status(403).json({ message: "Tenant admin access required" });
+      }
+
+      const tenantUsers = await storage.getTenantUsers(req.tenant.id);
+      res.json(tenantUsers);
+    } catch (error) {
+      console.error("Error fetching tenant users:", error);
+      res.status(500).json({ message: "Failed to fetch users" });
+    }
+  });
+
+  app.post('/api/tenant/users', isAuthenticated, requireTenant, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.userId);
+      const userTenants = await storage.getUserTenants(req.userId);
+      const currentTenant = userTenants.find(ut => ut.tenantId === req.tenant.id);
+      
+      if (!currentTenant || !['tenant_admin'].includes(currentTenant.role)) {
+        return res.status(403).json({ message: "Tenant admin access required" });
+      }
+
+      const { email, firstName, lastName, role = 'viewer' } = req.body;
+
+      // Create user
+      const newUser = await storage.upsertUser({
+        id: randomUUID(),
+        email,
+        firstName,
+        lastName,
+        isGlobalUser: false
+      });
+
+      // Add to tenant
+      const tenantUser = await storage.addUserToTenant({
+        tenantId: req.tenant.id,
+        userId: newUser.id,
+        role: role as any
+      });
+
+      // Log activity
+      await storage.createActivity({
+        tenantId: req.tenant.id,
+        userId: req.userId,
+        action: 'invite',
+        resource: 'user',
+        resourceId: newUser.id,
+        metadata: { userEmail: email, role }
+      });
+
+      res.json({ user: newUser, tenantUser });
+    } catch (error) {
+      console.error("Error creating user:", error);
+      res.status(500).json({ message: "Failed to create user" });
+    }
+  });
+
+  app.put('/api/tenant/users/:userId/role', isAuthenticated, requireTenant, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.userId);
+      const userTenants = await storage.getUserTenants(req.userId);
+      const currentTenant = userTenants.find(ut => ut.tenantId === req.tenant.id);
+      
+      if (!currentTenant || !['tenant_admin'].includes(currentTenant.role)) {
+        return res.status(403).json({ message: "Tenant admin access required" });
+      }
+
+      const { role } = req.body;
+      const tenantUsers = await storage.getTenantUsers(req.tenant.id);
+      const targetUser = tenantUsers.find(tu => tu.userId === req.params.userId);
+
+      if (!targetUser) {
+        return res.status(404).json({ message: "User not found in tenant" });
+      }
+
+      await storage.updateTenantUserRole(targetUser.id, role);
+
+      // Log activity
+      await storage.createActivity({
+        tenantId: req.tenant.id,
+        userId: req.userId,
+        action: 'update_role',
+        resource: 'user',
+        resourceId: req.params.userId,
+        metadata: { oldRole: targetUser.role, newRole: role }
+      });
+
+      res.json({ message: "Role updated successfully" });
+    } catch (error) {
+      console.error("Error updating user role:", error);
+      res.status(500).json({ message: "Failed to update role" });
+    }
+  });
+
+  // Object Storage routes for logos
+  app.get("/public-objects/:filePath(*)", async (req, res) => {
+    const filePath = req.params.filePath;
+    const objectStorageService = new ObjectStorageService();
+    try {
+      const file = await objectStorageService.searchPublicObject(filePath);
+      if (!file) {
+        return res.status(404).json({ error: "File not found" });
+      }
+      objectStorageService.downloadObject(file, res);
+    } catch (error) {
+      console.error("Error searching for public object:", error);
+      return res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.get("/objects/:objectPath(*)", isAuthenticated, async (req, res) => {
+    const objectStorageService = new ObjectStorageService();
+    try {
+      const objectFile = await objectStorageService.getObjectEntityFile(
+        req.path,
+      );
+      objectStorageService.downloadObject(objectFile, res);
+    } catch (error) {
+      console.error("Error accessing object:", error);
+      if (error instanceof ObjectNotFoundError) {
+        return res.sendStatus(404);
+      }
+      return res.sendStatus(500);
+    }
+  });
+
+  app.post("/api/objects/upload", isAuthenticated, async (req, res) => {
+    const objectStorageService = new ObjectStorageService();
+    const uploadURL = await objectStorageService.getObjectEntityUploadURL();
+    res.json({ uploadURL });
+  });
+
+  app.put("/api/tenant/logo", isAuthenticated, requireTenant, async (req, res) => {
+    if (!req.body.logoURL) {
+      return res.status(400).json({ error: "logoURL is required" });
+    }
+
+    try {
+      const objectStorageService = new ObjectStorageService();
+      const objectPath = objectStorageService.normalizeObjectEntityPath(
+        req.body.logoURL,
+      );
+
+      // Update tenant with logo path
+      await storage.updateTenant(req.tenant.id, { logoUrl: objectPath });
+
+      // Log activity
+      await storage.createActivity({
+        tenantId: req.tenant.id,
+        userId: req.userId,
+        action: 'update',
+        resource: 'tenant',
+        resourceId: req.tenant.id,
+        metadata: { action: 'logo_update' }
+      });
+
+      res.status(200).json({
+        objectPath: objectPath,
+      });
+    } catch (error) {
+      console.error("Error setting tenant logo:", error);
+      res.status(500).json({ error: "Internal server error" });
     }
   });
 
