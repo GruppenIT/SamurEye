@@ -1,0 +1,289 @@
+# SamurEye — MVP Technical Specification (Gruppen)
+_Last updated: 2025-08-15 15:40:23_
+
+## 0) Contexto e Escopo (MVP)
+- **Produto**: SamurEye (Breach & Attack Simulation / Attack Surface & Exposure validation).
+- **Cliente-alvo (fase 1)**: PMEs (Brasil), começando por ambientes de laboratório e **somente testes internos**.
+- **Requisitos-chave do MVP**:
+  - Orquestra **jornadas de testes** a partir do **frontend** (cloud) e executa os testes internos via **edge/collector**.
+  - Ferramentas de varredura no MVP: **Nmap** e **Nuclei** (interno via collector). Futuro: varredura externa também.
+  - **Collector** comunica-se **apenas via saída 443/TCP** com o backend (mTLS).
+  - **Armazenamento de evidências** local (disco 500 GB na VM2); **futuro**: migrar para filesystem em **S3**.
+  - **Credenciais** para jornadas são armazenadas no **Delinea Secret Server** (gruppenztn a.secretservercloud.com) via **API key**.
+  - **Autenticação**:
+    - **Admins globais**: SSO com **Entra ID** (futuro).
+    - **Tenants (admins/operadores/viewers)**: **local + MFA (TOTP/E-mail)**.
+  - **Observabilidade**: **Grafana** (stack) e envio de **logs para FortiSIEM** (CEF/UDP 514) com `tenant_id`.
+  - **Datacenter**: vSphere; VMs Ubuntu.
+  - **Domínio público**: `samureye.com.br` com subdomínios: `app`, `api`, `scanner`, `ca`.
+  - **TLS**: Let’s Encrypt nos frontends (SNI); **step-ca** interno como **Issuing CA** para mTLS de coletores.
+  - **Padrão de senha LAB** (não-produção): `S@mur3y3`.
+
+---
+
+## 1) Topologia do Ambiente (vSphere / VLANs)
+
+### 1.1 VMs do MVP
+| VM | Hostname | Função | vCPU | RAM | Discos | VLAN/PG | IP | SO |
+|---|---|---|---|---|---|---|---|---|
+| 1 | **vlxsam01** | Gateway (NGINX) + **step-ca** | 2 | 4 GB | OS 60 GB | `ZBX_SRV_CLOUD_V2500` | **172.24.1.151/24** | Ubuntu LTS |
+| 2 | **vlxsam02** | App stack (API/FE/Workers/Grafana/MinIO/Registry) | 8 | 16 GB | OS 60 GB + **/data/minio 500 GB** + **/var/lib/registry 40 GB** | `ZBX_SRV_CLOUD_V2500` | **172.24.1.152/24** | Ubuntu LTS |
+| 3 | **vlxsam03** | DB (PostgreSQL 16 + PgBouncer + Redis) | 4 | 16 GB | OS 60 GB + **DATA 200 GB** (pgdata+WAL) | `ZBX_SRV_CLOUD_V2500` | **172.24.1.153/24** | Ubuntu LTS |
+| 4 | **vlxsam04** | **Collector** (simula rede do cliente) | 2 | 4 GB | OS 30 GB | `GRP_SRV_SERVERS_V3000` | **192.168.100.151/24** | Ubuntu LTS |
+
+> **DNS interno (lab)**: entradas em `/etc/hosts` para apontar `app|api|ca|scanner.samureye.com.br` → `172.24.1.151` enquanto não há NAT público.
+
+### 1.2 DNS público e TLS (Let’s Encrypt)
+- **Registros A**: `app`, `api`, `scanner`, `ca` → IP público (quando houver NAT 80/443 para `vlxsam01`).
+- **Certificado LE (SAN)** emitido por **DNS-01** para: `app|api|ca|scanner.samureye.com.br`.
+  - Paths: `/etc/letsencrypt/live/app.samureye.com.br/fullchain.pem` e `privkey.pem` (reusados em todos os vhosts).
+- **HSTS** ativo nos vhosts (NGINX).
+
+### 1.3 Portas principais (MVP)
+| Componente | Porta | Proto | Origem → Destino |
+|---|---|---|---|
+| NGINX (HTTPS) | 443 | TCP | Internet/LAN → `vlxsam01` |
+| NGINX (ACME/redirect) | 80 | TCP | Internet → `vlxsam01` (quando publicar) |
+| step-ca API | 9000 | HTTPS | `vlxsam01` local (proxy por `ca.samureye.com.br`) |
+| API placeholder | 8080 | HTTP | `vlxsam01` → `vlxsam02:8080` |
+| Frontend placeholder | 3000 | HTTP | `vlxsam01` → `vlxsam02:3000` |
+| Docker Registry | 5000 | HTTP | DevOps/Host → `vlxsam02:5000` |
+| MinIO S3 | 9000 | HTTP | App/Workers → `vlxsam02:9000` |
+| MinIO Console | 9090 | HTTP | Admin → `vlxsam02:9090` |
+| Grafana | 9001 | HTTP | Admin → `vlxsam02:9001` |
+| PgBouncer | 6432 | TCP | `vlxsam02` → `vlxsam03:6432` |
+| Postgres | 5432 | TCP | Admin/Backup → `vlxsam03:5432` |
+| Redis | 6379 | TCP | `vlxsam02` → `vlxsam03:6379` |
+| FortiSIEM | 514 | UDP | `vlxsam02` → `siem.zerobox.com.br:514` |
+
+---
+
+## 2) Gateway & CA (vlxsam01)
+
+### 2.1 NGINX — HTTP (ACME + redirect)
+- Webroot: `/var/www/letsencrypt` para `/.well-known/acme-challenge/`.
+- Redireciona demais requests para HTTPS.
+- Arquivo: `/etc/nginx/sites-available/samureye-http.conf` (linkado em `sites-enabled`).
+
+### 2.2 NGINX — HTTPS (SNI + proxy)
+- **Vhosts**:
+  - `app.samureye.com.br` → **`172.24.1.152:3000`**
+  - `api.samureye.com.br` → **`172.24.1.152:8080`**
+  - `ca.samureye.com.br` → **proxy HTTPS** para **`127.0.0.1:9000`** (`proxy_ssl_verify off` no lab; em prod, usar `proxy_ssl_trusted_certificate` para cert da CA).
+  - `scanner.samureye.com.br` → landing estática (`/var/www/scanner`).
+- **TLS**: reuso do cert LE (SAN) emitido para `app.samureye.com.br`.
+- **Segurança**: `HSTS`, `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`.
+
+### 2.3 mTLS seletivo no `api.samureye.com.br`
+- **Objetivo**: exigir **mTLS** **apenas** em rotas do collector:
+  - `^/(telemetry|api/v1/jobs)`
+- **Modelo**:
+  - No nível do `server`:  
+    `ssl_client_certificate /etc/step-ca/certs/root_ca.crt` (ou `intermediate_ca.crt`)  
+    `ssl_verify_client optional;`  
+  - Na `location` protegida:  
+    `if ($ssl_client_verify != SUCCESS) { return 495; }`  
+    Encaminhar headers à API: `X-Client-Verify`, `X-Client-Serial`, `X-Client-DN`, `X-Client-Cert`.
+
+### 2.4 step-ca (Issuing CA)
+- **Instalação**: `step-ca` em `vlxsam01`, **endereço** `:9000` (HTTPS).
+- **Config**: `/etc/step-ca/config/ca.json`.
+- **Root fingerprint** (divulgado aos collectors):  
+  `ecb6226f43f55ce281946bea00758346b7668909f92da536ef8cb54b3f57d018`.
+- **Provisioners**:
+  - `admin@samureye.com.br` (padrão da init).
+  - **`collectors`** (JWK) — criado manualmente com `step crypto jwk create` e inserido em `ca.json`.
+    - Chave privada criptografada em: `/etc/step-ca/secrets/collectors.key.json` (senha LAB `S@mur3y3`).
+
+### 2.5 OTT (One-Time Token) e Enrolamento
+- **Gerar OTT (vlxsam01)**:
+  ```bash
+  CA_URL="https://ca.samureye.com.br"
+  PRIV=/etc/step-ca/secrets/collectors.key.json
+  export STEP_PASSWORD='S@mur3y3'  # evita prompt
+  step ca token collector-vlxsam04     --ca-url "$CA_URL"     --provisioner collectors     --key "$PRIV"     --san spiffe://samureye/gruppen-internal/vlxsam04     --not-after 10m
+  ```
+- **Collector (vlxsam04)**: bootstrap + enroll e geração de **chave sem senha** (para testes curl):
+  ```bash
+  CA_URL="https://ca.samureye.com.br"
+  ROOT_FP="ecb6226f43f55ce281946bea00758346b7668909f92da536ef8cb54b3f57d018"
+
+  step ca bootstrap --ca-url "$CA_URL" --fingerprint "$ROOT_FP" --install
+
+  step ca enroll collector-vlxsam04     --ca-url "$CA_URL"     --fingerprint "$ROOT_FP"     --token "$OTT"     --no-password --kty EC --curve P-256 --force
+  ```
+- **Teste mTLS (collector)**:
+  ```bash
+  curl -sv https://api.samureye.com.br/telemetry     --resolve api.samureye.com.br:443:172.24.1.151     --cert ~/.step/certs/collector-vlxsam04.crt     --key  ~/.step/private/collector-vlxsam04.key     --cacert ~/.step/certs/root_ca.crt     -H 'Content-Type: application/json' -d '{{}}'
+  ```
+
+---
+
+## 3) App Stack (vlxsam02)
+
+### 3.1 Discos e Montagens
+- **/data/minio** → **500 GB** (`/dev/sdb1`, XFS, label `MINIO_DATA`).
+- **/var/lib/registry** → **40 GB** (`/dev/sdc1`, XFS, label `REGISTRY_DATA`).
+- **/etc/fstab**:
+  ```fstab
+  UUID=<MINIO_UUID>  /data/minio       xfs  defaults,noatime,nodiratime  0 0
+  UUID=<REG_UUID>    /var/lib/registry xfs  defaults,noatime,nodiratime  0 0
+  ```
+- **Permissões**:
+  - Grafana: diretório `/opt/samureye/grafana` com **UID/GID 472** (`chown -R 472:472`).
+
+### 3.2 Docker Compose (serviços MVP)
+- **Docker Registry** (`:5000`) com **Basic Auth**:
+  - Usuários: `registry-admin` / `collector-pull` (ambos `S@mur3y3` no lab).
+  - Volume: `/var/lib/registry`.
+- **MinIO** (`:9000` API / `:9090` Console):
+  - ENV: `MINIO_ROOT_USER=samureye`, `MINIO_ROOT_PASSWORD=S@mur3y3`.
+  - Bucket: `bas-evidences` com **versionamento** ligado.
+- **Grafana** (`:9001` → container 3000):
+  - Image `grafana/grafana:10.4.2`, `user: "472"`, `GF_SECURITY_ADMIN_PASSWORD=S@mur3y3`.
+- **API placeholder** (`:8080`) — FastAPI (tiangolo image) com handlers `/healthz`, `/readyz`, `/env`.
+  - **.env.api**:
+    ```env
+    DB_URL=postgresql://samureye_app:S@mur3y3@172.24.1.153:6432/samureye
+    REDIS_URL=redis://:S@mur3y3@172.24.1.153:6379/0
+    MINIO_ENDPOINT=http://172.24.1.152:9000
+    MINIO_ACCESS_KEY=samureye
+    MINIO_SECRET_KEY=S@mur3y3
+    DELINEA_BASE_URL=https://gruppenztna.secretservercloud.com
+    DELINEA_API_KEY=REPLACE_ME
+    ```
+- **Frontend placeholder** (`:3000`) — NGINX estático (`/opt/samureye/app/frontend/index.html`).
+
+### 3.3 Endpoints úteis (lab)
+- **API**: `https://api.samureye.com.br/healthz` (via NGINX), `http://172.24.1.152:8080/healthz` (direto).
+- **Frontend**: `https://app.samureye.com.br/` (via NGINX), `http://172.24.1.152:3000/`.
+- **Grafana**: `http://172.24.1.152:9001` (`admin` / senha setada).
+- **MinIO**: Console `http://172.24.1.152:9090` (user `samureye`).
+
+---
+
+## 4) Banco de Dados & Cache (vlxsam03)
+
+### 4.1 PostgreSQL 16 (PGDG)
+- **Config** (`postgresql.conf`) — tuning leve (exemplo p/ 16 GB RAM):
+  - `listen_addresses = '*'`
+  - `shared_buffers = 4GB`
+  - `effective_cache_size = 12GB`
+  - `maintenance_work_mem = 1GB`
+  - `wal_level = replica`
+  - `max_wal_size = 4GB`
+
+- **pg_hba.conf** (lab):
+  ```
+  local   all all                        trust
+  host    all all 127.0.0.1/32           md5
+  host    all all ::1/128                md5
+  host    all all 172.24.1.152/32        md5  # APP
+  ```
+
+- **Usuário/DB**:
+  - `samureye_app` / `samureye` (senha LAB `S@mur3y3`).
+  - Extensões: `pgcrypto`, `"uuid-ossp"`, `citext`.
+  - Schema aplicado via `db-core-schema.sql` (MVP).
+
+### 4.2 PgBouncer (6432)
+- **pgbouncer.ini** (essência):
+  ```ini
+  [databases]
+  samureye = host=127.0.0.1 port=5432 dbname=samureye
+
+  [pgbouncer]
+  listen_addr = 0.0.0.0
+  listen_port = 6432
+  auth_type = md5
+  auth_file = /etc/pgbouncer/userlist.txt
+  pool_mode = transaction
+  max_client_conn = 500
+  default_pool_size = 50
+  reserve_pool_size = 10
+  ```
+- `userlist.txt`: hash **MD5(password+username)** para `samureye_app`.
+
+### 4.3 Redis (6379)
+- `bind 0.0.0.0`, `protected-mode yes`, `requirepass S@mur3y3`.
+
+- **Strings de conexão** (VM2):
+  - **Postgres (PgBouncer)**: `postgresql://samureye_app:S@mur3y3@172.24.1.153:6432/samureye`
+  - **Redis**: `redis://:S@mur3y3@172.24.1.153:6379/0`
+
+---
+
+## 5) Collector (vlxsam04)
+
+### 5.1 Networking
+- VLAN cliente (`GRP_SRV_SERVERS_V3000`), **192.168.100.151/24**.
+- **Somente saída 443/TCP** para `api.samureye.com.br` e `ca.samureye.com.br` (no lab, tudo liberado).
+
+### 5.2 Inscrição (mTLS via step-ca)
+1. **Bootstrap** com fingerprint da root.
+2. **Enroll** usando **OTT** emitido pelo provisioner `collectors`.
+3. **Certificados gravados** em `~/.step/certs` e `~/.step/private`.
+
+### 5.3 Fluxo mTLS
+- **Collector → API** (`/telemetry`, `/api/v1/jobs…`) com **client cert** apresentado.
+- **NGINX** valida cadeia (root/intermediária da **step-ca**) e injeta headers de identidade para a API.
+
+---
+
+## 6) Módulos Lógicos (MVP)
+
+- **Orchestrator/Backend** (futuro além do placeholder):
+  - **Tenant & RBAC** (admins locais + MFA; SSO EntraID para admins globais na v2).
+  - **Scheduler** de jornadas (Nmap, Nuclei).
+  - **Jobs API** (`/api/v1/jobs/*`): criação, claim pelo collector, heartbeat, finish.
+  - **Telemetry** (`/telemetry`): ingest de resultados e artefatos (MinIO).
+  - **Secrets**: integração **Delinea** por **API key** (padrão de pastas abaixo).
+  - **SIEM**: envio CEF/UDP 514 para `siem.zerobox.com.br` (campos: `tenant_id`, tipo de ameaça, criticidade, …).
+
+- **Collector Agent** (v1):
+  - Inscrição mTLS (step-ca), **apenas saída 443**.
+  - Executores: **Nmap**, **Nuclei** (com throttling/SAFE).
+  - Upload de evidências (JSON, stdout, pcaps) para **MinIO**; status para `/telemetry`.
+  - Resiliência: retry exponencial, backoff, jitter.
+
+- **Frontend**:
+  - CRUD de targets e jornadas, gatilhos de execução, dashboards (Grafana embutido).
+  - Gestão de credenciais (Delinea) — cadastro no **frontend** → grava via **API key** no Delinea.
+
+- **Observabilidade**:
+  - **Grafana**: painéis de status, resultados de scans (via Postgres + MinIO).
+  - **Logs**: plataforma, auditoria admin, e **ameaças descobertas** → **FortiSIEM** (CEF/UDP 514).
+
+---
+
+## 7) Integração com **Delinea Secret Server**
+- **Endpoint**: `https://gruppenztna.secretservercloud.com`.
+- **Organização das credenciais**:
+  - `BAS/<tenantid>/<Tipo>/<NomeDaCredencial>`  
+    Ex.: `BAS/acme/SSH/SSH_Default`, `BAS/acme/LDAP/Domain_acme.local`.
+- **Regra de nome**: **case-insensitive por tenant** (pode repetir em tenants diferentes).
+- **Fluxo** (MVP):
+  1. Admin cadastra credencial no **frontend**.
+  2. Backend grava/atualiza no **Delinea** via **API key**.
+  3. Jornada referencia o **path** da credencial ao executar.
+
+---
+
+## 8) Jornadas (MVP)
+- **Interno** (collector): **Nmap + Nuclei** em alvos definidos (hosts, ranges, portas).
+- **Agendamento**: imediato/manual (MVP); cron/recorrência em versões futuras.
+- **Resultados**:
+  - Metadados e findings no **Postgres**; artefatos brutos no **MinIO** (`bas-evidences`).
+  - Painéis no **Grafana**.
+  - Principais eventos em **CEF** para FortiSIEM.
+
+---
+
+## 9) Segurança & Hardening (MVP → Prod)
+- **TLS público**: Let’s Encrypt (ECDSA). Em produção, preferir **verificação do upstream** do `step-ca` (`proxy_ssl_trusted_certificate`).
+- **mTLS**: restrito às rotas do collector; validar `Subject`/SAN (`spiffe://samureye/<tenant>/<collector>`) na API.
+- **Secrets**: `.env` com escopo mínimo; segredos de runtime no **Delinea**.
+- **Redis** com senha; **Postgres** via **PgBouncer**; privilégios mínimos.
+- **Registry**: mover para TLS e autenticação forte (mTLS e escopos por repo) numa fase posterior.
+- **Auditoria**: logar ações administrativas e **incluir `tenant_id`** em todos os eventos enviados ao FortiSIEM.
+- **Backups**: base + MinIO; planejar retenção/versionamento (MinIO já com versioning).
