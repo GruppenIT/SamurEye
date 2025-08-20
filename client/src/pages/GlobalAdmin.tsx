@@ -42,6 +42,9 @@ export default function GlobalAdmin() {
     retry: false,
   });
 
+  // Ensure tenants is always an array
+  const tenantList = Array.isArray(tenants) ? tenants : [];
+
   const createTenantMutation = useMutation({
     mutationFn: async (data: CreateTenantForm) => {
       return apiRequest("/api/admin/tenants", "POST", data);
@@ -202,7 +205,7 @@ export default function GlobalAdmin() {
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {tenants?.map((tenant: any) => (
+        {tenantList.map((tenant: any) => (
           <Card key={tenant.id} data-testid={`card-tenant-${tenant.id}`}>
             <CardHeader>
               <div className="flex items-center justify-between">
@@ -253,7 +256,7 @@ export default function GlobalAdmin() {
         ))}
       </div>
 
-      {tenants?.length === 0 && (
+      {tenantList.length === 0 && (
         <div className="text-center py-12">
           <Building2 className="mx-auto h-12 w-12 text-muted-foreground" />
           <h3 className="mt-4 text-lg font-semibold">Nenhum tenant encontrado</h3>
