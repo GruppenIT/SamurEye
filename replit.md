@@ -12,6 +12,17 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+**August 20, 2025 - Complete Access Control System Restructuring**
+- Completely restructured access control system with dedicated admin interface at `/admin`
+- Created separate admin authentication system with hardcoded credentials (admin@samureye.com.br / SamurEye2024!)
+- Implemented comprehensive admin dashboard for tenant and user management
+- Added SOC user concept - users with access to all tenants marked with isSocUser flag
+- New admin routes: `/admin` (login), `/admin/dashboard` (main), `/admin/users/create` (user creation)
+- Admin can create/delete tenants and create users with tenant-role assignments
+- Updated database schema with new user fields: password, isSocUser, isActive, lastLoginAt
+- Separated admin functionality from regular user system for better security isolation
+- Admin system uses session-based authentication independent of Replit Auth
+
 **August 20, 2025 - Complete Documentation and Installation Refactoring**
 - Refactored all deployment documentation and scripts for production-ready installation
 - Created comprehensive README files for each server (vlxsam01-04) with step-by-step instructions
@@ -71,7 +82,12 @@ Preferred communication style: Simple, everyday language.
 
 ### Database Design
 - **Multi-tenant architecture** with tenant isolation
-- **User management** with role-based access (admin/operator/viewer)
+- **Dual user system**:
+  - **Admin users**: Global system administrators (via Replit Auth)
+  - **Tenant users**: Scoped to specific tenants with local authentication
+- **Enhanced user table** with password, isSocUser, isActive, lastLoginAt fields
+- **Tenant management** with full CRUD operations for admins
+- **User-tenant relationships** via tenantUsers table with role assignments
 - **Collectors** table for edge device registration and management
 - **Journeys** for security testing scenarios and configurations
 - **Credentials** management with Delinea Secret Server integration
@@ -79,10 +95,16 @@ Preferred communication style: Simple, everyday language.
 - **Activities** logging for audit trails
 
 ### Authentication & Authorization
-- **Replit OpenID Connect** for admin authentication
-- **Local authentication** with MFA (TOTP/Email) for tenant users
+- **Dual Authentication System**:
+  - **Admin System**: Session-based authentication at `/admin` with hardcoded credentials
+  - **User System**: Replit OpenID Connect for regular users
+- **Multi-level Access Control**:
+  - **Global Admins**: Full system access via `/admin` interface
+  - **SOC Users**: Access to all tenants (isSocUser = true)
+  - **Tenant Users**: Limited to specific tenant access with role-based permissions
 - **Session management** with PostgreSQL session store
 - **Tenant-based authorization** with currentTenantId tracking
+- **Role-based permissions**: tenant_admin, operator, viewer, tenant_auditor
 
 ### Real-time Communication
 - **WebSocket server** for live updates of collector status

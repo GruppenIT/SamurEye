@@ -14,12 +14,22 @@ import Credentials from "@/pages/Credentials";
 import ThreatIntelligence from "@/pages/ThreatIntelligence";
 import GlobalAdmin from "@/pages/GlobalAdmin";
 import TenantUsers from "@/pages/TenantUsers";
+import AdminLogin from "@/pages/AdminLogin";
+import AdminDashboard from "@/pages/AdminDashboard";
+import AdminUserCreate from "@/pages/AdminUserCreate";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
 
   return (
     <Switch>
+      {/* Admin routes - no authentication needed */}
+      <Route path="/admin" component={AdminLogin} />
+      <Route path="/admin/dashboard" component={AdminDashboard} />
+      <Route path="/admin/users/create" component={AdminUserCreate} />
+      <Route path="/admin/tenants/:tenantId/users" component={TenantUsers} />
+      
+      {/* Regular user routes */}
       {isLoading || !isAuthenticated ? (
         <Route path="/" component={Landing} />
       ) : (
@@ -29,8 +39,6 @@ function Router() {
           <Route path="/journeys" component={Journeys} />
           <Route path="/credentials" component={Credentials} />
           <Route path="/intelligence" component={ThreatIntelligence} />
-          <Route path="/admin" component={GlobalAdmin} />
-          <Route path="/admin/tenants/:tenantId/users" component={TenantUsers} />
           <Route path="/users" component={TenantUsers} />
         </TenantProvider>
       )}

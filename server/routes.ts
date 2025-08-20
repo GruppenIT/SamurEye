@@ -76,6 +76,93 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   await setupAuth(app);
 
+  // Admin authentication routes
+  app.post('/api/admin/login', async (req, res) => {
+    try {
+      const { email, password } = req.body;
+      
+      // Simple admin login - in production, use proper password hashing
+      if (email === 'admin@samureye.com.br' && password === 'SamurEye2024!') {
+        // Set admin session
+        (req.session as any).adminUser = { email, isAdmin: true };
+        res.json({ success: true, message: 'Login realizado com sucesso' });
+      } else {
+        res.status(401).json({ message: 'Credenciais inválidas' });
+      }
+    } catch (error) {
+      console.error('Admin login error:', error);
+      res.status(500).json({ message: 'Erro interno do servidor' });
+    }
+  });
+
+  app.post('/api/admin/logout', async (req, res) => {
+    try {
+      (req.session as any).adminUser = null;
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ message: 'Erro no logout' });
+    }
+  });
+
+  // Admin middleware
+  const isAdmin = (req: any, res: any, next: any) => {
+    if (!(req.session as any)?.adminUser?.isAdmin) {
+      return res.status(401).json({ message: 'Acesso negado - Admin apenas' });
+    }
+    next();
+  };
+
+  // Admin routes
+  app.get('/api/admin/tenants', isAdmin, async (req, res) => {
+    try {
+      const tenants = await storage.getAllTenants();
+      res.json(tenants);
+    } catch (error) {
+      console.error("Error fetching admin tenants:", error);
+      res.status(500).json({ message: "Failed to fetch tenants" });
+    }
+  });
+
+  app.post('/api/admin/tenants', isAdmin, async (req, res) => {
+    try {
+      const tenant = await storage.createTenant(req.body);
+      res.json(tenant);
+    } catch (error) {
+      console.error("Error creating tenant:", error);
+      res.status(500).json({ message: "Failed to create tenant" });
+    }
+  });
+
+  app.delete('/api/admin/tenants/:id', isAdmin, async (req, res) => {
+    try {
+      await storage.deleteTenant(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting tenant:", error);
+      res.status(500).json({ message: "Failed to delete tenant" });
+    }
+  });
+
+  app.get('/api/admin/stats', isAdmin, async (req, res) => {
+    try {
+      const stats = await storage.getAdminStats();
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching admin stats:", error);
+      res.status(500).json({ message: "Failed to fetch stats" });
+    }
+  });
+
+  app.post('/api/admin/users', isAdmin, async (req, res) => {
+    try {
+      const user = await storage.createAdminUser(req.body);
+      res.json(user);
+    } catch (error) {
+      console.error("Error creating user:", error);
+      res.status(500).json({ message: "Failed to create user" });
+    }
+  });
+
   // User routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {

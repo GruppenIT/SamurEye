@@ -34,7 +34,7 @@ import {
   type InsertTenantUserAuth,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, desc, gte, isNotNull } from "drizzle-orm";
+import { eq, and, desc, gte, isNotNull, sql } from "drizzle-orm";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
@@ -187,7 +187,53 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAllTenants(): Promise<Tenant[]> {
-    return await db.select().from(tenants);
+    return await db.select().from(tenants).orderBy(desc(tenants.createdAt));
+  }
+
+  // Admin operations  
+  async deleteTenant(id: string): Promise<void> {
+    await db.delete(tenants).where(eq(tenants.id, id));
+  }
+
+  async getAdminStats(): Promise<any> {
+    const [totalTenantsResult] = await db.select({ count: sql<number>`count(*)` }).from(tenants);
+    const [activeTenantsResult] = await db.select({ count: sql<number>`count(*)` }).from(tenants).where(eq(tenants.isActive, true));
+    const [totalUsersResult] = await db.select({ count: sql<number>`count(*)` }).from(users);
+    const [socUsersResult] = await db.select({ count: sql<number>`count(*)` }).from(users).where(eq(users.isSocUser, true));
+
+    return {
+      totalTenants: totalTenantsResult.count || 0,
+      activeTenants: activeTenantsResult.count || 0,
+      totalUsers: totalUsersResult.count || 0,
+      socUsers: socUsersResult.count || 0
+    };
+  }
+
+  async createAdminUser(userData: any): Promise<User> {
+    const userId = randomUUID();
+    
+    const [user] = await db.insert(users).values({
+      id: userId,
+      email: userData.email,
+      firstName: userData.firstName,
+      lastName: userData.lastName,
+      password: userData.password, // In production, hash this
+      isSocUser: userData.isSocUser || false,
+      isActive: true,
+    }).returning();
+
+    // If not SOC user, create tenant user relationship
+    if (!userData.isSocUser && userData.tenantId && userData.role) {
+      await db.insert(tenantUsers).values({
+        id: randomUUID(),
+        tenantId: userData.tenantId,
+        userId: user.id,
+        role: userData.role,
+        isActive: true,
+      });
+    }
+
+    return user;
   }
 
   async updateTenant(id: string, updates: Partial<Tenant>): Promise<void> {

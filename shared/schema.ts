@@ -37,10 +37,14 @@ export const users = pgTable("users", {
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
+  password: varchar("password"), // For local auth users
   currentTenantId: varchar("current_tenant_id"),
   preferredLanguage: varchar("preferred_language").default('pt-BR'),
   globalRole: globalRoleEnum("global_role"), // Global admin/auditor via SSO
   isGlobalUser: boolean("is_global_user").default(false), // SSO users vs tenant users
+  isSocUser: boolean("is_soc_user").default(false), // SOC users can access all tenants
+  isActive: boolean("is_active").default(true),
+  lastLoginAt: timestamp("last_login_at"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
