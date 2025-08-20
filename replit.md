@@ -12,6 +12,15 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+**August 20, 2025 - SSL Certificate System Complete with Manual Renewal**
+- Successfully resolved SSL certificate rate limiting issues with comprehensive improvements
+- Implemented "DNS Manual Assistido" option with two-stage validation (staging → production)
+- Added automatic rate limit detection to prevent "Service busy" errors
+- Created complete certificate management system with verification scripts and renewal reminders
+- Fixed certificate renewal process for manual certificates with proper cron configuration
+- Added comprehensive troubleshooting documentation for all SSL-related issues
+- Wildcard certificate (*.samureye.com.br) now active with 90-day manual renewal cycle
+
 **December 20, 2024 - Enhanced SSL/TLS Security with DNS Challenge**
 - Migrated SSL certificate system from HTTP-01 to DNS-01 challenge for enhanced security
 - Updated certificate setup to support wildcard certificates (*.samureye.com.br)

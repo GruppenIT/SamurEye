@@ -461,11 +461,55 @@ setup_letsencrypt_success() {
     if [ $? -eq 0 ]; then
         log "Certificados Let's Encrypt obtidos com sucesso!"
         
-        # Configurar renovação automática com hook
-        cat > /etc/cron.d/certbot-renew << 'EOF'
+        # Para certificados manuais, não configurar renovação automática
+        if grep -q "manual" /etc/letsencrypt/renewal/samureye.com.br.conf 2>/dev/null; then
+            warn "Certificado manual detectado - renovação automática não disponível"
+            echo ""
+            echo "📅 RENOVAÇÃO MANUAL NECESSÁRIA"
+            echo "Este certificado expira em 90 dias e deve ser renovado manualmente."
+            echo "Para renovar, execute novamente:"
+            echo "  sudo ./setup-certificates.sh"
+            echo "  Escolha opção 7 (DNS Manual Assistido)"
+            echo ""
+            
+            # Configurar lembrete de renovação manual
+            log "Configurando lembrete de renovação manual..."
+            
+            # Copiar script de lembrete
+            cp "$(dirname "$0")/renewal-reminder.sh" /opt/renewal-reminder.sh 2>/dev/null || \
+            cat > /opt/renewal-reminder.sh << 'EOF'
+#!/bin/bash
+CERT_PATH="/etc/letsencrypt/live/samureye.com.br/fullchain.pem"
+if [ -f "$CERT_PATH" ]; then
+    EXPIRY_DATE=$(openssl x509 -in "$CERT_PATH" -noout -enddate | cut -d= -f2)
+    EXPIRY_EPOCH=$(date -d "$EXPIRY_DATE" +%s)
+    CURRENT_EPOCH=$(date +%s)
+    DAYS_LEFT=$(( (EXPIRY_EPOCH - CURRENT_EPOCH) / 86400 ))
+    if [ $DAYS_LEFT -le 30 ]; then
+        echo "⚠️  Certificado SSL SamurEye expira em $DAYS_LEFT dias!"
+        echo "Execute: sudo /opt/setup-certificates.sh (opção 7)"
+        logger "SamurEye SSL certificate expires in $DAYS_LEFT days - manual renewal required"
+    fi
+fi
+EOF
+            
+            chmod +x /opt/renewal-reminder.sh
+            
+            # Adicionar cron para verificação semanal
+            cat > /etc/cron.d/ssl-renewal-reminder << 'EOF'
+# Verificação semanal de expiração de certificado SSL SamurEye
+0 9 * * 1 root /opt/renewal-reminder.sh
+EOF
+            
+            log "Lembrete de renovação configurado (verificação semanal)"
+        else
+            # Configurar renovação automática apenas para certificados automatizados
+            cat > /etc/cron.d/certbot-renew << 'EOF'
 # Renovação automática de certificados Let's Encrypt
 0 12 * * * root certbot renew --quiet --deploy-hook "systemctl reload nginx"
 EOF
+            log "Renovação automática configurada com hooks"
+        fi
         
         # Script de pré-hook para parar nginx se necessário
         mkdir -p /etc/letsencrypt/renewal-hooks/pre
@@ -492,14 +536,18 @@ EOF
         
         log "Renovação automática configurada com hooks"
         
-        # Testar renovação
-        log "Testando processo de renovação..."
-        certbot renew --dry-run
-        
-        if [ $? -eq 0 ]; then
-            log "Teste de renovação passou! Certificados serão renovados automaticamente."
+        # Testar renovação apenas para certificados não manuais
+        if ! grep -q "manual" /etc/letsencrypt/renewal/samureye.com.br.conf 2>/dev/null; then
+            log "Testando processo de renovação..."
+            certbot renew --dry-run
+            
+            if [ $? -eq 0 ]; then
+                log "Teste de renovação passou! Certificados serão renovados automaticamente."
+            else
+                warn "Teste de renovação falhou. Verifique a configuração."
+            fi
         else
-            warn "Teste de renovação falhou. Verifique a configuração."
+            log "Certificado manual - pular teste de renovação automática"
         fi
         
     else
@@ -797,7 +845,14 @@ case $choice in
         configure_nginx_ssl
         ;;
     5)
-        /opt/check-certificates.sh 2>/dev/null || echo "Script de verificação não encontrado"
+        # Usar script local se disponível, senão usar o instalado
+        if [ -f "$(dirname "$0")/check-ssl-status.sh" ]; then
+            bash "$(dirname "$0")/check-ssl-status.sh"
+        elif [ -f "/opt/check-ssl-status.sh" ]; then
+            /opt/check-ssl-status.sh
+        else
+            echo "Script de verificação não encontrado"
+        fi
         ;;
     6)
         migrate_to_wildcard

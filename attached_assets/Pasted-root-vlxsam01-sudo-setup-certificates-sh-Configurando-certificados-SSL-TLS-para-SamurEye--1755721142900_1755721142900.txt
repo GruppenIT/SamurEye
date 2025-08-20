@@ -1,0 +1,110 @@
+root@vlxsam01:~# sudo ./setup-certificates.sh
+🔒 Configurando certificados SSL/TLS para SamurEye...
+[2025-08-20 17:16:50] Verificando pré-requisitos...
+[2025-08-20 17:16:50] Verificando configuração DNS...
+[2025-08-20 17:16:50] DNS OK para app.samureye.com.br
+[2025-08-20 17:16:50] DNS OK para api.samureye.com.br
+[2025-08-20 17:16:50] DNS OK para scanner.samureye.com.br
+
+🔒 Setup de Certificados SSL/TLS para SamurEye
+
+Escolha uma opção:
+1) Let's Encrypt via DNS Challenge (Produção - Recomendado)
+2) Certificados Auto-assinados (Desenvolvimento/Teste)
+3) Configurar step-ca (CA Interna para mTLS)
+4) Apenas configurar NGINX
+5) Verificar certificados existentes
+6) Migrar certificados individuais para wildcard
+7) DNS Manual Assistido (recomendado para primeiro uso)
+
+Digite sua escolha (1-7): 1
+[2025-08-20 17:16:53] Configurando certificados Let's Encrypt via DNS Challenge...
+Saving debug log to /var/log/letsencrypt/letsencrypt.log
+
+🌐 CONFIGURAÇÃO DNS CHALLENGE
+
+Para usar DNS-01 challenge, você precisa configurar credenciais do seu provedor DNS:
+
+Provedores suportados:
+1) Cloudflare
+2) Route53 (AWS)
+3) Google Cloud DNS
+4) Manual (para outros provedores)
+
+Escolha seu provedor DNS (1-4): 4
+[2025-08-20 17:16:57] Configurando DNS Manual...
+
+📋 CONFIGURAÇÃO MANUAL DNS
+
+ATENÇÃO: Você precisará criar registros TXT manualmente durante o processo.
+IMPORTANTE: O Let's Encrypt pode solicitar MÚLTIPLOS registros TXT com o MESMO nome.
+Alguns provedores DNS exigem que você mantenha AMBOS os registros.
+
+Tenha acesso ao painel DNS do seu provedor aberto.
+
+Pressione ENTER para continuar...
+[2025-08-20 17:17:00] Verificando rate limits do Let's Encrypt...
+[2025-08-20 17:17:00] WARNING: Encontrados 4 erros de rate limit no log recente.
+Recomendamos aguardar 1-24 horas antes de tentar novamente.
+
+Tentar mesmo assim? (s/N): s
+
+🔄 INICIANDO PROCESSO DE VALIDAÇÃO DNS
+Você precisará adicionar os registros TXT conforme solicitado...
+
+[2025-08-20 17:17:30] Obtendo certificado wildcard...
+Use of --manual-public-ip-logging-ok is deprecated.
+Saving debug log to /var/log/letsencrypt/letsencrypt.log
+Requesting a certificate for *.samureye.com.br and samureye.com.br
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+Please deploy a DNS TXT record under the name:
+
+_acme-challenge.samureye.com.br.
+
+with the following value:
+
+ri7DS3EW0vrtgyhKQzKHJymNCuV34fAdMoV-6QOIGSY
+
+Before continuing, verify the TXT record has been deployed. Depending on the DNS
+provider, this may take some time, from a few seconds to multiple minutes. You can
+check if it has finished deploying with aid of online tools, such as the Google
+Admin Toolbox: https://toolbox.googleapps.com/apps/dig/#TXT/_acme-challenge.samureye.com.br.
+Look for one or more bolded line(s) below the line ';ANSWER'. It should show the
+value(s) you've just added.
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+Press Enter to Continue
+
+Successfully received certificate.
+Certificate is saved at: /etc/letsencrypt/live/samureye.com.br/fullchain.pem
+Key is saved at:         /etc/letsencrypt/live/samureye.com.br/privkey.pem
+This certificate expires on 2025-11-18.
+These files will be updated when the certificate renews.
+
+NEXT STEPS:
+- This certificate will not be renewed automatically. Autorenewal of --manual certificates requires the use of an authentication hook script (--manual-auth-hook) but one was not provided. To renew this certificate, repeat this same certbot command before the certificate's expiry date.
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+If you like Certbot, please consider supporting our work by:
+ * Donating to ISRG / Let's Encrypt:   https://letsencrypt.org/donate
+ * Donating to EFF:                    https://eff.org/donate-le
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+[2025-08-20 17:18:24] Certificados Let's Encrypt obtidos com sucesso!
+[2025-08-20 17:18:24] Renovação automática configurada com hooks
+[2025-08-20 17:18:24] Testando processo de renovação...
+Saving debug log to /var/log/letsencrypt/letsencrypt.log
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+Processing /etc/letsencrypt/renewal/samureye.com.br.conf
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+Failed to renew certificate samureye.com.br with error: The manual plugin is not working; there may be problems with your existing configuration.
+The error was: PluginError('An authentication script must be provided with --manual-auth-hook when using the manual plugin non-interactively.')
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+All simulated renewals failed. The following certificates could not be renewed:
+  /etc/letsencrypt/live/samureye.com.br/fullchain.pem (failure)
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+1 renew failure(s), 0 parse failure(s)
+Ask for help or search for solutions at https://community.letsencrypt.org. See the logfile /var/log/letsencrypt/letsencrypt.log or re-run Certbot with -v for more details.
+root@vlxsam01:~#
