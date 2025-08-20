@@ -4,10 +4,10 @@
 
 A plataforma SamurEye é distribuída em quatro servidores principais:
 
-- **vlxsam01**: Gateway/Proxy (NGINX + Let's Encrypt)
-- **vlxsam02**: Frontend + Backend (Node.js + React)
-- **vlxsam03**: Banco de Dados + Redis (PostgreSQL + Redis)
-- **vlxsam04**: Collector (Agente de coleta de dados)
+- **vlxsam01 (172.24.1.151)**: Gateway/Proxy (NGINX + Let's Encrypt)
+- **vlxsam02 (172.24.1.152)**: Frontend + Backend (Node.js + React)
+- **vlxsam03 (172.24.1.153)**: Banco de Dados + Redis (PostgreSQL + Redis)
+- **vlxsam04 (192.168.100.151)**: Collector (Agente de coleta de dados)
 
 ## Domínios e Certificados
 

@@ -12,12 +12,16 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-**December 20, 2024 - Comprehensive Deployment Documentation Created**
-- Created complete infrastructure deployment documentation for all four servers (vlxsam01-04)
-- Automated installation scripts for Gateway (NGINX+SSL), Frontend+Backend (Node.js), Database (PostgreSQL+Redis+MinIO), and Collector (Python+tools)
+**December 20, 2024 - Comprehensive Deployment Documentation with Specific IPs**
+- Created complete infrastructure deployment documentation for all four servers with specific IP addresses
+- vlxsam01 (172.24.1.151): Gateway/NGINX with SSL termination and proxy configuration
+- vlxsam02 (172.24.1.152): Frontend+Backend Node.js application with scanner service
+- vlxsam03 (172.24.1.153): Database cluster with PostgreSQL, Redis, and MinIO
+- vlxsam04 (192.168.100.151): Collector agent with outbound-only communication
+- Automated installation scripts with IP-specific configurations
 - SSL/TLS configuration with Let's Encrypt and self-signed certificate options
 - Centralized monitoring and logging setup with FortiSIEM CEF integration
-- Comprehensive troubleshooting guides and maintenance procedures
+- Network architecture documentation emphasizing collector's outbound-only design
 - Fixed tenant auto-creation issue for new users to resolve "No active tenant selected" error
 
 ## System Architecture

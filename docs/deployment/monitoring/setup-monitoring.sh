@@ -75,7 +75,7 @@ configure_centralized_logging() {
 
 # SamurEye Centralized Logging
 # Enviar logs para servidor central
-*.* @@vlxsam03:514
+*.* @@172.24.1.153:514
 
 # Log local para SamurEye
 $template SamurEyeFormat,"%TIMESTAMP% %HOSTNAME% %syslogtag%%msg%\n"
@@ -248,7 +248,7 @@ if (( $(echo "$load_avg > $load_threshold" | bc -l) )); then
     send_to_fortisiem "High load average: $load_avg" "Medium"
 fi
 
-# Verificar conexões de banco de dados
+# Verificar conexões de banco de dados (para vlxsam03)
 db_connections=$(netstat -an | grep :5432 | grep ESTABLISHED | wc -l)
 echo "$(date): Database connections: $db_connections" >> $LOG_FILE
 

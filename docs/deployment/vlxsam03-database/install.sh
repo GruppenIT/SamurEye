@@ -136,13 +136,13 @@ local   all             all                                     md5
 host    all             all             127.0.0.1/32            md5
 
 # SamurEye Application Servers
-host    samureye        samureye        vlxsam02/32             md5
+host    samureye        samureye        172.24.1.152/32         md5
 host    samureye        samureye        10.0.0.0/8              md5
 host    samureye        samureye        172.16.0.0/12           md5
 host    samureye        samureye        192.168.0.0/16          md5
 
 # Replication (if needed)
-# host    replication     all             vlxsam02/32             md5
+# host    replication     all             172.24.1.152/32         md5
 
 # IPv6 local connections:
 host    all             all             ::1/128                 md5
@@ -422,27 +422,27 @@ cat > /root/samureye-credentials.txt << EOF
 # IMPORTANTE: Mantenha este arquivo seguro!
 
 PostgreSQL:
-- Host: vlxsam03 (ou IP do servidor)
+- Host: 172.24.1.153 (vlxsam03)
 - Port: 5432
 - Database: $DB_NAME
 - Username: $DB_USER
 - Password: $DB_PASSWORD
 
 Redis:
-- Host: vlxsam03 (ou IP do servidor)
+- Host: 172.24.1.153 (vlxsam03)
 - Port: 6379
 - Password: samureye_redis_secure_password_change_me
 
 MinIO:
-- Host: vlxsam03 (ou IP do servidor)
+- Host: 172.24.1.153 (vlxsam03)
 - Port: 9000 (API), 9001 (Console)
 - Access Key: $MINIO_ACCESS_KEY
 - Secret Key: $MINIO_SECRET_KEY
-- Console URL: http://vlxsam03:9001
+- Console URL: http://172.24.1.153:9001
 
 Connection Strings:
-- PostgreSQL: postgresql://$DB_USER:$DB_PASSWORD@vlxsam03:5432/$DB_NAME
-- Redis: redis://:samureye_redis_secure_password_change_me@vlxsam03:6379
+- PostgreSQL: postgresql://$DB_USER:$DB_PASSWORD@172.24.1.153:5432/$DB_NAME
+- Redis: redis://:samureye_redis_secure_password_change_me@172.24.1.153:6379
 EOF
 
 chmod 600 /root/samureye-credentials.txt
@@ -454,11 +454,11 @@ echo ""
 echo "🔐 Credenciais salvas em: /root/samureye-credentials.txt"
 echo ""
 echo "🔗 Connection Strings:"
-echo "PostgreSQL: postgresql://$DB_USER:$DB_PASSWORD@vlxsam03:5432/$DB_NAME"
-echo "Redis: redis://:samureye_redis_secure_password_change_me@vlxsam03:6379"
+echo "PostgreSQL: postgresql://$DB_USER:$DB_PASSWORD@172.24.1.153:5432/$DB_NAME"
+echo "Redis: redis://:samureye_redis_secure_password_change_me@172.24.1.153:6379"
 echo ""
 echo "📊 URLs de Acesso:"
-echo "MinIO Console: http://vlxsam03:9001"
+echo "MinIO Console: http://172.24.1.153:9001"
 echo ""
 echo "🔧 PRÓXIMOS PASSOS:"
 echo "1. Alterar senhas padrão do Redis e MinIO"
@@ -467,8 +467,8 @@ echo "3. Configurar backup remoto"
 echo "4. Testar conectividade dos servidores de aplicação"
 echo ""
 echo "🧪 TESTES:"
-echo "psql -h vlxsam03 -U $DB_USER -d $DB_NAME"
-echo "redis-cli -h vlxsam03 -p 6379 -a samureye_redis_secure_password_change_me ping"
-echo "curl http://vlxsam03:9000/minio/health/live"
+echo "psql -h 172.24.1.153 -U $DB_USER -d $DB_NAME"
+echo "redis-cli -h 172.24.1.153 -p 6379 -a samureye_redis_secure_password_change_me ping"
+echo "curl http://172.24.1.153:9000/minio/health/live"
 echo ""
 echo "✅ Instalação do Database + Redis concluída com sucesso!"

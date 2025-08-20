@@ -154,15 +154,15 @@ chown $APP_USER:$APP_USER $APP_DIR/ecosystem.config.js
 log "Criando template de variáveis de ambiente..."
 cat > /etc/samureye/.env.template << 'EOF'
 # Database Configuration
-DATABASE_URL=postgresql://samureye:password@vlxsam03:5432/samureye
-PGHOST=vlxsam03
+DATABASE_URL=postgresql://samureye:password@172.24.1.153:5432/samureye
+PGHOST=172.24.1.153
 PGPORT=5432
 PGUSER=samureye
 PGPASSWORD=secure_password_here
 PGDATABASE=samureye
 
 # Redis Configuration
-REDIS_URL=redis://vlxsam03:6379
+REDIS_URL=redis://172.24.1.153:6379
 
 # Session Configuration
 SESSION_SECRET=your_very_secure_session_secret_here_min_32_chars
@@ -185,13 +185,13 @@ PORT=3000
 SCANNER_PORT=3001
 
 # MinIO/S3 (optional)
-MINIO_ENDPOINT=vlxsam03
+MINIO_ENDPOINT=172.24.1.153
 MINIO_PORT=9000
 MINIO_ACCESS_KEY=samureye
 MINIO_SECRET_KEY=your_minio_secret_key
 
 # Monitoring
-GRAFANA_URL=http://vlxsam03:3000
+GRAFANA_URL=http://172.24.1.153:3000
 FORTISIEM_HOST=your_fortisiem_host
 FORTISIEM_PORT=514
 

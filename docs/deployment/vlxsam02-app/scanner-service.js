@@ -305,7 +305,7 @@ function parseNmapXML(xmlContent) {
 // Enviar resultados para a API principal
 async function sendResultsToMainAPI(journeyId, results) {
   try {
-    const apiEndpoint = process.env.MAIN_API_ENDPOINT || 'http://localhost:3000';
+    const apiEndpoint = process.env.MAIN_API_ENDPOINT || 'http://172.24.1.152:3000';
     const apiKey = process.env.MAIN_API_KEY || process.env.SCANNER_API_KEY;
     
     const response = await fetch(`${apiEndpoint}/api/journeys/${journeyId}/results`, {

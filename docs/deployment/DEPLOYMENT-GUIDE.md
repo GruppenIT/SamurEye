@@ -7,41 +7,44 @@ Este guia fornece instruções completas para implantar a plataforma SamurEye em
 ## 🏗️ Arquitetura da Infraestrutura
 
 ```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│    vlxsam01     │    │    vlxsam02     │    │    vlxsam03     │    │    vlxsam04     │
-│     Gateway     │────│  Frontend +     │────│   Database +    │    │   Collector     │
-│                 │    │    Backend      │    │     Redis       │    │                 │
-│                 │    │                 │    │                 │    │                 │
-│ • NGINX         │    │ • Node.js       │    │ • PostgreSQL    │    │ • Python        │
-│ • Let's Encrypt │    │ • React         │    │ • Redis         │    │ • Nmap          │
-│ • SSL/TLS       │    │ • PM2           │    │ • MinIO         │    │ • Nuclei        │
-│ • Rate Limiting │    │ • Scanner       │    │ • Backup        │    │ • Telemetry     │
-│ • Fail2Ban      │    │ • WebSocket     │    │ • Monitoring    │    │ • Real-time     │
-└─────────────────┘    └─────────────────┘    └─────────────────┘    └─────────────────┘
+┌────────────────────┐    ┌────────────────────┐    ┌────────────────────┐    ┌────────────────────┐
+│     vlxsam01       │    │     vlxsam02       │    │     vlxsam03       │    │     vlxsam04       │
+│   (172.24.1.151)   │    │   (172.24.1.152)   │    │   (172.24.1.153)   │    │  (192.168.100.151) │
+│      Gateway       │────│   Frontend +       │────│    Database +      │    │     Collector      │
+│                    │    │     Backend        │    │      Redis         │    │   (outbound only)   │
+│                    │    │                    │    │                    │    │                    │
+│ • NGINX            │    │ • Node.js          │    │ • PostgreSQL       │    │ • Python           │
+│ • Let's Encrypt    │    │ • React            │    │ • Redis            │    │ • Nmap             │
+│ • SSL/TLS          │    │ • PM2              │    │ • MinIO            │    │ • Nuclei           │
+│ • Rate Limiting    │    │ • Scanner          │    │ • Backup           │    │ • Telemetry        │
+│ • Fail2Ban         │    │ • WebSocket        │    │ • Monitoring       │    │ • Real-time        │
+└────────────────────┘    └────────────────────┘    └────────────────────┘    └────────────────────┘
 ```
 
 ## 📋 Pré-requisitos
 
 ### DNS e Domínios
-- `app.samureye.com.br` → vlxsam01 (Interface web)
-- `api.samureye.com.br` → vlxsam01 (API backend)
-- `scanner.samureye.com.br` → vlxsam01 (Scanner externo)
-- `ca.samureye.com.br` → vlxsam01 (CA interna - opcional)
+- `app.samureye.com.br` → 172.24.1.151 (vlxsam01 - Interface web)
+- `api.samureye.com.br` → 172.24.1.151 (vlxsam01 - API backend)
+- `scanner.samureye.com.br` → 172.24.1.151 (vlxsam01 - Scanner externo)
+- `ca.samureye.com.br` → 172.24.1.151 (vlxsam01 - CA interna - opcional)
 
 ### Servidores
-- **vlxsam01**: 2 vCPU, 4GB RAM, 50GB SSD (Gateway)
-- **vlxsam02**: 4 vCPU, 8GB RAM, 100GB SSD (Aplicação)
-- **vlxsam03**: 4 vCPU, 8GB RAM, 200GB SSD (Banco de dados)
-- **vlxsam04**: 2 vCPU, 4GB RAM, 50GB SSD (Collector)
+- **vlxsam01 (172.24.1.151)**: 2 vCPU, 4GB RAM, 50GB SSD (Gateway)
+- **vlxsam02 (172.24.1.152)**: 4 vCPU, 8GB RAM, 100GB SSD (Aplicação)
+- **vlxsam03 (172.24.1.153)**: 4 vCPU, 8GB RAM, 200GB SSD (Banco de dados)
+- **vlxsam04 (192.168.100.151)**: 2 vCPU, 4GB RAM, 50GB SSD (Collector)
 
 ### Rede
 - Conectividade entre todos os servidores
 - Acesso à internet para updates e certificados
+- vlxsam04 (collector) conecta apenas outbound para vlxsam02 via HTTPS
 - Portas:
-  - 80/443 (HTTP/HTTPS) - vlxsam01
-  - 3000/3001 (App/Scanner) - vlxsam02
-  - 5432/6379/9000 (PostgreSQL/Redis/MinIO) - vlxsam03
+  - 80/443 (HTTP/HTTPS) - vlxsam01 (172.24.1.151)
+  - 3000/3001 (App/Scanner) - vlxsam02 (172.24.1.152)
+  - 5432/6379/9000 (PostgreSQL/Redis/MinIO) - vlxsam03 (172.24.1.153)
   - SSH para administração - todos
+  - vlxsam04 (192.168.100.151) - apenas outbound HTTPS
 
 ## 🔧 Processo de Instalação
 
@@ -49,7 +52,7 @@ Este guia fornece instruções completas para implantar a plataforma SamurEye em
 
 ```bash
 # Conectar ao servidor
-ssh root@vlxsam01
+ssh root@172.24.1.151
 
 # Baixar e executar script de instalação
 wget https://github.com/samureye/deployment/raw/main/vlxsam01-gateway/install.sh
@@ -73,7 +76,7 @@ sudo nginx -t && sudo systemctl reload nginx
 
 ```bash
 # Conectar ao servidor
-ssh root@vlxsam03
+ssh root@172.24.1.153
 
 # Baixar e executar script de instalação
 wget https://github.com/samureye/deployment/raw/main/vlxsam03-database/install.sh
@@ -93,7 +96,7 @@ cat /root/samureye-credentials.txt
 
 ```bash
 # Conectar ao servidor
-ssh root@vlxsam02
+ssh root@172.24.1.152
 
 # Baixar e executar script de instalação
 wget https://github.com/samureye/deployment/raw/main/vlxsam02-app/install.sh
@@ -129,7 +132,7 @@ curl http://localhost:3001/health
 
 ```bash
 # Conectar ao servidor
-ssh root@vlxsam04
+ssh root@192.168.100.151
 
 # Baixar e executar script de instalação
 wget https://github.com/samureye/deployment/raw/main/vlxsam04-collector/install.sh
@@ -225,11 +228,11 @@ curl -I https://scanner.samureye.com.br/health
 
 # Testar conectividade entre servidores
 # De vlxsam02 para vlxsam03
-nc -zv vlxsam03 5432  # PostgreSQL
-nc -zv vlxsam03 6379  # Redis
+nc -zv 172.24.1.153 5432  # PostgreSQL
+nc -zv 172.24.1.153 6379  # Redis
 
-# De vlxsam04 para vlxsam02
-nc -zv vlxsam02 3000  # API
+# De vlxsam04 para vlxsam02 (outbound only)
+nc -zv 172.24.1.152 3000  # API
 ```
 
 ### 2. Funcionalidade da Aplicação
