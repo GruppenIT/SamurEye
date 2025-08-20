@@ -10,6 +10,16 @@ The system enables security teams to discover vulnerabilities, test EDR/AV solut
 
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes
+
+**December 20, 2024 - Comprehensive Deployment Documentation Created**
+- Created complete infrastructure deployment documentation for all four servers (vlxsam01-04)
+- Automated installation scripts for Gateway (NGINX+SSL), Frontend+Backend (Node.js), Database (PostgreSQL+Redis+MinIO), and Collector (Python+tools)
+- SSL/TLS configuration with Let's Encrypt and self-signed certificate options
+- Centralized monitoring and logging setup with FortiSIEM CEF integration
+- Comprehensive troubleshooting guides and maintenance procedures
+- Fixed tenant auto-creation issue for new users to resolve "No active tenant selected" error
+
 ## System Architecture
 
 ### Frontend Architecture

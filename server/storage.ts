@@ -83,18 +83,52 @@ export class DatabaseStorage implements IStorage {
   }
 
   async upsertUser(userData: UpsertUser): Promise<User> {
-    const [user] = await db
-      .insert(users)
-      .values(userData)
-      .onConflictDoUpdate({
-        target: users.id,
-        set: {
+    // Check if user exists
+    const existingUser = await this.getUser(userData.id);
+    
+    if (existingUser) {
+      // Update existing user
+      const [user] = await db
+        .update(users)
+        .set({
           ...userData,
           updatedAt: new Date(),
-        },
-      })
-      .returning();
-    return user;
+        })
+        .where(eq(users.id, userData.id))
+        .returning();
+      return user;
+    } else {
+      // Create new user with default tenant
+      const [user] = await db
+        .insert(users)
+        .values(userData)
+        .returning();
+      
+      // Create default tenant for new user
+      const defaultTenant = await this.createTenant({
+        name: `${userData.firstName || userData.email || 'User'}'s Organization`,
+        slug: `org-${userData.id.slice(0, 8)}`,
+        description: 'Default organization'
+      });
+      
+      // Add user to tenant as admin
+      await this.addUserToTenant({
+        tenantId: defaultTenant.id,
+        userId: user.id,
+        role: 'admin'
+      });
+      
+      // Set as current tenant
+      await this.updateUserCurrentTenant(user.id, defaultTenant.id);
+      
+      // Return updated user
+      const [updatedUser] = await db
+        .select()
+        .from(users)
+        .where(eq(users.id, user.id));
+      
+      return updatedUser;
+    }
   }
 
   // Tenant operations
