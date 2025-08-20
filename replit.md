@@ -12,15 +12,22 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+**December 20, 2024 - Enhanced SSL/TLS Security with DNS Challenge**
+- Migrated SSL certificate system from HTTP-01 to DNS-01 challenge for enhanced security
+- Updated certificate setup to support wildcard certificates (*.samureye.com.br)
+- Added automated certificate configuration for multiple DNS providers (Cloudflare, Route53, Google Cloud DNS)
+- Created comprehensive DNS configuration documentation with provider-specific guides
+- Enhanced certificate renewal automation with improved hooks and error handling
+- Added migration functionality for existing HTTP-based certificates to DNS wildcard
+- Improved security posture by eliminating need to stop web services during certificate operations
+
 **December 20, 2024 - Comprehensive Deployment Documentation with Specific IPs**
 - Created complete infrastructure deployment documentation for all four servers with specific IP addresses
-- vlxsam01 (172.24.1.151): Gateway/NGINX with SSL termination and proxy configuration
+- vlxsam01 (172.24.1.151): Gateway/NGINX with SSL termination and DNS-based certificate management
 - vlxsam02 (172.24.1.152): Frontend+Backend Node.js application with scanner service
 - vlxsam03 (172.24.1.153): Database cluster with PostgreSQL, Redis, and MinIO
 - vlxsam04 (192.168.100.151): Collector agent with outbound-only communication
-- Automated installation scripts with IP-specific configurations
-- SSL/TLS configuration with Let's Encrypt and self-signed certificate options
-- Centralized monitoring and logging setup with FortiSIEM CEF integration
+- Automated installation scripts with DNS certificate plugin support
 - Network architecture documentation emphasizing collector's outbound-only design
 - Fixed tenant auto-creation issue for new users to resolve "No active tenant selected" error
 
@@ -95,9 +102,11 @@ Preferred communication style: Simple, everyday language.
 - **vSphere** virtualization platform for infrastructure
 
 ### DNS & TLS
-- **samureye.com.br** domain with subdomains (app, api, scanner, ca)
-- **Let's Encrypt** for public TLS certificates with DNS-01 challenge
-- **Automatic certificate renewal** and distribution
+- **samureye.com.br** domain with wildcard certificate support (*.samureye.com.br)
+- **Let's Encrypt DNS-01 Challenge** for enhanced security and wildcard certificates
+- **Multi-provider DNS support**: Cloudflare, AWS Route53, Google Cloud DNS, manual configuration
+- **Automated certificate management** with intelligent renewal hooks and migration capabilities
+- **Enhanced security posture** with no service interruption during certificate operations
 
 ### Security Tools Integration
 - **Nmap** for network scanning and discovery

@@ -45,6 +45,10 @@ apt update && apt upgrade -y
 log "Instalando pacotes essenciais..."
 apt install -y nginx certbot python3-certbot-nginx ufw fail2ban htop curl wget git unzip software-properties-common
 
+# Instalar plugins DNS para Let's Encrypt
+log "Instalando plugins DNS para certificados..."
+apt install -y python3-certbot-dns-cloudflare python3-certbot-dns-route53 python3-certbot-dns-google
+
 # Configurar timezone
 log "Configurando timezone para America/Sao_Paulo..."
 timedatectl set-timezone America/Sao_Paulo
@@ -234,10 +238,23 @@ log "Configuração inicial concluída!"
 echo ""
 echo "📋 PRÓXIMOS PASSOS:"
 echo "1. Configurar DNS para apontar os domínios para este servidor"
-echo "2. Executar: sudo certbot --nginx -d app.samureye.com.br -d api.samureye.com.br -d scanner.samureye.com.br"
+echo "2. Configurar certificados SSL usando DNS Challenge (RECOMENDADO):"
+echo "   sudo wget https://raw.githubusercontent.com/samureye/setup-certificates/main/setup-certificates.sh"
+echo "   sudo chmod +x setup-certificates.sh"
+echo "   sudo ./setup-certificates.sh"
+echo ""
+echo "   OU usar método HTTP tradicional:"
+echo "   sudo certbot --nginx -d app.samureye.com.br -d api.samureye.com.br -d scanner.samureye.com.br"
+echo ""
 echo "3. Copiar a configuração do NGINX (nginx-samureye.conf) para /etc/nginx/sites-available/samureye"
 echo "4. Ativar: sudo ln -sf /etc/nginx/sites-available/samureye /etc/nginx/sites-enabled/"
 echo "5. Remover configuração temporária: sudo rm /etc/nginx/sites-enabled/temp-cert"
 echo "6. Testar e reiniciar: sudo nginx -t && sudo systemctl reload nginx"
+echo ""
+echo "🔒 VANTAGENS DO DNS CHALLENGE:"
+echo "- Certificados wildcard (*.samureye.com.br)"
+echo "- Maior segurança"
+echo "- Não requer parar o servidor"
+echo "- Renovação automática mais confiável"
 echo ""
 echo "✅ Instalação do Gateway concluída com sucesso!"

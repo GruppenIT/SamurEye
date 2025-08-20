@@ -60,17 +60,44 @@ Criar arquivo de configuração principal:
 sudo nano /etc/nginx/sites-available/samureye
 ```
 
-### Certificados Let's Encrypt
+### Certificados Let's Encrypt via DNS Challenge
+
+⚠️ **IMPORTANTE**: Utilize DNS-01 Challenge em vez de HTTP-01 para maior segurança e suporte a wildcard.
 
 ```bash
-# Obter certificados para todos os domínios
-sudo certbot --nginx -d app.samureye.com.br -d api.samureye.com.br -d scanner.samureye.com.br
+# Execute o script automatizado para configurar certificados
+sudo ./ssl-certificates/setup-certificates.sh
 
-# Configurar renovação automática
-sudo crontab -e
-# Adicionar linha:
-0 12 * * * /usr/bin/certbot renew --quiet
+# OU configure manualmente:
+# 1. Instale plugins DNS
+sudo apt install -y python3-certbot-dns-cloudflare python3-certbot-dns-route53
+
+# 2. Configure credenciais do provedor DNS (exemplo Cloudflare)
+sudo nano /etc/letsencrypt/cloudflare.ini
+# dns_cloudflare_api_token = seu_token_aqui
+
+# 3. Obtenha certificado wildcard
+sudo certbot certonly \
+  --dns-cloudflare \
+  --dns-cloudflare-credentials /etc/letsencrypt/cloudflare.ini \
+  --email admin@samureye.com.br \
+  --agree-tos \
+  --no-eff-email \
+  -d "*.samureye.com.br" \
+  -d "samureye.com.br"
 ```
+
+**Vantagens do DNS Challenge:**
+- Certificados wildcard (*.samureye.com.br)
+- Não requer parar o servidor web
+- Maior segurança (sem validação HTTP)
+- Funciona mesmo com serviços internos
+
+**Provedores DNS Suportados:**
+- Cloudflare (recomendado)
+- AWS Route53
+- Google Cloud DNS
+- Modo manual para outros provedores
 
 ### Configuração do Fail2Ban
 
