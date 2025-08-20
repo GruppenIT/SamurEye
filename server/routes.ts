@@ -576,7 +576,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ uploadURL });
   });
 
-  app.put("/api/tenant/logo", isAuthenticated, requireTenant, async (req, res) => {
+  app.put("/api/tenant/logo", isAuthenticated, requireTenant, async (req: any, res) => {
     if (!req.body.logoURL) {
       return res.status(400).json({ error: "logoURL is required" });
     }
@@ -606,6 +606,77 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error setting tenant logo:", error);
       res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // Add example data endpoint
+  app.post("/api/admin/seed-example-data", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user?.globalRole || user.globalRole !== 'global_admin') {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      const { tenantId } = req.body;
+      if (!tenantId) {
+        return res.status(400).json({ message: "Tenant ID required" });
+      }
+
+      // Create example collectors directly here
+      const collector1 = await storage.createCollector({
+        tenantId,
+        name: "Collector-DC-01",
+        hostname: "dc01.corp.local",
+        ipAddress: "192.168.1.10",
+        status: "online",
+        version: "1.0.0",
+        lastSeen: new Date(),
+        metadata: {
+          os: "Windows Server 2022",
+          location: "Data Center - Rack A1",
+          capabilities: ["nmap", "nuclei", "ad_hygiene"]
+        }
+      });
+
+      const collector2 = await storage.createCollector({
+        tenantId,
+        name: "Collector-DMZ-01", 
+        hostname: "dmz01.corp.local",
+        ipAddress: "10.0.100.5",
+        status: "offline",
+        version: "1.0.0",
+        lastSeen: new Date(Date.now() - 30 * 60 * 1000), // 30 minutes ago
+        metadata: {
+          os: "Ubuntu 22.04 LTS",
+          location: "DMZ Network",
+          capabilities: ["nmap", "nuclei", "external_scan"]
+        }
+      });
+
+      // Add telemetry for online collector
+      await storage.addCollectorTelemetry({
+        collectorId: collector1.id,
+        cpuUsage: 45.2,
+        memoryUsage: 67.8,
+        diskUsage: 23.1,
+        networkThroughput: {
+          inbound: 12.5,
+          outbound: 8.3
+        },
+        processes: [
+          { name: "samureye-agent", cpu: 2.1, memory: 128 }
+        ]
+      });
+
+      res.json({
+        message: "Example data created successfully",
+        collectors: [collector1, collector2]
+      });
+    } catch (error) {
+      console.error("Error creating example data:", error);
+      res.status(500).json({ message: "Failed to create example data" });
     }
   });
 

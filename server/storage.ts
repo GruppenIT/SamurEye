@@ -70,13 +70,13 @@ export interface IStorage {
   getLatestCollectorTelemetry(collectorId: string): Promise<CollectorTelemetry | undefined>;
 
   // Journey operations
-  getJourneysByTenant(tenantId: string): Promise<(Journey & { collector?: Collector; createdBy: User })[]>;
+  getJourneysByTenant(tenantId: string): Promise<Journey[]>;
   getJourney(id: string): Promise<Journey | undefined>;
   createJourney(journey: InsertJourney): Promise<Journey>;
   updateJourneyStatus(id: string, status: string, results?: any): Promise<void>;
 
   // Credential operations
-  getCredentialsByTenant(tenantId: string): Promise<(Credential & { createdBy: User })[]>;
+  getCredentialsByTenant(tenantId: string): Promise<Credential[]>;
   getCredential(id: string): Promise<Credential | undefined>;
   createCredential(credential: InsertCredential): Promise<Credential>;
   updateCredential(id: string, updates: Partial<Credential>): Promise<void>;
@@ -87,7 +87,7 @@ export interface IStorage {
   createThreatIntelligence(intelligence: InsertThreatIntelligence): Promise<ThreatIntelligence>;
 
   // Activity operations
-  getActivitiesByTenant(tenantId: string, limit?: number): Promise<(Activity & { user: User })[]>;
+  getActivitiesByTenant(tenantId: string, limit?: number): Promise<Activity[]>;
   createActivity(activity: InsertActivity): Promise<Activity>;
 }
 
@@ -318,27 +318,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Journey operations
-  async getJourneysByTenant(tenantId: string): Promise<(Journey & { collector?: Collector; createdBy: User })[]> {
+  async getJourneysByTenant(tenantId: string): Promise<Journey[]> {
     return await db
-      .select({
-        id: journeys.id,
-        tenantId: journeys.tenantId,
-        name: journeys.name,
-        type: journeys.type,
-        status: journeys.status,
-        config: journeys.config,
-        results: journeys.results,
-        collectorId: journeys.collectorId,
-        createdBy: users,
-        startedAt: journeys.startedAt,
-        completedAt: journeys.completedAt,
-        createdAt: journeys.createdAt,
-        updatedAt: journeys.updatedAt,
-        collector: collectors,
-      })
+      .select()
       .from(journeys)
-      .innerJoin(users, eq(journeys.createdBy, users.id))
-      .leftJoin(collectors, eq(journeys.collectorId, collectors.id))
       .where(eq(journeys.tenantId, tenantId))
       .orderBy(desc(journeys.createdAt));
   }
@@ -373,22 +356,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Credential operations
-  async getCredentialsByTenant(tenantId: string): Promise<(Credential & { createdBy: User })[]> {
+  async getCredentialsByTenant(tenantId: string): Promise<Credential[]> {
     return await db
-      .select({
-        id: credentials.id,
-        tenantId: credentials.tenantId,
-        name: credentials.name,
-        type: credentials.type,
-        delineaSecretId: credentials.delineaSecretId,
-        delineaPath: credentials.delineaPath,
-        description: credentials.description,
-        createdBy: users,
-        createdAt: credentials.createdAt,
-        updatedAt: credentials.updatedAt,
-      })
+      .select()
       .from(credentials)
-      .innerJoin(users, eq(credentials.createdBy, users.id))
       .where(eq(credentials.tenantId, tenantId))
       .orderBy(desc(credentials.createdAt));
   }
@@ -450,8 +421,21 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createActivity(activity: InsertActivity): Promise<Activity> {
-    const [newActivity] = await db.insert(activities).values(activity).returning();
+    const [newActivity] = await db.insert(activities).values({
+      ...activity,
+      ipAddress: null,
+      userAgent: null
+    }).returning();
     return newActivity;
+  }
+
+  async getActivitiesByTenant(tenantId: string, limit = 50): Promise<Activity[]> {
+    return await db
+      .select()
+      .from(activities)
+      .where(eq(activities.tenantId, tenantId))
+      .orderBy(desc(activities.timestamp))
+      .limit(limit);
   }
 }
 

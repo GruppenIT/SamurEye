@@ -64,6 +64,22 @@ export default function GlobalAdmin() {
     },
   });
 
+  const seedExampleData = async (tenantId: string) => {
+    try {
+      await apiRequest("/api/admin/seed-example-data", "POST", { tenantId });
+      toast({
+        title: "Sucesso",
+        description: "Dados de exemplo criados com sucesso",
+      });
+    } catch (error) {
+      toast({
+        title: "Erro", 
+        description: "Falha ao criar dados de exemplo",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleCreateTenant = (data: CreateTenantForm) => {
     createTenantMutation.mutate(data);
   };
@@ -217,13 +233,19 @@ export default function GlobalAdmin() {
               </div>
               
               <div className="flex gap-2 mt-4">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="flex-1"
+                  onClick={() => seedExampleData(tenant.id)}
+                  data-testid={`button-seed-${tenant.id}`}
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  Dados Exemplo
+                </Button>
                 <Button variant="outline" size="sm" className="flex-1">
                   <Users className="mr-2 h-4 w-4" />
                   Usuários
-                </Button>
-                <Button variant="outline" size="sm" className="flex-1">
-                  <Activity className="mr-2 h-4 w-4" />
-                  Atividades
                 </Button>
               </div>
             </CardContent>
