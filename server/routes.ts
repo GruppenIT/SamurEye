@@ -413,27 +413,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/admin/tenants', isAuthenticated, async (req: any, res) => {
     try {
+      console.log("Creating tenant request body:", req.body);
       const user = await storage.getUser(req.user.claims.sub);
+      console.log("User permission check:", user?.globalRole);
+      
       if (!user?.globalRole || !['global_admin', 'global_auditor'].includes(user.globalRole)) {
         return res.status(403).json({ message: "Global admin access required" });
       }
 
       const validatedData = insertTenantSchema.parse(req.body);
+      console.log("Validated data:", validatedData);
+      
       const tenant = await storage.createTenant(validatedData);
+      console.log("Created tenant:", tenant);
 
       // Log activity
-      await storage.createActivity({
-        userId: req.user.claims.sub,
-        action: 'create',
-        resource: 'tenant',
-        resourceId: tenant.id,
-        metadata: { tenantName: tenant.name }
-      });
+      try {
+        await storage.createActivity({
+          userId: req.user.claims.sub,
+          action: 'create',
+          resource: 'tenant',
+          resourceId: tenant.id,
+          metadata: { tenantName: tenant.name }
+        });
+      } catch (activityError) {
+        console.warn("Failed to log activity:", activityError);
+        // Don't fail the request if activity logging fails
+      }
 
       res.json(tenant);
     } catch (error) {
       console.error("Error creating tenant:", error);
-      res.status(500).json({ message: "Failed to create tenant" });
+      if (error instanceof Error) {
+        console.error("Error details:", error.message, error.stack);
+      }
+      res.status(500).json({ 
+        message: "Failed to create tenant", 
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
     }
   });
 
