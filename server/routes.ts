@@ -169,6 +169,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin endpoint to list all users
+  app.get('/api/admin/users', isAdmin, async (req, res) => {
+    try {
+      const users = await storage.getAllUsers();
+      res.json(users);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      res.status(500).json({ message: "Failed to fetch users" });
+    }
+  });
+
+  // Admin endpoint to delete user
+  app.delete('/api/admin/users/:userId', isAdmin, async (req, res) => {
+    try {
+      await storage.deleteUser(req.params.userId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      res.status(500).json({ message: "Failed to delete user" });
+    }
+  });
+
   // User routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {

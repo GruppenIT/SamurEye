@@ -57,7 +57,7 @@ export default function TenantUsers() {
   });
 
   const { data: tenantUsers = [], isLoading } = useQuery({
-    queryKey: ["/api/tenant/users"],
+    queryKey: ["/api/admin/users"],
     retry: false,
   });
 
@@ -66,11 +66,11 @@ export default function TenantUsers() {
 
   const createUserMutation = useMutation({
     mutationFn: async (data: CreateUserForm) => {
-      const response = await apiRequest("POST", "/api/tenant/users", data);
+      const response = await apiRequest("POST", "/api/admin/users", data);
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/tenant/users"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
       setCreateDialogOpen(false);
       form.reset();
       toast({
@@ -87,23 +87,22 @@ export default function TenantUsers() {
     },
   });
 
-  const updateRoleMutation = useMutation({
-    mutationFn: async ({ userId, role }: { userId: string; role: string }) => {
-      return apiRequest(`/api/tenant/users/${userId}/role`, "PUT", { role });
+  const deleteUserMutation = useMutation({
+    mutationFn: async (userId: string) => {
+      const response = await apiRequest("DELETE", `/api/admin/users/${userId}`);
+      return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/tenant/users"] });
-      setRoleDialogOpen(false);
-      setSelectedUser(null);
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
       toast({
         title: "Sucesso",
-        description: "Função do usuário atualizada",
+        description: "Usuário excluído com sucesso",
       });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast({
         title: "Erro",
-        description: "Falha ao atualizar função",
+        description: error.message || "Erro ao excluir usuário",
         variant: "destructive",
       });
     },
@@ -113,9 +112,9 @@ export default function TenantUsers() {
     createUserMutation.mutate(data);
   };
 
-  const handleUpdateRole = (role: string) => {
-    if (selectedUser) {
-      updateRoleMutation.mutate({ userId: selectedUser.userId, role });
+  const handleDeleteUser = (userId: string) => {
+    if (confirm("Tem certeza que deseja excluir este usuário?")) {
+      deleteUserMutation.mutate(userId);
     }
   };
 

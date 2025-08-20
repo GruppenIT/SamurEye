@@ -240,6 +240,18 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
+  async getAllUsers(): Promise<User[]> {
+    return await db.select().from(users).orderBy(desc(users.createdAt));
+  }
+
+  async deleteUser(userId: string): Promise<void> {
+    // First delete tenant user relationships
+    await db.delete(tenantUsers).where(eq(tenantUsers.userId, userId));
+    
+    // Then delete the user
+    await db.delete(users).where(eq(users.id, userId));
+  }
+
   async updateTenant(id: string, updates: Partial<Tenant>): Promise<void> {
     await db
       .update(tenants)
