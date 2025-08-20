@@ -12,8 +12,17 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+**August 20, 2025 - Complete Documentation and Installation Refactoring**
+- Refactored all deployment documentation and scripts for production-ready installation
+- Created comprehensive README files for each server (vlxsam01-04) with step-by-step instructions
+- Removed all temporary "fix" scripts in favor of clean installation from scratch
+- Updated main deployment README with proper server installation order and dependencies
+- Created consolidated verification script for complete multi-server installation testing
+- Standardized all installation scripts with proper error handling, logging, and security
+- Documentation now matches exactly what the installation scripts perform
+
 **August 20, 2025 - SSL Certificate System Complete with Manual Renewal**
-- Successfully resolved SSL certificate rate limiting issues with comprehensive improvements
+- Successfully resolved SSL certificate rate limiting issues with comprehensive improvements  
 - Implemented "DNS Manual Assistido" option with two-stage validation (staging → production)
 - Added automatic rate limit detection to prevent "Service busy" errors
 - Created complete certificate management system with verification scripts and renewal reminders
