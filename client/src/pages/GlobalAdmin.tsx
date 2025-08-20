@@ -48,7 +48,8 @@ export default function GlobalAdmin() {
   const createTenantMutation = useMutation({
     mutationFn: async (data: CreateTenantForm) => {
       console.log("Sending tenant data:", data);
-      return apiRequest("/api/admin/tenants", "POST", data);
+      const response = await apiRequest("POST", "/api/admin/tenants", data);
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/tenants"] });
@@ -71,7 +72,7 @@ export default function GlobalAdmin() {
 
   const seedExampleData = async (tenantId: string) => {
     try {
-      await apiRequest("/api/admin/seed-example-data", "POST", { tenantId });
+      await apiRequest("POST", "/api/admin/seed-example-data", { tenantId });
       toast({
         title: "Sucesso",
         description: "Dados de exemplo criados com sucesso",
