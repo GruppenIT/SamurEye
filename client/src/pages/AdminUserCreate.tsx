@@ -65,6 +65,10 @@ export default function AdminUserCreate() {
   const createUserMutation = useMutation({
     mutationFn: async (data: CreateUserForm) => {
       const response = await apiRequest("POST", "/api/admin/users", data);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Erro ao criar usuário");
+      }
       return response.json();
     },
     onSuccess: () => {

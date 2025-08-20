@@ -157,9 +157,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const user = await storage.createAdminUser(req.body);
       res.json(user);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating user:", error);
-      res.status(500).json({ message: "Failed to create user" });
+      
+      // Handle specific errors with user-friendly messages
+      if (error.message.includes('já existe')) {
+        return res.status(400).json({ message: error.message });
+      }
+      
+      res.status(500).json({ message: "Erro ao criar usuário" });
     }
   });
 

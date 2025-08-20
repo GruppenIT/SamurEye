@@ -99,52 +99,50 @@ export class DatabaseStorage implements IStorage {
   }
 
   async upsertUser(userData: UpsertUser): Promise<User> {
-    // Check if user exists
-    const existingUser = await this.getUser(userData.id);
-    
-    if (existingUser) {
-      // Update existing user
-      const [user] = await db
-        .update(users)
-        .set({
-          ...userData,
-          updatedAt: new Date(),
-        })
-        .where(eq(users.id, userData.id))
-        .returning();
-      return user;
-    } else {
-      // Create new user with default tenant
-      const [user] = await db
-        .insert(users)
-        .values(userData)
-        .returning();
+    // Check if user exists  
+    if (userData.id) {
+      const existingUser = await this.getUser(userData.id);
       
-      // Create default tenant for new user
-      const defaultTenant = await this.createTenant({
-        name: `${userData.firstName || userData.email || 'User'}'s Organization`,
-        slug: `org-${userData.id.slice(0, 8)}`,
-        description: 'Default organization'
-      });
-      
-      // Add user to tenant as admin
-      await this.addUserToTenant({
-        tenantId: defaultTenant.id,
-        userId: user.id,
-        role: 'tenant_admin'
-      });
-      
-      // Set as current tenant
-      await this.updateUserCurrentTenant(user.id, defaultTenant.id);
-      
-      // Return updated user
-      const [updatedUser] = await db
-        .select()
-        .from(users)
-        .where(eq(users.id, user.id));
-      
-      return updatedUser;
+      if (existingUser) {
+        // Update existing user
+        const [user] = await db
+          .update(users)
+          .set({
+            ...userData,
+            updatedAt: new Date(),
+          })
+          .where(eq(users.id, userData.id))
+          .returning();
+        return user;
+      }
     }
+    
+    // Create new user with default tenant
+    const [user] = await db
+      .insert(users)
+      .values(userData)
+      .returning();
+    
+    // Create default tenant for new user
+    const defaultTenant = await this.createTenant({
+      name: `${userData.firstName || userData.email || 'User'}'s Organization`,
+      slug: `org-${user.id.slice(0, 8)}`,
+      description: 'Default organization'
+    });
+    
+    // Add user to tenant as admin
+    await this.addUserToTenant({
+      tenantId: defaultTenant.id,
+      userId: user.id,
+      role: 'tenant_admin'
+    });
+    
+    // Set as current tenant
+    await this.updateUserCurrentTenant(user.id, defaultTenant.id);
+    
+    // Return updated user
+    const updatedUser = await this.getUser(user.id);
+    return updatedUser!;
   }
 
   // Tenant operations
@@ -210,6 +208,12 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createAdminUser(userData: any): Promise<User> {
+    // Check if user with email already exists
+    const [existingUser] = await db.select().from(users).where(eq(users.email, userData.email));
+    if (existingUser) {
+      throw new Error(`Usuário com email ${userData.email} já existe`);
+    }
+
     const userId = randomUUID();
     
     const [user] = await db.insert(users).values({
@@ -446,21 +450,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Activity operations
-  async getActivitiesByTenant(tenantId: string, limit = 20): Promise<(Activity & { user: User })[]> {
+  async getActivitiesByTenant(tenantId: string, limit = 50): Promise<Activity[]> {
     return await db
-      .select({
-        id: activities.id,
-        tenantId: activities.tenantId,
-        userId: activities.userId,
-        action: activities.action,
-        resource: activities.resource,
-        resourceId: activities.resourceId,
-        metadata: activities.metadata,
-        timestamp: activities.timestamp,
-        user: users,
-      })
+      .select()
       .from(activities)
-      .innerJoin(users, eq(activities.userId, users.id))
       .where(eq(activities.tenantId, tenantId))
       .orderBy(desc(activities.timestamp))
       .limit(limit);
@@ -473,15 +466,6 @@ export class DatabaseStorage implements IStorage {
       userAgent: null
     }).returning();
     return newActivity;
-  }
-
-  async getActivitiesByTenant(tenantId: string, limit = 50): Promise<Activity[]> {
-    return await db
-      .select()
-      .from(activities)
-      .where(eq(activities.tenantId, tenantId))
-      .orderBy(desc(activities.timestamp))
-      .limit(limit);
   }
 }
 
