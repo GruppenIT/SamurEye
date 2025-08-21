@@ -35,6 +35,7 @@ function Router() {
       ) : (
         <TenantProvider>
           <Route path="/" component={Dashboard} />
+          <Route path="/dashboard" component={Dashboard} />
           <Route path="/collectors" component={Collectors} />
           <Route path="/journeys" component={Journeys} />
           <Route path="/credentials" component={Credentials} />

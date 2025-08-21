@@ -43,8 +43,8 @@ export default function Login() {
         description: "Login realizado com sucesso",
       });
       
-      // Redirecionar para dashboard
-      setLocation("/dashboard");
+      // Redirecionar para página inicial
+      setLocation("/");
     } catch (error: any) {
       toast({
         title: "Erro",
