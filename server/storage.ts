@@ -79,7 +79,7 @@ export interface IStorage {
   getCredentialsByTenant(tenantId: string): Promise<Credential[]>;
   getCredential(id: string): Promise<Credential | undefined>;
   createCredential(credential: InsertCredential): Promise<Credential>;
-  updateCredential(id: string, updates: Partial<Credential>): Promise<void>;
+  updateCredential(id: string, updates: Partial<Credential>): Promise<Credential>;
   deleteCredential(id: string): Promise<void>;
 
   // Threat Intelligence operations
@@ -463,11 +463,13 @@ export class DatabaseStorage implements IStorage {
     return newCredential;
   }
 
-  async updateCredential(id: string, updates: Partial<Credential>): Promise<void> {
-    await db
+  async updateCredential(id: string, updates: Partial<Credential>): Promise<Credential> {
+    const [updated] = await db
       .update(credentials)
       .set({ ...updates, updatedAt: new Date() })
-      .where(eq(credentials.id, id));
+      .where(eq(credentials.id, id))
+      .returning();
+    return updated;
   }
 
   async deleteCredential(id: string): Promise<void> {

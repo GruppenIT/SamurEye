@@ -43,8 +43,8 @@ export default function Login() {
         description: "Login realizado com sucesso",
       });
       
-      // Redirecionar para página inicial
-      setLocation("/");
+      // Force page reload to clear any cached auth state and redirect
+      window.location.href = "/";
     } catch (error: any) {
       toast({
         title: "Erro",

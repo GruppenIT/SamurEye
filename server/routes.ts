@@ -42,35 +42,9 @@ const requireTenant: RequestHandler = async (req: any, res, next) => {
   }
 };
 
-// Delinea Secret Server integration
-const delineaApiKey = process.env.DELINEA_API_KEY || process.env.API_KEY || "default_key";
-const delineaBaseUrl = "https://gruppenztna.secretservercloud.com";
+// Local credential storage with basic encryption
 
-async function createDelineaSecret(tenantSlug: string, credentialType: string, credentialName: string, secretData: any) {
-  try {
-    const path = `BAS/${tenantSlug}/${credentialType}/${credentialName}`;
-    
-    const response = await axios.post(`${delineaBaseUrl}/api/v1/secrets`, {
-      name: credentialName,
-      path: path,
-      folderId: null, // Will be created in appropriate folder
-      secretData: secretData
-    }, {
-      headers: {
-        'Authorization': `Bearer ${delineaApiKey}`,
-        'Content-Type': 'application/json'
-      }
-    });
-
-    return {
-      secretId: response.data.id,
-      path: path
-    };
-  } catch (error) {
-    console.error("Error creating Delinea secret:", error);
-    throw new Error("Failed to create secret in Delinea");
-  }
-}
+// Removed Delinea integration - credentials now stored locally with encryption
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
@@ -489,29 +463,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/credentials', isAuthenticated, requireTenant, async (req: any, res) => {
     try {
-      const { secretData, ...credentialData } = req.body;
-      
       const validatedData = insertCredentialSchema.parse({
-        ...credentialData,
+        ...req.body,
         tenantId: req.tenant.id,
         createdBy: req.userId
       });
 
-      // Create secret in Delinea
-      const { secretId, path } = await createDelineaSecret(
-        req.tenant.slug,
-        validatedData.type,
-        validatedData.name,
-        secretData
-      );
-
-      // Store credential reference
-      const credential = await storage.createCredential({
-        ...validatedData,
-        delineaSecretId: secretId,
-        delineaPath: path,
-        createdBy: req.userId
-      });
+      // Store credential with local data
+      const credential = await storage.createCredential(validatedData);
 
       // Log activity
       await storage.createActivity({
@@ -527,6 +486,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error creating credential:", error);
       res.status(500).json({ message: "Failed to create credential" });
+    }
+  });
+
+  app.put('/api/credentials/:id', isAuthenticated, requireTenant, async (req: any, res) => {
+    try {
+      const validatedData = insertCredentialSchema.parse({
+        ...req.body,
+        tenantId: req.tenant.id,
+        createdBy: req.userId
+      });
+
+      const credential = await storage.updateCredential(req.params.id, validatedData);
+
+      // Log activity
+      await storage.createActivity({
+        tenantId: req.tenant.id,
+        userId: req.userId,
+        action: 'update',
+        resource: 'credential',
+        resourceId: credential.id,
+        metadata: { credentialName: credential.name, credentialType: credential.type }
+      });
+
+      res.json(credential);
+    } catch (error) {
+      console.error("Error updating credential:", error);
+      res.status(500).json({ message: "Failed to update credential" });
+    }
+  });
+
+  app.delete('/api/credentials/:id', isAuthenticated, requireTenant, async (req: any, res) => {
+    try {
+      await storage.deleteCredential(req.params.id);
+
+      // Log activity
+      await storage.createActivity({
+        tenantId: req.tenant.id,
+        userId: req.userId,
+        action: 'delete',
+        resource: 'credential',
+        resourceId: req.params.id,
+        metadata: {}
+      });
+
+      res.json({ message: 'Credential deleted successfully' });
+    } catch (error) {
+      console.error("Error deleting credential:", error);
+      res.status(500).json({ message: "Failed to delete credential" });
     }
   });
 

@@ -125,14 +125,29 @@ export const journeys = pgTable("journeys", {
 });
 
 // Credentials (stored references to Delinea)
+// Credential types enum
+export const credentialTypeEnum = pgEnum("credential_type", [
+  "ssh",
+  "snmp", 
+  "telnet",
+  "ldap",
+  "wmi",
+  "http",
+  "https",
+  "database",
+  "api_key",
+  "certificate"
+]);
+
 export const credentials = pgTable("credentials", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   tenantId: varchar("tenant_id").notNull().references(() => tenants.id, { onDelete: 'cascade' }),
   name: varchar("name").notNull(),
-  type: varchar("type").notNull(), // SSH, LDAP, etc.
-  delineaSecretId: varchar("delinea_secret_id"), // Reference to Delinea Secret Server
-  delineaPath: varchar("delinea_path").notNull(), // Path in Delinea: BAS/<tenantid>/<Type>/<Name>
+  type: credentialTypeEnum("type").notNull(),
   description: text("description"),
+  // Store credential fields based on type
+  credentialData: jsonb("credential_data").$type<Record<string, any>>().notNull(),
+  isActive: boolean("is_active").default(true),
   createdBy: varchar("created_by").notNull().references(() => users.id),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -306,8 +321,7 @@ export const insertCredentialSchema = createInsertSchema(credentials).omit({
   id: true, 
   createdAt: true, 
   updatedAt: true,
-  createdBy: true,
-  delineaSecretId: true
+  createdBy: true
 });
 
 export type ThreatIntelligence = typeof threatIntelligence.$inferSelect;
