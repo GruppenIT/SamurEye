@@ -142,7 +142,9 @@ export function AppHeader({ activeTab, onTabChange }: AppHeaderProps) {
                       ? `${currentUser.firstName} ${currentUser.lastName}`
                       : currentUser?.email || 'User'}
                   </span>
-                  <span className="text-xs text-muted-foreground">Admin</span>
+                  <span className="text-xs text-muted-foreground">
+                    {currentUser?.isSocUser ? 'SOC Operator' : 'User'}
+                  </span>
                 </div>
                 <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
                   <span className="text-white text-sm font-medium">

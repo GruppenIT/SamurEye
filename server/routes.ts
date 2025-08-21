@@ -14,6 +14,8 @@ import {
 import axios from "axios";
 import { randomUUID } from "crypto";
 import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
+import session from "express-session";
+import createMemoryStore from "memorystore";
 
 // Tenant middleware
 const requireTenant: RequestHandler = async (req: any, res, next) => {
@@ -47,8 +49,27 @@ const requireTenant: RequestHandler = async (req: any, res, next) => {
 // Removed Delinea integration - credentials now stored locally with encryption
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Auth middleware
-  await setupAuth(app);
+  // Create memory store for session
+  const MemoryStore = createMemoryStore(session);
+  
+  // Session middleware
+  app.use(session({
+    secret: 'samureye-dev-secret-2024',
+    resave: false,
+    saveUninitialized: false,
+    cookie: { 
+      secure: false, // Set to true in production with HTTPS
+      httpOnly: true,
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      sameSite: 'lax'
+    },
+    store: new MemoryStore({
+      checkPeriod: 86400000 // prune expired entries every 24h
+    })
+  }));
+
+  // Auth middleware (for Replit Auth - disabled for now to avoid conflicts)
+  // await setupAuth(app);
 
   // Admin authentication routes
   app.post('/api/admin/login', async (req, res) => {
@@ -194,6 +215,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       (req.session as any).userId = user.id;
       (req.session as any).userEmail = user.email;
       
+      // Force session save
+      await new Promise<void>((resolve, reject) => {
+        req.session.save((err: any) => {
+          if (err) {
+            console.error('Session save error:', err);
+            reject(err);
+          } else {
+            resolve();
+          }
+        });
+      });
+      
       // Update last login
       await storage.updateLastLogin(user.id);
       
@@ -226,7 +259,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get current user endpoint (for session-based auth)
+  // Get current user endpoint (for session-based auth) with tenant information
   app.get('/api/user', async (req, res) => {
     try {
       const userId = (req.session as any)?.userId;
@@ -240,12 +273,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Usuário não encontrado ou inativo" });
       }
 
+      // Get user tenants and current tenant info
+      let tenants: any[] = [];
+      let currentTenant = null;
+
+      if (user.isSocUser) {
+        // SOC users have access to all tenants
+        const allTenants = await storage.getAllTenants();
+        tenants = allTenants.map(t => ({
+          tenantId: t.id,
+          role: 'soc_operator',
+          tenant: t
+        }));
+        // Use first tenant as default for SOC users
+        currentTenant = allTenants.length > 0 ? allTenants[0] : null;
+      } else {
+        // Regular users - get their specific tenant associations
+        tenants = await storage.getUserTenants(userId);
+        if (user.currentTenantId) {
+          currentTenant = await storage.getTenant(user.currentTenantId);
+        } else if (tenants.length > 0) {
+          // Use first available tenant if no current tenant set
+          const firstTenant = tenants[0];
+          currentTenant = await storage.getTenant(firstTenant.tenantId);
+        }
+      }
+
       res.json({
         id: user.id,
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
         isSocUser: user.isSocUser,
+        tenants,
+        currentTenant
       });
     } catch (error) {
       console.error("Error getting user:", error);
@@ -343,9 +404,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/auth/switch-tenant', isAuthenticated, async (req: any, res) => {
+  app.post('/api/switch-tenant', isLocalUserAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.localUser.id;
       const { tenantId } = req.body;
 
       // Verify user has access to this tenant
@@ -475,7 +536,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Log activity
       await storage.createActivity({
         tenantId: req.tenant.id,
-        userId: req.userId,
+        userId: req.localUser.id,
         action: 'create',
         resource: 'journey',
         resourceId: journey.id,
@@ -501,7 +562,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Log activity
       await storage.createActivity({
         tenantId: req.tenant.id,
-        userId: req.userId,
+        userId: req.localUser.id,
         action: 'start',
         resource: 'journey',
         resourceId: journey.id,
@@ -567,7 +628,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Log activity
       await storage.createActivity({
         tenantId: req.tenant.id,
-        userId: req.userId,
+        userId: req.localUser.id,
         action: 'update',
         resource: 'credential',
         resourceId: credential.id,
@@ -588,7 +649,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Log activity
       await storage.createActivity({
         tenantId: req.tenant.id,
-        userId: req.userId,
+        userId: req.localUser.id,
         action: 'delete',
         resource: 'credential',
         resourceId: req.params.id,

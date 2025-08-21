@@ -4,7 +4,7 @@ import { apiRequest } from '@/lib/queryClient';
 import type { User, Tenant, TenantUser } from '@shared/schema';
 
 interface TenantContextType {
-  currentUser: (User & { tenants: (TenantUser & { tenant: Tenant })[], currentTenant: Tenant | null }) | undefined;
+  currentUser: any;
   isLoading: boolean;
   switchTenant: (tenantId: string) => Promise<void>;
 }
@@ -15,16 +15,16 @@ export function TenantProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
   
   const { data: currentUser, isLoading } = useQuery({
-    queryKey: ['/api/auth/user'],
+    queryKey: ['/api/user'],
     retry: false,
   });
 
   const switchTenantMutation = useMutation({
     mutationFn: async (tenantId: string) => {
-      await apiRequest('POST', '/api/auth/switch-tenant', { tenantId });
+      await apiRequest('POST', '/api/switch-tenant', { tenantId });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/user'] });
       queryClient.invalidateQueries(); // Invalidate all queries since tenant context changed
     },
   });
