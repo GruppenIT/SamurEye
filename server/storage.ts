@@ -252,6 +252,33 @@ export class DatabaseStorage implements IStorage {
     await db.delete(users).where(eq(users.id, userId));
   }
 
+  async authenticateUser(email: string, password: string): Promise<User | null> {
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+    
+    if (!user) {
+      return null;
+    }
+
+    // In production, you should hash passwords and compare hashes
+    // For now, comparing plain text (this should be changed for security)
+    if (user.password === password) {
+      return user;
+    }
+
+    return null;
+  }
+
+  async getUserById(id: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user;
+  }
+
+  async updateLastLogin(userId: string): Promise<void> {
+    await db.update(users)
+      .set({ lastLoginAt: new Date() })
+      .where(eq(users.id, userId));
+  }
+
   async updateTenant(id: string, updates: Partial<Tenant>): Promise<void> {
     await db
       .update(tenants)

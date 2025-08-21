@@ -6,7 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
 import { TenantProvider } from "@/contexts/TenantContext";
 import NotFound from "@/pages/not-found";
-import Landing from "@/pages/Landing";
+import Login from "@/pages/Login";
 import Dashboard from "@/pages/Dashboard";
 import Collectors from "@/pages/Collectors";
 import Journeys from "@/pages/Journeys";
@@ -31,7 +31,7 @@ function Router() {
       
       {/* Regular user routes */}
       {isLoading || !isAuthenticated ? (
-        <Route path="/" component={Landing} />
+        <Route path="/" component={Login} />
       ) : (
         <TenantProvider>
           <Route path="/" component={Dashboard} />

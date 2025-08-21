@@ -191,6 +191,87 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // User login endpoint (for regular users created in the system)
+  app.post('/api/login', async (req, res) => {
+    try {
+      const { email, password } = req.body;
+      
+      if (!email || !password) {
+        return res.status(400).json({ message: "Email e senha são obrigatórios" });
+      }
+
+      const user = await storage.authenticateUser(email, password);
+      if (!user) {
+        return res.status(401).json({ message: "Credenciais inválidas" });
+      }
+
+      if (!user.isActive) {
+        return res.status(401).json({ message: "Usuário inativo" });
+      }
+
+      // Create user session
+      (req.session as any).userId = user.id;
+      (req.session as any).userEmail = user.email;
+      
+      // Update last login
+      await storage.updateLastLogin(user.id);
+      
+      res.json({
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        isSocUser: user.isSocUser,
+      });
+    } catch (error) {
+      console.error("Error during login:", error);
+      res.status(500).json({ message: "Erro interno do servidor" });
+    }
+  });
+
+  // User logout endpoint
+  app.post('/api/logout', async (req, res) => {
+    try {
+      req.session.destroy((err) => {
+        if (err) {
+          console.error("Error destroying session:", err);
+          return res.status(500).json({ message: "Erro ao fazer logout" });
+        }
+        res.json({ success: true });
+      });
+    } catch (error) {
+      console.error("Error during logout:", error);
+      res.status(500).json({ message: "Erro interno do servidor" });
+    }
+  });
+
+  // Get current user endpoint (for session-based auth)
+  app.get('/api/user', async (req, res) => {
+    try {
+      const userId = (req.session as any)?.userId;
+      
+      if (!userId) {
+        return res.status(401).json({ message: "Não autenticado" });
+      }
+
+      const user = await storage.getUserById(userId);
+      if (!user || !user.isActive) {
+        return res.status(401).json({ message: "Usuário não encontrado ou inativo" });
+      }
+
+      res.json({
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        isSocUser: user.isSocUser,
+      });
+    } catch (error) {
+      console.error("Error getting user:", error);
+      res.status(500).json({ message: "Erro interno do servidor" });
+    }
+  });
+
   // User routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {

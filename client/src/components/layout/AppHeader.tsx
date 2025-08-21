@@ -30,8 +30,14 @@ export function AppHeader({ activeTab, onTabChange }: AppHeaderProps) {
     { id: 'users', label: 'Usuários' },
   ];
 
-  const handleLogout = () => {
-    window.location.href = '/api/logout';
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/logout', { method: 'POST' });
+      window.location.href = '/';
+    } catch (error) {
+      console.error('Logout error:', error);
+      window.location.href = '/';
+    }
   };
 
   const getInitials = (user: any) => {
@@ -153,9 +159,13 @@ export function AppHeader({ activeTab, onTabChange }: AppHeaderProps) {
                 </span>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleLogout} data-testid="logout-button">
+              <DropdownMenuItem onClick={() => switchLanguage(language === 'pt-BR' ? 'en' : 'pt-BR')}>
+                {t('common.switchLanguage')}
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleLogout} data-testid="button-logout">
                 <LogOut className="mr-2 h-4 w-4" />
-                Sair
+                {t('common.logout')}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
