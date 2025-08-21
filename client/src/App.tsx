@@ -22,10 +22,7 @@ import AdminUserCreate from "@/pages/AdminUserCreate";
 function Router() {
   const { isAuthenticated, isLoading, error } = useAuth();
 
-  // Debug logs
-  console.log('Router - isAuthenticated:', isAuthenticated);
-  console.log('Router - isLoading:', isLoading);
-  console.log('Router - error:', error);
+
 
   return (
     <Switch>

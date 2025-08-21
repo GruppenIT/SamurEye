@@ -53,7 +53,7 @@ export function RecentActivities() {
     }
   ];
 
-  const displayActivities = activities || mockActivities;
+  const displayActivities = Array.isArray(activities) ? activities : mockActivities;
 
   const getActivityIcon = (action: string) => {
     switch (action) {
@@ -173,7 +173,7 @@ export function RecentActivities() {
       </CardHeader>
       <CardContent>
         <div className="space-y-4" data-testid="activities-list">
-          {displayActivities.map((activity: any) => {
+          {displayActivities && displayActivities.length > 0 ? displayActivities.map((activity: any) => {
             const IconComponent = getActivityIcon(activity.action);
             const colors = getActivityColor(activity.status);
             
@@ -239,7 +239,11 @@ export function RecentActivities() {
                 </div>
               </div>
             );
-          })}
+          }) : (
+            <div className="text-center py-8">
+              <p className="text-muted-foreground">Nenhuma atividade recente encontrada</p>
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>

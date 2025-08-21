@@ -19,10 +19,7 @@ export function TenantProvider({ children }: { children: ReactNode }) {
     retry: false,
   });
 
-  // Log for debugging
-  console.log('TenantProvider - User data:', currentUser);
-  console.log('TenantProvider - Loading:', isLoading);
-  console.log('TenantProvider - Error:', error);
+
 
   const switchTenantMutation = useMutation({
     mutationFn: async (tenantId: string) => {
