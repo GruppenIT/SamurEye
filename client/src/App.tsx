@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
 import { TenantProvider } from "@/contexts/TenantContext";
+import { Component, ReactNode } from 'react';
 import NotFound from "@/pages/not-found";
 import Login from "@/pages/Login";
 import Dashboard from "@/pages/Dashboard";
@@ -19,7 +20,12 @@ import AdminDashboard from "@/pages/AdminDashboard";
 import AdminUserCreate from "@/pages/AdminUserCreate";
 
 function Router() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, error } = useAuth();
+
+  // Debug logs
+  console.log('Router - isAuthenticated:', isAuthenticated);
+  console.log('Router - isLoading:', isLoading);
+  console.log('Router - error:', error);
 
   return (
     <Switch>
@@ -30,7 +36,14 @@ function Router() {
       <Route path="/admin/tenants/:tenantId/users" component={TenantUsers} />
       
       {/* Regular user routes */}
-      {isLoading || !isAuthenticated ? (
+      {isLoading ? (
+        <div className="min-h-screen bg-background flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent mx-auto"></div>
+            <p className="text-muted-foreground mt-2">Verificando autenticação...</p>
+          </div>
+        </div>
+      ) : !isAuthenticated ? (
         <Route path="/" component={Login} />
       ) : (
         <TenantProvider>
@@ -53,10 +66,67 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Toaster />
-        <Router />
+        <ErrorBoundary>
+          <Router />
+        </ErrorBoundary>
       </TooltipProvider>
     </QueryClientProvider>
   );
+}
+
+// Error boundary to catch React errors and prevent blank screen
+
+interface ErrorBoundaryState {
+  hasError: boolean;
+  error?: Error;
+}
+
+class ErrorBoundary extends Component<{ children: ReactNode }, ErrorBoundaryState> {
+  constructor(props: { children: ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: any) {
+    console.error('React Error Boundary caught an error:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="min-h-screen bg-background flex items-center justify-center p-4">
+          <div className="max-w-md text-center">
+            <h1 className="text-2xl font-bold text-destructive mb-4">Something went wrong</h1>
+            <p className="text-muted-foreground mb-4">
+              A aplicação encontrou um erro inesperado. Por favor, recarregue a página.
+            </p>
+            <button 
+              onClick={() => window.location.reload()} 
+              className="bg-primary text-primary-foreground px-4 py-2 rounded-md"
+            >
+              Recarregar Página
+            </button>
+            {this.state.error && (
+              <details className="mt-4 text-left">
+                <summary className="cursor-pointer text-sm text-muted-foreground">
+                  Detalhes do erro (para desenvolvedores)
+                </summary>
+                <pre className="text-xs bg-muted p-2 rounded mt-2 overflow-auto">
+                  {this.state.error.stack}
+                </pre>
+              </details>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
 }
 
 export default App;
