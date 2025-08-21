@@ -209,10 +209,11 @@ export default function AdminDashboard() {
   const handleLogout = async () => {
     try {
       await apiRequest("POST", "/api/admin/logout", {});
-      setLocation("/admin");
+      // Force page reload to clear all session data
+      window.location.href = "/admin";
     } catch (error) {
       console.error("Logout error:", error);
-      setLocation("/admin");
+      window.location.href = "/admin";
     }
   };
 

@@ -83,6 +83,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Simple admin login - in production, use proper password hashing
       if (email === 'admin@samureye.com.br' && password === 'SamurEye2024!') {
+        // Clear any regular user session
+        delete (req.session as any).userId;
+        delete (req.session as any).userEmail;
+        
         // Set admin session
         (req.session as any).adminUser = { email, isAdmin: true };
         res.json({ success: true, message: 'Login realizado com sucesso' });
@@ -97,7 +101,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/admin/logout', async (req, res) => {
     try {
-      (req.session as any).adminUser = null;
+      delete (req.session as any).adminUser;
       res.json({ success: true });
     } catch (error) {
       res.status(500).json({ message: 'Erro no logout' });
@@ -209,7 +213,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Usuário inativo" });
       }
 
-      // Create user session
+      // Clear any admin session
+      delete (req.session as any).adminUser;
+      
+      // Create user session  
       (req.session as any).userId = user.id;
       (req.session as any).userEmail = user.email;
       
