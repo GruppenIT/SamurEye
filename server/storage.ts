@@ -508,6 +508,19 @@ export class DatabaseStorage implements IStorage {
     }).returning();
     return newActivity;
   }
+
+  // Clear all tenant-specific data for re-seeding
+  async clearTenantData(tenantId: string): Promise<void> {
+    // Delete in order to respect foreign key constraints
+    await db.delete(collectorTelemetry).where(
+      sql`collector_id IN (SELECT id FROM collectors WHERE tenant_id = ${tenantId})`
+    );
+    await db.delete(activities).where(eq(activities.tenantId, tenantId));
+    await db.delete(threatIntelligence).where(eq(threatIntelligence.tenantId, tenantId));
+    await db.delete(credentials).where(eq(credentials.tenantId, tenantId));
+    await db.delete(journeys).where(eq(journeys.tenantId, tenantId));
+    await db.delete(collectors).where(eq(collectors.tenantId, tenantId));
+  }
 }
 
 export const storage = new DatabaseStorage();

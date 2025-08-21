@@ -1067,5 +1067,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }, 10000); // Every 10 seconds
 
+  // Development route to seed different tenant data
+  app.post('/api/dev/seed-tenant-data', async (req, res) => {
+    try {
+      const { seedDifferentTenantData } = await import('./seedSimpleData');
+      await seedDifferentTenantData();
+      res.json({ success: true, message: 'Tenant data seeded successfully' });
+    } catch (error) {
+      console.error('Error seeding tenant data:', error);
+      res.status(500).json({ error: 'Failed to seed tenant data' });
+    }
+  });
+
   return httpServer;
 }
