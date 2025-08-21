@@ -61,6 +61,8 @@ const translations: Translations = {
   'common.loading': { 'pt-BR': 'Carregando...', 'en': 'Loading...' },
   'common.error': { 'pt-BR': 'Erro', 'en': 'Error' },
   'common.success': { 'pt-BR': 'Sucesso', 'en': 'Success' },
+  'common.logout': { 'pt-BR': 'Logout', 'en': 'Logout' },
+  'common.switchLanguage': { 'pt-BR': 'Alterar Idioma', 'en': 'Switch Language' },
 
   // Welcome
   'welcome.title': { 'pt-BR': 'Bem-vindo ao SamurEye', 'en': 'Welcome to SamurEye' },
