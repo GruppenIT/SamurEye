@@ -253,6 +253,71 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Local user middleware (for session-based authentication)
+  const isLocalUserAuthenticated = async (req: any, res: any, next: any) => {
+    try {
+      const userId = (req.session as any)?.userId;
+      
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const user = await storage.getUserById(userId);
+      if (!user || !user.isActive) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      req.userId = userId;
+      req.localUser = user;
+      next();
+    } catch (error) {
+      console.error("Authentication error:", error);
+      res.status(500).json({ message: "Authentication error" });
+    }
+  };
+
+  // Tenant middleware for local users
+  const requireLocalUserTenant = async (req: any, res: any, next: any) => {
+    try {
+      const user = req.localUser;
+      
+      if (user.isSocUser) {
+        // SOC users can access all tenants - we'll use a default or let them choose
+        const tenants = await storage.getAllTenants();
+        if (tenants.length > 0) {
+          req.tenant = tenants[0]; // Default to first tenant for now
+        } else {
+          return res.status(400).json({ message: "No tenants available" });
+        }
+      } else {
+        // Regular users need tenant association
+        const userTenants = await storage.getUserTenants(user.id);
+        if (userTenants.length === 0) {
+          return res.status(403).json({ message: "No tenant access" });
+        }
+        
+        // Use current tenant or first available
+        let tenantId = user.currentTenantId;
+        if (!tenantId || !userTenants.find(ut => ut.tenantId === tenantId)) {
+          tenantId = userTenants[0].tenantId;
+        }
+        
+        const tenant = await storage.getTenant(tenantId);
+        if (!tenant) {
+          return res.status(404).json({ message: "Tenant not found" });
+        }
+        
+        req.tenant = tenant;
+        req.userTenantRole = userTenants.find(ut => ut.tenantId === tenantId)?.role;
+      }
+      
+      next();
+    } catch (error) {
+      console.error("Tenant middleware error:", error);
+      res.status(500).json({ message: "Tenant access error" });
+    }
+  };
+
   // User routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {
@@ -300,7 +365,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Collector routes
-  app.get('/api/collectors', isAuthenticated, requireTenant, async (req: any, res) => {
+  app.get('/api/collectors', isLocalUserAuthenticated, requireLocalUserTenant, async (req: any, res) => {
     try {
       const collectors = await storage.getCollectorsByTenant(req.tenant.id);
       res.json(collectors);
@@ -310,7 +375,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/collectors', isAuthenticated, requireTenant, async (req: any, res) => {
+  app.post('/api/collectors', isLocalUserAuthenticated, requireLocalUserTenant, async (req: any, res) => {
     try {
       const validatedData = insertCollectorSchema.parse({
         ...req.body,
@@ -337,7 +402,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/collectors/:id/regenerate-token', isAuthenticated, requireTenant, async (req: any, res) => {
+  app.post('/api/collectors/:id/regenerate-token', isLocalUserAuthenticated, requireLocalUserTenant, async (req: any, res) => {
     try {
       const collector = await storage.getCollector(req.params.id);
       if (!collector || collector.tenantId !== req.tenant.id) {
@@ -387,7 +452,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Journey routes
-  app.get('/api/journeys', isAuthenticated, requireTenant, async (req: any, res) => {
+  app.get('/api/journeys', isLocalUserAuthenticated, requireLocalUserTenant, async (req: any, res) => {
     try {
       const journeys = await storage.getJourneysByTenant(req.tenant.id);
       res.json(journeys);
@@ -397,12 +462,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/journeys', isAuthenticated, requireTenant, async (req: any, res) => {
+  app.post('/api/journeys', isLocalUserAuthenticated, requireLocalUserTenant, async (req: any, res) => {
     try {
       const validatedData = insertJourneySchema.parse({
         ...req.body,
         tenantId: req.tenant.id,
-        createdBy: req.userId
+        createdBy: req.localUser.id
       });
 
       const journey = await storage.createJourney(validatedData);
@@ -424,7 +489,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/journeys/:id/start', isAuthenticated, requireTenant, async (req: any, res) => {
+  app.post('/api/journeys/:id/start', isLocalUserAuthenticated, requireLocalUserTenant, async (req: any, res) => {
     try {
       const journey = await storage.getJourney(req.params.id);
       if (!journey || journey.tenantId !== req.tenant.id) {
@@ -451,7 +516,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Credential routes
-  app.get('/api/credentials', isAuthenticated, requireTenant, async (req: any, res) => {
+  app.get('/api/credentials', isLocalUserAuthenticated, requireLocalUserTenant, async (req: any, res) => {
     try {
       const credentials = await storage.getCredentialsByTenant(req.tenant.id);
       res.json(credentials);
@@ -461,12 +526,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/credentials', isAuthenticated, requireTenant, async (req: any, res) => {
+  app.post('/api/credentials', isLocalUserAuthenticated, requireLocalUserTenant, async (req: any, res) => {
     try {
       const validatedData = insertCredentialSchema.parse({
         ...req.body,
         tenantId: req.tenant.id,
-        createdBy: req.userId
+        createdBy: req.localUser.id
       });
 
       // Store credential with local data
@@ -475,7 +540,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Log activity
       await storage.createActivity({
         tenantId: req.tenant.id,
-        userId: req.userId,
+        userId: req.localUser.id,
         action: 'create',
         resource: 'credential',
         resourceId: credential.id,
@@ -489,12 +554,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/credentials/:id', isAuthenticated, requireTenant, async (req: any, res) => {
+  app.put('/api/credentials/:id', isLocalUserAuthenticated, requireLocalUserTenant, async (req: any, res) => {
     try {
       const validatedData = insertCredentialSchema.parse({
         ...req.body,
         tenantId: req.tenant.id,
-        createdBy: req.userId
+        createdBy: req.localUser.id
       });
 
       const credential = await storage.updateCredential(req.params.id, validatedData);
@@ -516,7 +581,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete('/api/credentials/:id', isAuthenticated, requireTenant, async (req: any, res) => {
+  app.delete('/api/credentials/:id', isLocalUserAuthenticated, requireLocalUserTenant, async (req: any, res) => {
     try {
       await storage.deleteCredential(req.params.id);
 
@@ -538,7 +603,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Threat Intelligence routes
-  app.get('/api/threat-intelligence', isAuthenticated, requireTenant, async (req: any, res) => {
+  app.get('/api/threat-intelligence', isLocalUserAuthenticated, requireLocalUserTenant, async (req: any, res) => {
     try {
       const intelligence = await storage.getThreatIntelligenceByTenant(req.tenant.id);
       res.json(intelligence);
@@ -549,7 +614,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Activity routes
-  app.get('/api/activities', isAuthenticated, requireTenant, async (req: any, res) => {
+  app.get('/api/activities', isLocalUserAuthenticated, requireLocalUserTenant, async (req: any, res) => {
     try {
       const limit = parseInt(req.query.limit as string) || 20;
       const activities = await storage.getActivitiesByTenant(req.tenant.id, limit);
@@ -561,7 +626,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Dashboard metrics route
-  app.get('/api/dashboard/metrics', isAuthenticated, requireTenant, async (req: any, res) => {
+  app.get('/api/dashboard/metrics', isLocalUserAuthenticated, requireLocalUserTenant, async (req: any, res) => {
     try {
       const collectors = await storage.getCollectorsByTenant(req.tenant.id);
       const journeys = await storage.getJourneysByTenant(req.tenant.id);
