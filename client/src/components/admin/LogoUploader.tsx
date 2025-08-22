@@ -74,6 +74,7 @@ export function LogoUploader({
       setSelectedFile(null);
       setPreviewUrl(null);
       queryClient.invalidateQueries({ queryKey: ['/api/admin/settings'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/system/settings'] });
       queryClient.invalidateQueries({ queryKey: ['/api/admin/tenants'] });
       if (entityId) {
         queryClient.invalidateQueries({ queryKey: ['/api/admin/tenants', entityId] });

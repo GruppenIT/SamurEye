@@ -191,19 +191,20 @@ export class ObjectStorageService {
     // Extract the path from the URL by removing query parameters and domain
     const url = new URL(rawPath);
     const rawObjectPath = url.pathname;
-  
-    let objectEntityDir = this.getPrivateObjectDir();
-    if (!objectEntityDir.endsWith("/")) {
-      objectEntityDir = `${objectEntityDir}/`;
+    
+    // Path format: /bucket-name/.private/uploads/object-id
+    // We want to extract just the object-id and return /objects/uploads/object-id
+    const pathParts = rawObjectPath.split('/');
+    
+    // Find the uploads directory and get the object ID after it
+    const uploadsIndex = pathParts.indexOf('uploads');
+    if (uploadsIndex !== -1 && pathParts[uploadsIndex + 1]) {
+      const objectId = pathParts[uploadsIndex + 1];
+      return `/objects/uploads/${objectId}`;
     }
-  
-    if (!rawObjectPath.startsWith(objectEntityDir)) {
-      return rawObjectPath;
-    }
-  
-    // Extract the entity ID from the path
-    const entityId = rawObjectPath.slice(objectEntityDir.length);
-    return `/objects/${entityId}`;
+    
+    // Fallback: return original path
+    return rawObjectPath;
   }
 
   // Tries to set the ACL policy for the object entity and return the normalized path.
