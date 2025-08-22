@@ -481,6 +481,9 @@ export class DatabaseStorage implements IStorage {
 
   async createSystemSettings(settings: { systemName: string; systemDescription: string; supportEmail: string; logoUrl?: string | null }): Promise<SystemSettings> {
     const [newSettings] = await db.insert(systemSettings).values({
+      key: 'system_configuration',
+      value: 'System wide configuration settings',
+      description: 'Global system configuration',
       systemName: settings.systemName,
       systemDescription: settings.systemDescription,
       supportEmail: settings.supportEmail,
