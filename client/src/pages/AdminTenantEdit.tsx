@@ -190,7 +190,7 @@ export default function AdminTenantEdit() {
               <LogoUploader
                 title="Logo do Tenant"
                 currentLogo={logoUrl}
-                uploadEndpoint="/api/admin/settings"
+                uploadEndpoint={`/api/admin/tenants/${tenantId}`}
                 onSuccess={() => window.location.reload()}
                 type="tenant"
                 entityId={tenantId}

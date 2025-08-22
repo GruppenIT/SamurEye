@@ -255,13 +255,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put('/api/admin/tenants/:id', isAdmin, async (req, res) => {
     try {
-      const { name, description, logoUrl } = req.body;
+      const { name, slug, description, logoUrl, isActive } = req.body;
       const tenantId = req.params.id;
 
       await storage.updateTenant(tenantId, {
         name,
+        slug,
         description,
-        logoUrl
+        logoUrl,
+        isActive
       });
 
       const updatedTenant = await storage.getTenant(tenantId);
@@ -272,8 +274,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Object storage upload route
-  app.post('/api/objects/upload', async (req, res) => {
+  // Object storage upload route (for admin uploads)
+  app.post('/api/objects/upload', isAdmin, async (req, res) => {
     try {
       const objectStorageService = new ObjectStorageService();
       const uploadURL = await objectStorageService.getObjectEntityUploadURL();
