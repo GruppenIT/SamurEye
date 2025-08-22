@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useTenant } from '@/contexts/TenantContext';
 import { useI18n } from '@/hooks/useI18n';
+import { useQuery } from '@tanstack/react-query';
 
 interface AppHeaderProps {
   activeTab: string;
@@ -19,6 +20,12 @@ interface AppHeaderProps {
 export function AppHeader({ activeTab, onTabChange }: AppHeaderProps) {
   const { currentUser } = useTenant();
   const { language, t, switchLanguage } = useI18n();
+  
+  // Fetch system settings to get logo (public route)
+  const { data: systemSettings } = useQuery({
+    queryKey: ['/api/system/settings'],
+    retry: false,
+  });
 
   const navItems = [
     { id: 'dashboard', label: t('nav.dashboard') },
@@ -54,10 +61,19 @@ export function AppHeader({ activeTab, onTabChange }: AppHeaderProps) {
       <div className="px-6 py-4 flex items-center justify-between">
         <div className="flex items-center space-x-6">
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center">
-              <Eye className="text-white text-sm" size={16} />
-            </div>
-            <h1 className="text-xl font-bold text-white">SamurEye</h1>
+            {systemSettings?.logoUrl ? (
+              <img
+                src={systemSettings.logoUrl}
+                alt="SamurEye Logo"
+                className="w-8 h-8 object-contain rounded-lg"
+                data-testid="system-logo"
+              />
+            ) : (
+              <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center">
+                <Eye className="text-white text-sm" size={16} />
+              </div>
+            )}
+            <h1 className="text-xl font-bold text-white">{systemSettings?.systemName || 'SamurEye'}</h1>
             <Badge variant="secondary" className="text-xs bg-info text-white">
               MVP
             </Badge>

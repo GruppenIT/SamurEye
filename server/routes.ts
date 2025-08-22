@@ -301,6 +301,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Public route to get system settings (without admin requirement)
+  app.get('/api/system/settings', async (req, res) => {
+    try {
+      const settings = await storage.getSystemSettings();
+      if (!settings) {
+        return res.json({
+          systemName: 'SamurEye',
+          systemDescription: 'Plataforma de Simulação de Ataques e Análise de Segurança',
+          logoUrl: null
+        });
+      }
+      // Only return public settings fields
+      res.json({
+        systemName: settings.systemName,
+        systemDescription: settings.systemDescription,
+        logoUrl: settings.logoUrl
+      });
+    } catch (error) {
+      console.error("Error fetching system settings:", error);
+      res.status(500).json({ message: "Failed to fetch system settings" });
+    }
+  });
+
   app.get('/api/admin/stats', isAdmin, async (req, res) => {
     try {
       const stats = await storage.getAdminStats();

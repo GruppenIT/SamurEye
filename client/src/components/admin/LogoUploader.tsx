@@ -50,8 +50,13 @@ export function LogoUploader({
         throw new Error('Failed to upload file');
       }
 
-      // Update system/tenant with logo URL
-      const logoUrl = uploadURL.split('?')[0];
+      // Convert Google Cloud Storage URL to our local endpoint
+      const originalUrl = uploadURL.split('?')[0];
+      const urlParts = originalUrl.split('/');
+      const bucketName = urlParts[3];
+      const objectPath = urlParts.slice(4).join('/');
+      const logoUrl = `/objects/uploads/${objectPath}`;
+      
       const updateData = type === 'system' 
         ? { logoUrl }
         : { logoUrl };
