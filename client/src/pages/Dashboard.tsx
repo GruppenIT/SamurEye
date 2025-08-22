@@ -8,7 +8,7 @@ import { AttackSurfaceHeatmap } from '@/components/dashboard/AttackSurfaceHeatma
 import { EDRTimeline } from '@/components/dashboard/EDRTimeline';
 import { JourneyResults } from '@/components/dashboard/JourneyResults';
 import { CollectorStatus } from '@/components/dashboard/CollectorStatus';
-import { RecentActivities } from '@/components/dashboard/RecentActivities';
+import { ActivityFeed } from '@/components/dashboard/ActivityFeed';
 import { CollectorEnrollment } from '@/components/collectors/CollectorEnrollment';
 import { JourneyForm } from '@/components/journeys/JourneyForm';
 import { useI18n } from '@/hooks/useI18n';
@@ -100,7 +100,7 @@ export default function Dashboard() {
         <CollectorStatus />
 
         {/* Recent Activities */}
-        <RecentActivities />
+        <ActivityFeed />
       </MainLayout>
 
       {/* Modals */}
