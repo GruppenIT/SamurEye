@@ -334,6 +334,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       req.userId = userId;
       req.localUser = user;
+      req.user = user; // Para compatibilidade com outros endpoints
       next();
     } catch (error) {
       console.error("Authentication error:", error);
@@ -695,6 +696,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Journey Results Dashboard data
   app.get('/api/dashboard/journey-results', isLocalUserAuthenticated, async (req: any, res) => {
     try {
+      if (!req.user) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+
       const tenantId = req.user.currentTenantId;
       if (!tenantId) {
         return res.status(400).json({ message: "No active tenant selected" });
