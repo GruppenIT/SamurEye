@@ -1,6 +1,7 @@
 import { Shield, AlertTriangle, XCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { useQuery } from '@tanstack/react-query';
 import { useI18n } from '@/hooks/useI18n';
 
 interface EDREvent {
@@ -16,36 +17,10 @@ interface EDREvent {
 export function EDRTimeline() {
   const { t } = useI18n();
 
-  // Mock EDR events - in real app this would come from WebSocket or API
-  const edrEvents: EDREvent[] = [
-    {
-      id: '1',
-      type: 'blocked',
-      title: 'Malware Detected',
-      endpoint: 'WS-LAB-001',
-      process: 'suspicious.exe',
-      latency: '125ms',
-      timestamp: '14:32:15'
-    },
-    {
-      id: '2',
-      type: 'detected',
-      title: 'Suspicious Activity',
-      endpoint: 'WS-LAB-003',
-      process: 'powershell.exe',
-      latency: '2.3s',
-      timestamp: '14:28:42'
-    },
-    {
-      id: '3',
-      type: 'failed',
-      title: 'Detection Failed',
-      endpoint: 'WS-LAB-005',
-      process: 'mimikatz.exe',
-      latency: 'Timeout',
-      timestamp: '14:25:18'
-    }
-  ];
+  const { data: edrEvents, isLoading } = useQuery<EDREvent[]>({
+    queryKey: ['/api/dashboard/edr-events'],
+    refetchInterval: 30000,
+  });
 
   const getEventIcon = (type: string) => {
     switch (type) {
@@ -116,8 +91,21 @@ export function EDRTimeline() {
         </div>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4" data-testid="edr-events">
-          {edrEvents.map((event) => {
+        {isLoading ? (
+          <div className="space-y-3 animate-pulse">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="flex items-start space-x-3 p-3 rounded-lg bg-muted">
+                <div className="w-8 h-8 bg-muted-foreground/20 rounded"></div>
+                <div className="flex-1 space-y-2">
+                  <div className="h-4 bg-muted-foreground/20 rounded w-3/4"></div>
+                  <div className="h-3 bg-muted-foreground/20 rounded w-1/2"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="space-y-4" data-testid="edr-events">
+            {edrEvents?.map((event) => {
             const IconComponent = getEventIcon(event.type);
             const colors = getEventColor(event.type);
             
@@ -156,8 +144,9 @@ export function EDRTimeline() {
                 </div>
               </div>
             );
-          })}
-        </div>
+          }) || []}
+          </div>
+        )}
       </CardContent>
     </Card>
   );

@@ -31,6 +31,8 @@ export function TenantProvider({ children }: { children: ReactNode }) {
       
       // Then invalidate all data queries that depend on tenant context
       queryClient.invalidateQueries({ queryKey: ['/api/dashboard/metrics'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/dashboard/attack-surface'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/dashboard/edr-events'] });
       queryClient.invalidateQueries({ queryKey: ['/api/collectors'] });
       queryClient.invalidateQueries({ queryKey: ['/api/journeys'] });
       queryClient.invalidateQueries({ queryKey: ['/api/activities'] });

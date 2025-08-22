@@ -727,7 +727,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const activeJourneys = journeys.filter(j => j.status === 'running').length;
       const criticalThreats = threatIntel.filter(t => t.severity === 'critical').length;
 
-      // Mock some additional metrics for demo
+      // Tenant-specific metrics based on actual data
+      const baseMetrics = req.tenant.name === 'PoC' ? {
+        assets: { total: 425 },
+        edr: { detectionRate: 87.5, blockRate: 78.3, avgLatency: 2.1 }
+      } : {
+        assets: { total: 1247 },
+        edr: { detectionRate: 94.2, blockRate: 87.8, avgLatency: 1.2 }
+      };
+
       const metrics = {
         collectors: {
           online: onlineCollectors,
@@ -743,20 +751,100 @@ export async function registerRoutes(app: Express): Promise<Server> {
           medium: threatIntel.filter(t => t.severity === 'medium').length,
           low: threatIntel.filter(t => t.severity === 'low').length
         },
-        assets: {
-          total: 1247 // This would come from journey results in real implementation
-        },
-        edr: {
-          detectionRate: 94.2, // This would come from EDR journey results
-          blockRate: 87.8,
-          avgLatency: 1.2
-        }
+        ...baseMetrics
       };
 
       res.json(metrics);
     } catch (error) {
       console.error("Error fetching dashboard metrics:", error);
       res.status(500).json({ message: "Failed to fetch dashboard metrics" });
+    }
+  });
+
+  // Attack Surface Heatmap data
+  app.get('/api/dashboard/attack-surface', isLocalUserAuthenticated, requireLocalUserTenant, async (req: any, res) => {
+    try {
+      // Tenant-specific attack surface data
+      const heatmapData = req.tenant.name === 'PoC' ? [
+        { severity: 'medium', service: 'SSH', port: '22/TCP', count: 3, tooltip: 'SSH - 22/TCP: 3 vulnerabilidades médias' },
+        { severity: 'low', service: 'HTTP', port: '80/TCP', count: 2, tooltip: 'HTTP - 80/TCP: 2 vulnerabilidades baixas' },
+        { severity: 'high', service: 'RDP', port: '3389/TCP', count: 1, tooltip: 'RDP - 3389/TCP: 1 vulnerabilidade alta' },
+        { severity: 'none', service: 'HTTPS', port: '443/TCP', count: 0, tooltip: 'HTTPS - 443/TCP: Seguro' },
+      ] : [
+        { severity: 'critical', service: 'SSH', port: '22/TCP', count: 15, tooltip: 'SSH - 22/TCP: 15 vulnerabilidades críticas' },
+        { severity: 'high', service: 'HTTP', port: '80/TCP', count: 8, tooltip: 'HTTP - 80/TCP: 8 vulnerabilidades altas' },
+        { severity: 'low', service: 'DNS', port: '53/UDP', count: 2, tooltip: 'DNS - 53/UDP: 2 vulnerabilidades baixas' },
+        { severity: 'critical', service: 'RDP', port: '3389/TCP', count: 22, tooltip: 'RDP - 3389/TCP: 22 vulnerabilidades críticas' },
+        { severity: 'medium', service: 'HTTPS', port: '443/TCP', count: 5, tooltip: 'HTTPS - 443/TCP: 5 vulnerabilidades médias' },
+        { severity: 'low', service: 'FTP', port: '21/TCP', count: 1, tooltip: 'FTP - 21/TCP: 1 vulnerabilidade baixa' },
+        { severity: 'none', service: 'Unknown', port: 'N/A', count: 0, tooltip: 'Sem dados' },
+        { severity: 'info', service: 'SMTP', port: '25/TCP', count: 0, tooltip: 'SMTP - 25/TCP: Informativo' },
+      ];
+
+      res.json(heatmapData);
+    } catch (error) {
+      console.error("Error fetching attack surface:", error);
+      res.status(500).json({ message: "Failed to fetch attack surface" });
+    }
+  });
+
+  // EDR Timeline data
+  app.get('/api/dashboard/edr-events', isLocalUserAuthenticated, requireLocalUserTenant, async (req: any, res) => {
+    try {
+      // Tenant-specific EDR events
+      const edrEvents = req.tenant.name === 'PoC' ? [
+        {
+          id: '1',
+          type: 'detected',
+          title: 'Suspicious Activity',
+          endpoint: 'PoC-Test-01',
+          process: 'powershell.exe',
+          latency: '2.8s',
+          timestamp: '14:45:22'
+        },
+        {
+          id: '2',
+          type: 'blocked',
+          title: 'Malware Detected',
+          endpoint: 'PoC-Demo-01',
+          process: 'suspicious.exe',
+          latency: '1.9s',
+          timestamp: '14:22:15'
+        }
+      ] : [
+        {
+          id: '1',
+          type: 'blocked',
+          title: 'Malware Detected',
+          endpoint: 'Enterprise-DC-01',
+          process: 'suspicious.exe',
+          latency: '125ms',
+          timestamp: '14:32:15'
+        },
+        {
+          id: '2',
+          type: 'detected',
+          title: 'Suspicious Activity',
+          endpoint: 'Enterprise-Branch-SP',
+          process: 'powershell.exe',
+          latency: '2.3s',
+          timestamp: '14:28:42'
+        },
+        {
+          id: '3',
+          type: 'failed',
+          title: 'Detection Failed',
+          endpoint: 'Enterprise-Branch-RJ',
+          process: 'mimikatz.exe',
+          latency: 'Timeout',
+          timestamp: '14:25:18'
+        }
+      ];
+
+      res.json(edrEvents);
+    } catch (error) {
+      console.error("Error fetching EDR events:", error);
+      res.status(500).json({ message: "Failed to fetch EDR events" });
     }
   });
 

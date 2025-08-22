@@ -2,6 +2,7 @@ import { RefreshCw } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { useQuery } from '@tanstack/react-query';
 import { useI18n } from '@/hooks/useI18n';
 
 interface HeatmapCell {
@@ -15,17 +16,10 @@ interface HeatmapCell {
 export function AttackSurfaceHeatmap() {
   const { t } = useI18n();
 
-  // Mock heatmap data - in real app this would come from API
-  const heatmapData: HeatmapCell[] = [
-    { severity: 'critical', service: 'SSH', port: '22/TCP', count: 15, tooltip: 'SSH - 22/TCP: 15 vulnerabilidades críticas' },
-    { severity: 'high', service: 'HTTP', port: '80/TCP', count: 8, tooltip: 'HTTP - 80/TCP: 8 vulnerabilidades altas' },
-    { severity: 'low', service: 'DNS', port: '53/UDP', count: 2, tooltip: 'DNS - 53/UDP: 2 vulnerabilidades baixas' },
-    { severity: 'critical', service: 'RDP', port: '3389/TCP', count: 22, tooltip: 'RDP - 3389/TCP: 22 vulnerabilidades críticas' },
-    { severity: 'medium', service: 'HTTPS', port: '443/TCP', count: 5, tooltip: 'HTTPS - 443/TCP: 5 vulnerabilidades médias' },
-    { severity: 'low', service: 'FTP', port: '21/TCP', count: 1, tooltip: 'FTP - 21/TCP: 1 vulnerabilidade baixa' },
-    { severity: 'none', service: 'Unknown', port: 'N/A', count: 0, tooltip: 'Sem dados' },
-    { severity: 'info', service: 'SMTP', port: '25/TCP', count: 0, tooltip: 'SMTP - 25/TCP: Informativo' },
-  ];
+  const { data: heatmapData, isLoading, refetch } = useQuery<HeatmapCell[]>({
+    queryKey: ['/api/dashboard/attack-surface'],
+    refetchInterval: 60000,
+  });
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
@@ -58,18 +52,30 @@ export function AttackSurfaceHeatmap() {
             <Button 
               size="sm" 
               className="text-xs bg-accent hover:bg-accent/90"
+              onClick={() => refetch()}
+              disabled={isLoading}
               data-testid="refresh-heatmap"
             >
-              <RefreshCw className="mr-1 h-3 w-3" />
+              <RefreshCw className={`mr-1 h-3 w-3 ${isLoading ? 'animate-spin' : ''}`} />
               {t('common.update')}
             </Button>
           </div>
         </div>
       </CardHeader>
       <CardContent>
-        {/* Heatmap Grid */}
-        <div className="grid grid-cols-8 gap-1 mb-4" data-testid="heatmap-grid">
-          {heatmapData.map((cell, index) => (
+        {isLoading ? (
+          <div className="animate-pulse">
+            <div className="grid grid-cols-8 gap-1 mb-4">
+              {[...Array(8)].map((_, i) => (
+                <div key={i} className="w-full h-8 bg-muted rounded"></div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <>
+            {/* Heatmap Grid */}
+            <div className="grid grid-cols-8 gap-1 mb-4" data-testid="heatmap-grid">
+              {heatmapData?.map((cell, index) => (
             <div
               key={index}
               className={`w-full h-8 rounded cursor-pointer transition-all duration-200 hover:scale-110 hover:z-10 ${getSeverityColor(cell.severity)}`}
@@ -104,8 +110,10 @@ export function AttackSurfaceHeatmap() {
                 </Badge>
               )}
             </div>
-          ))}
+          )) || []}
         </div>
+          </>
+        )}
       </CardContent>
     </Card>
   );
