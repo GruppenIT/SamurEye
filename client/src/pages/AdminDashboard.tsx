@@ -453,6 +453,14 @@ export default function AdminDashboard() {
                       <Button 
                         variant="outline" 
                         size="sm"
+                        onClick={() => setLocation(`/admin/tenants/${tenant.id}/edit`)}
+                        data-testid={`button-edit-${tenant.id}`}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
                         onClick={() => {
                           setSelectedTenant(tenant);
                           setDeleteDialogOpen(true);

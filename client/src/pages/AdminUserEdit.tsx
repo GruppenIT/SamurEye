@@ -53,15 +53,19 @@ export default function AdminUserEdit() {
   const { data: user, isLoading: userLoading } = useQuery<User>({
     queryKey: ['/api/admin/users', userId],
     enabled: !!userId,
-    onSuccess: (data) => {
-      setFirstName(data.firstName);
-      setLastName(data.lastName);
-      setEmail(data.email);
-      setIsSocUser(data.isSocUser);
-      setIsActive(data.isActive);
-      setUserTenants(data.tenants.map(t => ({ tenantId: t.tenantId, role: t.role })));
-    },
   });
+
+  // Load user data when it arrives
+  useEffect(() => {
+    if (user) {
+      setFirstName(user.firstName);
+      setLastName(user.lastName);
+      setEmail(user.email);
+      setIsSocUser(user.isSocUser);
+      setIsActive(user.isActive);
+      setUserTenants(user.tenants.map(t => ({ tenantId: t.tenantId, role: t.role })));
+    }
+  }, [user]);
 
   const { data: allTenants } = useQuery<Tenant[]>({
     queryKey: ['/api/admin/tenants'],

@@ -20,6 +20,7 @@ import AdminDashboard from "@/pages/AdminDashboard";
 import AdminUserCreate from "@/pages/AdminUserCreate";
 import AdminSettings from "@/pages/AdminSettings";
 import AdminUserEdit from "@/pages/AdminUserEdit";
+import AdminTenantEdit from "@/pages/AdminTenantEdit";
 
 function Router() {
   const { isAuthenticated, isLoading, error } = useAuth();
@@ -34,6 +35,7 @@ function Router() {
       <Route path="/admin/settings" component={AdminSettings} />
       <Route path="/admin/users/create" component={AdminUserCreate} />
       <Route path="/admin/users/:id/edit" component={AdminUserEdit} />
+      <Route path="/admin/tenants/:tenantId/edit" component={AdminTenantEdit} />
       <Route path="/admin/tenants/:tenantId/users" component={TenantUsers} />
       
       {/* Regular user routes */}

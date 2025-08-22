@@ -240,6 +240,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin tenant edit routes
+  app.get('/api/admin/tenants/:id', isAdmin, async (req, res) => {
+    try {
+      const tenant = await storage.getTenant(req.params.id);
+      if (!tenant) {
+        return res.status(404).json({ message: "Tenant not found" });
+      }
+      res.json(tenant);
+    } catch (error) {
+      console.error("Error fetching tenant:", error);
+      res.status(500).json({ message: "Failed to fetch tenant" });
+    }
+  });
+
   app.put('/api/admin/tenants/:id', isAdmin, async (req, res) => {
     try {
       const { name, description, logoUrl } = req.body;
