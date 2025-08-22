@@ -479,8 +479,13 @@ export class DatabaseStorage implements IStorage {
     return settings;
   }
 
-  async createSystemSettings(settings: InsertSystemSettings): Promise<SystemSettings> {
-    const [newSettings] = await db.insert(systemSettings).values(settings).returning();
+  async createSystemSettings(settings: { systemName: string; systemDescription: string; supportEmail: string; logoUrl?: string | null }): Promise<SystemSettings> {
+    const [newSettings] = await db.insert(systemSettings).values({
+      systemName: settings.systemName,
+      systemDescription: settings.systemDescription,
+      supportEmail: settings.supportEmail,
+      logoUrl: settings.logoUrl || null
+    }).returning();
     return newSettings;
   }
 
