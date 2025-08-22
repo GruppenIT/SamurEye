@@ -7,61 +7,11 @@ import { useI18n } from '@/hooks/useI18n';
 
 export function JourneyResults() {
   const { t } = useI18n();
-  const { data: metrics } = useQuery({
-    queryKey: ['/api/dashboard/metrics'],
-    refetchInterval: 30000,
+  
+  const { data: journeyData, isLoading } = useQuery({
+    queryKey: ['/api/dashboard/journey-results'],
+    refetchInterval: 60000,
   });
-
-  const journeyData = [
-    {
-      id: 'attack-surface',
-      title: t('journey.attackSurface'),
-      icon: Globe,
-      iconColor: 'text-blue-500',
-      iconBg: 'bg-blue-500/20',
-      lastExecution: '2h ' + t('time.ago'),
-      status: 'success',
-      results: {
-        hostsScanned: 847,
-        servicesExposed: 2341,
-        criticalCves: metrics?.vulnerabilities?.critical || 23,
-        internetFacing: 127
-      },
-      scanType: 'Escaneamento interno via collector'
-    },
-    {
-      id: 'ad-hygiene',
-      title: t('journey.adHygiene'),
-      icon: Users,
-      iconColor: 'text-blue-400',
-      iconBg: 'bg-blue-400/20',
-      lastExecution: '6h ' + t('time.ago'),
-      status: 'warning',
-      results: {
-        inactiveAccounts: 142,
-        orphanAdmins: 7,
-        weakPolicies: 28,
-        slaExpiring: 15
-      },
-      scanType: 'Análise contínua de domínio'
-    },
-    {
-      id: 'edr-testing',
-      title: t('journey.edrTesting'),
-      icon: Shield,
-      iconColor: 'text-green-500',
-      iconBg: 'bg-green-500/20',
-      lastExecution: '30min ' + t('time.ago'),
-      status: 'success',
-      results: {
-        detectionRate: `${metrics?.edr?.detectionRate || 94.2}%`,
-        blockRate: `${metrics?.edr?.blockRate || 87.8}%`,
-        avgLatency: `${metrics?.edr?.avgLatency || 1.2}s`,
-        detectionFailures: 4
-      },
-      scanType: 'Testando 23 endpoints ativos'
-    }
-  ];
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -117,10 +67,30 @@ export function JourneyResults() {
     return 'text-white';
   };
 
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8" data-testid="journey-results">
+        {[...Array(3)].map((_, i) => (
+          <Card key={i} className="bg-secondary animate-pulse">
+            <CardContent className="p-6">
+              <div className="h-16 bg-muted rounded mb-4"></div>
+              <div className="h-6 bg-muted rounded mb-2"></div>
+              <div className="space-y-2">
+                {[...Array(4)].map((_, j) => (
+                  <div key={j} className="h-4 bg-muted rounded"></div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+  }
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8" data-testid="journey-results">
-      {journeyData.map((journey) => {
-        const IconComponent = journey.icon;
+      {journeyData?.map((journey) => {
+        const IconComponent = journey.icon === 'Globe' ? Globe : journey.icon === 'Users' ? Users : Shield;
         const labels = getResultLabels(journey.id);
         
         return (

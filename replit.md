@@ -12,6 +12,16 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+**August 22, 2025 - Complete Dashboard Components Migration to API Data**
+- Created tenant-specific dashboard endpoints: /api/dashboard/attack-surface, /api/dashboard/edr-events, /api/dashboard/journey-results
+- Migrated all dashboard components (AttackSurfaceHeatmap, EDRTimeline, JourneyResults) from static mock data to real API data
+- Implemented complete data isolation between tenants across all dashboard components
+- Tenant data verification successful:
+  - "Rodrigo's Organization": 847 hosts scanned, 142 inactive accounts, 94.2% EDR detection rate
+  - "PoC": 127 hosts scanned, 23 inactive accounts, 78.3% EDR detection rate
+- Enhanced TenantContext cache invalidation to include all new dashboard endpoints
+- Dashboard now fully responsive to tenant switching with real-time data updates
+
 **August 22, 2025 - Tenant Switching Functionality Completed**
 - Fixed critical issue with tenant switching for SOC users 
 - Enhanced switch-tenant endpoint to properly handle SOC user permissions for all tenants

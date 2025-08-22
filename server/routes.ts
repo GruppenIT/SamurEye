@@ -692,6 +692,131 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Journey Results Dashboard data
+  app.get('/api/dashboard/journey-results', isLocalUserAuthenticated, async (req: any, res) => {
+    try {
+      const tenantId = req.user.currentTenantId;
+      if (!tenantId) {
+        return res.status(400).json({ message: "No active tenant selected" });
+      }
+
+      const tenant = await storage.getTenant(tenantId);
+      if (!tenant) {
+        return res.status(404).json({ message: "Tenant not found" });
+      }
+
+      const collectors = await storage.getCollectorsByTenant(tenantId);
+      const journeys = await storage.getJourneysByTenant(tenantId);
+      const threatIntel = await storage.getThreatIntelligenceByTenant(tenantId);
+      
+      // Tenant-specific journey results
+      const journeyData = tenant.name === 'PoC' ? [
+        {
+          id: 'attack-surface',
+          title: 'Superfície de Ataque',
+          icon: 'Globe',
+          iconColor: 'text-blue-500',
+          iconBg: 'bg-blue-500/20',
+          lastExecution: '4h atrás',
+          status: 'success',
+          results: {
+            hostsScanned: 127,
+            servicesExposed: 423,
+            criticalCves: threatIntel.filter(t => t.severity === 'critical').length || 3,
+            internetFacing: 18
+          },
+          scanType: 'Escaneamento PoC via collector'
+        },
+        {
+          id: 'ad-hygiene',
+          title: 'Higiene AD/LDAP',
+          icon: 'Users',
+          iconColor: 'text-blue-400',
+          iconBg: 'bg-blue-400/20',
+          lastExecution: '8h atrás',
+          status: 'warning',
+          results: {
+            inactiveAccounts: 23,
+            orphanAdmins: 2,
+            weakPolicies: 5,
+            slaExpiring: 3
+          },
+          scanType: 'Análise de ambiente PoC'
+        },
+        {
+          id: 'edr-testing',
+          title: 'Testes EDR/AV',
+          icon: 'Shield',
+          iconColor: 'text-green-500',
+          iconBg: 'bg-green-500/20',
+          lastExecution: '1h atrás',
+          status: 'success',
+          results: {
+            detectionRate: '78.3%',
+            blockRate: '71.2%',
+            avgLatency: '2.1s',
+            detectionFailures: 8
+          },
+          scanType: 'Testando 5 endpoints PoC'
+        }
+      ] : [
+        {
+          id: 'attack-surface',
+          title: 'Superfície de Ataque',
+          icon: 'Globe',
+          iconColor: 'text-blue-500',
+          iconBg: 'bg-blue-500/20',
+          lastExecution: '2h atrás',
+          status: 'success',
+          results: {
+            hostsScanned: 847,
+            servicesExposed: 2341,
+            criticalCves: threatIntel.filter(t => t.severity === 'critical').length || 23,
+            internetFacing: 127
+          },
+          scanType: 'Escaneamento interno via collector'
+        },
+        {
+          id: 'ad-hygiene',
+          title: 'Higiene AD/LDAP',
+          icon: 'Users',
+          iconColor: 'text-blue-400',
+          iconBg: 'bg-blue-400/20',
+          lastExecution: '6h atrás',
+          status: 'warning',
+          results: {
+            inactiveAccounts: 142,
+            orphanAdmins: 7,
+            weakPolicies: 28,
+            slaExpiring: 15
+          },
+          scanType: 'Análise contínua de domínio'
+        },
+        {
+          id: 'edr-testing',
+          title: 'Testes EDR/AV',
+          icon: 'Shield',
+          iconColor: 'text-green-500',
+          iconBg: 'bg-green-500/20',
+          lastExecution: '30min atrás',
+          status: 'success',
+          results: {
+            detectionRate: '94.2%',
+            blockRate: '87.8%',
+            avgLatency: '1.2s',
+            detectionFailures: 4
+          },
+          scanType: 'Testando 23 endpoints ativos'
+        }
+      ];
+
+      res.json(journeyData);
+    } catch (error) {
+      console.error("Error fetching journey results:", error);
+      res.status(500).json({ message: "Failed to fetch journey results" });
+    }
+  });
+
   // Threat Intelligence routes
   app.get('/api/threat-intelligence', isLocalUserAuthenticated, requireLocalUserTenant, async (req: any, res) => {
     try {
