@@ -12,6 +12,16 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+**August 22, 2025 - Tenant Switching Functionality Completed**
+- Fixed critical issue with tenant switching for SOC users 
+- Enhanced switch-tenant endpoint to properly handle SOC user permissions for all tenants
+- Corrected requireLocalUserTenant middleware to respect user.currentTenantId for SOC users
+- Successfully implemented data isolation between tenants with correct metrics display
+- Tenant "Rodrigo's Organization": 3 collectors (2 online), 2 journeys (1 active)  
+- Tenant "PoC": 2 collectors (1 online), 1 journey (0 active)
+- ActivityFeed component created to replace problematic RecentActivities component
+- Dashboard now loads correctly with proper tenant-specific data filtering
+
 **August 20, 2025 - Complete Access Control System Restructuring**
 - Completely restructured access control system with dedicated admin interface at `/admin`
 - Created separate admin authentication system with hardcoded credentials (admin@samureye.com.br / SamurEye2024!)

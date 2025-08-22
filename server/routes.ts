@@ -347,13 +347,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = req.localUser;
       
       if (user.isSocUser) {
-        // SOC users can access all tenants - we'll use a default or let them choose
-        const tenants = await storage.getAllTenants();
-        if (tenants.length > 0) {
-          req.tenant = tenants[0]; // Default to first tenant for now
-        } else {
-          return res.status(400).json({ message: "No tenants available" });
+        // SOC users can access all tenants - use currentTenantId if set
+        let tenantId = user.currentTenantId;
+        if (!tenantId) {
+          // If no current tenant set, use first available
+          const tenants = await storage.getAllTenants();
+          if (tenants.length > 0) {
+            tenantId = tenants[0].id;
+          } else {
+            return res.status(400).json({ message: "No tenants available" });
+          }
         }
+        
+        const tenant = await storage.getTenant(tenantId);
+        if (!tenant) {
+          return res.status(404).json({ message: "Tenant not found" });
+        }
+        
+        req.tenant = tenant;
       } else {
         // Regular users need tenant association
         const userTenants = await storage.getUserTenants(user.id);
