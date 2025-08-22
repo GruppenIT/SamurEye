@@ -142,6 +142,135 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin Settings routes
+  app.get('/api/admin/settings', isAdmin, async (req, res) => {
+    try {
+      // Get or create system settings
+      let settings = await storage.getSystemSettings();
+      if (!settings) {
+        settings = await storage.createSystemSettings({
+          systemName: 'SamurEye',
+          systemDescription: 'Plataforma de Simulação de Ataques e Análise de Segurança',
+          supportEmail: 'suporte@samureye.com.br',
+          logoUrl: null
+        });
+      }
+      res.json(settings);
+    } catch (error) {
+      console.error("Error fetching admin settings:", error);
+      res.status(500).json({ message: "Failed to fetch settings" });
+    }
+  });
+
+  app.put('/api/admin/settings', isAdmin, async (req, res) => {
+    try {
+      const { systemName, systemDescription, supportEmail, logoUrl } = req.body;
+      
+      const settings = await storage.updateSystemSettings({
+        systemName,
+        systemDescription, 
+        supportEmail,
+        logoUrl
+      });
+      
+      res.json(settings);
+    } catch (error) {
+      console.error("Error updating admin settings:", error);
+      res.status(500).json({ message: "Failed to update settings" });
+    }
+  });
+
+  // Admin User Edit routes
+  app.get('/api/admin/users/:id', isAdmin, async (req, res) => {
+    try {
+      const user = await storage.getUserById(req.params.id);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      const userTenants = await storage.getUserTenants(user.id);
+      const userWithTenants = {
+        ...user,
+        tenants: userTenants
+      };
+
+      res.json(userWithTenants);
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      res.status(500).json({ message: "Failed to fetch user" });
+    }
+  });
+
+  app.put('/api/admin/users/:id', isAdmin, async (req, res) => {
+    try {
+      const { firstName, lastName, email, isSocUser, isActive, password, tenants } = req.body;
+      const userId = req.params.id;
+
+      // Update user basic info
+      const updateData: any = {
+        firstName,
+        lastName,
+        email,
+        isSocUser,
+        isActive
+      };
+
+      if (password && password.trim()) {
+        updateData.password = password;
+      }
+
+      const updatedUser = await storage.updateUser(userId, updateData);
+
+      // Update tenant associations
+      if (tenants) {
+        // Remove all current associations
+        await storage.removeAllUserTenants(userId);
+        
+        // Add new associations
+        for (const tenantAssoc of tenants) {
+          await storage.addUserToTenant(userId, tenantAssoc.tenantId, tenantAssoc.role);
+        }
+      }
+
+      res.json(updatedUser);
+    } catch (error) {
+      console.error("Error updating user:", error);
+      res.status(500).json({ message: "Failed to update user" });
+    }
+  });
+
+  // Admin tenant edit routes
+  app.put('/api/admin/tenants/:id', isAdmin, async (req, res) => {
+    try {
+      const { name, description, logoUrl } = req.body;
+      const tenantId = req.params.id;
+
+      await storage.updateTenant(tenantId, {
+        name,
+        description,
+        logoUrl
+      });
+
+      const updatedTenant = await storage.getTenant(tenantId);
+      res.json(updatedTenant);
+    } catch (error) {
+      console.error("Error updating tenant:", error);
+      res.status(500).json({ message: "Failed to update tenant" });
+    }
+  });
+
+  // Object storage upload route
+  app.post('/api/objects/upload', async (req, res) => {
+    try {
+      const objectStorageService = new ObjectStorageService();
+      const uploadURL = await objectStorageService.getObjectEntityUploadURL();
+      res.json({ uploadURL });
+    } catch (error) {
+      console.error("Error getting upload URL:", error);
+      res.status(500).json({ message: "Failed to get upload URL" });
+    }
+  });
+
   app.get('/api/admin/stats', isAdmin, async (req, res) => {
     try {
       const stats = await storage.getAdminStats();
@@ -555,13 +684,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/journeys', isLocalUserAuthenticated, requireLocalUserTenant, async (req: any, res) => {
     try {
-      const validatedData = insertJourneySchema.parse({
+      const journey = await storage.createJourney({
         ...req.body,
         tenantId: req.tenant.id,
         createdBy: req.localUser.id
       });
-
-      const journey = await storage.createJourney(validatedData);
 
       // Log activity
       await storage.createActivity({
@@ -619,14 +746,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/credentials', isLocalUserAuthenticated, requireLocalUserTenant, async (req: any, res) => {
     try {
-      const validatedData = insertCredentialSchema.parse({
+      // Store credential with local data
+      const credential = await storage.createCredential({
         ...req.body,
         tenantId: req.tenant.id,
         createdBy: req.localUser.id
       });
-
-      // Store credential with local data
-      const credential = await storage.createCredential(validatedData);
 
       // Log activity
       await storage.createActivity({
@@ -1078,11 +1203,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       // Add to tenant
-      const tenantUser = await storage.addUserToTenant({
-        tenantId: req.tenant.id,
-        userId: newUser.id,
-        role: role as any
-      });
+      const tenantUser = await storage.addUserToTenant(newUser.id, req.tenant.id, role);
 
       // Log activity
       await storage.createActivity({

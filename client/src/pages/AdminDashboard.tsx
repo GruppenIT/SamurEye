@@ -14,7 +14,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
-import { Building2, Users, Plus, Trash2, Settings, Shield, LogOut } from "lucide-react";
+import { Building2, Users, Plus, Trash2, Settings, Shield, LogOut, Edit } from "lucide-react";
 import { useLocation } from "wouter";
 
 const createTenantSchema = insertTenantSchema.extend({
@@ -28,6 +28,7 @@ type CreateTenantForm = z.infer<typeof createTenantSchema>;
 function AdminUsersList() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [, setLocation] = useLocation();
   
   const { data: users = [], isLoading } = useQuery({
     queryKey: ["/api/admin/users"],
@@ -100,6 +101,14 @@ function AdminUsersList() {
                     <Badge variant={user.isActive ? "default" : "secondary"} data-testid={`badge-status-${user.id}`}>
                       {user.isActive ? "Ativo" : "Inativo"}
                     </Badge>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => setLocation(`/admin/users/${user.id}/edit`)}
+                      data-testid={`button-edit-user-${user.id}`}
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
                     <Button 
                       variant="outline" 
                       size="sm"
@@ -229,10 +238,20 @@ export default function AdminDashboard() {
                 SamurEye Admin
               </h1>
             </div>
-            <Button variant="ghost" onClick={handleLogout} data-testid="button-logout">
-              <LogOut className="h-4 w-4 mr-2" />
-              Sair
-            </Button>
+            <div className="flex items-center space-x-2">
+              <Button 
+                variant="ghost" 
+                onClick={() => setLocation('/admin/settings')}
+                data-testid="button-settings"
+              >
+                <Settings className="h-4 w-4 mr-2" />
+                Configurações
+              </Button>
+              <Button variant="ghost" onClick={handleLogout} data-testid="button-logout">
+                <LogOut className="h-4 w-4 mr-2" />
+                Sair
+              </Button>
+            </div>
           </div>
         </div>
       </header>

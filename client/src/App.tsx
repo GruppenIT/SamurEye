@@ -18,6 +18,8 @@ import TenantUsers from "@/pages/TenantUsers";
 import AdminLogin from "@/pages/AdminLogin";
 import AdminDashboard from "@/pages/AdminDashboard";
 import AdminUserCreate from "@/pages/AdminUserCreate";
+import AdminSettings from "@/pages/AdminSettings";
+import AdminUserEdit from "@/pages/AdminUserEdit";
 
 function Router() {
   const { isAuthenticated, isLoading, error } = useAuth();
@@ -29,7 +31,9 @@ function Router() {
       {/* Admin routes - no authentication needed */}
       <Route path="/admin" component={AdminLogin} />
       <Route path="/admin/dashboard" component={AdminDashboard} />
+      <Route path="/admin/settings" component={AdminSettings} />
       <Route path="/admin/users/create" component={AdminUserCreate} />
+      <Route path="/admin/users/:id/edit" component={AdminUserEdit} />
       <Route path="/admin/tenants/:tenantId/users" component={TenantUsers} />
       
       {/* Regular user routes */}

@@ -48,16 +48,19 @@ export interface IStorage {
   getUserTenants(userId: string): Promise<(TenantUser & { tenant: Tenant })[]>;
   createTenant(tenant: InsertTenant): Promise<Tenant>;
   updateTenant(id: string, updates: Partial<Tenant>): Promise<void>;
-  addUserToTenant(tenantUser: InsertTenantUser): Promise<TenantUser>;
+  addUserToTenant(userId: string, tenantId: string, role: string): Promise<TenantUser>;
+  removeAllUserTenants(userId: string): Promise<void>;
+  getUserById(id: string): Promise<User | undefined>;
+  updateUser(id: string, updates: Partial<User>): Promise<User>;
   updateUserCurrentTenant(userId: string, tenantId: string): Promise<void>;
   getTenantUsers(tenantId: string): Promise<(TenantUser & { user: User })[]>;
   updateTenantUserRole(tenantUserId: string, role: string): Promise<void>;
   removeTenantUser(tenantUserId: string): Promise<void>;
 
   // System settings operations  
-  getSystemSetting(key: string): Promise<SystemSettings | undefined>;
-  setSystemSetting(key: string, value: string, description?: string): Promise<SystemSettings>;
-  getAllSystemSettings(): Promise<SystemSettings[]>;
+  getSystemSettings(): Promise<SystemSettings | undefined>;
+  createSystemSettings(settings: InsertSystemSettings): Promise<SystemSettings>;
+  updateSystemSettings(updates: Partial<SystemSettings>): Promise<SystemSettings>;
 
   // Collector operations
   getCollectorsByTenant(tenantId: string): Promise<Collector[]>;
@@ -131,11 +134,7 @@ export class DatabaseStorage implements IStorage {
     });
     
     // Add user to tenant as admin
-    await this.addUserToTenant({
-      tenantId: defaultTenant.id,
-      userId: user.id,
-      role: 'tenant_admin'
-    });
+    await this.addUserToTenant(user.id, defaultTenant.id, 'tenant_admin');
     
     // Set as current tenant
     await this.updateUserCurrentTenant(user.id, defaultTenant.id);
@@ -172,10 +171,7 @@ export class DatabaseStorage implements IStorage {
     return newTenant;
   }
 
-  async addUserToTenant(tenantUser: InsertTenantUser): Promise<TenantUser> {
-    const [newTenantUser] = await db.insert(tenantUsers).values(tenantUser).returning();
-    return newTenantUser;
-  }
+
 
   async updateUserCurrentTenant(userId: string, tenantId: string): Promise<void> {
     await db
@@ -268,22 +264,10 @@ export class DatabaseStorage implements IStorage {
     return null;
   }
 
-  async getUserById(id: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.id, id));
-    return user;
-  }
-
   async updateLastLogin(userId: string): Promise<void> {
     await db.update(users)
       .set({ lastLoginAt: new Date() })
       .where(eq(users.id, userId));
-  }
-
-  async updateTenant(id: string, updates: Partial<Tenant>): Promise<void> {
-    await db
-      .update(tenants)
-      .set({ ...updates, updatedAt: new Date() })
-      .where(eq(tenants.id, id));
   }
 
   async getTenantUsers(tenantId: string): Promise<(TenantUser & { user: User })[]> {
@@ -313,27 +297,7 @@ export class DatabaseStorage implements IStorage {
     await db.delete(tenantUsers).where(eq(tenantUsers.id, tenantUserId));
   }
 
-  // System settings operations
-  async getSystemSetting(key: string): Promise<SystemSettings | undefined> {
-    const [setting] = await db.select().from(systemSettings).where(eq(systemSettings.key, key));
-    return setting;
-  }
 
-  async setSystemSetting(key: string, value: string, description?: string): Promise<SystemSettings> {
-    const [setting] = await db
-      .insert(systemSettings)
-      .values({ key, value, description })
-      .onConflictDoUpdate({
-        target: systemSettings.key,
-        set: { value, description, updatedAt: new Date() },
-      })
-      .returning();
-    return setting;
-  }
-
-  async getAllSystemSettings(): Promise<SystemSettings[]> {
-    return await db.select().from(systemSettings);
-  }
 
   // Collector operations
   async getCollectorsByTenant(tenantId: string): Promise<Collector[]> {
@@ -507,6 +471,73 @@ export class DatabaseStorage implements IStorage {
       userAgent: null
     }).returning();
     return newActivity;
+  }
+
+  // System settings operations
+  async getSystemSettings(): Promise<SystemSettings | undefined> {
+    const [settings] = await db.select().from(systemSettings).limit(1);
+    return settings;
+  }
+
+  async createSystemSettings(settings: InsertSystemSettings): Promise<SystemSettings> {
+    const [newSettings] = await db.insert(systemSettings).values(settings).returning();
+    return newSettings;
+  }
+
+  async updateSystemSettings(updates: Partial<SystemSettings>): Promise<SystemSettings> {
+    // Get existing settings or create if none exist
+    let existing = await this.getSystemSettings();
+    if (!existing) {
+      existing = await this.createSystemSettings({
+        systemName: 'SamurEye',
+        systemDescription: 'Plataforma de Simulação de Ataques e Análise de Segurança',
+        supportEmail: 'suporte@samureye.com.br',
+        logoUrl: null
+      });
+    }
+
+    const [updated] = await db
+      .update(systemSettings)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(systemSettings.id, existing.id))
+      .returning();
+    return updated;
+  }
+
+  // Enhanced user management operations
+  async getUserById(id: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user;
+  }
+
+  async updateUser(id: string, updates: Partial<User>): Promise<User> {
+    const [updated] = await db
+      .update(users)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(users.id, id))
+      .returning();
+    return updated;
+  }
+
+  async removeAllUserTenants(userId: string): Promise<void> {
+    await db.delete(tenantUsers).where(eq(tenantUsers.userId, userId));
+  }
+
+  async addUserToTenant(userId: string, tenantId: string, role: string): Promise<TenantUser> {
+    const [newTenantUser] = await db.insert(tenantUsers).values({
+      userId,
+      tenantId,
+      role: role as any
+    }).returning();
+    return newTenantUser;
+  }
+
+  // Enhanced tenant operations
+  async updateTenant(id: string, updates: Partial<Tenant>): Promise<void> {
+    await db
+      .update(tenants)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(tenants.id, id));
   }
 
   // Clear all tenant-specific data for re-seeding

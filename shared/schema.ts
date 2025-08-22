@@ -171,9 +171,10 @@ export const threatIntelligence = pgTable("threat_intelligence", {
 // Global system settings (for platform-wide configuration)
 export const systemSettings = pgTable("system_settings", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  key: varchar("key").unique().notNull(),
-  value: text("value"),
-  description: text("description"),
+  systemName: varchar("system_name").default('SamurEye'),
+  systemDescription: text("system_description"),
+  supportEmail: varchar("support_email"),
+  logoUrl: varchar("logo_url"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
