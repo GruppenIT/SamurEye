@@ -25,9 +25,17 @@ export function TenantProvider({ children }: { children: ReactNode }) {
     mutationFn: async (tenantId: string) => {
       await apiRequest('POST', '/api/switch-tenant', { tenantId });
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/user'] });
-      queryClient.invalidateQueries(); // Invalidate all queries since tenant context changed
+    onSuccess: async () => {
+      // First, refresh user data to get updated current tenant
+      await queryClient.refetchQueries({ queryKey: ['/api/user'] });
+      
+      // Then invalidate all data queries that depend on tenant context
+      queryClient.invalidateQueries({ queryKey: ['/api/dashboard/metrics'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/collectors'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/journeys'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/activities'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/threat-intelligence'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/credentials'] });
     },
   });
 
