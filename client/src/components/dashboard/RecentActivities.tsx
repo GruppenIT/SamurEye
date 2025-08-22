@@ -5,6 +5,16 @@ import { Badge } from '@/components/ui/badge';
 import { useQuery } from '@tanstack/react-query';
 import { useI18n } from '@/hooks/useI18n';
 
+interface Activity {
+  id: string;
+  action: string;
+  title: string;
+  user: { firstName: string; lastName: string };
+  metadata: any;
+  timestamp: string;
+  status: string;
+}
+
 export function RecentActivities() {
   const { t } = useI18n();
   
@@ -14,14 +24,14 @@ export function RecentActivities() {
   });
 
   // Mock activities for demo if no data available
-  const mockActivities = [
+  const mockActivities: Activity[] = [
     {
       id: '1',
       action: 'journey_started',
       title: 'Nova jornada Attack Surface iniciada',
       user: { firstName: 'João', lastName: 'Silva' },
       metadata: { journeyName: 'Attack Surface', target: '192.168.100.0/24', collector: 'vlxsam04' },
-      timestamp: new Date(Date.now() - 2 * 60 * 1000).toISOString(), // 2 minutes ago
+      timestamp: new Date(Date.now() - 2 * 60 * 1000).toISOString(),
       status: 'running'
     },
     {
@@ -30,7 +40,7 @@ export function RecentActivities() {
       title: 'Jornada EDR Testing concluída',
       user: { firstName: 'João', lastName: 'Silva' },
       metadata: { endpointsTested: 23, detectionRate: 94.2, failures: 4 },
-      timestamp: new Date(Date.now() - 30 * 60 * 1000).toISOString(), // 30 minutes ago
+      timestamp: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
       status: 'completed'
     },
     {
@@ -39,98 +49,66 @@ export function RecentActivities() {
       title: 'Coletor collector-branch desconectado',
       user: { firstName: 'Sistema', lastName: '' },
       metadata: { lastSeen: '14:32', reason: 'Timeout de conexão' },
-      timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
+      timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
       status: 'offline'
-    },
-    {
-      id: '4',
-      action: 'vulnerabilities_found',
-      title: '23 vulnerabilidades críticas descobertas',
-      user: { firstName: 'Sistema', lastName: '' },
-      metadata: { cves: ['CVE-2024-1234', 'CVE-2024-5678'], action: 'Requer ação imediata' },
-      timestamp: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(), // 3 hours ago
-      status: 'critical'
     }
   ];
 
-  const displayActivities = Array.isArray(activities) ? activities : mockActivities;
+  // Safely get activities array
+  const getActivities = (): Activity[] => {
+    if (Array.isArray(activities)) {
+      return activities;
+    }
+    return mockActivities;
+  };
+
+  const displayActivities = getActivities();
 
   const getActivityIcon = (action: string) => {
     switch (action) {
-      case 'journey_started':
-        return Play;
-      case 'journey_completed':
-        return Check;
-      case 'collector_offline':
-        return AlertTriangle;
-      case 'vulnerabilities_found':
-        return Shield;
-      default:
-        return Play;
+      case 'journey_started': return Play;
+      case 'journey_completed': return Check;
+      case 'collector_offline': return AlertTriangle;
+      case 'vulnerabilities_found': return Shield;
+      default: return Play;
     }
   };
 
   const getActivityColor = (status: string) => {
     switch (status) {
-      case 'running':
-        return {
-          bg: 'bg-blue-500/20',
-          text: 'text-blue-500',
-          badge: 'bg-blue-500/20 text-blue-500'
-        };
-      case 'completed':
-        return {
-          bg: 'bg-green-500/20',
-          text: 'text-green-500',
-          badge: 'bg-green-500/20 text-green-500'
-        };
-      case 'offline':
-        return {
-          bg: 'bg-yellow-500/20',
-          text: 'text-yellow-500',
-          badge: 'bg-red-500/20 text-red-500'
-        };
-      case 'critical':
-        return {
-          bg: 'bg-red-500/20',
-          text: 'text-red-500',
-          badge: 'bg-red-500/20 text-red-500'
-        };
-      default:
-        return {
-          bg: 'bg-gray-500/20',
-          text: 'text-gray-500',
-          badge: 'bg-gray-500/20 text-gray-500'
-        };
+      case 'running': return { bg: 'bg-blue-500/20', text: 'text-blue-500', badge: 'bg-blue-500/20 text-blue-500' };
+      case 'completed': return { bg: 'bg-green-500/20', text: 'text-green-500', badge: 'bg-green-500/20 text-green-500' };
+      case 'offline': return { bg: 'bg-yellow-500/20', text: 'text-yellow-500', badge: 'bg-red-500/20 text-red-500' };
+      case 'critical': return { bg: 'bg-red-500/20', text: 'text-red-500', badge: 'bg-red-500/20 text-red-500' };
+      default: return { bg: 'bg-gray-500/20', text: 'text-gray-500', badge: 'bg-gray-500/20 text-gray-500' };
     }
   };
 
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case 'running':
-        return 'EM EXECUÇÃO';
-      case 'completed':
-        return 'CONCLUÍDA';
-      case 'offline':
-        return 'OFFLINE';
-      case 'critical':
-        return 'CRÍTICO';
-      default:
-        return status.toUpperCase();
+      case 'running': return 'EM EXECUÇÃO';
+      case 'completed': return 'CONCLUÍDA';
+      case 'offline': return 'OFFLINE';
+      case 'critical': return 'CRÍTICO';
+      default: return status.toUpperCase();
     }
   };
 
   const formatTimeAgo = (timestamp: string) => {
-    const now = new Date();
-    const time = new Date(timestamp);
-    const diffMs = now.getTime() - time.getTime();
-    const diffMins = Math.floor(diffMs / (1000 * 60));
-    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    try {
+      const now = new Date();
+      const time = new Date(timestamp);
+      const diffMs = now.getTime() - time.getTime();
+      const diffMins = Math.floor(diffMs / (1000 * 60));
+      const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
 
-    if (diffMins < 60) {
-      return `há ${diffMins} ${diffMins === 1 ? 'minuto' : 'minutos'}`;
-    } else {
-      return `há ${diffHours} ${diffHours === 1 ? 'hora' : 'horas'}`;
+      if (diffMins < 60) {
+        return `há ${diffMins} ${diffMins === 1 ? 'minuto' : 'minutos'}`;
+      } else {
+        return `há ${diffHours} ${diffHours === 1 ? 'hora' : 'horas'}`;
+      }
+    } catch (error) {
+      return 'agora';
     }
   };
 
@@ -142,7 +120,7 @@ export function RecentActivities() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {[...Array(4)].map((_, i) => (
+            {[1, 2, 3, 4].map((i) => (
               <div key={i} className="flex items-start space-x-4 p-4 bg-card rounded-lg animate-pulse">
                 <div className="w-8 h-8 bg-muted rounded-full"></div>
                 <div className="flex-1">
@@ -173,7 +151,7 @@ export function RecentActivities() {
       </CardHeader>
       <CardContent>
         <div className="space-y-4" data-testid="activities-list">
-          {displayActivities && displayActivities.length > 0 ? displayActivities.map((activity: any) => {
+          {displayActivities.length > 0 ? displayActivities.map((activity) => {
             const IconComponent = getActivityIcon(activity.action);
             const colors = getActivityColor(activity.status);
             
@@ -197,32 +175,32 @@ export function RecentActivities() {
                   </div>
                   
                   {activity.metadata && (
-                    <p className="text-sm text-muted-foreground mt-1" data-testid={`activity-details-${activity.id}`}>
+                    <div className="text-sm text-muted-foreground mt-1" data-testid={`activity-details-${activity.id}`}>
                       {activity.action === 'journey_started' && (
-                        <>
+                        <span>
                           Iniciada por <span className="text-accent">{activity.user.firstName} {activity.user.lastName}</span>
                           {activity.metadata.target && <> • Target: <span className="text-white">{activity.metadata.target}</span></>}
                           {activity.metadata.collector && <> • Collector: <span className="text-white">{activity.metadata.collector}</span></>}
-                        </>
+                        </span>
                       )}
                       {activity.action === 'journey_completed' && (
-                        <>
+                        <span>
                           {activity.metadata.endpointsTested} endpoints testados • {activity.metadata.detectionRate}% taxa de detecção
                           • {activity.metadata.failures} falhas identificadas
-                        </>
+                        </span>
                       )}
                       {activity.action === 'collector_offline' && (
-                        <>
+                        <span>
                           Última comunicação: {activity.metadata.lastSeen} • Verificar conectividade de rede
-                        </>
+                        </span>
                       )}
                       {activity.action === 'vulnerabilities_found' && (
-                        <>
+                        <span>
                           Jornada Attack Surface • {activity.metadata.cves?.join(', ')}
                           • {activity.metadata.action}
-                        </>
+                        </span>
                       )}
-                    </p>
+                    </div>
                   )}
                   
                   <div className="flex items-center mt-2">
@@ -232,7 +210,7 @@ export function RecentActivities() {
                     <span className="text-xs text-muted-foreground" data-testid={`activity-meta-${activity.id}`}>
                       {activity.action === 'journey_started' && 'ETA: 15 minutos'}
                       {activity.action === 'journey_completed' && 'Duração: 12 minutos'}
-                      {activity.action === 'collector_offline' && activity.metadata.reason}
+                      {activity.action === 'collector_offline' && activity.metadata?.reason}
                       {activity.action === 'vulnerabilities_found' && 'Enviado para SIEM'}
                     </span>
                   </div>
