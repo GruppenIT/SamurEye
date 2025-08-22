@@ -285,8 +285,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
           role: 'soc_operator',
           tenant: t
         }));
-        // Use first tenant as default for SOC users
-        currentTenant = allTenants.length > 0 ? allTenants[0] : null;
+        // For SOC users, use currentTenantId if set, otherwise use first tenant
+        if (user.currentTenantId) {
+          currentTenant = await storage.getTenant(user.currentTenantId);
+        } else if (allTenants.length > 0) {
+          currentTenant = allTenants[0];
+        }
       } else {
         // Regular users - get their specific tenant associations
         tenants = await storage.getUserTenants(userId);
@@ -409,9 +413,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.localUser.id;
       const { tenantId } = req.body;
 
-      // Verify user has access to this tenant
-      const userTenants = await storage.getUserTenants(userId);
-      const hasAccess = userTenants.some(ut => ut.tenantId === tenantId);
+      // Get user to check if they are SOC user
+      const user = await storage.getUserById(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      let hasAccess = false;
+
+      if (user.isSocUser) {
+        // SOC users have access to all tenants - just verify tenant exists
+        const tenant = await storage.getTenant(tenantId);
+        hasAccess = !!tenant;
+      } else {
+        // Regular users - check their specific tenant associations
+        const userTenants = await storage.getUserTenants(userId);
+        hasAccess = userTenants.some(ut => ut.tenantId === tenantId);
+      }
       
       if (!hasAccess) {
         return res.status(403).json({ message: "Access denied to this tenant" });
