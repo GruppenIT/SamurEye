@@ -191,7 +191,12 @@ export default function AdminTenantEdit() {
                 title="Logo do Tenant"
                 currentLogo={logoUrl}
                 uploadEndpoint={`/api/admin/tenants/${tenantId}`}
-                onSuccess={() => window.location.reload()}
+                onSuccess={() => {
+                  // Refresh the tenant data to show the new logo
+                  queryClient.invalidateQueries({ queryKey: ['/api/admin/tenants', tenantId] });
+                  // Update local state to show the logo immediately
+                  setTimeout(() => window.location.reload(), 500);
+                }}
                 type="tenant"
                 entityId={tenantId}
               />

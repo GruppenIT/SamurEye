@@ -51,14 +51,17 @@ export function LogoUploader({
       }
 
       // Update system/tenant with logo URL
+      const logoUrl = uploadURL.split('?')[0];
       const updateData = type === 'system' 
-        ? { logoUrl: uploadURL.split('?')[0] }
-        : { logoUrl: uploadURL.split('?')[0] };
+        ? { logoUrl }
+        : { logoUrl };
 
       const updateResponse = await apiRequest('PUT', uploadEndpoint, updateData);
-      return await updateResponse.json();
+      const result = await updateResponse.json();
+      
+      return { ...result, logoUrl };
     },
-    onSuccess: () => {
+    onSuccess: (data: any) => {
       toast({
         title: 'Logo atualizado',
         description: 'O logo foi carregado com sucesso.',
@@ -67,6 +70,9 @@ export function LogoUploader({
       setPreviewUrl(null);
       queryClient.invalidateQueries({ queryKey: ['/api/admin/settings'] });
       queryClient.invalidateQueries({ queryKey: ['/api/admin/tenants'] });
+      if (entityId) {
+        queryClient.invalidateQueries({ queryKey: ['/api/admin/tenants', entityId] });
+      }
       onSuccess?.();
     },
     onError: (error: Error) => {
