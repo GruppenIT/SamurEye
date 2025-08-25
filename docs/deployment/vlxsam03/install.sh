@@ -183,7 +183,346 @@ fi
 log "Redis configurado e iniciado"
 
 # ============================================================================
-# 4. INSTALAÇÃO GRAFANA
+# 4. INSTALAÇÃO E CONFIGURAÇÃO POSTGRESQL
+# ============================================================================
+
+log "🐘 Instalando PostgreSQL 16..."
+
+# Instalar PostgreSQL 16
+apt install -y postgresql-16 postgresql-contrib-16
+
+# Iniciar e habilitar PostgreSQL
+systemctl start postgresql
+systemctl enable postgresql
+
+# Configurar PostgreSQL
+sudo -u postgres psql -c "ALTER USER postgres PASSWORD 'SamurEye2024PG!';"
+
+# Criar banco de dados e usuário para SamurEye
+sudo -u postgres psql << EOF
+-- Criar usuário samureye
+CREATE USER samureye WITH PASSWORD 'SamurEye2024DB!';
+
+-- Criar banco de dados
+CREATE DATABASE samureye_db OWNER samureye;
+
+-- Conceder privilégios
+GRANT ALL PRIVILEGES ON DATABASE samureye_db TO samureye;
+
+-- Conectar ao banco e configurar schema
+\c samureye_db;
+
+-- Conceder privilégios no schema public
+GRANT ALL ON SCHEMA public TO samureye;
+GRANT CREATE ON SCHEMA public TO samureye;
+
+-- Habilitar extensões necessárias
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS "pg_stat_statements";
+
+EOF
+
+log "✅ PostgreSQL configurado com sucesso"
+
+# Criar script SQL do schema
+cat > /tmp/samureye_schema.sql << 'SCHEMA_EOF'
+-- SamurEye Database Schema
+-- Generated from shared/schema.ts
+
+-- Enums
+CREATE TYPE global_role AS ENUM ('global_admin', 'global_auditor');
+CREATE TYPE tenant_role AS ENUM ('tenant_admin', 'operator', 'viewer', 'tenant_auditor');
+CREATE TYPE collector_status AS ENUM ('online', 'offline', 'enrolling', 'error');
+CREATE TYPE journey_type AS ENUM ('attack_surface', 'ad_hygiene', 'edr_testing');
+CREATE TYPE journey_status AS ENUM ('pending', 'running', 'completed', 'failed', 'cancelled');
+CREATE TYPE credential_type AS ENUM ('ssh', 'snmp', 'telnet', 'ldap', 'wmi', 'http', 'https', 'database', 'api_key', 'certificate');
+
+-- Sessions table (mandatory for auth)
+CREATE TABLE IF NOT EXISTS sessions (
+    sid VARCHAR PRIMARY KEY,
+    sess JSONB NOT NULL,
+    expire TIMESTAMP NOT NULL
+);
+CREATE INDEX IF NOT EXISTS "IDX_session_expire" ON sessions(expire);
+
+-- Users table (Replit Auth + local auth)
+CREATE TABLE IF NOT EXISTS users (
+    id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+    email VARCHAR UNIQUE,
+    first_name VARCHAR,
+    last_name VARCHAR,
+    profile_image_url VARCHAR,
+    password VARCHAR,
+    current_tenant_id VARCHAR,
+    preferred_language VARCHAR DEFAULT 'pt-BR',
+    global_role global_role,
+    is_global_user BOOLEAN DEFAULT false,
+    is_soc_user BOOLEAN DEFAULT false,
+    is_active BOOLEAN DEFAULT true,
+    last_login_at TIMESTAMP,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Tenants table
+CREATE TABLE IF NOT EXISTS tenants (
+    id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+    name VARCHAR NOT NULL,
+    slug VARCHAR UNIQUE NOT NULL,
+    description TEXT,
+    logo_url VARCHAR,
+    settings JSONB,
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Tenant users (many-to-many with roles)
+CREATE TABLE IF NOT EXISTS tenant_users (
+    id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+    tenant_id VARCHAR NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+    user_id VARCHAR NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    role tenant_role NOT NULL DEFAULT 'viewer',
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Collectors
+CREATE TABLE IF NOT EXISTS collectors (
+    id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+    tenant_id VARCHAR NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+    name VARCHAR NOT NULL,
+    hostname VARCHAR,
+    ip_address VARCHAR,
+    status collector_status NOT NULL DEFAULT 'offline',
+    version VARCHAR,
+    last_seen TIMESTAMP,
+    enrollment_token VARCHAR,
+    enrollment_token_expires TIMESTAMP,
+    metadata JSONB,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Collector telemetry
+CREATE TABLE IF NOT EXISTS collector_telemetry (
+    id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+    collector_id VARCHAR NOT NULL REFERENCES collectors(id) ON DELETE CASCADE,
+    cpu_usage REAL,
+    memory_usage REAL,
+    disk_usage REAL,
+    network_throughput JSONB,
+    processes JSONB,
+    timestamp TIMESTAMP DEFAULT NOW()
+);
+
+-- Journeys
+CREATE TABLE IF NOT EXISTS journeys (
+    id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+    tenant_id VARCHAR NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+    name VARCHAR NOT NULL,
+    type journey_type NOT NULL,
+    status journey_status NOT NULL DEFAULT 'pending',
+    config JSONB NOT NULL,
+    results JSONB,
+    collector_id VARCHAR REFERENCES collectors(id),
+    created_by VARCHAR NOT NULL REFERENCES users(id),
+    started_at TIMESTAMP,
+    completed_at TIMESTAMP,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Credentials
+CREATE TABLE IF NOT EXISTS credentials (
+    id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+    tenant_id VARCHAR NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+    name VARCHAR NOT NULL,
+    type credential_type NOT NULL,
+    description TEXT,
+    credential_data JSONB NOT NULL,
+    is_active BOOLEAN DEFAULT true,
+    created_by VARCHAR NOT NULL REFERENCES users(id),
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Threat Intelligence
+CREATE TABLE IF NOT EXISTS threat_intelligence (
+    id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+    tenant_id VARCHAR NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+    type VARCHAR NOT NULL,
+    source VARCHAR NOT NULL,
+    severity VARCHAR NOT NULL,
+    title VARCHAR NOT NULL,
+    description TEXT,
+    data JSONB,
+    score INTEGER,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- System Settings
+CREATE TABLE IF NOT EXISTS system_settings (
+    id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+    key VARCHAR NOT NULL,
+    value TEXT,
+    description TEXT,
+    system_name VARCHAR DEFAULT 'SamurEye',
+    system_description TEXT,
+    support_email VARCHAR,
+    logo_url VARCHAR,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Tenant User Auth (for local MFA)
+CREATE TABLE IF NOT EXISTS tenant_user_auth (
+    id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+    tenant_user_id VARCHAR NOT NULL REFERENCES tenant_users(id) ON DELETE CASCADE,
+    username VARCHAR NOT NULL,
+    password_hash VARCHAR,
+    totp_secret VARCHAR,
+    email_verified BOOLEAN DEFAULT false,
+    last_login TIMESTAMP,
+    login_attempts INTEGER DEFAULT 0,
+    locked_until TIMESTAMP,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Activities/Audit Log
+CREATE TABLE IF NOT EXISTS activities (
+    id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+    tenant_id VARCHAR REFERENCES tenants(id) ON DELETE CASCADE,
+    user_id VARCHAR NOT NULL REFERENCES users(id),
+    action VARCHAR NOT NULL,
+    resource VARCHAR NOT NULL,
+    resource_id VARCHAR,
+    metadata JSONB,
+    ip_address VARCHAR,
+    user_agent VARCHAR,
+    timestamp TIMESTAMP DEFAULT NOW()
+);
+
+-- Insert initial system settings
+INSERT INTO system_settings (key, value, description, system_name, system_description) 
+VALUES 
+    ('app_version', '1.0.0', 'Current application version', 'SamurEye', 'Breach & Attack Simulation Platform'),
+    ('maintenance_mode', 'false', 'System maintenance mode', 'SamurEye', 'Breach & Attack Simulation Platform')
+ON CONFLICT DO NOTHING;
+
+-- Create initial admin tenant
+INSERT INTO tenants (id, name, slug, description, is_active)
+VALUES ('admin-tenant-id', 'Admin Organization', 'admin-org', 'Default administrative organization', true)
+ON CONFLICT DO NOTHING;
+
+SCHEMA_EOF
+
+# Executar schema no banco
+log "🗄️ Criando estrutura do banco de dados..."
+sudo -u postgres psql -d samureye_db -f /tmp/samureye_schema.sql
+
+# Configurar permissões finais
+sudo -u postgres psql -d samureye_db << EOF
+-- Garantir que o usuário samureye tem acesso total às tabelas
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO samureye;
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO samureye;
+GRANT USAGE ON SCHEMA public TO samureye;
+
+-- Configurar privilégios padrão para futuras tabelas
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO samureye;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO samureye;
+EOF
+
+# Configurar PostgreSQL para aceitar conexões
+cat > /etc/postgresql/16/main/postgresql.conf << 'PGCONF_EOF'
+# SamurEye PostgreSQL Configuration
+listen_addresses = '*'
+port = 5432
+max_connections = 200
+shared_buffers = 256MB
+effective_cache_size = 1GB
+maintenance_work_mem = 64MB
+checkpoint_completion_target = 0.9
+wal_buffers = 16MB
+default_statistics_target = 100
+random_page_cost = 1.1
+effective_io_concurrency = 200
+work_mem = 4MB
+min_wal_size = 1GB
+max_wal_size = 4GB
+
+# Logging
+log_destination = 'stderr,csvlog'
+logging_collector = on
+log_directory = '/var/log/postgresql'
+log_filename = 'postgresql-%Y-%m-%d_%H%M%S.log'
+log_rotation_age = 1d
+log_rotation_size = 100MB
+log_min_duration_statement = 1000
+log_line_prefix = '%t [%p]: [%l-1] user=%u,db=%d,app=%a,client=%h '
+log_checkpoints = on
+log_connections = on
+log_disconnections = on
+log_lock_waits = on
+
+# Extensions
+shared_preload_libraries = 'pg_stat_statements'
+PGCONF_EOF
+
+# Configurar autenticação
+cat > /etc/postgresql/16/main/pg_hba.conf << 'PGHBA_EOF'
+# SamurEye PostgreSQL Authentication Configuration
+# TYPE  DATABASE        USER            ADDRESS                 METHOD
+
+# Local connections
+local   all             postgres                                md5
+local   all             samureye                                md5
+local   samureye_db     samureye                                md5
+
+# IPv4 local connections
+host    all             postgres        127.0.0.1/32            md5
+host    samureye_db     samureye        127.0.0.1/32            md5
+
+# IPv4 internal network connections (for other vlxsam servers)
+host    samureye_db     samureye        172.24.1.0/24           md5
+host    samureye_db     samureye        192.168.100.0/24        md5
+
+# IPv6 local connections
+host    all             all             ::1/128                 md5
+
+# Replication connections
+local   replication     postgres                                md5
+host    replication     postgres        127.0.0.1/32            md5
+host    replication     postgres        ::1/128                 md5
+PGHBA_EOF
+
+# Reiniciar PostgreSQL com nova configuração
+systemctl restart postgresql
+sleep 5
+
+# Verificar se PostgreSQL está rodando
+if systemctl is-active --quiet postgresql; then
+    log "✅ PostgreSQL configurado e iniciado com sucesso"
+else
+    error "❌ Falha ao iniciar PostgreSQL"
+fi
+
+# Testar conexão
+if sudo -u postgres psql -d samureye_db -c "SELECT version();" > /dev/null 2>&1; then
+    log "✅ Teste de conexão PostgreSQL bem-sucedido"
+else
+    warn "⚠️ Problema na conexão PostgreSQL"
+fi
+
+# Limpar arquivo temporário
+rm -f /tmp/samureye_schema.sql
+
+log "PostgreSQL configurado e banco samureye_db criado"
+
+# ============================================================================
+# 5. INSTALAÇÃO E CONFIGURAÇÃO GRAFANA
 # ============================================================================
 
 log "📊 Instalando Grafana..."
@@ -322,7 +661,7 @@ else
 fi
 
 # ============================================================================
-# 5. INSTALAÇÃO MINIO (OPCIONAL - BACKUP LOCAL)
+# 6. INSTALAÇÃO MINIO (OPCIONAL - BACKUP LOCAL)
 # ============================================================================
 
 log "🗄️ Instalando MinIO (backup local)..."
@@ -462,13 +801,13 @@ cat > "$CONFIG_DIR/.env" << 'EOF'
 VLXSAM03_IP=172.24.1.153
 NODE_ENV=production
 
-# Neon Database (configurar com valores reais)
-DATABASE_URL=postgresql://username:password@ep-xyz.us-east-1.aws.neon.tech/samureye?sslmode=require
-PGDATABASE=samureye
-PGHOST=ep-xyz.us-east-1.aws.neon.tech
+# Local PostgreSQL Database (configurado automaticamente)
+DATABASE_URL=postgresql://samureye:SamurEye2024DB!@172.24.1.153:5432/samureye_db?sslmode=disable
+PGDATABASE=samureye_db
+PGHOST=172.24.1.153
 PGPORT=5432
-PGUSER=username
-PGPASSWORD=password
+PGUSER=samureye
+PGPASSWORD=SamurEye2024DB!
 
 # Redis Configuration  
 REDIS_HOST=172.24.1.153
@@ -555,6 +894,76 @@ else
 fi
 
 log "Teste Neon Database concluído"
+EOF
+
+# Script de teste PostgreSQL local
+cat > "$SCRIPTS_DIR/test-postgres-connection.sh" << 'EOF'
+#!/bin/bash
+
+# Teste de conectividade PostgreSQL local
+
+source /etc/samureye/.env
+
+log() { echo "[$(date '+%H:%M:%S')] $1"; }
+error() { echo "[$(date '+%H:%M:%S')] ERROR: $1"; exit 1; }
+
+log "🐘 Testando conectividade PostgreSQL local..."
+
+# Teste básico de conectividade
+log "Testando conexão com banco samureye_db..."
+if PGPASSWORD="$PGPASSWORD" psql -h "$PGHOST" -U "$PGUSER" -d "$PGDATABASE" -c "SELECT version();" >/dev/null 2>&1; then
+    log "✅ Conexão PostgreSQL: OK"
+    
+    # Teste de latência
+    start_time=$(date +%s%N)
+    PGPASSWORD="$PGPASSWORD" psql -h "$PGHOST" -U "$PGUSER" -d "$PGDATABASE" -c "SELECT 1;" >/dev/null 2>&1
+    end_time=$(date +%s%N)
+    latency=$(( (end_time - start_time) / 1000000 ))
+    
+    log "⚡ Latência local: ${latency}ms"
+    
+    # Teste de tabelas
+    table_count=$(PGPASSWORD="$PGPASSWORD" psql -h "$PGHOST" -U "$PGUSER" -d "$PGDATABASE" -t -c "SELECT count(*) FROM information_schema.tables WHERE table_schema = 'public';" 2>/dev/null | xargs)
+    log "📊 Tabelas encontradas: $table_count"
+    
+    # Verificar algumas tabelas específicas
+    log "🔍 Verificando estrutura do banco..."
+    
+    # Verificar tabela de usuários
+    if PGPASSWORD="$PGPASSWORD" psql -h "$PGHOST" -U "$PGUSER" -d "$PGDATABASE" -c "\d users" >/dev/null 2>&1; then
+        log "✅ Tabela 'users': OK"
+    else
+        log "⚠️ Tabela 'users': não encontrada"
+    fi
+    
+    # Verificar tabela de tenants
+    if PGPASSWORD="$PGPASSWORD" psql -h "$PGHOST" -U "$PGUSER" -d "$PGDATABASE" -c "\d tenants" >/dev/null 2>&1; then
+        log "✅ Tabela 'tenants': OK"
+    else
+        log "⚠️ Tabela 'tenants': não encontrada"
+    fi
+    
+    # Verificar tabela de collectors
+    if PGPASSWORD="$PGPASSWORD" psql -h "$PGHOST" -U "$PGUSER" -d "$PGDATABASE" -c "\d collectors" >/dev/null 2>&1; then
+        log "✅ Tabela 'collectors': OK"
+    else
+        log "⚠️ Tabela 'collectors': não encontrada"
+    fi
+    
+    # Verificar extensões
+    log "🔧 Verificando extensões..."
+    ext_uuid=$(PGPASSWORD="$PGPASSWORD" psql -h "$PGHOST" -U "$PGUSER" -d "$PGDATABASE" -t -c "SELECT count(*) FROM pg_extension WHERE extname = 'uuid-ossp';" 2>/dev/null | xargs)
+    if [ "$ext_uuid" = "1" ]; then
+        log "✅ Extensão 'uuid-ossp': instalada"
+    else
+        log "⚠️ Extensão 'uuid-ossp': não instalada"
+    fi
+    
+else
+    error "❌ Falha na conexão PostgreSQL local"
+fi
+
+log "Teste PostgreSQL local concluído"
 EOF
 
 # Script de teste Object Storage
@@ -785,7 +1194,7 @@ log "Rotação de logs configurada"
 log "🎯 Finalizando instalação..."
 
 # Verificar status dos serviços
-services=("redis-server" "grafana-server" "minio")
+services=("postgresql" "redis-server" "grafana-server" "minio")
 for service in "${services[@]}"; do
     if systemctl is-active --quiet "$service"; then
         log "✅ $service: Ativo"
@@ -801,20 +1210,21 @@ echo "🎉 INSTALAÇÃO vlxsam03 CONCLUÍDA"
 echo "============================================================================"
 echo ""
 echo "📊 SERVIÇOS INSTALADOS:"
+echo "  • PostgreSQL (Database): 172.24.1.153:5432"
 echo "  • Redis (Cache/Sessions): 172.24.1.153:6379"
 echo "  • Grafana (Monitoring): http://172.24.1.153:3000"
 echo "  • MinIO (Backup): http://172.24.1.153:9000"
 echo ""
 echo "🔑 CREDENCIAIS PADRÃO:"
+echo "  • PostgreSQL: samureye/SamurEye2024DB! (banco: samureye_db)"
 echo "  • Redis: senha 'SamurEye2024Redis!'"
 echo "  • Grafana: admin/SamurEye2024!"
 echo "  • MinIO: admin/SamurEye2024!"
 echo ""
 echo "⚠️ PRÓXIMOS PASSOS:"
-echo "  1. Configurar DATABASE_URL no arquivo /etc/samureye/.env"
-echo "  2. Configurar object storage no vlxsam02"
-echo "  3. Executar testes: /opt/samureye/scripts/health-check.sh"
-echo "  4. Verificar conectividade Neon: /opt/samureye/scripts/test-neon-connection.sh"
+echo "  1. Configurar object storage no vlxsam02"
+echo "  2. Executar testes: /opt/samureye/scripts/health-check.sh"
+echo "  3. Verificar conectividade PostgreSQL: /opt/samureye/scripts/test-postgres-connection.sh"
 echo ""
 echo "📁 DIRETÓRIOS IMPORTANTES:"
 echo "  • Dados: /opt/data"
