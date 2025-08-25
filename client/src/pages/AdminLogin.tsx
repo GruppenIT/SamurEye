@@ -10,6 +10,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Shield, Lock } from "lucide-react";
 import { useLocation } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 
 const adminLoginSchema = z.object({
   email: z.string().email("Email inválido"),
@@ -22,6 +23,12 @@ export default function AdminLogin() {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const [, setLocation] = useLocation();
+
+  // Fetch system settings to get logo
+  const { data: systemSettings } = useQuery({
+    queryKey: ['/api/system/settings'],
+    retry: false,
+  });
 
   const form = useForm<AdminLoginForm>({
     resolver: zodResolver(adminLoginSchema),
@@ -61,8 +68,19 @@ export default function AdminLogin() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
       <div className="w-full max-w-md space-y-8">
         <div className="text-center">
-          <div className="mx-auto h-16 w-16 bg-primary rounded-full flex items-center justify-center mb-4">
-            <Shield className="h-8 w-8 text-primary-foreground" />
+          <div className="mx-auto h-20 w-20 flex items-center justify-center mb-4">
+            {systemSettings?.logoUrl ? (
+              <img
+                src={systemSettings.logoUrl}
+                alt="SamurEye Logo"
+                className="w-20 h-20 object-contain rounded-lg"
+                data-testid="admin-login-logo"
+              />
+            ) : (
+              <div className="w-20 h-20 bg-primary rounded-full flex items-center justify-center">
+                <Shield className="h-10 w-10 text-primary-foreground" />
+              </div>
+            )}
           </div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
             SamurEye Admin

@@ -10,6 +10,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import { Shield, Eye, EyeOff } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 
 const loginSchema = z.object({
   email: z.string().email("Email inválido"),
@@ -23,6 +24,12 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const [, setLocation] = useLocation();
+
+  // Fetch system settings to get logo
+  const { data: systemSettings } = useQuery({
+    queryKey: ['/api/system/settings'],
+    retry: false,
+  });
 
   const form = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
@@ -61,8 +68,19 @@ export default function Login() {
       <div className="w-full max-w-md">
         <Card className="shadow-xl">
           <CardHeader className="text-center">
-            <div className="mx-auto mb-4 w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
-              <Shield className="h-6 w-6 text-primary" />
+            <div className="mx-auto mb-4 w-16 h-16 flex items-center justify-center">
+              {systemSettings?.logoUrl ? (
+                <img
+                  src={systemSettings.logoUrl}
+                  alt="SamurEye Logo"
+                  className="w-16 h-16 object-contain rounded-lg"
+                  data-testid="login-logo"
+                />
+              ) : (
+                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
+                  <Shield className="h-8 w-8 text-primary" />
+                </div>
+              )}
             </div>
             <CardTitle className="text-2xl font-bold">SamurEye</CardTitle>
             <CardDescription>

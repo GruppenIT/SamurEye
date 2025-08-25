@@ -65,12 +65,12 @@ export function AppHeader({ activeTab, onTabChange }: AppHeaderProps) {
               <img
                 src={systemSettings.logoUrl}
                 alt="SamurEye Logo"
-                className="w-12 h-12 object-contain rounded-lg"
+                className="w-20 h-20 object-contain rounded-lg"
                 data-testid="system-logo"
               />
             ) : (
-              <div className="w-12 h-12 bg-accent rounded-lg flex items-center justify-center">
-                <Eye className="text-white text-sm" size={24} />
+              <div className="w-20 h-20 bg-accent rounded-lg flex items-center justify-center">
+                <Eye className="text-white text-lg" size={32} />
               </div>
             )}
             <h1 className="text-xl font-bold text-white">{systemSettings?.systemName || 'SamurEye'}</h1>
