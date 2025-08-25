@@ -27,18 +27,27 @@ export default function AdminLogin() {
   const [, setLocation] = useLocation();
   const { isAuthenticated: isAdminAuthenticated, isLoading: adminLoading } = useAdminAuth();
 
+  // Fetch system settings to get logo
+  const { data: systemSettings } = useQuery({
+    queryKey: ['/api/system/settings'],
+    retry: false,
+  });
+
+  // Form must be declared before any early returns (React hooks rule)
+  const form = useForm<AdminLoginForm>({
+    resolver: zodResolver(adminLoginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
+
   // Redirect if already logged in as admin
   useEffect(() => {
     if (!adminLoading && isAdminAuthenticated) {
       setLocation('/admin/dashboard');
     }
   }, [isAdminAuthenticated, adminLoading, setLocation]);
-
-  // Fetch system settings to get logo
-  const { data: systemSettings } = useQuery({
-    queryKey: ['/api/system/settings'],
-    retry: false,
-  });
 
   // Show loading if checking admin auth
   if (adminLoading) {
@@ -56,14 +65,6 @@ export default function AdminLogin() {
   if (isAdminAuthenticated) {
     return null;
   }
-
-  const form = useForm<AdminLoginForm>({
-    resolver: zodResolver(adminLoginSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-    },
-  });
 
   const handleLogin = async (data: AdminLoginForm) => {
     try {

@@ -1,0 +1,22 @@
+Something went wrong
+
+A aplicação encontrou um erro inesperado. Por favor, recarregue a página.
+Detalhes do erro (para desenvolvedores)
+
+updateWorkInProgressHook@https://b958262d-0f24-4167-96ab-94dc535e52e4-00-2j1k3714v889o.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=b4e44553:11678:21
+updateRef@https://b958262d-0f24-4167-96ab-94dc535e52e4-00-2j1k3714v889o.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=b4e44553:12064:22
+useRef@https://b958262d-0f24-4167-96ab-94dc535e52e4-00-2j1k3714v889o.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=b4e44553:12745:22
+useRef@https://b958262d-0f24-4167-96ab-94dc535e52e4-00-2j1k3714v889o.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-QCHXOAYK.js?v=b4e44553:1074:29
+useForm@https://b958262d-0f24-4167-96ab-94dc535e52e4-00-2j1k3714v889o.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-4BFJKWC4.js?v=b4e44553:1907:45
+AdminLogin@https://b958262d-0f24-4167-96ab-94dc535e52e4-00-2j1k3714v889o.janeway.replit.dev/src/pages/AdminLogin.tsx:77:23
+renderWithHooks@https://b958262d-0f24-4167-96ab-94dc535e52e4-00-2j1k3714v889o.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=b4e44553:11548:35
+updateFunctionComponent@https://b958262d-0f24-4167-96ab-94dc535e52e4-00-2j1k3714v889o.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=b4e44553:14582:28
+beginWork@https://b958262d-0f24-4167-96ab-94dc535e52e4-00-2j1k3714v889o.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=b4e44553:15924:22
+beginWork$1@https://b958262d-0f24-4167-96ab-94dc535e52e4-00-2j1k3714v889o.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=b4e44553:19753:22
+performUnitOfWork@https://b958262d-0f24-4167-96ab-94dc535e52e4-00-2j1k3714v889o.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=b4e44553:19198:20
+workLoopSync@https://b958262d-0f24-4167-96ab-94dc535e52e4-00-2j1k3714v889o.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=b4e44553:19137:30
+renderRootSync@https://b958262d-0f24-4167-96ab-94dc535e52e4-00-2j1k3714v889o.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=b4e44553:19116:15
+recoverFromConcurrentError@https://b958262d-0f24-4167-96ab-94dc535e52e4-00-2j1k3714v889o.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=b4e44553:18736:42
+performSyncWorkOnRoot@https://b958262d-0f24-4167-96ab-94dc535e52e4-00-2j1k3714v889o.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=b4e44553:18879:28
+flushSyncCallbacks@https://b958262d-0f24-4167-96ab-94dc535e52e4-00-2j1k3714v889o.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=b4e44553:9119:30
+node_modules/react-dom/cjs/react-dom.development.js/ensureRootIsScheduled/<@https://b958262d-0f24-4167-96ab-94dc535e52e4-00-2j1k3714v889o.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=b4e44553:18627:21
