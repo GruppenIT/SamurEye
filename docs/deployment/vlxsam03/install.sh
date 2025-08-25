@@ -118,19 +118,22 @@ log "🔴 Instalando Redis..."
 # Instalar Redis
 apt install -y redis-server
 
-# Garantir que o usuário redis existe
-if ! id "redis" &>/dev/null; then
-    useradd -r -s /bin/false redis
-fi
+# Parar Redis se estiver rodando para configuração limpa
+systemctl stop redis-server 2>/dev/null || true
+pkill redis-server 2>/dev/null || true
+sleep 2
 
-# Garantir que o grupo redis existe
-if ! getent group redis >/dev/null; then
-    groupadd redis
-fi
+# Usar diretórios padrão Redis (evita problemas AppArmor Ubuntu 24.04)
+mkdir -p /var/lib/redis
+mkdir -p /var/log/redis
+chown redis:redis /var/lib/redis
+chown redis:redis /var/log/redis
+chmod 750 /var/lib/redis
+chmod 750 /var/log/redis
 
-# Configuração Redis para SamurEye
+# Configuração Redis compatível com Ubuntu 24.04
 cat > /etc/redis/redis.conf << 'EOF'
-# Redis Configuration for SamurEye
+# Redis Configuration for SamurEye - Ubuntu 24.04 Compatible
 # vlxsam03 - Cache and Sessions
 
 # Network
@@ -143,7 +146,7 @@ requirepass SamurEye2024Redis!
 maxmemory 2gb
 maxmemory-policy allkeys-lru
 
-# Persistence
+# Persistence (usando diretório padrão)
 save 900 1
 save 300 10
 save 60 10000
@@ -151,13 +154,13 @@ stop-writes-on-bgsave-error yes
 rdbcompression yes
 rdbchecksum yes
 dbfilename dump.rdb
-dir /opt/data/redis
+dir /var/lib/redis
 
-# Logging
+# Logging (usando diretório padrão)
 loglevel notice
-logfile /var/log/samureye/redis.log
+logfile /var/log/redis/redis-server.log
 
-# Session storage optimization
+# Performance
 timeout 0
 tcp-keepalive 300
 
@@ -169,36 +172,34 @@ rename-command CONFIG "CONFIG_b835e7b6c3f1"
 
 # Client connections
 maxclients 1000
+
+# System compatibility
+daemonize no
+supervised systemd
 EOF
 
-# Configurar systemd override para Redis
-mkdir -p /etc/systemd/system/redis-server.service.d
-cat > /etc/systemd/system/redis-server.service.d/override.conf << 'EOF'
-[Service]
-User=redis
-Group=redis
-ExecStart=
-ExecStart=/usr/bin/redis-server /etc/redis/redis.conf
-ReadWriteDirectories=-/opt/data/redis
-EOF
+# Garantir permissões na configuração
+chown redis:redis /etc/redis/redis.conf
+chmod 640 /etc/redis/redis.conf
 
-# Verificar permissões Redis e iniciar serviço
-if [ ! -d "/opt/data/redis" ]; then
-    mkdir -p /opt/data/redis
-fi
-chown redis:redis /opt/data/redis
-chmod 750 /opt/data/redis
-
-# Recarregar systemd e iniciar Redis
+# Recarregar systemd e iniciar Redis (sem override problemático)
 systemctl daemon-reload
 systemctl enable redis-server
-systemctl stop redis-server 2>/dev/null || true
-sleep 2
 systemctl start redis-server
+
+# Aguardar inicialização
+sleep 3
 
 # Verificar se Redis iniciou corretamente
 if ! systemctl is-active --quiet redis-server; then
     error "Falha ao iniciar o Redis. Verifique os logs: journalctl -xeu redis-server.service"
+fi
+
+# Teste de conectividade
+if redis-cli -h 127.0.0.1 -a SamurEye2024Redis! ping | grep -q PONG; then
+    log "✅ Redis configurado e testado com sucesso"
+else
+    warn "⚠️ Redis iniciou mas conexão com senha falhou"
 fi
 
 log "Redis configurado e iniciado"
@@ -343,11 +344,13 @@ PGPORT=5432
 PGUSER=username
 PGPASSWORD=password
 
-# Redis Configuration
+# Redis Configuration  
 REDIS_HOST=172.24.1.153
 REDIS_PORT=6379
 REDIS_PASSWORD=SamurEye2024Redis!
 REDIS_URL=redis://:SamurEye2024Redis!@172.24.1.153:6379
+REDIS_DATA_DIR=/var/lib/redis
+REDIS_LOG_FILE=/var/log/redis/redis-server.log
 
 # Object Storage (Google Cloud Storage)
 # Configurado automaticamente no vlxsam02 via object storage setup
@@ -567,6 +570,8 @@ log "🔄 Iniciando backup diário..."
 log "Backing up Redis..."
 mkdir -p "$BACKUP_DIR/redis/$BACKUP_DATE"
 redis-cli -h 172.24.1.153 -a SamurEye2024Redis! --rdb "$BACKUP_DIR/redis/$BACKUP_DATE/dump.rdb"
+# Backup Redis data directory
+cp -r /var/lib/redis/* "$BACKUP_DIR/redis/$BACKUP_DATE/" 2>/dev/null || true
 
 # Backup Neon Database (se configurado)
 if [ -n "$DATABASE_URL" ]; then
