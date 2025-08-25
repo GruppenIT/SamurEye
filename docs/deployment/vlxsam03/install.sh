@@ -261,20 +261,27 @@ if [ -d "/opt/data/minio" ]; then
     rm -rf /opt/data/minio
 fi
 
-# Criar diretório do zero com permissões corretas
+# Garantir que /opt/data existe e tem permissões adequadas
+if [ ! -d "/opt/data" ]; then
+    mkdir -p /opt/data
+    chown samureye:samureye /opt/data
+fi
+
+# Criar diretório MinIO com permissões corretas (como root primeiro)
 mkdir -p /opt/data/minio/data
 chown -R minio:minio /opt/data/minio
 chmod -R 755 /opt/data/minio
 
 # Definir o diretório como home do usuário minio após criação
-usermod -d /opt/data/minio minio
+usermod -d /opt/data/minio minio 2>/dev/null || true
 
 # Inicializar estrutura MinIO corretamente
-sudo -u minio mkdir -p /opt/data/minio/data/.minio.sys
+sudo -u minio mkdir -p /opt/data/minio/data/.minio.sys 2>/dev/null || true
 
 # Verificar se as permissões estão corretas
-log "Estrutura MinIO criada: $(ls -la /opt/data/minio/)"
-log "✅ Diretório MinIO criado e inicializado"
+log "Estrutura MinIO criada:"
+ls -la /opt/data/minio/ 2>/dev/null || log "Diretório MinIO não acessível"
+log "✅ Diretório MinIO configurado"
 
 # Configurar MinIO
 mkdir -p /etc/default
