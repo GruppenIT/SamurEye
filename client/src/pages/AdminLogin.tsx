@@ -11,6 +11,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Shield, Lock } from "lucide-react";
 import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
+import { useEffect } from "react";
 
 const adminLoginSchema = z.object({
   email: z.string().email("Email inválido"),
@@ -23,12 +25,37 @@ export default function AdminLogin() {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const [, setLocation] = useLocation();
+  const { isAuthenticated: isAdminAuthenticated, isLoading: adminLoading } = useAdminAuth();
+
+  // Redirect if already logged in as admin
+  useEffect(() => {
+    if (!adminLoading && isAdminAuthenticated) {
+      setLocation('/admin/dashboard');
+    }
+  }, [isAdminAuthenticated, adminLoading, setLocation]);
 
   // Fetch system settings to get logo
   const { data: systemSettings } = useQuery({
     queryKey: ['/api/system/settings'],
     retry: false,
   });
+
+  // Show loading if checking admin auth
+  if (adminLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent mx-auto"></div>
+          <p className="text-muted-foreground mt-2">Verificando autenticação...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Don't render login form if already authenticated
+  if (isAdminAuthenticated) {
+    return null;
+  }
 
   const form = useForm<AdminLoginForm>({
     resolver: zodResolver(adminLoginSchema),

@@ -103,6 +103,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Check admin authentication status
+  app.get('/api/admin/me', async (req, res) => {
+    try {
+      const adminUser = (req.session as any)?.adminUser;
+      if (adminUser?.isAdmin) {
+        res.json({ 
+          isAuthenticated: true, 
+          email: adminUser.email,
+          isAdmin: true 
+        });
+      } else {
+        res.status(401).json({ 
+          isAuthenticated: false, 
+          message: 'Not authenticated' 
+        });
+      }
+    } catch (error) {
+      res.status(500).json({ message: 'Erro na verificação de autenticação' });
+    }
+  });
+
   // Admin middleware
   const isAdmin = (req: any, res: any, next: any) => {
     if (!(req.session as any)?.adminUser?.isAdmin) {

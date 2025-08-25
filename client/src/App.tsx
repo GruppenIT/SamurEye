@@ -21,6 +21,7 @@ import AdminUserCreate from "@/pages/AdminUserCreate";
 import AdminSettings from "@/pages/AdminSettings";
 import AdminUserEdit from "@/pages/AdminUserEdit";
 import AdminTenantEdit from "@/pages/AdminTenantEdit";
+import { AdminProtectedRoute } from "@/components/AdminProtectedRoute";
 
 function Router() {
   const { isAuthenticated, isLoading, error } = useAuth();
@@ -29,14 +30,38 @@ function Router() {
 
   return (
     <Switch>
-      {/* Admin routes - no authentication needed */}
+      {/* Admin routes */}
       <Route path="/admin" component={AdminLogin} />
-      <Route path="/admin/dashboard" component={AdminDashboard} />
-      <Route path="/admin/settings" component={AdminSettings} />
-      <Route path="/admin/users/create" component={AdminUserCreate} />
-      <Route path="/admin/users/:id/edit" component={AdminUserEdit} />
-      <Route path="/admin/tenants/:tenantId/edit" component={AdminTenantEdit} />
-      <Route path="/admin/tenants/:tenantId/users" component={TenantUsers} />
+      <Route path="/admin/dashboard">
+        <AdminProtectedRoute>
+          <AdminDashboard />
+        </AdminProtectedRoute>
+      </Route>
+      <Route path="/admin/settings">
+        <AdminProtectedRoute>
+          <AdminSettings />
+        </AdminProtectedRoute>
+      </Route>
+      <Route path="/admin/users/create">
+        <AdminProtectedRoute>
+          <AdminUserCreate />
+        </AdminProtectedRoute>
+      </Route>
+      <Route path="/admin/users/:id/edit">
+        <AdminProtectedRoute>
+          <AdminUserEdit />
+        </AdminProtectedRoute>
+      </Route>
+      <Route path="/admin/tenants/:tenantId/edit">
+        <AdminProtectedRoute>
+          <AdminTenantEdit />
+        </AdminProtectedRoute>
+      </Route>
+      <Route path="/admin/tenants/:tenantId/users">
+        <AdminProtectedRoute>
+          <TenantUsers />
+        </AdminProtectedRoute>
+      </Route>
       
       {/* Regular user routes */}
       {isLoading ? (
