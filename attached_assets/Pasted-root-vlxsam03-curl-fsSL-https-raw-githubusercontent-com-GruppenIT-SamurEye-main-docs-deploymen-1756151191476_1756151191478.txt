@@ -1,0 +1,133 @@
+root@vlxsam03:~# curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam03/install.sh | bash
+[19:41:06] 🚀 Iniciando instalação vlxsam03 - Database/Services Server
+[19:41:06] Servidor: 172.24.1.153
+[19:41:06] Data Directory: /opt/data
+[19:41:06] 📦 Atualizando sistema base...
+Hit:1 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:2 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:3 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:4 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+All packages are up to date.
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+Calculating upgrade... Done
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+curl is already the newest version (8.5.0-2ubuntu10.6).
+wget is already the newest version (1.21.4-1ubuntu4.1).
+gnupg is already the newest version (2.4.4-2ubuntu17.3).
+software-properties-common is already the newest version (0.99.49.3).
+apt-transport-https is already the newest version (2.8.3).
+ca-certificates is already the newest version (20240203).
+lsb-release is already the newest version (12.0-2).
+jq is already the newest version (1.7.1-3ubuntu0.24.04.1).
+htop is already the newest version (3.3.0-4build1).
+iotop is already the newest version (0.6-42-ga14256a-0.2build1).
+netcat-openbsd is already the newest version (1.226-1ubuntu2).
+redis-tools is already the newest version (5:7.0.15-1ubuntu0.24.04.1).
+postgresql-client-16 is already the newest version (16.9-0ubuntu0.24.04.1).
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+[19:41:09] Sistema base atualizado
+[19:41:09] 👤 Configurando usuários e diretórios...
+[19:41:09] Usuários e diretórios configurados
+[19:41:09] 🔴 Instalando Redis...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+redis-server is already the newest version (5:7.0.15-1ubuntu0.24.04.1).
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+Synchronizing state of redis-server.service with SysV service script with /usr/lib/systemd/systemd-sysv-install.
+Executing: /usr/lib/systemd/systemd-sysv-install enable redis-server
+Job for redis-server.service failed because the control process exited with error code.
+See "systemctl status redis-server.service" and "journalctl -xeu redis-server.service" for details.
+root@vlxsam03:~# journalctl -xeu redis-server.service
+░░ Defined-By: systemd
+░░ Support: http://www.ubuntu.com/support
+░░
+░░ An ExecStart= process belonging to unit redis-server.service has exited.
+░░
+░░ The process' exit code is 'exited' and its exit status is 1.
+Aug 25 19:41:11 vlxsam03 systemd[1]: redis-server.service: Failed with result 'exit-code'.
+░░ Subject: Unit failed
+░░ Defined-By: systemd
+░░ Support: http://www.ubuntu.com/support
+░░
+░░ The unit redis-server.service has entered the 'failed' state with result 'exit-code'.
+Aug 25 19:41:11 vlxsam03 systemd[1]: Failed to start redis-server.service - Advanced key-value store.
+░░ Subject: A start job for unit redis-server.service has failed
+░░ Defined-By: systemd
+░░ Support: http://www.ubuntu.com/support
+░░
+░░ A start job for unit redis-server.service has finished with a failure.
+░░
+░░ The job identifier is 9117 and the job result is failed.
+Aug 25 19:41:11 vlxsam03 systemd[1]: redis-server.service: Scheduled restart job, restart counter is at 4.
+░░ Subject: Automatic restarting of a unit has been scheduled
+░░ Defined-By: systemd
+░░ Support: http://www.ubuntu.com/support
+░░
+░░ Automatic restarting of the unit redis-server.service has been scheduled, as the result for
+░░ the configured Restart= setting for the unit.
+Aug 25 19:41:11 vlxsam03 systemd[1]: Starting redis-server.service - Advanced key-value store...
+░░ Subject: A start job for unit redis-server.service has begun execution
+░░ Defined-By: systemd
+░░ Support: http://www.ubuntu.com/support
+░░
+░░ A start job for unit redis-server.service has begun execution.
+░░
+░░ The job identifier is 9228.
+Aug 25 19:41:11 vlxsam03 redis-server[30609]: *** FATAL CONFIG FILE ERROR (Redis 7.0.15) ***
+Aug 25 19:41:11 vlxsam03 redis-server[30609]: Reading the configuration file, at line 22
+Aug 25 19:41:11 vlxsam03 redis-server[30609]: >>> 'dir /opt/data/redis'
+Aug 25 19:41:11 vlxsam03 redis-server[30609]: Permission denied
+Aug 25 19:41:11 vlxsam03 systemd[1]: redis-server.service: Main process exited, code=exited, status=1/FAILURE
+░░ Subject: Unit process exited
+░░ Defined-By: systemd
+░░ Support: http://www.ubuntu.com/support
+░░
+░░ An ExecStart= process belonging to unit redis-server.service has exited.
+░░
+░░ The process' exit code is 'exited' and its exit status is 1.
+Aug 25 19:41:11 vlxsam03 systemd[1]: redis-server.service: Failed with result 'exit-code'.
+░░ Subject: Unit failed
+░░ Defined-By: systemd
+░░ Support: http://www.ubuntu.com/support
+░░
+░░ The unit redis-server.service has entered the 'failed' state with result 'exit-code'.
+Aug 25 19:41:11 vlxsam03 systemd[1]: Failed to start redis-server.service - Advanced key-value store.
+░░ Subject: A start job for unit redis-server.service has failed
+░░ Defined-By: systemd
+░░ Support: http://www.ubuntu.com/support
+░░
+░░ A start job for unit redis-server.service has finished with a failure.
+░░
+░░ The job identifier is 9228 and the job result is failed.
+Aug 25 19:41:11 vlxsam03 systemd[1]: redis-server.service: Scheduled restart job, restart counter is at 5.
+░░ Subject: Automatic restarting of a unit has been scheduled
+░░ Defined-By: systemd
+░░ Support: http://www.ubuntu.com/support
+░░
+░░ Automatic restarting of the unit redis-server.service has been scheduled, as the result for
+░░ the configured Restart= setting for the unit.
+Aug 25 19:41:11 vlxsam03 systemd[1]: redis-server.service: Start request repeated too quickly.
+Aug 25 19:41:11 vlxsam03 systemd[1]: redis-server.service: Failed with result 'exit-code'.
+░░ Subject: Unit failed
+░░ Defined-By: systemd
+░░ Support: http://www.ubuntu.com/support
+░░
+░░ The unit redis-server.service has entered the 'failed' state with result 'exit-code'.
+Aug 25 19:41:11 vlxsam03 systemd[1]: Failed to start redis-server.service - Advanced key-value store.
+░░ Subject: A start job for unit redis-server.service has failed
+░░ Defined-By: systemd
+░░ Support: http://www.ubuntu.com/support
+░░
+░░ A start job for unit redis-server.service has finished with a failure.
+░░
+░░ The job identifier is 9339 and the job result is failed.
+root@vlxsam03:~#

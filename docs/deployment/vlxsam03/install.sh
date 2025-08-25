@@ -92,10 +92,20 @@ mkdir -p "$SCRIPTS_DIR"
 mkdir -p "$CONFIG_DIR"
 mkdir -p /var/log/samureye
 
-# Definir permissões
+# Definir permissões gerais
 chown -R samureye:samureye "$DATA_DIR" "$BACKUP_DIR"
 chown -R samureye:samureye /var/log/samureye
 chmod 750 "$DATA_DIR" "$BACKUP_DIR"
+
+# Criar diretórios específicos para Redis com permissões corretas
+mkdir -p "$DATA_DIR/redis"
+chown redis:redis "$DATA_DIR/redis"
+chmod 750 "$DATA_DIR/redis"
+
+# Criar arquivo de log do Redis se não existir
+touch /var/log/samureye/redis.log
+chown redis:redis /var/log/samureye/redis.log
+chmod 640 /var/log/samureye/redis.log
 
 log "Usuários e diretórios configurados"
 
@@ -107,6 +117,16 @@ log "🔴 Instalando Redis..."
 
 # Instalar Redis
 apt install -y redis-server
+
+# Garantir que o usuário redis existe
+if ! id "redis" &>/dev/null; then
+    useradd -r -s /bin/false redis
+fi
+
+# Garantir que o grupo redis existe
+if ! getent group redis >/dev/null; then
+    groupadd redis
+fi
 
 # Configuração Redis para SamurEye
 cat > /etc/redis/redis.conf << 'EOF'
@@ -162,11 +182,24 @@ ExecStart=/usr/bin/redis-server /etc/redis/redis.conf
 ReadWriteDirectories=-/opt/data/redis
 EOF
 
-# Definir permissões e iniciar Redis
+# Verificar permissões Redis e iniciar serviço
+if [ ! -d "/opt/data/redis" ]; then
+    mkdir -p /opt/data/redis
+fi
 chown redis:redis /opt/data/redis
+chmod 750 /opt/data/redis
+
+# Recarregar systemd e iniciar Redis
 systemctl daemon-reload
 systemctl enable redis-server
-systemctl restart redis-server
+systemctl stop redis-server 2>/dev/null || true
+sleep 2
+systemctl start redis-server
+
+# Verificar se Redis iniciou corretamente
+if ! systemctl is-active --quiet redis-server; then
+    error "Falha ao iniciar o Redis. Verifique os logs: journalctl -xeu redis-server.service"
+fi
 
 log "Redis configurado e iniciado"
 
