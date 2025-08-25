@@ -53,9 +53,13 @@ export function LogoUploader({
       // Convert Google Cloud Storage URL to our local endpoint
       const originalUrl = uploadURL.split('?')[0];
       const urlParts = originalUrl.split('/');
-      const bucketName = urlParts[3];
-      const objectPath = urlParts.slice(4).join('/');
-      const logoUrl = `/objects/uploads/${objectPath}`;
+      // URL format: https://storage.googleapis.com/bucket-name/.private/uploads/object-id
+      // We want to extract just the object-id
+      const uploadsIndex = urlParts.indexOf('uploads');
+      const objectId = uploadsIndex !== -1 && urlParts[uploadsIndex + 1] 
+        ? urlParts[uploadsIndex + 1] 
+        : urlParts[urlParts.length - 1];
+      const logoUrl = `/objects/uploads/${objectId}`;
       
       const updateData = type === 'system' 
         ? { logoUrl }
