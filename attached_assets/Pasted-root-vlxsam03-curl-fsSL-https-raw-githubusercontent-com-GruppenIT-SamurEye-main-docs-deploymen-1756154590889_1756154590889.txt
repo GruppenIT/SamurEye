@@ -1,0 +1,138 @@
+root@vlxsam03:~# curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam03/install.sh | bash
+[20:41:40] 🚀 Iniciando instalação vlxsam03 - Database/Services Server
+[20:41:40] Servidor: 172.24.1.153
+[20:41:40] Data Directory: /opt/data
+[20:41:40] 📦 Atualizando sistema base...
+Hit:1 https://packages.grafana.com/oss/deb stable InRelease
+Hit:2 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:3 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:4 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:5 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+All packages are up to date.
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+Calculating upgrade... Done
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+curl is already the newest version (8.5.0-2ubuntu10.6).
+wget is already the newest version (1.21.4-1ubuntu4.1).
+gnupg is already the newest version (2.4.4-2ubuntu17.3).
+software-properties-common is already the newest version (0.99.49.3).
+apt-transport-https is already the newest version (2.8.3).
+ca-certificates is already the newest version (20240203).
+lsb-release is already the newest version (12.0-2).
+jq is already the newest version (1.7.1-3ubuntu0.24.04.1).
+htop is already the newest version (3.3.0-4build1).
+iotop is already the newest version (0.6-42-ga14256a-0.2build1).
+netcat-openbsd is already the newest version (1.226-1ubuntu2).
+redis-tools is already the newest version (5:7.0.15-1ubuntu0.24.04.1).
+postgresql-client-16 is already the newest version (16.9-0ubuntu0.24.04.1).
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+[20:41:43] Sistema base atualizado
+[20:41:43] 👤 Configurando usuários e diretórios...
+[20:41:44] Usuários e diretórios configurados
+[20:41:44] 🔴 Instalando Redis...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+redis-server is already the newest version (5:7.0.15-1ubuntu0.24.04.1).
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+Synchronizing state of redis-server.service with SysV service script with /usr/lib/systemd/systemd-sysv-install.
+Executing: /usr/lib/systemd/systemd-sysv-install enable redis-server
+Warning: Using a password with '-a' or '-u' option on the command line interface may not be safe.
+[20:41:50] ✅ Redis configurado e testado com sucesso
+[20:41:50] Redis configurado e iniciado
+[20:41:50] 📊 Instalando Grafana...
+File '/usr/share/keyrings/grafana.gpg' exists. Overwrite? (y/N) y
+Hit:1 https://packages.grafana.com/oss/deb stable InRelease
+Hit:2 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:3 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:4 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:5 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+All packages are up to date.
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+grafana is already the newest version (12.1.1).
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+Synchronizing state of grafana-server.service with SysV service script with /usr/lib/systemd/systemd-sysv-install.
+Executing: /usr/lib/systemd/systemd-sysv-install enable grafana-server
+[20:41:55] Grafana instalado e configurado
+[20:41:55] 🗄️ Instalando MinIO (backup local)...
+--2025-08-25 20:41:56--  https://dl.min.io/server/minio/release/linux-amd64/minio
+Resolving dl.min.io (dl.min.io)... 178.128.69.202, 138.68.11.125
+Connecting to dl.min.io (dl.min.io)|178.128.69.202|:443... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 110780600 (106M) [application/octet-stream]
+Saving to: ‘/usr/local/bin/minio’
+
+/usr/local/bin/minio                                 100%[======================================================================================================================>] 105.65M  6.23MB/s    in 69s
+
+2025-08-25 20:43:05 (1.53 MB/s) - ‘/usr/local/bin/minio’ saved [110780600/110780600]
+
+usermod: no changes
+[20:43:05] Estrutura MinIO criada:
+total 12
+drwxr-xr-x 3 minio    minio    4096 Aug 25 20:43 .
+drwxr-x--- 6 samureye samureye 4096 Aug 25 20:43 ..
+drwxr-xr-x 2 minio    minio    4096 Aug 25 20:43 data
+[20:43:05] ✅ Diretório MinIO configurado
+[20:43:05] Testando acesso MinIO ao diretório...
+[20:43:06] Iniciando MinIO...
+[20:43:15] WARNING: ⚠️ MinIO não iniciou corretamente. Verificando logs...
+Aug 25 20:43:11 vlxsam03 minio[45414]: FATAL Unable to use the drive /opt/data/minio/data: drive not found: Invalid arguments specified
+Aug 25 20:43:11 vlxsam03 systemd[1]: minio.service: Main process exited, code=exited, status=1/FAILURE
+Aug 25 20:43:11 vlxsam03 systemd[1]: minio.service: Failed with result 'exit-code'.
+[20:43:15] ⚠️ MinIO será configurado como opcional (pode ser corrigido manualmente se necessário)
+[20:43:15] 🔧 Configurando variáveis de ambiente...
+[20:43:15] Configuração de ambiente criada
+[20:43:15] 📝 Criando scripts de teste...
+[20:43:15] Scripts de teste criados
+[20:43:15] ⏰ Configurando cron para backups...
+[20:43:15] Cron jobs configurados
+[20:43:15] 📋 Configurando rotação de logs...
+[20:43:15] Rotação de logs configurada
+[20:43:15] 🎯 Finalizando instalação...
+[20:43:15] ✅ redis-server: Ativo
+[20:43:15] WARNING: ⚠️ grafana-server: Inativo
+[20:43:15] WARNING: ⚠️ minio: Inativo
+
+============================================================================
+🎉 INSTALAÇÃO vlxsam03 CONCLUÍDA
+============================================================================
+
+📊 SERVIÇOS INSTALADOS:
+  • Redis (Cache/Sessions): 172.24.1.153:6379
+  • Grafana (Monitoring): http://172.24.1.153:3000
+  • MinIO (Backup): http://172.24.1.153:9000
+
+🔑 CREDENCIAIS PADRÃO:
+  • Redis: senha 'SamurEye2024Redis!'
+  • Grafana: admin/SamurEye2024!
+  • MinIO: admin/SamurEye2024!
+
+⚠️ PRÓXIMOS PASSOS:
+  1. Configurar DATABASE_URL no arquivo /etc/samureye/.env
+  2. Configurar object storage no vlxsam02
+  3. Executar testes: /opt/samureye/scripts/health-check.sh
+  4. Verificar conectividade Neon: /opt/samureye/scripts/test-neon-connection.sh
+
+📁 DIRETÓRIOS IMPORTANTES:
+  • Dados: /opt/data
+  • Backups: /opt/backup
+  • Scripts: /opt/samureye/scripts
+  • Configuração: /etc/samureye
+  • Logs: /var/log/samureye
+
+============================================================================
+[20:43:15] ✅ Instalação vlxsam03 concluída com sucesso!
+root@vlxsam03:~#
