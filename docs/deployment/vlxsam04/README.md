@@ -3,19 +3,24 @@
 ## Visão Geral
 
 O servidor vlxsam04 executa o agente coletor do SamurEye na rede interna:
-- **Comunicação outbound-only** com a plataforma
-- **Ferramentas de segurança** (Nmap, Nuclei, etc.)
-- **Telemetria em tempo real** de sistema e rede
-- **Execução de jornadas** de teste de segurança
+- **Comunicação outbound-only** com mTLS e autenticação por certificado
+- **Ferramentas de segurança** (Nmap, Nuclei, Masscan, Gobuster)
+- **Telemetria em tempo real** via WebSocket e HTTPS
+- **Execução de jornadas multi-tenant** de teste de segurança
+- **Integração Object Storage** para upload de resultados
 - **Monitoramento local** sem exposição externa
+- **Autenticação step-ca** para certificados X.509
 
 ## Especificações
 
-- **IP:** 192.168.100.151 (rede interna)
+- **IP:** 192.168.100.151 (rede interna isolada)
 - **OS:** Ubuntu 22.04 LTS
-- **Comunicação:** Outbound HTTPS apenas (porta 443)
+- **Comunicação:** Outbound HTTPS/WSS apenas (porta 443)
+- **Autenticação:** mTLS com certificados X.509 (step-ca)
 - **Usuário:** samureye-collector
 - **Diretório:** /opt/samureye-collector
+- **Runtime:** Python 3.11+ com Node.js 20.x (para ferramentas)
+- **Storage:** Local + Object Storage (upload de resultados)
 
 ## Instalação
 
@@ -38,49 +43,69 @@ chmod +x install.sh
 ### O que o Script Instala
 
 1. **Sistema Base**
-   - Python 3.10+ para o agente collector
-   - Ferramentas de segurança (Nmap, Nuclei)
+   - Python 3.11+ para o agente collector
+   - Node.js 20.x para ferramentas modernas
    - Usuário dedicado samureye-collector
-   - Estrutura de diretórios segura
+   - Estrutura de diretórios segura com isolamento
 
-2. **Collector Agent**
-   - Cliente HTTPS para comunicação com app
-   - Sistema de telemetria local
-   - Executor de comandos seguro
-   - Logs estruturados
+2. **Collector Agent Multi-Tenant**
+   - Cliente HTTPS/WebSocket com mTLS
+   - Sistema de telemetria em tempo real
+   - Executor de comandos com sandbox
+   - Logs estruturados por tenant
+   - Integração Object Storage
 
-3. **Ferramentas de Segurança**
-   - Nmap completo com scripts
-   - Nuclei com templates atualizados
+3. **Ferramentas de Segurança Atualizadas**
+   - Nmap 7.94+ com scripts NSE
+   - Nuclei 3.x com templates atualizados
    - Masscan para scanning rápido
    - Gobuster para descoberta web
+   - Custom tools para BAS (Breach & Attack Simulation)
 
-4. **Serviços**
+4. **Segurança e Autenticação**
+   - step-ca client para certificados
+   - mTLS para todas comunicações
+   - Validação de certificados X.509
+   - Rotação automática de certificados
+
+5. **Serviços Systemd**
    - samureye-collector (agente principal)
-   - samureye-telemetry (coleta de métricas)
-   - Scripts de health check
+   - samureye-telemetry (métricas tempo real)
+   - samureye-cert-renew (renovação certificados)
+   - Scripts de health check multi-tenant
 
 ## Configuração Pós-Instalação
 
-### 1. Configurar Certificado do Collector
+### 1. Configurar Certificados step-ca
 
 ```bash
-# O script gerará um certificado único para este collector
-# Copie a chave pública para registrar na aplicação
-cat /opt/samureye-collector/certs/collector.pub
+# Configurar cliente step-ca e obter certificado inicial
+./scripts/setup-step-ca.sh
 
-# Registre este collector na aplicação via interface web
-# Usado para autenticação mútua
+# Verificar certificado X.509 gerado
+step certificate inspect /opt/samureye-collector/certs/collector.crt
+
+# Registrar collector na aplicação (via API ou interface web)
+cat /opt/samureye-collector/certs/collector-id.txt
+
+# Certificados são renovados automaticamente via step-ca
+# Verificar status: systemctl status samureye-cert-renew
 ```
 
-### 2. Configurar Endpoint da Aplicação
+### 2. Configurar Endpoints e Multi-Tenancy
 
 ```bash
-# Editar configuração para apontar para vlxsam02
+# Editar configuração principal
 sudo nano /etc/samureye-collector/.env
 
-# Variável principal:
+# Endpoints principais:
 SAMUREYE_API_URL=https://api.samureye.com.br
+SAMUREYE_WS_URL=wss://api.samureye.com.br/ws
+STEP_CA_URL=https://ca.samureye.com.br
+
+# Multi-tenancy (configurado via API após registro)
+COLLECTOR_TENANT_ID=auto-configured
+COLLECTOR_ROLE=scanner
 ```
 
 ### 3. Testar Conectividade
@@ -101,23 +126,34 @@ SAMUREYE_API_URL=https://api.samureye.com.br
 # Verificar status dos serviços
 systemctl status samureye-collector
 systemctl status samureye-telemetry
+systemctl status samureye-cert-renew
 
-# Health check completo
+# Health check completo multi-tenant
 ./scripts/health-check.sh
 
-# Testar ferramentas
-nmap --version
-nuclei --version
+# Testar ferramentas atualizadas
+nmap --version                    # 7.94+
+nuclei --version                  # 3.x
+masscan --version
+gobuster version
+step version                      # step-ca client
 ```
 
 ### Testar Comunicação
 
 ```bash
-# Testar conectividade HTTPS com vlxsam02
-curl -v https://api.samureye.com.br/api/health
+# Testar conectividade HTTPS com mTLS
+./scripts/test-mtls-connection.sh
+
+# Testar WebSocket real-time
+./scripts/test-websocket.sh
+
+# Testar upload Object Storage
+./scripts/test-object-storage.sh
 
 # Verificar logs de comunicação
 tail -f /var/log/samureye-collector/communication.log
+tail -f /var/log/samureye-collector/websocket.log
 ```
 
 ## Arquitetura do Collector
@@ -126,35 +162,57 @@ tail -f /var/log/samureye-collector/communication.log
 
 ```
 /opt/samureye-collector/
-├── agent/              # Agente principal Python
-│   ├── main.py         # Loop principal
-│   ├── api_client.py   # Cliente HTTPS
-│   ├── executor.py     # Executor de comandos
-│   ├── telemetry.py    # Coleta de métricas
-│   └── security.py     # Validações de segurança
-├── certs/              # Certificados do collector
-├── tools/              # Ferramentas de segurança
-├── logs/               # Logs locais
-└── temp/               # Arquivos temporários
+├── agent/                  # Agente principal Python 3.11+
+│   ├── main.py             # Loop principal multi-tenant
+│   ├── api_client.py       # Cliente HTTPS/WebSocket com mTLS
+│   ├── websocket_client.py # Cliente WebSocket real-time
+│   ├── executor.py         # Executor sandbox para comandos
+│   ├── telemetry.py        # Coleta de métricas tempo real
+│   ├── security.py         # Validações mTLS e sandbox
+│   ├── object_storage.py   # Cliente Object Storage
+│   └── tenant_manager.py   # Gestão multi-tenant
+├── certs/                  # Certificados X.509 step-ca
+│   ├── collector.crt       # Certificado do collector
+│   ├── collector.key       # Chave privada
+│   ├── ca.crt              # CA root certificate
+│   └── collector-id.txt    # ID único do collector
+├── tools/                  # Ferramentas de segurança atualizadas
+│   ├── nmap/               # Nmap 7.94+ com scripts
+│   ├── nuclei/             # Nuclei 3.x com templates
+│   ├── masscan/            # Masscan para scanning rápido
+│   └── custom/             # Ferramentas customizadas BAS
+├── logs/                   # Logs estruturados por tenant
+│   ├── tenant-{id}/        # Logs por tenant
+│   └── system/             # Logs de sistema
+├── temp/                   # Arquivos temporários por tenant
+│   └── tenant-{id}/        # Resultados por tenant
+└── uploads/                # Área de upload Object Storage
+    └── tenant-{id}/        # Uploads por tenant
 ```
 
-### Fluxo de Comunicação
+### Fluxo de Comunicação Multi-Tenant
 
 ```
-1. Collector → API (HTTPS)
-   - Heartbeat a cada 30 segundos
-   - Envio de telemetria
-   - Recebimento de comandos
+1. Autenticação mTLS Inicial
+   - Collector → step-ca: Obter/renovar certificado X.509
+   - Collector → API: Registrar com certificado mTLS
+   - API → Collector: Confirmar registração e tenant assignment
 
-2. API → Collector (via HTTPS response)
-   - Comandos de execução
-   - Configurações
-   - Updates de ferramentas
+2. Comunicação Real-time (WebSocket + mTLS)
+   - Collector → API: Heartbeat + telemetria (30s)
+   - API → Collector: Comandos de execução por tenant
+   - Collector → API: Status de execução em tempo real
 
-3. Collector → API (HTTPS)
-   - Resultados de execução
-   - Logs estruturados
-   - Status de saúde
+3. Transferência de Dados (HTTPS + mTLS)
+   - Collector → Object Storage: Upload de resultados por tenant
+   - Collector → API: Metadados e logs estruturados
+   - API → Collector: Configurações e updates
+
+4. Segurança e Isolamento
+   - Sandbox por tenant para execução de comandos
+   - Logs segregados por tenant
+   - Object Storage com ACL por tenant
+   - Renovação automática de certificados
 ```
 
 ## Ferramentas Disponíveis
@@ -192,25 +250,33 @@ masscan -p80,443 192.168.1.0/24 --rate=1000
 gobuster dir -u http://example.com -w /usr/share/wordlists/common.txt
 ```
 
-## Telemetria Coletada
+## Telemetria Multi-Tenant Coletada
 
-### Métricas de Sistema
-- CPU: Uso por core, load average
-- Memória: Uso, disponível, swap
-- Disco: Espaço, I/O, inodes
-- Rede: Interfaces, tráfego, conectividade
+### Métricas de Sistema (Global)
+- CPU: Uso por core, load average, temperatura
+- Memória: Uso, disponível, swap, cache
+- Disco: Espaço, I/O, inodes, performance
+- Rede: Interfaces, tráfego, latência, conectividade
+- Collector: Status, versão, uptime, certificados
 
-### Métricas de Rede
-- Descoberta de dispositivos ativos
-- Mapeamento de portas abertas
-- Identificação de serviços
-- Mudanças na topologia
+### Métricas por Tenant
+- Jornadas executadas: Status, duração, resultados
+- Comandos executados: Tipo, sucesso/erro, recursos utilizados
+- Descoberta de rede: Hosts ativos, serviços, mudanças
+- Uploads Object Storage: Volume, latência, sucesso
 
-### Métricas de Segurança
-- Vulnerabilidades identificadas
-- Serviços expostos
-- Configurações inseguras
-- Indicadores de comprometimento
+### Métricas de Segurança (Por Tenant)
+- Vulnerabilidades: CVEs identificados, severidade, status
+- Superficie de ataque: Portas, serviços, protocolos expostos
+- Configurações: Baselines, desvios, compliance
+- EDR/AV Testing: Detecções, bypasses, false positives
+- Indicators of Compromise: IOCs detectados, timestamps
+
+### Métricas de Performance
+- Latência de comunicação: API, WebSocket, Object Storage
+- Throughput: Comandos/s, uploads/s, telemetria/s
+- Recursos: CPU/memória por tenant, concorrência
+- Erros: Taxa de erro por tipo, tenant, ferramenta
 
 ## Troubleshooting
 
@@ -221,74 +287,121 @@ gobuster dir -u http://example.com -w /usr/share/wordlists/common.txt
 ping api.samureye.com.br
 curl -I https://api.samureye.com.br
 
-# Testar com certificado do collector
-./scripts/test-auth.sh
+# Testar mTLS com certificado do collector
+./scripts/test-mtls-connection.sh
+
+# Testar WebSocket
+./scripts/test-websocket.sh
+
+# Verificar certificados step-ca
+step certificate inspect /opt/samureye-collector/certs/collector.crt
+step certificate verify /opt/samureye-collector/certs/collector.crt
 
 # Logs de comunicação
 tail -f /var/log/samureye-collector/communication.log
+tail -f /var/log/samureye-collector/websocket.log
+tail -f /var/log/samureye-collector/mtls.log
 ```
 
 ### Problemas do Agente
 
 ```bash
-# Status dos serviços
+# Status dos serviços multi-tenant
 systemctl status samureye-collector
 systemctl status samureye-telemetry
+systemctl status samureye-cert-renew
 
-# Logs detalhados
+# Logs detalhados por componente
 tail -f /var/log/samureye-collector/agent.log
 tail -f /var/log/samureye-collector/telemetry.log
+tail -f /var/log/samureye-collector/tenant-{id}.log
 
-# Restart dos serviços
+# Logs de sistema
+journalctl -u samureye-collector -f
+journalctl -u samureye-telemetry -f
+
+# Restart seguros dos serviços
 systemctl restart samureye-collector
+systemctl restart samureye-telemetry
+
+# Verificar multi-tenancy
+./scripts/check-tenant-isolation.sh
 ```
 
 ### Problemas de Ferramentas
 
 ```bash
-# Verificar instalações
-which nmap nuclei masscan gobuster
+# Verificar instalações atualizadas
+which nmap nuclei masscan gobuster step
+nmap --version                    # Deve ser 7.94+
+nuclei --version                  # Deve ser 3.x+
+step version                      # step-ca client
 
 # Testar execução manual
 nmap localhost
-nuclei --version
+nuclei -target http://localhost -t /opt/samureye-collector/tools/nuclei/templates/
 
-# Verificar permissões
+# Verificar permissões e sandbox
 ls -la /opt/samureye-collector/tools/
+./scripts/test-sandbox.sh
+
+# Atualizar templates Nuclei
+./scripts/update-nuclei-templates.sh
 ```
 
 ## Monitoramento
 
-### Health Check Local
+### Health Check Multi-Tenant
 
 ```bash
-# Executar verificação completa
+# Executar verificação completa multi-tenant
 ./scripts/health-check.sh
 
-# Verificar apenas conectividade
+# Verificar conectividade (mTLS + WebSocket)
 ./scripts/check-connectivity.sh
 
-# Status das ferramentas
+# Status das ferramentas atualizadas
 ./scripts/check-tools.sh
+
+# Verificar isolamento por tenant
+./scripts/check-tenant-isolation.sh
+
+# Testar Object Storage por tenant
+./scripts/test-object-storage-tenant.sh
+
+# Verificar certificados e renovação
+./scripts/check-certificates.sh
 ```
 
-### Logs Importantes
+### Logs Importantes Multi-Tenant
 
 ```bash
-# Agente principal
+# Agente principal multi-tenant
 tail -f /var/log/samureye-collector/agent.log
 
-# Comunicação com API
+# Comunicação (HTTPS + WebSocket + mTLS)
 tail -f /var/log/samureye-collector/communication.log
+tail -f /var/log/samureye-collector/websocket.log
+tail -f /var/log/samureye-collector/mtls.log
 
-# Execução de ferramentas
+# Execução por tenant
 tail -f /var/log/samureye-collector/execution.log
+tail -f /var/log/samureye-collector/tenant-{id}.log
 
-# Telemetria
+# Object Storage uploads
+tail -f /var/log/samureye-collector/object-storage.log
+
+# Telemetria e certificados
 tail -f /var/log/samureye-collector/telemetry.log
+tail -f /var/log/samureye-collector/certificates.log
 
 # Sistema
 journalctl -u samureye-collector -f
+journalctl -u samureye-telemetry -f
+journalctl -u samureye-cert-renew -f
+
+# Logs agregados por tenant
+find /var/log/samureye-collector/logs/tenant-{id}/ -name "*.log" -exec tail -f {} +
 ```
 
 ## Segurança
@@ -296,7 +409,15 @@ journalctl -u samureye-collector -f
 ### Princípios de Segurança
 
 1. **Outbound Only**: Nenhuma conexão inbound permitida
-2. **Certificado Único**: Cada collector tem certificado próprio
+2. **mTLS Universal**: Todas comunicações com autenticação mútua
+3. **Certificados X.509**: step-ca com renovação automática
+4. **Isolamento Multi-Tenant**: Sandbox e logs separados por tenant
+5. **Object Storage ACL**: Controle de acesso por tenant
+6. **Execução Sandbox**: Comandos isolados com limitações de recursos
+7. **Logs Auditados**: Rastreabilidade completa por tenant
+8. **Validação de Comandos**: Whitelist de comandos permitidos
+9. **Comunicação Criptografada**: TLS 1.3 para todas as conexões
+10. **Rotação de Credenciais**: Certificados renovados automaticamente
 3. **Validação Rigorosa**: Todos os comandos são validados
 4. **Logs Completos**: Todas as ações são logadas
 5. **Usuário Limitado**: Execução com usuário não-privilegiado

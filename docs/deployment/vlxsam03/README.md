@@ -2,19 +2,23 @@
 
 ## Visão Geral
 
-O servidor vlxsam03 fornece toda a infraestrutura de dados para a plataforma SamurEye:
-- **PostgreSQL 15** para dados da aplicação
+O servidor vlxsam03 fornece infraestrutura de dados local e conexões para a plataforma SamurEye:
+- **Neon Database** (PostgreSQL serverless) para dados da aplicação
 - **Redis** para cache e sessões
-- **MinIO** para armazenamento de arquivos
+- **Google Cloud Storage** para object storage (via integração)
+- **MinIO** (opcional) para armazenamento local de backup
 - **Grafana** para monitoramento e dashboards
-- **Backup automático** de todos os dados
+- **Sistema Multi-tenant** com isolamento de dados
+- **Backup automático** de configurações e logs
 
 ## Especificações
 
 - **IP:** 172.24.1.153
 - **OS:** Ubuntu 22.04 LTS
-- **Portas:** 5432 (PostgreSQL), 6379 (Redis), 9000 (MinIO), 3000 (Grafana)
-- **Storage:** Dados em /opt/data com backup em /opt/backup
+- **Portas:** 6379 (Redis), 9000 (MinIO - opcional), 3000 (Grafana)
+- **Database:** Neon Database (PostgreSQL serverless) - conexão remota
+- **Object Storage:** Google Cloud Storage - integração via API
+- **Storage Local:** Logs e backup em /opt/data
 
 ## Instalação
 
@@ -36,48 +40,56 @@ chmod +x install.sh
 
 ### O que o Script Instala
 
-1. **PostgreSQL 15**
-   - Configuração otimizada para SamurEye
-   - Usuário e database 'samureye' 
-   - Backup automático diário
-   - Logs estruturados
+1. **Neon Database Configuration**
+   - Configuração de conexão para PostgreSQL serverless
+   - Variáveis de ambiente para DATABASE_URL
+   - Scripts de teste de conectividade
+   - Schema multi-tenant configurado
 
 2. **Redis**
    - Configuração para cache e sessões
    - Persistência configurada
+   - Suporte a session storage
    - Monitoramento ativo
 
-3. **MinIO**
-   - Object storage S3-compatível
-   - Buckets para diferentes tipos de dados
-   - Interface web de administração
+3. **Object Storage Integration**
+   - Configuração Google Cloud Storage
+   - Environment variables para buckets
+   - Scripts de teste de conectividade
+   - MinIO local opcional para backup
 
 4. **Grafana**
-   - Dashboards de monitoramento
-   - Integração com PostgreSQL
+   - Dashboards de monitoramento multi-tenant
+   - Integração com Neon Database
+   - Métricas de sistema e aplicação
    - Alertas configurados
 
 ## Configuração Pós-Instalação
 
-### 1. Configurar Senhas de Banco
+### 1. Configurar Neon Database
 
 ```bash
-# Alterar senha do usuário samureye no PostgreSQL
-sudo -u postgres psql
-ALTER USER samureye PASSWORD 'nova_senha_segura_aqui';
-\q
-
-# Atualizar arquivo de configuração
+# As configurações do Neon Database são feitas via variáveis de ambiente
+# Editar arquivo de configuração
 sudo nano /etc/samureye/.env
+
+# Configurar DATABASE_URL para Neon
+DATABASE_URL=postgresql://user:pass@ep-xyz.us-east-1.aws.neon.tech/samureye?sslmode=require
+
+# Testar conexão
+./scripts/test-neon-connection.sh
 ```
 
-### 2. Configurar MinIO
+### 2. Configurar Object Storage
 
 ```bash
-# Acessar interface web MinIO
-# https://172.24.1.153:9001 (admin/SamurEye2024!)
+# Object Storage é configurado automaticamente via Google Cloud Storage
+# Verificar configuração
+./scripts/test-object-storage.sh
 
-# Criar buckets necessários
+# Configurar MinIO local (opcional - backup)
+# Acessar interface web MinIO
+# http://172.24.1.153:9001 (admin/SamurEye2024!)
 ./scripts/setup-minio-buckets.sh
 ```
 
@@ -100,36 +112,50 @@ sudo nano /etc/samureye/.env
 ./scripts/health-check.sh
 
 # Testar conectividade individual
-pg_isready -h localhost -p 5432 -U samureye
+./scripts/test-neon-connection.sh
 redis-cli ping
-curl http://localhost:9000/minio/health/live
+./scripts/test-object-storage.sh
+curl http://localhost:9000/minio/health/live  # MinIO local (opcional)
 ```
 
 ### Testar Conexões Remotas
 
 ```bash
 # Do vlxsam02, testar conexão
-psql -h 172.24.1.153 -U samureye -d samureye_prod -c "SELECT version();"
+# Neon Database (remoto) - testar do vlxsam02
+export DATABASE_URL="postgresql://..."
+psql $DATABASE_URL -c "SELECT version();"
+
+# Redis local
 redis-cli -h 172.24.1.153 ping
+
+# Object Storage (Google Cloud) - testar conectividade
+curl -s "https://storage.googleapis.com" > /dev/null
+echo "Object Storage: $?"
+
+# MinIO local (opcional)
 curl http://172.24.1.153:9000/minio/health/live
 ```
 
 ## Estrutura de Dados
 
-### PostgreSQL Databases
+### Neon Database (PostgreSQL Serverless)
 
 ```sql
--- Database principal da aplicação
-samureye_prod
+-- Database principal da aplicação (Neon)
+samureye_database
 
--- Tabelas principais:
-- users                 -- Usuários do sistema
-- tenants               -- Multi-tenancy
-- collectors            -- Dispositivos coletores
-- journeys              -- Jornadas de teste
-- credentials           -- Integração Delinea
-- threat_intelligence   -- Dados de ameaças
-- activities            -- Logs de auditoria
+-- Tabelas principais (Multi-tenant):
+- users                 -- Usuários globais e SOC
+- tenants               -- Organizações/tenants
+- tenant_users          -- Usuários por tenant
+- sessions              -- Sessões de usuário
+- collectors            -- Dispositivos coletores por tenant
+- journeys              -- Jornadas de teste por tenant
+- credentials           -- Integração Delinea por tenant
+- threat_intelligence   -- Dados de ameaças compartilhados
+- activities            -- Logs de auditoria por tenant
+- object_entities       -- Metadados Object Storage
 ```
 
 ### Redis Estruturas
@@ -149,20 +175,24 @@ queue:scans
 queue:notifications
 ```
 
-### MinIO Buckets
+### Object Storage Structure
 
 ```
-# Arquivos da aplicação
-samureye-app/
-  ├── uploads/         # Uploads de usuários
-  ├── reports/         # Relatórios gerados
-  └── evidence/        # Evidências de scans
+# Google Cloud Storage Buckets
+repl-default-bucket-{REPL_ID}/
+  ├── public/              # Assets públicos por tenant
+  │   ├── tenant-1/        # Assets do tenant 1
+  │   └── tenant-2/        # Assets do tenant 2
+  └── .private/            # Arquivos privados
+      ├── uploads/         # Uploads de usuários
+      ├── reports/         # Relatórios por tenant
+      └── evidence/        # Evidências de scans
 
-# Backups
+# MinIO Local (Backup Opcional)
 samureye-backup/
-  ├── database/        # Backups PostgreSQL
-  ├── configs/         # Configurações
-  └── logs/           # Logs arquivados
+  ├── configs/         # Configurações do sistema
+  ├── logs/            # Logs arquivados
+  └── redis/           # Snapshots Redis
 ```
 
 ## Backup e Recuperação
@@ -173,74 +203,90 @@ samureye-backup/
 # Backup diário configurado via cron
 /opt/samureye/scripts/daily-backup.sh
 
-# Localização dos backups
+# Localização dos backups locais
 /opt/backup/
-├── postgresql/      # Dumps SQL diários
-├── redis/          # RDB snapshots
-├── minio/          # Dados de objeto
-└── configs/        # Configurações do sistema
+├── neon/            # Dumps Neon Database (diários)
+├── redis/           # RDB snapshots
+├── configs/         # Configurações do sistema
+├── logs/            # Logs de sistema
+└── object-storage/  # Backup metadados (opcional)
+
+# Nota: Neon Database tem backup automático nativo
+# Object Storage tem versionamento automático
 ```
 
 ### Restauração Manual
 
 ```bash
-# Restaurar PostgreSQL
-./scripts/restore-postgresql.sh [backup-date]
+# Restaurar Neon Database (via backup local)
+./scripts/restore-neon.sh [backup-date]
 
 # Restaurar Redis
 ./scripts/restore-redis.sh [backup-date]
 
-# Restaurar MinIO
-./scripts/restore-minio.sh [backup-date]
+# Restaurar configurações
+./scripts/restore-configs.sh [backup-date]
+
+# Nota: Object Storage tem versionamento nativo
+# Neon Database tem point-in-time recovery nativo
 ```
 
 ## Monitoramento
 
 ### Grafana Dashboards
 
-- **SamurEye Overview** - Status geral da plataforma
-- **Database Metrics** - Performance PostgreSQL e Redis
-- **Storage Metrics** - Utilização MinIO
-- **System Resources** - CPU, memória, disco
+- **SamurEye Multi-Tenant Overview** - Status geral por tenant
+- **Neon Database Metrics** - Performance e conectividade
+- **Redis Cache Metrics** - Performance de cache e sessões
+- **Object Storage Metrics** - Utilização Google Cloud Storage
+- **System Resources** - CPU, memória, disco vlxsam03
 
 ### Métricas Principais
 
 ```bash
-# PostgreSQL
-- Conexões ativas
+# Neon Database
+- Conectividade e latência
 - Queries por segundo
-- Tamanho do database
-- Locks e deadlocks
+- Tamanho do database por tenant
+- Pool de conexões
 
-# Redis  
+# Redis Local
 - Memória utilizada
 - Hit rate do cache
+- Sessões ativas por tenant
 - Comandos por segundo
-- Clientes conectados
 
-# MinIO
-- Espaço utilizado
-- Objetos armazenados
-- Bandwidth de upload/download
-- Operações por segundo
+# Object Storage
+- Usage por tenant
+- Objetos por bucket
+- API calls para Google Cloud
+- Transferência de dados
+
+# System
+- CPU e memória vlxsam03
+- Conectividade de rede
+- Espaço em disco local
 ```
 
 ## Troubleshooting
 
-### Problemas PostgreSQL
+### Problemas Neon Database
 
 ```bash
-# Verificar status
-systemctl status postgresql
+# Testar conectividade
+./scripts/test-neon-connection.sh
 
-# Logs de erro
-tail -f /var/log/postgresql/postgresql-15-main.log
+# Verificar variáveis de ambiente
+echo $DATABASE_URL
 
-# Conectividade
-pg_isready -h localhost -p 5432
+# Testar conexão manual
+psql $DATABASE_URL -c "SELECT version();"
 
-# Espaço em disco
-df -h /var/lib/postgresql/
+# Verificar latência
+time psql $DATABASE_URL -c "SELECT 1;"
+
+# Logs de conexão (no vlxsam02)
+journalctl -u samureye-app -f | grep -i database
 ```
 
 ### Problemas Redis
@@ -257,7 +303,25 @@ redis-cli info
 redis-cli config get '*'
 ```
 
-### Problemas MinIO
+### Problemas Object Storage
+
+```bash
+# Testar conectividade Google Cloud Storage
+./scripts/test-object-storage.sh
+
+# Verificar variáveis de ambiente
+echo $PUBLIC_OBJECT_SEARCH_PATHS
+echo $PRIVATE_OBJECT_DIR
+
+# Testar API calls
+curl -s "https://storage.googleapis.com" > /dev/null
+echo "GCS API: $?"
+
+# Verificar permissões (no vlxsam02)
+journalctl -u samureye-app -f | grep -i "object.*storage"
+```
+
+### Problemas MinIO Local (Opcional)
 
 ```bash
 # Status do serviço

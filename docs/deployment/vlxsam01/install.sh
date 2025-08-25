@@ -152,6 +152,10 @@ http {
     limit_req_zone $binary_remote_addr zone=api:10m rate=100r/m;
     limit_req_zone $binary_remote_addr zone=auth:10m rate=20r/m;
     limit_req_zone $binary_remote_addr zone=upload:10m rate=10r/m;
+    limit_req_zone $binary_remote_addr zone=admin:10m rate=30r/m;
+    limit_req_zone $binary_remote_addr zone=admin_login:10m rate=10r/m;
+    limit_req_zone $binary_remote_addr zone=dashboard:10m rate=200r/m;
+    limit_req_zone $binary_remote_addr zone=object_storage:10m rate=500r/m;
     limit_req_zone $binary_remote_addr zone=general:10m rate=1000r/m;
 
     # Connection limiting
@@ -200,18 +204,18 @@ mkdir -p /etc/nginx/conf.d
 
 # Configuração upstream para vlxsam02
 cat > /etc/nginx/conf.d/upstream.conf << 'EOF'
-# Upstream para aplicação SamurEye em vlxsam02
+# Upstream para aplicação SamurEye em vlxsam02 (React 18 + Vite dev server)
 upstream samureye_app {
-    server 172.24.1.152:3000 max_fails=3 fail_timeout=30s;
+    server 172.24.1.152:5000 max_fails=3 fail_timeout=30s;
     # Adicionar mais servidores aqui para load balancing
-    # server 172.24.1.152:3001 backup;
+    # server 172.24.1.152:5001 backup;
     
     keepalive 16;
 }
 
 # Upstream para WebSocket
 upstream samureye_ws {
-    server 172.24.1.152:3000;
+    server 172.24.1.152:5000;
     keepalive 16;
 }
 EOF
@@ -296,7 +300,45 @@ server {
         proxy_read_timeout 60s;
     }
 
-    # Endpoints de autenticação com rate limiting restritivo
+    # Admin endpoints com rate limiting especial
+    location /api/admin/login {
+        limit_req zone=admin_login burst=5 nodelay;
+        
+        proxy_pass http://samureye_app;
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+    
+    location /api/admin/ {
+        limit_req zone=admin burst=20 nodelay;
+        
+        proxy_pass http://samureye_app;
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+    
+    # Dashboard endpoints com rate limiting específico
+    location /api/dashboard/ {
+        limit_req zone=dashboard burst=100 nodelay;
+        
+        proxy_pass http://samureye_app;
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+    
+    # Endpoints de autenticação Replit com rate limiting restritivo
     location ~ ^/(auth|login|register) {
         limit_req zone=auth burst=10 nodelay;
         
@@ -309,6 +351,55 @@ server {
         proxy_set_header X-Forwarded-Proto $scheme;
     }
 
+    # Object Storage endpoints
+    location /api/objects/upload {
+        limit_req zone=upload burst=5 nodelay;
+        client_max_body_size 100M;
+        
+        proxy_pass http://samureye_app;
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        
+        # Timeouts maiores para uploads
+        proxy_connect_timeout 300s;
+        proxy_send_timeout 300s;
+        proxy_read_timeout 300s;
+    }
+    
+    # Object Storage serving (public assets)
+    location /public-objects/ {
+        limit_req zone=object_storage burst=50 nodelay;
+        
+        proxy_pass http://samureye_app;
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        
+        # Cache para object storage
+        expires 1h;
+        add_header Cache-Control "public";
+    }
+    
+    # Protected object access
+    location /objects/ {
+        limit_req zone=upload burst=20 nodelay;
+        
+        proxy_pass http://samureye_app;
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+    
     # Upload endpoints
     location ~ ^/api/(upload|files) {
         limit_req zone=upload burst=5 nodelay;

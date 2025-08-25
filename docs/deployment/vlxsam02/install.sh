@@ -2,7 +2,7 @@
 
 # SamurEye vlxsam02 - Application Server Installation
 # Servidor: vlxsam02 (172.24.1.152)
-# Função: Frontend React + Backend Node.js + Scanner Service
+# Função: React 18 + Vite + TypeScript + Node.js Express + Scanner Service
 
 set -e
 
@@ -56,7 +56,9 @@ apt-get install -y \
     ufw \
     fail2ban \
     supervisor \
-    sqlite3
+    sqlite3 \
+    postgresql-client \
+    wscat
 
 # ============================================================================
 # 2. CONFIGURAÇÃO DE USUÁRIO
@@ -120,13 +122,13 @@ node_version=$(node --version)
 npm_version=$(npm --version)
 log "Node.js: $node_version, NPM: $npm_version"
 
-# Instalar PM2 globalmente
-log "Instalando PM2..."
-npm install -g pm2
+# Configurar desenvolvimento com Vite
+log "Configurando ambiente de desenvolvimento..."
+npm install -g tsx typescript
+npm cache clean --force
 
-# Configurar PM2 startup para usuário samureye
-sudo -u "$APP_USER" pm2 startup
-env PATH=$PATH:/usr/bin /usr/lib/node_modules/pm2/bin/pm2 startup systemd -u "$APP_USER" --hp "$APP_HOME"
+# Não é mais necessário PM2 - usando systemd service
+log "PM2 substituído por systemd service"
 
 # ============================================================================
 # 4. CONFIGURAÇÃO DE FIREWALL
@@ -138,15 +140,14 @@ log "🔥 Configurando firewall UFW..."
 ufw default deny incoming
 ufw default allow outgoing
 
-# Permitir SSH e portas da aplicação
+# Permitir SSH e porta da aplicação unificada
 ufw allow ssh
-ufw allow 3000/tcp comment "SamurEye App"
-ufw allow 3001/tcp comment "SamurEye Scanner"
+ufw allow 5000/tcp comment "SamurEye App (Vite)"
 
 # Ativar firewall
 ufw --force enable
 
-log "Firewall configurado: SSH (22), App (3000), Scanner (3001)"
+log "Firewall configurado: SSH (22), App (5000)"
 
 # ============================================================================
 # 5. FERRAMENTAS DE SEGURANÇA
@@ -166,9 +167,14 @@ unzip "nuclei_${NUCLEI_VERSION}_linux_amd64.zip"
 mv nuclei /usr/local/bin/
 chmod +x /usr/local/bin/nuclei
 
+# Instalar Masscan
+log "Instalando Masscan..."
+apt-get install -y masscan
+
 # Verificar instalações
 nmap --version | head -1
 nuclei --version
+masscan --version | head -1
 
 # Atualizar templates do Nuclei
 sudo -u "$APP_USER" nuclei -update-templates
@@ -200,13 +206,13 @@ log "⚙️ Configurando variáveis de ambiente..."
 cat > /etc/samureye/.env << 'EOF'
 # SamurEye Application - Environment Variables
 # Servidor: vlxsam02 (172.24.1.152)
+# Stack: React 18 + Vite + TypeScript + Node.js Express + Drizzle ORM
 
-# Application
-NODE_ENV=production
-PORT=3000
-SCANNER_PORT=3001
+# Application (Vite Dev Server)
+NODE_ENV=development
+PORT=5000
 
-# Database (vlxsam03)
+# Database (Neon Database)
 DATABASE_URL=postgresql://samureye:SamurEye2024!@172.24.1.153:5432/samureye_prod
 PGHOST=172.24.1.153
 PGPORT=5432
@@ -214,50 +220,53 @@ PGUSER=samureye
 PGPASSWORD=SamurEye2024!
 PGDATABASE=samureye_prod
 
-# Redis (vlxsam03)
-REDIS_URL=redis://172.24.1.153:6379
-
-# Session
+# Session Management
 SESSION_SECRET=samureye-super-secret-session-key-2024-change-this
 
-# Authentication
+# Replit Authentication (for regular users)
 REPL_ID=your_replit_app_id
 ISSUER_URL=https://replit.com/oidc
 REPLIT_DOMAINS=app.samureye.com.br,api.samureye.com.br
 
-# Delinea Secret Server
+# Object Storage (Google Cloud Storage Integration)
+DEFAULT_OBJECT_STORAGE_BUCKET_ID=repl-default-bucket-your-repl-id
+PUBLIC_OBJECT_SEARCH_PATHS=/repl-default-bucket-your-repl-id/public
+PRIVATE_OBJECT_DIR=/repl-default-bucket-your-repl-id/.private
+
+# Delinea Secret Server (Optional)
 DELINEA_API_KEY=your_delinea_api_key_here
 DELINEA_BASE_URL=https://gruppenztna.secretservercloud.com
 DELINEA_RULE_NAME=SamurEye Integration
 
-# MinIO/Object Storage (vlxsam03)
-MINIO_ENDPOINT=172.24.1.153
-MINIO_PORT=9000
-MINIO_ACCESS_KEY=samureye
-MINIO_SECRET_KEY=SamurEye2024!
-MINIO_BUCKET_NAME=samureye-storage
-
-# Scanner Service
-SCANNER_SERVICE_URL=http://localhost:3001
+# Scanner Tools (Integrated)
 NMAP_PATH=/usr/bin/nmap
 NUCLEI_PATH=/usr/local/bin/nuclei
+MASSCAN_PATH=/usr/bin/masscan
 
 # Logging
 LOG_LEVEL=info
 LOG_DIR=/var/log/samureye
 
-# Monitoring
-GRAFANA_URL=http://172.24.1.153:3000
-FORTISIEM_HOST=your_fortisiem_host
-FORTISIEM_PORT=514
+# Multi-tenant Configuration
+TENANT_ISOLATION=true
+DEFAULT_TENANT_SLUG=default
 
-# Frontend URL
+# Admin Authentication (Local System)
+ADMIN_EMAIL=admin@samureye.com.br
+ADMIN_PASSWORD=SamurEye2024!
+
+# Frontend URLs
 FRONTEND_URL=https://app.samureye.com.br
 API_BASE_URL=https://api.samureye.com.br
 
-# File Upload
-UPLOAD_MAX_SIZE=50MB
+# File Upload & Object Storage
+UPLOAD_MAX_SIZE=100MB
 UPLOAD_DIR=/opt/samureye/uploads
+
+# Monitoring & Integration
+GRAFANA_URL=http://172.24.1.153:3000
+FORTISIEM_HOST=your_fortisiem_host
+FORTISIEM_PORT=514
 
 # Rate Limiting
 RATE_LIMIT_WINDOW_MS=900000
@@ -265,6 +274,10 @@ RATE_LIMIT_MAX_REQUESTS=100
 
 # CORS
 CORS_ORIGINS=https://app.samureye.com.br,https://api.samureye.com.br
+
+# Development (Vite specific)
+VITE_API_BASE_URL=https://api.samureye.com.br
+VITE_APP_NAME=SamurEye
 EOF
 
 chmod 600 /etc/samureye/.env
@@ -274,241 +287,153 @@ chown root:root /etc/samureye/.env
 ln -sf /etc/samureye/.env "$APP_DIR/.env"
 
 # ============================================================================
-# 8. CONFIGURAÇÃO PM2
+# 8. CONFIGURAÇÃO SYSTEMD SERVICE
 # ============================================================================
 
-log "⚡ Configurando PM2..."
+log "⚡ Configurando systemd service..."
 
-# Configuração PM2 para aplicação SamurEye
-cat > "$APP_DIR/ecosystem.config.js" << 'EOF'
-module.exports = {
-  apps: [
-    {
-      name: 'samureye-app',
-      script: 'server/index.ts',
-      interpreter: 'node',
-      interpreter_args: '--loader tsx',
-      cwd: '/opt/samureye/SamurEye',
-      instances: 2,
-      exec_mode: 'cluster',
-      max_memory_restart: '1G',
-      env: {
-        NODE_ENV: 'production',
-        PORT: 3000
-      },
-      env_file: '/etc/samureye/.env',
-      log_file: '/var/log/samureye/app.log',
-      out_file: '/var/log/samureye/app-out.log',
-      error_file: '/var/log/samureye/app-error.log',
-      time: true,
-      watch: false,
-      ignore_watch: ['node_modules', '*.log', '.git'],
-      max_restarts: 5,
-      restart_delay: 5000
-    },
-    {
-      name: 'samureye-scanner',
-      script: 'scanner-service.js',
-      cwd: '/opt/samureye',
-      instances: 1,
-      env: {
-        NODE_ENV: 'production',
-        PORT: 3001
-      },
-      env_file: '/etc/samureye/.env',
-      log_file: '/var/log/samureye/scanner.log',
-      out_file: '/var/log/samureye/scanner-out.log',
-      error_file: '/var/log/samureye/scanner-error.log',
-      time: true,
-      watch: false,
-      max_restarts: 5,
-      restart_delay: 5000
-    }
-  ]
-};
+# Systemd service para aplicação SamurEye unificada
+cat > /etc/systemd/system/samureye-app.service << 'EOF'
+[Unit]
+Description=SamurEye Application (React 18 + Vite + Node.js)
+After=network.target
+Wants=network.target
+
+[Service]
+# Usuário e diretório
+User=samureye
+Group=samureye
+WorkingDirectory=/opt/samureye
+
+# Comando de execução (Vite dev server)
+ExecStart=/usr/bin/npm run dev
+
+# Environment
+EnvironmentFile=/etc/samureye/.env
+Environment=NODE_ENV=development
+Environment=PORT=5000
+
+# Restart policy
+Restart=always
+RestartSec=10
+StartLimitInterval=60s
+StartLimitBurst=3
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=samureye-app
+
+# Security
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/samureye /var/log/samureye /tmp
+
+# Limits
+LimitNOFILE=65535
+LimitNPROC=4096
+
+[Install]
+WantedBy=multi-user.target
 EOF
 
-chown "$APP_USER:$APP_USER" "$APP_DIR/ecosystem.config.js"
+# Recarregar systemd
+systemctl daemon-reload
+
+# Habilitar serviço para iniciar no boot
+systemctl enable samureye-app
+
+log "Systemd service configurado e habilitado"
 
 # ============================================================================
-# 9. SCANNER SERVICE
+# 9. CONFIGURAÇÃO APLICAÇÃO E DEPENDÊNCIAS
 # ============================================================================
 
-log "🔍 Configurando Scanner Service..."
+log "📦 Configurando aplicação SamurEye..."
 
-cat > "$APP_DIR/scanner-service.js" << 'EOF'
-#!/usr/bin/env node
-
-// SamurEye Scanner Service
-// Porta: 3001
-// Função: Executar ferramentas de segurança (Nmap, Nuclei)
-
-const express = require('express');
-const { spawn } = require('child_process');
-const path = require('path');
-const fs = require('fs');
-
-const app = express();
-const PORT = process.env.SCANNER_PORT || 3001;
-
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-
-// Health check
-app.get('/health', (req, res) => {
-  res.json({
-    status: 'healthy',
-    timestamp: new Date().toISOString(),
-    service: 'samureye-scanner',
-    version: '1.0.0'
-  });
-});
-
-// Executar Nmap
-app.post('/scan/nmap', async (req, res) => {
-  const { target, options = [] } = req.body;
-  
-  if (!target) {
-    return res.status(400).json({ error: 'Target is required' });
+# Criar package.json básico para instalação
+cat > "$APP_DIR/package.json" << 'EOF'
+{
+  "name": "samureye-platform",
+  "version": "1.0.0",
+  "description": "SamurEye Breach & Attack Simulation Platform",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio"
+  },
+  "dependencies": {
+    "@google-cloud/storage": "^7.7.0",
+    "@hookform/resolvers": "^3.3.2",
+    "@neondatabase/serverless": "^0.9.0",
+    "@radix-ui/react-accordion": "^1.1.2",
+    "@radix-ui/react-alert-dialog": "^1.0.5",
+    "@radix-ui/react-avatar": "^1.0.4",
+    "@radix-ui/react-checkbox": "^1.0.4",
+    "@radix-ui/react-dialog": "^1.0.5",
+    "@radix-ui/react-dropdown-menu": "^2.0.6",
+    "@radix-ui/react-hover-card": "^1.0.7",
+    "@radix-ui/react-label": "^2.0.2",
+    "@radix-ui/react-popover": "^1.0.7",
+    "@radix-ui/react-progress": "^1.0.3",
+    "@radix-ui/react-select": "^2.0.0",
+    "@radix-ui/react-separator": "^1.0.3",
+    "@radix-ui/react-slot": "^1.0.2",
+    "@radix-ui/react-switch": "^1.0.3",
+    "@radix-ui/react-tabs": "^1.0.4",
+    "@radix-ui/react-toast": "^1.1.5",
+    "@radix-ui/react-tooltip": "^1.0.7",
+    "@tanstack/react-query": "^5.17.0",
+    "@types/express": "^4.17.21",
+    "@types/express-session": "^1.17.10",
+    "@types/node": "^20.10.6",
+    "@types/react": "^18.2.46",
+    "@types/react-dom": "^18.2.18",
+    "@types/ws": "^8.5.10",
+    "@vitejs/plugin-react": "^4.2.1",
+    "axios": "^1.6.2",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.0.0",
+    "cmdk": "^0.2.0",
+    "connect-pg-simple": "^9.0.1",
+    "date-fns": "^3.0.6",
+    "drizzle-kit": "^0.20.7",
+    "drizzle-orm": "^0.29.1",
+    "drizzle-zod": "^0.5.1",
+    "express": "^4.18.2",
+    "express-session": "^1.17.3",
+    "lucide-react": "^0.303.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-hook-form": "^7.48.2",
+    "tailwind-merge": "^2.2.0",
+    "tailwindcss": "^3.4.0",
+    "tailwindcss-animate": "^1.0.7",
+    "tsx": "^4.6.2",
+    "typescript": "^5.3.3",
+    "vite": "^5.0.10",
+    "wouter": "^3.0.0",
+    "ws": "^8.16.0",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/connect-pg-simple": "^7.0.3",
+    "autoprefixer": "^10.4.16",
+    "postcss": "^8.4.32"
   }
-
-  try {
-    const nmapPath = process.env.NMAP_PATH || '/usr/bin/nmap';
-    const args = [...options, target];
-    
-    console.log(`Executing nmap: ${nmapPath} ${args.join(' ')}`);
-    
-    const nmap = spawn(nmapPath, args);
-    let output = '';
-    let error = '';
-
-    nmap.stdout.on('data', (data) => {
-      output += data.toString();
-    });
-
-    nmap.stderr.on('data', (data) => {
-      error += data.toString();
-    });
-
-    nmap.on('close', (code) => {
-      res.json({
-        success: code === 0,
-        exit_code: code,
-        output,
-        error,
-        target,
-        options,
-        timestamp: new Date().toISOString()
-      });
-    });
-
-  } catch (err) {
-    console.error('Nmap execution error:', err);
-    res.status(500).json({ error: 'Internal scanner error', details: err.message });
-  }
-});
-
-// Executar Nuclei
-app.post('/scan/nuclei', async (req, res) => {
-  const { target, templates = [], options = [] } = req.body;
-  
-  if (!target) {
-    return res.status(400).json({ error: 'Target is required' });
-  }
-
-  try {
-    const nucleiPath = process.env.NUCLEI_PATH || '/usr/local/bin/nuclei';
-    const args = ['-target', target, ...options];
-    
-    if (templates.length > 0) {
-      args.push('-t', templates.join(','));
-    }
-    
-    console.log(`Executing nuclei: ${nucleiPath} ${args.join(' ')}`);
-    
-    const nuclei = spawn(nucleiPath, args);
-    let output = '';
-    let error = '';
-
-    nuclei.stdout.on('data', (data) => {
-      output += data.toString();
-    });
-
-    nuclei.stderr.on('data', (data) => {
-      error += data.toString();
-    });
-
-    nuclei.on('close', (code) => {
-      res.json({
-        success: code === 0,
-        exit_code: code,
-        output,
-        error,
-        target,
-        templates,
-        options,
-        timestamp: new Date().toISOString()
-      });
-    });
-
-  } catch (err) {
-    console.error('Nuclei execution error:', err);
-    res.status(500).json({ error: 'Internal scanner error', details: err.message });
-  }
-});
-
-// Listar templates do Nuclei
-app.get('/scan/nuclei/templates', (req, res) => {
-  try {
-    const templatesDir = path.join(process.env.HOME || '/home/samureye', 'nuclei-templates');
-    
-    if (!fs.existsSync(templatesDir)) {
-      return res.json({ templates: [], message: 'Templates directory not found' });
-    }
-
-    // Implementar listagem de templates recursivamente
-    const getTemplates = (dir, prefix = '') => {
-      const items = fs.readdirSync(dir);
-      let templates = [];
-      
-      for (const item of items) {
-        const fullPath = path.join(dir, item);
-        const stat = fs.statSync(fullPath);
-        
-        if (stat.isDirectory()) {
-          templates = templates.concat(getTemplates(fullPath, `${prefix}${item}/`));
-        } else if (item.endsWith('.yaml') || item.endsWith('.yml')) {
-          templates.push(`${prefix}${item}`);
-        }
-      }
-      
-      return templates;
-    };
-
-    const templates = getTemplates(templatesDir);
-    res.json({ templates, count: templates.length });
-
-  } catch (err) {
-    console.error('Error listing templates:', err);
-    res.status(500).json({ error: 'Error listing templates', details: err.message });
-  }
-});
-
-// Middleware de erro
-app.use((err, req, res, next) => {
-  console.error('Scanner service error:', err);
-  res.status(500).json({ error: 'Internal scanner error' });
-});
-
-// Iniciar servidor
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`SamurEye Scanner Service running on port ${PORT}`);
-  console.log(`Health check: http://localhost:${PORT}/health`);
-});
+}
 EOF
 
-chmod +x "$APP_DIR/scanner-service.js"
-chown "$APP_USER:$APP_USER" "$APP_DIR/scanner-service.js"
+chown "$APP_USER:$APP_USER" "$APP_DIR/package.json"
+
+# Instalar dependências quando o código estiver disponível
+log "Nota: dependências serão instaladas após clonagem do código fonte"
 
 # ============================================================================
 # 10. SCRIPTS DE MONITORAMENTO
@@ -529,28 +454,27 @@ echo "Data: $(date)"
 echo "Servidor: vlxsam02 ($(hostname -I | awk '{print $1}'))"
 echo ""
 
-# Verificar serviços PM2
-echo "⚡ PM2 SERVICES:"
-pm2_status=$(sudo -u samureye pm2 jlist 2>/dev/null | jq -r '.[] | "\(.name): \(.pm2_env.status)"' 2>/dev/null)
-if [ $? -eq 0 ]; then
-    echo "$pm2_status"
+# Verificar serviço systemd
+echo "⚡ SYSTEMD SERVICES:"
+if systemctl is-active --quiet samureye-app; then
+    echo "✅ samureye-app: $(systemctl is-active samureye-app)"
 else
-    echo "❌ PM2 não está rodando ou sem processos"
+    echo "❌ samureye-app: $(systemctl is-active samureye-app)"
 fi
 
 # Verificar endpoints
 echo ""
 echo "🌐 ENDPOINTS:"
-if curl -f -s http://localhost:3000/api/health >/dev/null 2>&1; then
-    echo "✅ App (3000): Respondendo"
+if curl -f -s http://localhost:5000/api/admin/stats >/dev/null 2>&1; then
+    echo "✅ App (5000): Respondendo"
 else
-    echo "❌ App (3000): Não responde"
+    echo "❌ App (5000): Não responde"
 fi
 
-if curl -f -s http://localhost:3001/health >/dev/null 2>&1; then
-    echo "✅ Scanner (3001): Respondendo"
+if curl -f -s http://localhost:5000/api/system/settings >/dev/null 2>&1; then
+    echo "✅ System API (5000): Respondendo"
 else
-    echo "❌ Scanner (3001): Não responde"
+    echo "❌ System API (5000): Não responde"
 fi
 
 # Verificar conectividade com vlxsam03 (database)
@@ -687,11 +611,11 @@ if ! command -v tsx >/dev/null 2>&1; then
     npm install -g tsx
 fi
 
-# Build da aplicação (se o script existir)
-if npm run build >/dev/null 2>&1; then
-    log "Build da aplicação executado"
+# Verificar se é possível executar o dev server
+if npm run dev --version >/dev/null 2>&1; then
+    log "Vite dev server configurado"
 else
-    log "Sem script de build configurado (normal para desenvolvimento)"
+    log "Vite dev server não configurado ainda (normal antes da clonagem do código)"
 fi
 
 log "✅ Dependências instaladas com sucesso!"
@@ -702,41 +626,46 @@ chmod +x "$APP_DIR/scripts/install-dependencies.sh"
 chown -R "$APP_USER:$APP_USER" "$APP_DIR/scripts"
 
 # ============================================================================
-# 11. SYSTEMD SERVICES
+# 11. FINALIZAÇÃO DA INSTALAÇÃO
 # ============================================================================
 
-log "⚙️ Configurando serviços systemd..."
+log "⚙️ Finalizando instalação..."
 
-# Serviço systemd como backup para PM2
-cat > /etc/systemd/system/samureye-app.service << 'EOF'
-[Unit]
-Description=SamurEye Application
-After=network.target
-Wants=network.target
+# Criar arquivos de configuração básicos para desenvolvimento
+cat > "$APP_DIR/vite.config.ts" << 'EOF'
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import path from 'path'
 
-[Service]
-Type=forking
-User=samureye
-Group=samureye
-WorkingDirectory=/opt/samureye
-EnvironmentFile=/etc/samureye/.env
-ExecStart=/usr/bin/pm2 start ecosystem.config.js
-ExecReload=/usr/bin/pm2 reload ecosystem.config.js
-ExecStop=/usr/bin/pm2 stop ecosystem.config.js
-PIDFile=/home/samureye/.pm2/pm2.pid
-Restart=always
-RestartSec=5
-StandardOutput=syslog
-StandardError=syslog
-SyslogIdentifier=samureye-app
+export default defineConfig({
+  plugins: [react()],
+  server: {
+    host: '0.0.0.0',
+    port: 5000,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:5000',
+        changeOrigin: true
+      },
+      '/ws': {
+        target: 'ws://localhost:5000',
+        ws: true
+      }
+    }
+  },
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './client/src'),
+      '@shared': path.resolve(__dirname, './shared'),
+      '@assets': path.resolve(__dirname, './attached_assets')
+    }
+  }
+})
+EOF
 
-# Security
-NoNewPrivileges=true
-PrivateTmp=true
-ProtectSystem=strict
-ReadWritePaths=/opt/samureye /var/log/samureye /home/samureye
+chown "$APP_USER:$APP_USER" "$APP_DIR/vite.config.ts"
 
-[Install]
+log "Systemd service já configurado anteriormente"
 WantedBy=multi-user.target
 EOF
 
