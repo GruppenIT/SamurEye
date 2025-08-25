@@ -43,7 +43,7 @@ A SamurEye é uma plataforma abrangente de Breach & Attack Simulation (BAS) com 
 - Object Storage (Google Cloud Storage)
 
 **Banco de Dados:**
-- PostgreSQL 15 (Neon serverless)
+- PostgreSQL 16 (local no vlxsam03)
 - Redis para cache e sessões
 - MinIO para object storage
 - Arquitetura multi-tenant completa
@@ -90,7 +90,7 @@ A SamurEye é uma plataforma abrangente de Breach & Attack Simulation (BAS) com 
   - vlxsam04 (192.168.100.151) - apenas outbound HTTPS
 
 ### Variáveis de Ambiente Principais
-- `DATABASE_URL`: Conexão PostgreSQL Neon
+- `DATABASE_URL`: Conexão PostgreSQL local (172.24.1.153:5432)
 - `SESSION_SECRET`: Chave para sessões
 - `DEFAULT_OBJECT_STORAGE_BUCKET_ID`: Bucket para object storage
 - `PUBLIC_OBJECT_SEARCH_PATHS`: Caminhos para assets públicos
@@ -119,11 +119,13 @@ chmod +x install.sh
 sudo ./install.sh
 
 # Verificar serviços instalados
-systemctl status postgresql redis-server minio grafana-server
+systemctl status postgresql redis-server grafana-server
 
-# Testar conectividade
-sudo -u postgres psql -c "SELECT version();"
+# Testar conectividade PostgreSQL
+PGPASSWORD='SamurEye2024DB!' psql -h 127.0.0.1 -U samureye -d samureye_db -c "SELECT version();"
 redis-cli ping
+
+# Testar MinIO (se instalado)
 curl http://localhost:9000/minio/health/live
 
 # SALVAR credenciais mostradas pelo script
@@ -170,7 +172,7 @@ sudo ./install.sh
 # Configurar variáveis de ambiente
 sudo nano /etc/samureye/.env
 # Configurar variáveis principais:
-# DATABASE_URL=postgresql://samureye:password@172.24.1.153:5432/samureye
+# DATABASE_URL=postgresql://samureye:SamurEye2024DB!@172.24.1.153:5432/samureye_db
 # SESSION_SECRET=sua_chave_secreta_segura_aqui
 # DELINEA_API_KEY=sua_api_key_aqui (opcional)
 

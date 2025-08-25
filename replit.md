@@ -12,6 +12,16 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+**August 25, 2025 - PostgreSQL Local Setup Complete**
+- Successfully migrated from Neon Database to PostgreSQL 16 on-premise (vlxsam03)
+- Implemented full PostgreSQL 16 installation with automatic cluster recovery
+- Database server running at 172.24.1.153:5432 with samureye_db database
+- All 13 tables created successfully with proper schema and extensions
+- Connection string: postgresql://samureye:SamurEye2024DB!@172.24.1.153:5432/samureye_db
+- Automatic reinstallation logic added to handle cluster corruption issues
+- PostgreSQL local setup provides better performance and control than serverless Neon
+- Updated all deployment documentation to reflect PostgreSQL local configuration
+
 **August 22, 2025 - Complete Dashboard Components Migration to API Data**
 - Created tenant-specific dashboard endpoints: /api/dashboard/attack-surface, /api/dashboard/edr-events, /api/dashboard/journey-results
 - Migrated all dashboard components (AttackSurfaceHeatmap, EDRTimeline, JourneyResults) from static mock data to real API data
@@ -94,8 +104,8 @@ Preferred communication style: Simple, everyday language.
 ### Backend Architecture
 - **Express.js** server with TypeScript
 - **Node.js** runtime environment
-- **PostgreSQL** database with Drizzle ORM for type-safe database operations
-- **Neon Database** as the serverless PostgreSQL provider
+- **PostgreSQL 16** database with Drizzle ORM for type-safe database operations
+- **Local PostgreSQL** server running on vlxsam03 (172.24.1.153:5432)
 - **WebSocket** support for real-time updates (collector status, journey progress)
 - **Session-based authentication** with connect-pg-simple for session storage
 - **Replit Auth** integration for SSO capabilities
@@ -142,7 +152,7 @@ Preferred communication style: Simple, everyday language.
 ## External Dependencies
 
 ### Database & Storage
-- **Neon Database** (PostgreSQL) - Primary data storage with connection pooling
+- **PostgreSQL 16** (Local) - Primary data storage on vlxsam03 with connection pooling
 - **MinIO** - Object storage for scan results and evidence files (future S3 migration planned)
 - **Redis** - Caching and session storage
 

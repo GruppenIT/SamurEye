@@ -189,37 +189,43 @@ log "Redis configurado e iniciado"
 log "🐘 Instalando PostgreSQL 16..."
 
 # Instalar PostgreSQL 16
-apt install -y postgresql-16 postgresql-contrib-16
+apt install -y postgresql-16 postgresql-contrib
 
 # Iniciar e habilitar PostgreSQL
 systemctl start postgresql
 systemctl enable postgresql
+sleep 3
 
-# Configurar PostgreSQL
-sudo -u postgres psql -c "ALTER USER postgres PASSWORD 'SamurEye2024PG!';"
+# Verificar se PostgreSQL iniciou corretamente
+if ! systemctl is-active --quiet postgresql; then
+    warn "⚠️ Reinstalando PostgreSQL devido a problemas de cluster..."
+    
+    # Limpeza completa em caso de problemas
+    systemctl stop postgresql
+    apt-get purge postgresql-16 postgresql-common postgresql-client-16 -y
+    apt-get autoremove -y
+    rm -rf /var/lib/postgresql/ /etc/postgresql/ /var/log/postgresql/ /run/postgresql/
+    userdel postgres 2>/dev/null || true
+    
+    # Reinstalação limpa
+    apt-get update
+    apt-get install -y postgresql-16 postgresql-contrib
+    systemctl start postgresql
+    sleep 5
+fi
 
-# Criar banco de dados e usuário para SamurEye
-sudo -u postgres psql << EOF
--- Criar usuário samureye
-CREATE USER samureye WITH PASSWORD 'SamurEye2024DB!';
-
--- Criar banco de dados
+# Criar usuário samureye e banco de dados
+sudo -u postgres psql << 'EOF'
+CREATE ROLE samureye WITH LOGIN PASSWORD 'SamurEye2024DB!' CREATEDB;
 CREATE DATABASE samureye_db OWNER samureye;
-
--- Conceder privilégios
 GRANT ALL PRIVILEGES ON DATABASE samureye_db TO samureye;
+EOF
 
--- Conectar ao banco e configurar schema
-\c samureye_db;
-
--- Conceder privilégios no schema public
-GRANT ALL ON SCHEMA public TO samureye;
-GRANT CREATE ON SCHEMA public TO samureye;
-
--- Habilitar extensões necessárias
+# Conectar ao banco samureye_db e ativar extensões
+sudo -u postgres psql -d samureye_db << 'EOF'
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-CREATE EXTENSION IF NOT EXISTS "pg_stat_statements";
-
+CREATE EXTENSION IF NOT EXISTS pg_stat_statements;
+GRANT ALL ON SCHEMA public TO samureye;
 EOF
 
 log "✅ PostgreSQL configurado com sucesso"

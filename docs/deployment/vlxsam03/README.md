@@ -60,24 +60,28 @@ chmod +x install.sh
 
 4. **Grafana**
    - Dashboards de monitoramento multi-tenant
-   - Integração com Neon Database
+   - Integração com PostgreSQL local
    - Métricas de sistema e aplicação
    - Alertas configurados
 
 ## Configuração Pós-Instalação
 
-### 1. Configurar Neon Database
+### 1. PostgreSQL Local (Configurado Automaticamente)
 
 ```bash
-# As configurações do Neon Database são feitas via variáveis de ambiente
-# Editar arquivo de configuração
-sudo nano /etc/samureye/.env
+# PostgreSQL 16 foi instalado e configurado automaticamente
+# Database: samureye_db
+# Usuário: samureye
+# Senha: SamurEye2024DB!
 
-# Configurar DATABASE_URL para Neon
-DATABASE_URL=postgresql://user:pass@ep-xyz.us-east-1.aws.neon.tech/samureye?sslmode=require
+# As configurações estão em:
+cat /etc/samureye/.env
 
-# Testar conexão
-./scripts/test-neon-connection.sh
+# Testar conexão local
+./scripts/test-postgres-connection.sh
+
+# Verificar status do serviço
+systemctl status postgresql
 ```
 
 ### 2. Configurar Object Storage
@@ -112,7 +116,7 @@ DATABASE_URL=postgresql://user:pass@ep-xyz.us-east-1.aws.neon.tech/samureye?sslm
 ./scripts/health-check.sh
 
 # Testar conectividade individual
-./scripts/test-neon-connection.sh
+./scripts/test-postgres-connection.sh
 redis-cli ping
 ./scripts/test-object-storage.sh
 curl http://localhost:9000/minio/health/live  # MinIO local (opcional)
@@ -122,9 +126,8 @@ curl http://localhost:9000/minio/health/live  # MinIO local (opcional)
 
 ```bash
 # Do vlxsam02, testar conexão
-# Neon Database (remoto) - testar do vlxsam02
-export DATABASE_URL="postgresql://..."
-psql $DATABASE_URL -c "SELECT version();"
+# PostgreSQL local - testar do vlxsam02
+PGPASSWORD='SamurEye2024DB!' psql -h 172.24.1.153 -U samureye -d samureye_db -c "SELECT version();"
 
 # Redis local
 redis-cli -h 172.24.1.153 ping
@@ -139,11 +142,11 @@ curl http://172.24.1.153:9000/minio/health/live
 
 ## Estrutura de Dados
 
-### Neon Database (PostgreSQL Serverless)
+### PostgreSQL Local
 
 ```sql
--- Database principal da aplicação (Neon)
-samureye_database
+-- Database principal da aplicação (Local)
+samureye_db
 
 -- Tabelas principais (Multi-tenant):
 - users                 -- Usuários globais e SOC

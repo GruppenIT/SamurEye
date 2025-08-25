@@ -1,0 +1,225 @@
+root@vlxsam03:~# systemctl stop postgresql
+systemctl stop postgresql@16-main.service
+root@vlxsam03:~# apt-get purge postgresql-16 postgresql-common postgresql-client-16 -y
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following packages were automatically installed and are no longer required:
+  libcommon-sense-perl libjson-perl libjson-xs-perl libllvm17t64 libpq5 libtypes-serialiser-perl postgresql-client-common ssl-cert
+Use 'apt autoremove' to remove them.
+The following packages will be REMOVED:
+  postgresql-16* postgresql-client-16* postgresql-common*
+0 upgraded, 0 newly installed, 3 to remove and 0 not upgraded.
+After this operation, 50.3 MB disk space will be freed.
+(Reading database ... 140165 files and directories currently installed.)
+Removing postgresql-16 (16.9-0ubuntu0.24.04.1) ...
+update-alternatives: warning: forcing reinstallation of alternative /usr/share/postgresql/16/man/man1/psql.1.gz because link group psql.1.gz is broken
+Removing postgresql-client-16 (16.9-0ubuntu0.24.04.1) ...
+Removing postgresql-common (257build1.1) ...
+Removing 'diversion of /usr/bin/pg_config to /usr/bin/pg_config.libpq-dev by postgresql-common'
+Processing triggers for man-db (2.12.0-4build2) ...
+(Reading database ... 138315 files and directories currently installed.)
+Purging configuration files for postgresql-16 (16.9-0ubuntu0.24.04.1) ...
+Purging configuration files for postgresql-common (257build1.1) ...
+dpkg: warning: while removing postgresql-common, directory '/var/lib/postgresql' not empty so not removed
+root@vlxsam03:~# apt-get autoremove -y
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following packages will be REMOVED:
+  libcommon-sense-perl libjson-perl libjson-xs-perl libllvm17t64 libpq5 libtypes-serialiser-perl postgresql-client-common ssl-cert
+0 upgraded, 0 newly installed, 8 to remove and 0 not upgraded.
+After this operation, 125 MB disk space will be freed.
+(Reading database ... 138310 files and directories currently installed.)
+Removing libjson-xs-perl (4.030-2build3) ...
+Removing libtypes-serialiser-perl (1.01-1) ...
+Removing libcommon-sense-perl:amd64 (3.75-3build3) ...
+Removing libjson-perl (4.10000-1) ...
+Removing libllvm17t64:amd64 (1:17.0.6-9ubuntu1) ...
+Removing libpq5:amd64 (16.9-0ubuntu0.24.04.1) ...
+Removing postgresql-client-common (257build1.1) ...
+Removing ssl-cert (1.1.2ubuntu1) ...
+Processing triggers for man-db (2.12.0-4build2) ...
+Processing triggers for libc-bin (2.39-0ubuntu8.5) ...
+root@vlxsam03:~# rm -rf /var/lib/postgresql/
+rm -rf /etc/postgresql/
+rm -rf /var/log/postgresql/
+rm -rf /run/postgresql/
+root@vlxsam03:~# userdel postgres || true
+root@vlxsam03:~# apt-get update
+Hit:1 https://packages.grafana.com/oss/deb stable InRelease
+Hit:2 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:3 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:4 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Hit:5 http://security.ubuntu.com/ubuntu noble-security InRelease
+Reading package lists... Done
+root@vlxsam03:~# apt-get install postgresql-16 postgresql-contrib -y
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following additional packages will be installed:
+  libcommon-sense-perl libjson-perl libjson-xs-perl libllvm17t64 libpq5 libtypes-serialiser-perl postgresql-client-16 postgresql-client-common postgresql-common ssl-cert
+Suggested packages:
+  postgresql-doc-16
+The following NEW packages will be installed:
+  libcommon-sense-perl libjson-perl libjson-xs-perl libllvm17t64 libpq5 libtypes-serialiser-perl postgresql-16 postgresql-client-16 postgresql-client-common postgresql-common postgresql-contrib ssl-cert
+0 upgraded, 12 newly installed, 0 to remove and 0 not upgraded.
+Need to get 43.6 MB of archives.
+After this operation, 175 MB of additional disk space will be used.
+Get:1 http://archive.ubuntu.com/ubuntu noble/main amd64 libjson-perl all 4.10000-1 [81.9 kB]
+Get:2 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 postgresql-client-common all 257build1.1 [36.4 kB]
+Get:3 http://archive.ubuntu.com/ubuntu noble/main amd64 ssl-cert all 1.1.2ubuntu1 [17.8 kB]
+Get:4 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 postgresql-common all 257build1.1 [161 kB]
+Get:5 http://archive.ubuntu.com/ubuntu noble/main amd64 libcommon-sense-perl amd64 3.75-3build3 [20.4 kB]
+Get:6 http://archive.ubuntu.com/ubuntu noble/main amd64 libtypes-serialiser-perl all 1.01-1 [11.6 kB]
+Get:7 http://archive.ubuntu.com/ubuntu noble/main amd64 libjson-xs-perl amd64 4.030-2build3 [83.6 kB]
+Get:8 http://archive.ubuntu.com/ubuntu noble/main amd64 libllvm17t64 amd64 1:17.0.6-9ubuntu1 [26.2 MB]
+Get:9 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libpq5 amd64 16.9-0ubuntu0.24.04.1 [143 kB]
+Get:10 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 postgresql-client-16 amd64 16.9-0ubuntu0.24.04.1 [1,294 kB]
+Get:11 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 postgresql-16 amd64 16.9-0ubuntu0.24.04.1 [15.5 MB]
+Get:12 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 postgresql-contrib all 16+257build1.1 [11.6 kB]
+Fetched 43.6 MB in 4s (10.2 MB/s)
+Preconfiguring packages ...
+Selecting previously unselected package libjson-perl.
+(Reading database ... 138204 files and directories currently installed.)
+Preparing to unpack .../00-libjson-perl_4.10000-1_all.deb ...
+Unpacking libjson-perl (4.10000-1) ...
+Selecting previously unselected package postgresql-client-common.
+Preparing to unpack .../01-postgresql-client-common_257build1.1_all.deb ...
+Unpacking postgresql-client-common (257build1.1) ...
+Selecting previously unselected package ssl-cert.
+Preparing to unpack .../02-ssl-cert_1.1.2ubuntu1_all.deb ...
+Unpacking ssl-cert (1.1.2ubuntu1) ...
+Selecting previously unselected package postgresql-common.
+Preparing to unpack .../03-postgresql-common_257build1.1_all.deb ...
+Adding 'diversion of /usr/bin/pg_config to /usr/bin/pg_config.libpq-dev by postgresql-common'
+Unpacking postgresql-common (257build1.1) ...
+Selecting previously unselected package libcommon-sense-perl:amd64.
+Preparing to unpack .../04-libcommon-sense-perl_3.75-3build3_amd64.deb ...
+Unpacking libcommon-sense-perl:amd64 (3.75-3build3) ...
+Selecting previously unselected package libtypes-serialiser-perl.
+Preparing to unpack .../05-libtypes-serialiser-perl_1.01-1_all.deb ...
+Unpacking libtypes-serialiser-perl (1.01-1) ...
+Selecting previously unselected package libjson-xs-perl.
+Preparing to unpack .../06-libjson-xs-perl_4.030-2build3_amd64.deb ...
+Unpacking libjson-xs-perl (4.030-2build3) ...
+Selecting previously unselected package libllvm17t64:amd64.
+Preparing to unpack .../07-libllvm17t64_1%3a17.0.6-9ubuntu1_amd64.deb ...
+Unpacking libllvm17t64:amd64 (1:17.0.6-9ubuntu1) ...
+Selecting previously unselected package libpq5:amd64.
+Preparing to unpack .../08-libpq5_16.9-0ubuntu0.24.04.1_amd64.deb ...
+Unpacking libpq5:amd64 (16.9-0ubuntu0.24.04.1) ...
+Selecting previously unselected package postgresql-client-16.
+Preparing to unpack .../09-postgresql-client-16_16.9-0ubuntu0.24.04.1_amd64.deb ...
+Unpacking postgresql-client-16 (16.9-0ubuntu0.24.04.1) ...
+Selecting previously unselected package postgresql-16.
+Preparing to unpack .../10-postgresql-16_16.9-0ubuntu0.24.04.1_amd64.deb ...
+Unpacking postgresql-16 (16.9-0ubuntu0.24.04.1) ...
+Selecting previously unselected package postgresql-contrib.
+Preparing to unpack .../11-postgresql-contrib_16+257build1.1_all.deb ...
+Unpacking postgresql-contrib (16+257build1.1) ...
+Setting up postgresql-client-common (257build1.1) ...
+Setting up libpq5:amd64 (16.9-0ubuntu0.24.04.1) ...
+Setting up libcommon-sense-perl:amd64 (3.75-3build3) ...
+Setting up libllvm17t64:amd64 (1:17.0.6-9ubuntu1) ...
+Setting up ssl-cert (1.1.2ubuntu1) ...
+Setting up libtypes-serialiser-perl (1.01-1) ...
+Setting up libjson-perl (4.10000-1) ...
+Setting up libjson-xs-perl (4.030-2build3) ...
+Setting up postgresql-client-16 (16.9-0ubuntu0.24.04.1) ...
+update-alternatives: using /usr/share/postgresql/16/man/man1/psql.1.gz to provide /usr/share/man/man1/psql.1.gz (psql.1.gz) in auto mode
+Setting up postgresql-common (257build1.1) ...
+
+Creating config file /etc/postgresql-common/createcluster.conf with new version
+Building PostgreSQL dictionaries from installed myspell/hunspell packages...
+Removing obsolete dictionary files:
+Created symlink /etc/systemd/system/multi-user.target.wants/postgresql.service → /usr/lib/systemd/system/postgresql.service.
+Setting up postgresql-16 (16.9-0ubuntu0.24.04.1) ...
+Creating new PostgreSQL cluster 16/main ...
+/usr/lib/postgresql/16/bin/initdb -D /var/lib/postgresql/16/main --auth-local peer --auth-host scram-sha-256 --no-instructions
+The files belonging to this database system will be owned by user "postgres".
+This user must also own the server process.
+
+The database cluster will be initialized with locale "en_US.UTF-8".
+The default database encoding has accordingly been set to "UTF8".
+The default text search configuration will be set to "english".
+
+Data page checksums are disabled.
+
+fixing permissions on existing directory /var/lib/postgresql/16/main ... ok
+creating subdirectories ... ok
+selecting dynamic shared memory implementation ... posix
+selecting default max_connections ... 100
+selecting default shared_buffers ... 128MB
+selecting default time zone ... Etc/UTC
+creating configuration files ... ok
+running bootstrap script ... ok
+performing post-bootstrap initialization ... ok
+syncing data to disk ... ok
+Setting up postgresql-contrib (16+257build1.1) ...
+Processing triggers for man-db (2.12.0-4build2) ...
+Processing triggers for libc-bin (2.39-0ubuntu8.5) ...
+Scanning processes...
+Scanning candidates...
+Scanning linux images...
+
+Pending kernel upgrade!
+Running kernel version:
+  6.8.0-41-generic
+Diagnostics:
+  The currently running kernel version is not the expected kernel version 6.8.0-78-generic.
+
+Restarting the system to load the new kernel will not be handled automatically, so you should consider rebooting.
+
+Restarting services...
+
+Service restarts being deferred:
+ /etc/needrestart/restart.d/dbus.service
+ systemctl restart getty@tty1.service
+ systemctl restart systemd-logind.service
+ systemctl restart unattended-upgrades.service
+
+No containers need to be restarted.
+
+User sessions running outdated binaries:
+ suporte @ session #1: sshd[1380,1498], su[1546]
+ suporte @ user manager service: systemd[1385]
+
+No VM guests are running outdated hypervisor (qemu) binaries on this host.
+root@vlxsam03:~# systemctl status postgresql
+● postgresql.service - PostgreSQL RDBMS
+     Loaded: loaded (/usr/lib/systemd/system/postgresql.service; enabled; preset: enabled)
+     Active: active (exited) since Mon 2025-08-25 21:46:42 UTC; 10s ago
+   Main PID: 60087 (code=exited, status=0/SUCCESS)
+        CPU: 967us
+
+Aug 25 21:46:42 vlxsam03 systemd[1]: Starting postgresql.service - PostgreSQL RDBMS...
+Aug 25 21:46:42 vlxsam03 systemd[1]: Finished postgresql.service - PostgreSQL RDBMS.
+root@vlxsam03:~# pg_lsclusters
+Ver Cluster Port Status Owner    Data directory              Log file
+16  main    5432 online postgres /var/lib/postgresql/16/main /var/log/postgresql/postgresql-16-main.log
+root@vlxsam03:~# sudo -u postgres psql -c "ALTER ROLE postgres PASSWORD 'SamurEye2024DB!';"
+-bash: !': event not found
+root@vlxsam03:~# sudo -u postgres psql << 'EOF'
+CREATE ROLE samureye WITH LOGIN PASSWORD 'SamurEye2024DB!' CREATEDB;
+CREATE DATABASE samureye_db OWNER samureye;
+GRANT ALL PRIVILEGES ON DATABASE samureye_db TO samureye;
+EOF
+CREATE ROLE
+CREATE DATABASE
+GRANT
+root@vlxsam03:~# sudo -u postgres psql -d samureye_db << 'EOF'
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS pg_stat_statements;
+GRANT ALL ON SCHEMA public TO samureye;
+EOF
+CREATE EXTENSION
+CREATE EXTENSION
+GRANT
+root@vlxsam03:~# PGPASSWORD='SamurEye2024DB!' psql -h 127.0.0.1 -U samureye -d samureye_db -c "SELECT version();"
+                                                               version
+--------------------------------------------------------------------------------------------------------------------------------------
+ PostgreSQL 16.9 (Ubuntu 16.9-0ubuntu0.24.04.1) on x86_64-pc-linux-gnu, compiled by gcc (Ubuntu 13.3.0-6ubuntu2~24.04) 13.3.0, 64-bit
+(1 row)
+
+root@vlxsam03:~#
