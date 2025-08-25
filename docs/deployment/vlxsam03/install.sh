@@ -235,10 +235,19 @@ EOF
 chown -R grafana:grafana /opt/data/grafana
 chown grafana:grafana /var/log/samureye/grafana.log 2>/dev/null || touch /var/log/samureye/grafana.log && chown grafana:grafana /var/log/samureye/grafana.log
 
+# Iniciar Grafana com verificações
 systemctl enable grafana-server
 systemctl start grafana-server
 
-log "Grafana instalado e configurado"
+# Aguardar e verificar Grafana
+sleep 5
+if systemctl is-active --quiet grafana-server; then
+    log "✅ Grafana configurado e iniciado com sucesso"
+else
+    warn "⚠️ Problema com Grafana. Verificando logs..."
+    journalctl -u grafana-server --no-pager --lines=3 || true
+    log "⚠️ Grafana pode precisar de ajustes manuais"
+fi
 
 # ============================================================================
 # 5. INSTALAÇÃO MINIO (OPCIONAL - BACKUP LOCAL)
@@ -255,32 +264,29 @@ if ! id "minio" &>/dev/null; then
     useradd -r -s /bin/bash minio
 fi
 
-# Garantir que o diretório MinIO existe com permissões corretas
-# Remover se existir com permissões incorretas
+# Limpar diretório MinIO antigo se existir
 if [ -d "/opt/data/minio" ]; then
     rm -rf /opt/data/minio
 fi
-
-# Garantir que /opt/data existe e tem permissões adequadas
-if [ ! -d "/opt/data" ]; then
-    mkdir -p /opt/data
-    chown samureye:samureye /opt/data
+if [ -d "/var/lib/minio" ]; then
+    rm -rf /var/lib/minio
 fi
 
-# Criar diretório MinIO com permissões corretas (como root primeiro)
-mkdir -p /opt/data/minio/data
-chown -R minio:minio /opt/data/minio
-chmod -R 755 /opt/data/minio
+# Estratégia diferente para MinIO - usar diretório mais simples
+mkdir -p /var/lib/minio
+chown -R minio:minio /var/lib/minio
+chmod -R 755 /var/lib/minio
 
-# Definir o diretório como home do usuário minio após criação
-usermod -d /opt/data/minio minio 2>/dev/null || true
+# Definir home directory
+usermod -d /var/lib/minio minio 2>/dev/null || true
 
-# Inicializar estrutura MinIO corretamente
-sudo -u minio mkdir -p /opt/data/minio/data/.minio.sys 2>/dev/null || true
+# Criar estrutura básica do MinIO
+sudo -u minio mkdir -p /var/lib/minio/{data,config} 2>/dev/null || true
+echo "Created MinIO structure in /var/lib/minio"
 
-# Verificar se as permissões estão corretas
+# Verificar estrutura
 log "Estrutura MinIO criada:"
-ls -la /opt/data/minio/ 2>/dev/null || log "Diretório MinIO não acessível"
+ls -la /var/lib/minio/ 2>/dev/null || log "Diretório MinIO não acessível"
 log "✅ Diretório MinIO configurado"
 
 # Configurar MinIO
@@ -289,7 +295,7 @@ cat > /etc/default/minio << 'EOF'
 # MinIO configuration for SamurEye backup
 MINIO_ROOT_USER=admin
 MINIO_ROOT_PASSWORD=SamurEye2024!
-MINIO_VOLUMES=/opt/data/minio/data
+MINIO_VOLUMES=/var/lib/minio/data
 MINIO_OPTS="--console-address :9001"
 MINIO_SERVER_URL=http://172.24.1.153:9000
 EOF
@@ -301,7 +307,7 @@ sudo -u minio /usr/local/bin/minio server --help > /dev/null 2>&1 || {
 }
 
 # Verificar se diretório é válido para MinIO
-if [ ! -d "/opt/data/minio/data" ] || [ ! -w "/opt/data/minio/data" ]; then
+if [ ! -d "/var/lib/minio/data" ] || [ ! -w "/var/lib/minio/data" ]; then
     error "Diretório MinIO não está acessível"
 fi
 
@@ -317,7 +323,7 @@ Type=exec
 User=minio
 Group=minio
 EnvironmentFile=/etc/default/minio
-ExecStart=/usr/local/bin/minio server --console-address :9001 /opt/data/minio/data
+ExecStart=/usr/local/bin/minio server --console-address :9001 /var/lib/minio/data
 TimeoutStopSec=30
 Restart=always
 RestartSec=5
