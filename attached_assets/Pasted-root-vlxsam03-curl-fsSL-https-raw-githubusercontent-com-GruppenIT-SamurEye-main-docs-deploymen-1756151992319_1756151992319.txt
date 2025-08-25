@@ -1,0 +1,312 @@
+root@vlxsam03:~# curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam03/install.sh | bash
+[19:53:57] 🚀 Iniciando instalação vlxsam03 - Database/Services Server
+[19:53:57] Servidor: 172.24.1.153
+[19:53:57] Data Directory: /opt/data
+[19:53:57] 📦 Atualizando sistema base...
+Hit:1 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:2 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:3 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:4 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+All packages are up to date.
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+Calculating upgrade... Done
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+curl is already the newest version (8.5.0-2ubuntu10.6).
+wget is already the newest version (1.21.4-1ubuntu4.1).
+gnupg is already the newest version (2.4.4-2ubuntu17.3).
+software-properties-common is already the newest version (0.99.49.3).
+apt-transport-https is already the newest version (2.8.3).
+ca-certificates is already the newest version (20240203).
+lsb-release is already the newest version (12.0-2).
+jq is already the newest version (1.7.1-3ubuntu0.24.04.1).
+htop is already the newest version (3.3.0-4build1).
+iotop is already the newest version (0.6-42-ga14256a-0.2build1).
+netcat-openbsd is already the newest version (1.226-1ubuntu2).
+redis-tools is already the newest version (5:7.0.15-1ubuntu0.24.04.1).
+postgresql-client-16 is already the newest version (16.9-0ubuntu0.24.04.1).
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+[19:54:00] Sistema base atualizado
+[19:54:00] 👤 Configurando usuários e diretórios...
+[19:54:00] Usuários e diretórios configurados
+[19:54:00] 🔴 Instalando Redis...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+redis-server is already the newest version (5:7.0.15-1ubuntu0.24.04.1).
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+Synchronizing state of redis-server.service with SysV service script with /usr/lib/systemd/systemd-sysv-install.
+Executing: /usr/lib/systemd/systemd-sysv-install enable redis-server
+Job for redis-server.service failed because the control process exited with error code.
+See "systemctl status redis-server.service" and "journalctl -xeu redis-server.service" for details.
+root@vlxsam03:~# vi /etc/redis/redis.conf
+root@vlxsam03:~# sudo systemctl stop redis-server
+sudo rm -rf /etc/systemd/system/redis-server.service.d/
+root@vlxsam03:~# sudo mkdir -p /var/lib/redis /var/log/redis
+sudo chown redis:redis /var/lib/redis /var/log/redis
+sudo chmod 750 /var/lib/redis /var/log/redis
+root@vlxsam03:~# sudo tee /etc/redis/redis.conf > /dev/null << 'EOF'
+bind 0.0.0.0
+port 6379
+protected-mode yes
+requirepass SamurEye2024Redis!
+maxmemory 2gb
+maxmemory-policy allkeys-lru
+save 900 1
+save 300 10
+save 60 10000
+stop-writes-on-bgsave-error yes
+rdbcompression yes
+rdbchecksum yes
+dbfilename dump.rdb
+dir /var/lib/redis
+loglevel notice
+logfile /var/log/redis/redis-server.log
+timeout 0
+tcp-keepalive 300
+maxclients 1000
+daemonize no
+supervised systemd
+EOF
+root@vlxsam03:~# sudo chown redis:redis /etc/redis/redis.conf
+sudo chmod 640 /etc/redis/redis.conf
+sudo systemctl daemon-reload
+sudo systemctl enable redis-server
+sudo systemctl start redis-server
+Synchronizing state of redis-server.service with SysV service script with /usr/lib/systemd/systemd-sysv-install.
+Executing: /usr/lib/systemd/systemd-sysv-install enable redis-server
+root@vlxsam03:~# redis-cli -h 172.24.1.153 -a SamurEye2024Redis! ping
+Warning: Using a password with '-a' or '-u' option on the command line interface may not be safe.
+PONG
+root@vlxsam03:~# curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam03/install.sh | bash
+[19:55:46] 🚀 Iniciando instalação vlxsam03 - Database/Services Server
+[19:55:46] Servidor: 172.24.1.153
+[19:55:46] Data Directory: /opt/data
+[19:55:46] 📦 Atualizando sistema base...
+Hit:1 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:2 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:3 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:4 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+All packages are up to date.
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+Calculating upgrade... Done
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+curl is already the newest version (8.5.0-2ubuntu10.6).
+wget is already the newest version (1.21.4-1ubuntu4.1).
+gnupg is already the newest version (2.4.4-2ubuntu17.3).
+software-properties-common is already the newest version (0.99.49.3).
+apt-transport-https is already the newest version (2.8.3).
+ca-certificates is already the newest version (20240203).
+lsb-release is already the newest version (12.0-2).
+jq is already the newest version (1.7.1-3ubuntu0.24.04.1).
+htop is already the newest version (3.3.0-4build1).
+iotop is already the newest version (0.6-42-ga14256a-0.2build1).
+netcat-openbsd is already the newest version (1.226-1ubuntu2).
+redis-tools is already the newest version (5:7.0.15-1ubuntu0.24.04.1).
+postgresql-client-16 is already the newest version (16.9-0ubuntu0.24.04.1).
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+[19:55:49] Sistema base atualizado
+[19:55:49] 👤 Configurando usuários e diretórios...
+[19:55:50] Usuários e diretórios configurados
+[19:55:50] 🔴 Instalando Redis...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+redis-server is already the newest version (5:7.0.15-1ubuntu0.24.04.1).
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+Synchronizing state of redis-server.service with SysV service script with /usr/lib/systemd/systemd-sysv-install.
+Executing: /usr/lib/systemd/systemd-sysv-install enable redis-server
+Warning: Using a password with '-a' or '-u' option on the command line interface may not be safe.
+[19:55:56] ✅ Redis configurado e testado com sucesso
+[19:55:56] Redis configurado e iniciado
+[19:55:56] 📊 Instalando Grafana...
+Get:1 https://packages.grafana.com/oss/deb stable InRelease [7,661 B]
+Get:2 https://packages.grafana.com/oss/deb stable/main amd64 Packages [431 kB]
+Hit:3 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:4 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:5 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:6 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Fetched 439 kB in 1s (521 kB/s)
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+All packages are up to date.
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following additional packages will be installed:
+  musl
+The following NEW packages will be installed:
+  grafana musl
+0 upgraded, 2 newly installed, 0 to remove and 0 not upgraded.
+Need to get 190 MB of archives.
+After this operation, 692 MB of additional disk space will be used.
+Get:1 https://packages.grafana.com/oss/deb stable/main amd64 grafana amd64 12.1.1 [190 MB]
+Get:2 http://archive.ubuntu.com/ubuntu noble/universe amd64 musl amd64 1.2.4-2 [416 kB]
+Fetched 190 MB in 4s (43.3 MB/s)
+Selecting previously unselected package musl:amd64.
+(Reading database ... 125375 files and directories currently installed.)
+Preparing to unpack .../musl_1.2.4-2_amd64.deb ...
+Unpacking musl:amd64 (1.2.4-2) ...
+Selecting previously unselected package grafana.
+Preparing to unpack .../grafana_12.1.1_amd64.deb ...
+Unpacking grafana (12.1.1) ...
+Setting up musl:amd64 (1.2.4-2) ...
+Setting up grafana (12.1.1) ...
+info: Selecting UID from range 100 to 999 ...
+
+info: Adding system user `grafana' (UID 111) ...
+info: Adding new user `grafana' (UID 111) with group `grafana' ...
+info: Not creating home directory `/usr/share/grafana'.
+### NOT starting on installation, please execute the following statements to configure grafana to start automatically using systemd
+ sudo /bin/systemctl daemon-reload
+ sudo /bin/systemctl enable grafana-server
+### You can start grafana-server by executing
+ sudo /bin/systemctl start grafana-server
+Processing triggers for man-db (2.12.0-4build2) ...
+Scanning processes...
+Scanning candidates...
+Scanning linux images...
+
+Pending kernel upgrade!
+Running kernel version:
+  6.8.0-41-generic
+Diagnostics:
+  The currently running kernel version is not the expected kernel version 6.8.0-78-generic.
+
+Restarting the system to load the new kernel will not be handled automatically, so you should consider rebooting.
+
+Restarting services...
+
+Service restarts being deferred:
+ /etc/needrestart/restart.d/dbus.service
+ systemctl restart getty@tty1.service
+ systemctl restart systemd-logind.service
+ systemctl restart unattended-upgrades.service
+
+No containers need to be restarted.
+
+User sessions running outdated binaries:
+ suporte @ session #1: sshd[1380,1498], su[1546]
+ suporte @ user manager service: systemd[1385]
+
+No VM guests are running outdated hypervisor (qemu) binaries on this host.
+Synchronizing state of grafana-server.service with SysV service script with /usr/lib/systemd/systemd-sysv-install.
+Executing: /usr/lib/systemd/systemd-sysv-install enable grafana-server
+Created symlink /etc/systemd/system/multi-user.target.wants/grafana-server.service → /usr/lib/systemd/system/grafana-server.service.
+[19:56:10] Grafana instalado e configurado
+[19:56:10] 🗄️ Instalando MinIO (backup local)...
+--2025-08-25 19:56:10--  https://dl.min.io/server/minio/release/linux-amd64/minio
+Resolving dl.min.io (dl.min.io)... 178.128.69.202, 138.68.11.125
+Connecting to dl.min.io (dl.min.io)|178.128.69.202|:443... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 110780600 (106M) [application/octet-stream]
+Saving to: ‘/usr/local/bin/minio’
+
+/usr/local/bin/minio                                 100%[======================================================================================================================>] 105.65M  1.74MB/s    in 2m 0s
+
+2025-08-25 19:58:11 (899 KB/s) - ‘/usr/local/bin/minio’ saved [110780600/110780600]
+
+Created symlink /etc/systemd/system/multi-user.target.wants/minio.service → /etc/systemd/system/minio.service.
+Job for minio.service failed because the control process exited with error code.
+See "systemctl status minio.service" and "journalctl -xeu minio.service" for details.
+root@vlxsam03:~# journalctl -xeu minio.service
+░░ Subject: A start job for unit minio.service has failed
+░░ Defined-By: systemd
+░░ Support: http://www.ubuntu.com/support
+░░
+░░ A start job for unit minio.service has finished with a failure.
+░░
+░░ The job identifier is 15672 and the job result is failed.
+Aug 25 20:00:01 vlxsam03 systemd[1]: minio.service: Scheduled restart job, restart counter is at 20.
+░░ Subject: Automatic restarting of a unit has been scheduled
+░░ Defined-By: systemd
+░░ Support: http://www.ubuntu.com/support
+░░
+░░ Automatic restarting of the unit minio.service has been scheduled, as the result for
+░░ the configured Restart= setting for the unit.
+Aug 25 20:00:01 vlxsam03 systemd[1]: Starting minio.service - MinIO Object Storage...
+░░ Subject: A start job for unit minio.service has begun execution
+░░ Defined-By: systemd
+░░ Support: http://www.ubuntu.com/support
+░░
+░░ A start job for unit minio.service has begun execution.
+░░
+░░ The job identifier is 15894.
+Aug 25 20:00:02 vlxsam03 minio[34118]: FATAL Unable to use the drive /opt/data/minio: drive not found: Invalid arguments specified
+Aug 25 20:00:02 vlxsam03 systemd[1]: minio.service: Main process exited, code=exited, status=1/FAILURE
+░░ Subject: Unit process exited
+░░ Defined-By: systemd
+░░ Support: http://www.ubuntu.com/support
+░░
+░░ An ExecStart= process belonging to unit minio.service has exited.
+░░
+░░ The process' exit code is 'exited' and its exit status is 1.
+Aug 25 20:00:02 vlxsam03 systemd[1]: minio.service: Failed with result 'exit-code'.
+░░ Subject: Unit failed
+░░ Defined-By: systemd
+░░ Support: http://www.ubuntu.com/support
+░░
+░░ The unit minio.service has entered the 'failed' state with result 'exit-code'.
+Aug 25 20:00:02 vlxsam03 systemd[1]: Failed to start minio.service - MinIO Object Storage.
+░░ Subject: A start job for unit minio.service has failed
+░░ Defined-By: systemd
+░░ Support: http://www.ubuntu.com/support
+░░
+░░ A start job for unit minio.service has finished with a failure.
+░░
+░░ The job identifier is 15894 and the job result is failed.
+Aug 25 20:00:07 vlxsam03 systemd[1]: minio.service: Scheduled restart job, restart counter is at 21.
+░░ Subject: Automatic restarting of a unit has been scheduled
+░░ Defined-By: systemd
+░░ Support: http://www.ubuntu.com/support
+░░
+░░ Automatic restarting of the unit minio.service has been scheduled, as the result for
+░░ the configured Restart= setting for the unit.
+Aug 25 20:00:07 vlxsam03 systemd[1]: Starting minio.service - MinIO Object Storage...
+░░ Subject: A start job for unit minio.service has begun execution
+░░ Defined-By: systemd
+░░ Support: http://www.ubuntu.com/support
+░░
+░░ A start job for unit minio.service has begun execution.
+░░
+░░ The job identifier is 16005.
+Aug 25 20:00:07 vlxsam03 minio[34132]: FATAL Unable to use the drive /opt/data/minio: drive not found: Invalid arguments specified
+Aug 25 20:00:07 vlxsam03 systemd[1]: minio.service: Main process exited, code=exited, status=1/FAILURE
+░░ Subject: Unit process exited
+░░ Defined-By: systemd
+░░ Support: http://www.ubuntu.com/support
+░░
+░░ An ExecStart= process belonging to unit minio.service has exited.
+░░
+░░ The process' exit code is 'exited' and its exit status is 1.
+Aug 25 20:00:07 vlxsam03 systemd[1]: minio.service: Failed with result 'exit-code'.
+░░ Subject: Unit failed
+░░ Defined-By: systemd
+░░ Support: http://www.ubuntu.com/support
+░░
+░░ The unit minio.service has entered the 'failed' state with result 'exit-code'.
+Aug 25 20:00:07 vlxsam03 systemd[1]: Failed to start minio.service - MinIO Object Storage.
+░░ Subject: A start job for unit minio.service has failed
+░░ Defined-By: systemd
+░░ Support: http://www.ubuntu.com/support
+░░
+░░ A start job for unit minio.service has finished with a failure.
+░░
+░░ The job identifier is 16005 and the job result is failed.
+root@vlxsam03:~#

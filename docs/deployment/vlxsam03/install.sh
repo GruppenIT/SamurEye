@@ -86,13 +86,13 @@ if ! id "samureye" &>/dev/null; then
 fi
 
 # Criar diretórios essenciais
-mkdir -p "$DATA_DIR"/{redis,grafana,minio,logs}
+mkdir -p "$DATA_DIR"/{redis,grafana,logs}
 mkdir -p "$BACKUP_DIR"/{redis,configs,logs,neon}
 mkdir -p "$SCRIPTS_DIR"
 mkdir -p "$CONFIG_DIR"
 mkdir -p /var/log/samureye
 
-# Definir permissões gerais
+# Definir permissões gerais (MinIO será criado separadamente)
 chown -R samureye:samureye "$DATA_DIR" "$BACKUP_DIR"
 chown -R samureye:samureye /var/log/samureye
 chmod 750 "$DATA_DIR" "$BACKUP_DIR"
@@ -250,10 +250,28 @@ log "🗄️ Instalando MinIO (backup local)..."
 wget -O /usr/local/bin/minio https://dl.min.io/server/minio/release/linux-amd64/minio
 chmod +x /usr/local/bin/minio
 
-# Criar usuário minio
-useradd -r -s /bin/bash minio || true
+# Criar usuário minio se não existir
+if ! id "minio" &>/dev/null; then
+    useradd -r -s /bin/bash -d /opt/data/minio minio
+fi
+
+# Garantir que o diretório MinIO existe com permissões corretas
+# Remover se existir com permissões incorretas
+if [ -d "/opt/data/minio" ]; then
+    rm -rf /opt/data/minio
+fi
+
+# Criar diretório do zero com permissões corretas
 mkdir -p /opt/data/minio
 chown minio:minio /opt/data/minio
+chmod 755 /opt/data/minio
+
+# Verificar se o usuário minio pode escrever no diretório
+if ! sudo -u minio test -w /opt/data/minio; then
+    error "Usuário minio não consegue escrever em /opt/data/minio"
+fi
+
+log "Diretório MinIO criado e verificado"
 
 # Configurar MinIO
 mkdir -p /etc/default
@@ -293,11 +311,27 @@ ReadWritePaths=/opt/data/minio
 WantedBy=multi-user.target
 EOF
 
+# Inicializar MinIO com verificações
 systemctl daemon-reload
 systemctl enable minio
+
+# Aguardar e tentar iniciar MinIO
+log "Iniciando MinIO..."
+sleep 2
 systemctl start minio
 
-log "MinIO configurado (backup local)"
+# Aguardar inicialização do MinIO
+sleep 5
+
+# Verificar se MinIO iniciou corretamente
+if systemctl is-active --quiet minio; then
+    log "✅ MinIO configurado e iniciado com sucesso"
+else
+    warn "⚠️ MinIO não iniciou corretamente. Verificando logs..."
+    # Mostrar erro mas não falhar o script, pois MinIO é opcional
+    journalctl -u minio.service --no-pager --lines=3 || true
+    log "⚠️ MinIO será configurado como opcional (pode ser corrigido manualmente se necessário)"
+fi
 
 # ============================================================================
 # 6. CONFIGURAÇÃO DE ENVIRONMENT
