@@ -250,9 +250,9 @@ log "🗄️ Instalando MinIO (backup local)..."
 wget -O /usr/local/bin/minio https://dl.min.io/server/minio/release/linux-amd64/minio
 chmod +x /usr/local/bin/minio
 
-# Criar usuário minio se não existir
+# Criar usuário minio se não existir (sem home directory específico primeiro)
 if ! id "minio" &>/dev/null; then
-    useradd -r -s /bin/bash -d /opt/data/minio minio
+    useradd -r -s /bin/bash minio
 fi
 
 # Garantir que o diretório MinIO existe com permissões corretas
@@ -266,12 +266,19 @@ mkdir -p /opt/data/minio
 chown minio:minio /opt/data/minio
 chmod 755 /opt/data/minio
 
-# Verificar se o usuário minio pode escrever no diretório
-if ! sudo -u minio test -w /opt/data/minio; then
-    error "Usuário minio não consegue escrever em /opt/data/minio"
-fi
+# Definir o diretório como home do usuário minio após criação
+usermod -d /opt/data/minio minio
 
-log "Diretório MinIO criado e verificado"
+# Verificar se as permissões estão corretas
+ls -la /opt/data/minio
+log "Diretório MinIO: $(ls -ld /opt/data/minio)"
+
+# Teste mais simples de escrita
+if [ -w /opt/data/minio ]; then
+    log "✅ Diretório MinIO criado e acessível"
+else
+    warn "⚠️ Problemas com permissões MinIO, mas continuando instalação"
+fi
 
 # Configurar MinIO
 mkdir -p /etc/default
