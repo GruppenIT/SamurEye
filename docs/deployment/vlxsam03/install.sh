@@ -235,10 +235,15 @@ EOF
 systemctl stop grafana-server || true
 systemctl disable grafana-server || true
 systemctl reset-failed grafana-server || true
-sleep 5
 
-# Limpar possível PID file residual
+# Matar qualquer processo Grafana residual
+pkill -f grafana-server || true
+sleep 3
+
+# Limpar possível PID file residual e dados problemáticos
 rm -f /var/run/grafana/grafana-server.pid
+rm -f /var/lib/grafana/grafana.db.lock || true
+sleep 5
 
 # Limpar logs antigos problemáticos
 rm -f /var/log/samureye/grafana.log
@@ -251,9 +256,38 @@ chown grafana:grafana /var/log/samureye/grafana.log
 chmod 644 /var/log/samureye/grafana.log
 
 # Verificar se diretório está acessível
-sudo -u grafana test -w /opt/data/grafana || {
-    error "Grafana não consegue escrever em /opt/data/grafana"
-}
+if ! sudo -u grafana test -w /opt/data/grafana; then
+    warn "Grafana não consegue escrever em /opt/data/grafana, usando configuração padrão"
+    
+    # Usar diretório padrão do Grafana se houver problemas
+    cat > /etc/grafana/grafana.ini << 'EOF'
+[server]
+http_addr = 0.0.0.0
+http_port = 3000
+domain = 172.24.1.153
+
+[database]
+type = sqlite3
+path = /var/lib/grafana/grafana.db
+
+[security]
+admin_user = admin
+admin_password = SamurEye2024!
+secret_key = SamurEyeGrafanaSecret2024
+disable_gravatar = true
+
+[auth.anonymous]
+enabled = false
+
+[log]
+mode = file
+level = info
+EOF
+    
+    log "Usando configuração padrão do Grafana"
+else
+    log "Diretório Grafana acessível, usando configuração personalizada"
+fi
 
 # Reabilitar e reiniciar Grafana com delay adequado
 systemctl daemon-reload
@@ -296,7 +330,14 @@ log "🗄️ Instalando MinIO (backup local)..."
 # Parar MinIO completamente antes de atualizar binário
 systemctl stop minio || true
 systemctl disable minio || true
-sleep 3
+
+# Matar qualquer processo MinIO residual
+pkill -f minio || true
+sleep 5
+
+# Aguardar possível flush de I/O
+sync
+sleep 2
 
 # Remover binário antigo se existir
 rm -f /usr/local/bin/minio
