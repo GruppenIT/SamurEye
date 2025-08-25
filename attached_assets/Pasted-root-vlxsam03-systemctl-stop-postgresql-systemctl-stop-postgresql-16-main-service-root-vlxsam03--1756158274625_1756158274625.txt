@@ -1,0 +1,63 @@
+root@vlxsam03:~# systemctl stop postgresql
+systemctl stop postgresql@16-main.service
+root@vlxsam03:~# ls -la /etc/postgresql/16/
+cat /etc/postgresql-common/pg_clusters
+total 12
+drwxr-xr-x 3 postgres postgres 4096 Aug 25 21:22 .
+drwxr-xr-x 3 postgres postgres 4096 Aug 25 21:22 ..
+drwxr-xr-x 3 postgres postgres 4096 Aug 25 21:34 main
+cat: /etc/postgresql-common/pg_clusters: No such file or directory
+root@vlxsam03:~# cat /etc/postgresql-common/pg_clusters
+cat: /etc/postgresql-common/pg_clusters: No such file or directory
+root@vlxsam03:~# rm -rf /etc/postgresql/16/main/
+root@vlxsam03:~# sudo pg_dropcluster --stop 16 main || true
+
+# 2. Criar cluster novo
+sudo pg_createcluster 16 main
+
+# 3. Iniciar cluster
+sudo pg_ctlcluster 16 main start
+
+# 4. Verificar se funcionou
+pg_lsclusters
+Error: specified cluster does not exist
+Configuring already existing cluster (configuration: /etc/postgresql/16/main, data: /var/lib/postgresql/16/main, owner: 112:113)
+Error: move_conffile: required configuration file /var/lib/postgresql/16/main/postgresql.conf does not exist
+Error: specified cluster '16 main' does not exist
+Ver Cluster Port Status Owner Data directory Log file
+root@vlxsam03:~#
+root@vlxsam03:~#
+root@vlxsam03:~# systemctl status postgresql@16-main.service
+× postgresql@16-main.service - PostgreSQL Cluster 16-main
+     Loaded: loaded (/usr/lib/systemd/system/postgresql@.service; disabled; preset: enabled)
+     Active: failed (Result: protocol) since Mon 2025-08-25 21:37:42 UTC; 6min ago
+   Duration: 2.569s
+        CPU: 25ms
+
+Aug 25 21:37:41 vlxsam03 systemd[1]: Starting postgresql@16-main.service - PostgreSQL Cluster 16-main...
+Aug 25 21:37:42 vlxsam03 postgresql@16-main[57003]: Use of uninitialized value $data_directory in concatenation (.) or string at /usr/share/perl5/PgCommon.pm line 286.
+Aug 25 21:37:42 vlxsam03 postgresql@16-main[57003]: Use of uninitialized value $data_directory in concatenation (.) or string at /usr/share/perl5/PgCommon.pm line 286.
+Aug 25 21:37:42 vlxsam03 postgresql@16-main[57003]: Use of uninitialized value $data_directory in concatenation (.) or string at /usr/share/perl5/PgCommon.pm line 286.
+Aug 25 21:37:42 vlxsam03 postgresql@16-main[57003]: Error: Invalid data directory for cluster 16 main
+Aug 25 21:37:42 vlxsam03 systemd[1]: postgresql@16-main.service: Can't open PID file /run/postgresql/16-main.pid (yet?) after start: No such file or directory
+Aug 25 21:37:42 vlxsam03 systemd[1]: postgresql@16-main.service: Failed with result 'protocol'.
+Aug 25 21:37:42 vlxsam03 systemd[1]: Failed to start postgresql@16-main.service - PostgreSQL Cluster 16-main.
+root@vlxsam03:~# sudo -u postgres psql << 'EOF'
+ALTER ROLE postgres PASSWORD 'SamurEye2024DB!';
+CREATE ROLE samureye WITH LOGIN PASSWORD 'SamurEye2024DB!' CREATEDB;
+CREATE DATABASE samureye_db OWNER samureye;
+GRANT ALL PRIVILEGES ON DATABASE samureye_db TO samureye;
+EOF
+psql: error: connection to server on socket "/var/run/postgresql/.s.PGSQL.5432" failed: No such file or directory
+        Is the server running locally and accepting connections on that socket?
+root@vlxsam03:~# sudo -u postgres psql -d samureye_db << 'EOF'
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS pg_stat_statements;
+GRANT ALL ON SCHEMA public TO samureye;
+EOF
+psql: error: connection to server on socket "/var/run/postgresql/.s.PGSQL.5432" failed: No such file or directory
+        Is the server running locally and accepting connections on that socket?
+root@vlxsam03:~# PGPASSWORD='SamurEye2024DB!' psql -h 127.0.0.1 -U samureye -d samureye_db -c "SELECT version();"
+psql: error: connection to server at "127.0.0.1", port 5432 failed: Connection refused
+        Is the server running on that host and accepting TCP/IP connections?
+root@vlxsam03:~#
