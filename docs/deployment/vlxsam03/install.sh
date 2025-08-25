@@ -294,7 +294,18 @@ MINIO_OPTS="--console-address :9001"
 MINIO_SERVER_URL=http://172.24.1.153:9000
 EOF
 
-# Systemd service para MinIO
+# Testar se MinIO consegue acessar o diretório
+log "Testando acesso MinIO ao diretório..."
+sudo -u minio /usr/local/bin/minio server --help > /dev/null 2>&1 || {
+    error "MinIO binary não funciona corretamente"
+}
+
+# Verificar se diretório é válido para MinIO
+if [ ! -d "/opt/data/minio/data" ] || [ ! -w "/opt/data/minio/data" ]; then
+    error "Diretório MinIO não está acessível"
+fi
+
+# Systemd service para MinIO (simplificado para debug)
 cat > /etc/systemd/system/minio.service << 'EOF'
 [Unit]
 Description=MinIO Object Storage
@@ -302,20 +313,20 @@ After=network.target
 Wants=network.target
 
 [Service]
-Type=notify
+Type=exec
 User=minio
 Group=minio
 EnvironmentFile=/etc/default/minio
-ExecStart=/usr/local/bin/minio server $MINIO_OPTS $MINIO_VOLUMES
+ExecStart=/usr/local/bin/minio server --console-address :9001 /opt/data/minio/data
 TimeoutStopSec=30
 Restart=always
 RestartSec=5
+StandardOutput=journal
+StandardError=journal
 
-# Security
-NoNewPrivileges=true
-PrivateTmp=true
-ProtectSystem=strict
-ReadWritePaths=/opt/data/minio
+# Security (relaxada para debug)
+NoNewPrivileges=false
+PrivateTmp=false
 
 [Install]
 WantedBy=multi-user.target
