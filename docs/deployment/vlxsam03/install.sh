@@ -66,9 +66,9 @@ apt install -y \
     jq \
     htop \
     iotop \
-    netcat \
+    netcat-openbsd \
     redis-tools \
-    postgresql-client-15
+    postgresql-client-16
 
 log "Sistema base atualizado"
 
