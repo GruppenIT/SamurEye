@@ -1,0 +1,383 @@
+root@vlxsam03:~# curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam03/install.sh | bash
+[21:22:38] 🚀 Iniciando instalação vlxsam03 - Database/Services Server
+[21:22:38] Servidor: 172.24.1.153
+[21:22:38] Data Directory: /opt/data
+[21:22:38] 📦 Atualizando sistema base...
+Hit:1 https://packages.grafana.com/oss/deb stable InRelease
+Hit:2 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:3 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:4 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:5 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+All packages are up to date.
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+Calculating upgrade... Done
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+curl is already the newest version (8.5.0-2ubuntu10.6).
+wget is already the newest version (1.21.4-1ubuntu4.1).
+gnupg is already the newest version (2.4.4-2ubuntu17.3).
+software-properties-common is already the newest version (0.99.49.3).
+apt-transport-https is already the newest version (2.8.3).
+ca-certificates is already the newest version (20240203).
+lsb-release is already the newest version (12.0-2).
+jq is already the newest version (1.7.1-3ubuntu0.24.04.1).
+htop is already the newest version (3.3.0-4build1).
+iotop is already the newest version (0.6-42-ga14256a-0.2build1).
+netcat-openbsd is already the newest version (1.226-1ubuntu2).
+redis-tools is already the newest version (5:7.0.15-1ubuntu0.24.04.1).
+postgresql-client-16 is already the newest version (16.9-0ubuntu0.24.04.1).
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+[21:22:42] Sistema base atualizado
+[21:22:42] 👤 Configurando usuários e diretórios...
+[21:22:42] Usuários e diretórios configurados
+[21:22:42] 🔴 Instalando Redis...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+redis-server is already the newest version (5:7.0.15-1ubuntu0.24.04.1).
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+Synchronizing state of redis-server.service with SysV service script with /usr/lib/systemd/systemd-sysv-install.
+Executing: /usr/lib/systemd/systemd-sysv-install enable redis-server
+Warning: Using a password with '-a' or '-u' option on the command line interface may not be safe.
+[21:22:48] ✅ Redis configurado e testado com sucesso
+[21:22:48] Redis configurado e iniciado
+[21:22:48] 🐘 Instalando PostgreSQL 16...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+Note, selecting 'postgresql-16' instead of 'postgresql-contrib-16'
+The following additional packages will be installed:
+  libcommon-sense-perl libjson-perl libjson-xs-perl libllvm17t64 libtypes-serialiser-perl postgresql-common ssl-cert
+The following NEW packages will be installed:
+  libcommon-sense-perl libjson-perl libjson-xs-perl libllvm17t64 libtypes-serialiser-perl postgresql-16 postgresql-common ssl-cert
+0 upgraded, 8 newly installed, 0 to remove and 0 not upgraded.
+Need to get 42.1 MB of archives.
+After this operation, 170 MB of additional disk space will be used.
+Get:1 http://archive.ubuntu.com/ubuntu noble/main amd64 libjson-perl all 4.10000-1 [81.9 kB]
+Get:2 http://archive.ubuntu.com/ubuntu noble/main amd64 ssl-cert all 1.1.2ubuntu1 [17.8 kB]
+Get:3 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 postgresql-common all 257build1.1 [161 kB]
+Get:4 http://archive.ubuntu.com/ubuntu noble/main amd64 libcommon-sense-perl amd64 3.75-3build3 [20.4 kB]
+Get:5 http://archive.ubuntu.com/ubuntu noble/main amd64 libtypes-serialiser-perl all 1.01-1 [11.6 kB]
+Get:6 http://archive.ubuntu.com/ubuntu noble/main amd64 libjson-xs-perl amd64 4.030-2build3 [83.6 kB]
+Get:7 http://archive.ubuntu.com/ubuntu noble/main amd64 libllvm17t64 amd64 1:17.0.6-9ubuntu1 [26.2 MB]
+Get:8 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 postgresql-16 amd64 16.9-0ubuntu0.24.04.1 [15.5 MB]
+Fetched 42.1 MB in 4s (9,938 kB/s)
+Preconfiguring packages ...
+Selecting previously unselected package libjson-perl.
+(Reading database ... 138502 files and directories currently installed.)
+Preparing to unpack .../0-libjson-perl_4.10000-1_all.deb ...
+Unpacking libjson-perl (4.10000-1) ...
+Selecting previously unselected package ssl-cert.
+Preparing to unpack .../1-ssl-cert_1.1.2ubuntu1_all.deb ...
+Unpacking ssl-cert (1.1.2ubuntu1) ...
+Selecting previously unselected package postgresql-common.
+Preparing to unpack .../2-postgresql-common_257build1.1_all.deb ...
+Adding 'diversion of /usr/bin/pg_config to /usr/bin/pg_config.libpq-dev by postgresql-common'
+Unpacking postgresql-common (257build1.1) ...
+Selecting previously unselected package libcommon-sense-perl:amd64.
+Preparing to unpack .../3-libcommon-sense-perl_3.75-3build3_amd64.deb ...
+Unpacking libcommon-sense-perl:amd64 (3.75-3build3) ...
+Selecting previously unselected package libtypes-serialiser-perl.
+Preparing to unpack .../4-libtypes-serialiser-perl_1.01-1_all.deb ...
+Unpacking libtypes-serialiser-perl (1.01-1) ...
+Selecting previously unselected package libjson-xs-perl.
+Preparing to unpack .../5-libjson-xs-perl_4.030-2build3_amd64.deb ...
+Unpacking libjson-xs-perl (4.030-2build3) ...
+Selecting previously unselected package libllvm17t64:amd64.
+Preparing to unpack .../6-libllvm17t64_1%3a17.0.6-9ubuntu1_amd64.deb ...
+Unpacking libllvm17t64:amd64 (1:17.0.6-9ubuntu1) ...
+Selecting previously unselected package postgresql-16.
+Preparing to unpack .../7-postgresql-16_16.9-0ubuntu0.24.04.1_amd64.deb ...
+Unpacking postgresql-16 (16.9-0ubuntu0.24.04.1) ...
+Setting up libcommon-sense-perl:amd64 (3.75-3build3) ...
+Setting up libllvm17t64:amd64 (1:17.0.6-9ubuntu1) ...
+Setting up ssl-cert (1.1.2ubuntu1) ...
+Created symlink /etc/systemd/system/multi-user.target.wants/ssl-cert.service → /usr/lib/systemd/system/ssl-cert.service.
+Setting up libtypes-serialiser-perl (1.01-1) ...
+Setting up libjson-perl (4.10000-1) ...
+Setting up libjson-xs-perl (4.030-2build3) ...
+Setting up postgresql-common (257build1.1) ...
+
+Creating config file /etc/postgresql-common/createcluster.conf with new version
+Building PostgreSQL dictionaries from installed myspell/hunspell packages...
+Removing obsolete dictionary files:
+Created symlink /etc/systemd/system/multi-user.target.wants/postgresql.service → /usr/lib/systemd/system/postgresql.service.
+Setting up postgresql-16 (16.9-0ubuntu0.24.04.1) ...
+Creating new PostgreSQL cluster 16/main ...
+/usr/lib/postgresql/16/bin/initdb -D /var/lib/postgresql/16/main --auth-local peer --auth-host scram-sha-256 --no-instructions
+The files belonging to this database system will be owned by user "postgres".
+This user must also own the server process.
+
+The database cluster will be initialized with locale "en_US.UTF-8".
+The default database encoding has accordingly been set to "UTF8".
+The default text search configuration will be set to "english".
+
+Data page checksums are disabled.
+
+fixing permissions on existing directory /var/lib/postgresql/16/main ... ok
+creating subdirectories ... ok
+selecting dynamic shared memory implementation ... posix
+selecting default max_connections ... 100
+selecting default shared_buffers ... 128MB
+selecting default time zone ... Etc/UTC
+creating configuration files ... ok
+running bootstrap script ... ok
+performing post-bootstrap initialization ... ok
+syncing data to disk ... ok
+update-alternatives: updating alternative /usr/share/postgresql/16/man/man1/psql.1.gz because link group psql.1.gz has changed slave links
+Processing triggers for man-db (2.12.0-4build2) ...
+Processing triggers for libc-bin (2.39-0ubuntu8.5) ...
+Scanning processes...
+Scanning candidates...
+Scanning linux images...
+
+Pending kernel upgrade!
+Running kernel version:
+  6.8.0-41-generic
+Diagnostics:
+  The currently running kernel version is not the expected kernel version 6.8.0-78-generic.
+
+Restarting the system to load the new kernel will not be handled automatically, so you should consider rebooting.
+
+Restarting services...
+
+Service restarts being deferred:
+ /etc/needrestart/restart.d/dbus.service
+ systemctl restart getty@tty1.service
+ systemctl restart systemd-logind.service
+ systemctl restart unattended-upgrades.service
+
+No containers need to be restarted.
+
+User sessions running outdated binaries:
+ suporte @ session #1: sshd[1380,1498], su[1546]
+ suporte @ user manager service: systemd[1385]
+
+No VM guests are running outdated hypervisor (qemu) binaries on this host.
+Synchronizing state of postgresql.service with SysV service script with /usr/lib/systemd/systemd-sysv-install.
+Executing: /usr/lib/systemd/systemd-sysv-install enable postgresql
+ALTER ROLE
+CREATE ROLE
+CREATE DATABASE
+GRANT
+You are now connected to database "samureye_db" as user "postgres".
+GRANT
+GRANT
+CREATE EXTENSION
+CREATE EXTENSION
+[21:23:02] ✅ PostgreSQL configurado com sucesso
+[21:23:02] 🗄️ Criando estrutura do banco de dados...
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TABLE
+CREATE INDEX
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+INSERT 0 2
+INSERT 0 1
+GRANT
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+[21:23:07] ✅ PostgreSQL configurado e iniciado com sucesso
+[21:23:07] WARNING: ⚠️ Problema na conexão PostgreSQL
+[21:23:07] PostgreSQL configurado e banco samureye_db criado
+[21:23:07] 📊 Instalando Grafana...
+File '/usr/share/keyrings/grafana.gpg' exists. Overwrite? (y/N) y
+Hit:1 https://packages.grafana.com/oss/deb stable InRelease
+Hit:2 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:3 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:4 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:5 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+All packages are up to date.
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+grafana is already the newest version (12.1.1).
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+Synchronizing state of grafana-server.service with SysV service script with /usr/lib/systemd/systemd-sysv-install.
+Executing: /usr/lib/systemd/systemd-sysv-install disable grafana-server
+Removed "/etc/systemd/system/multi-user.target.wants/grafana-server.service".
+Failed to reset failed state of unit grafana-server.service: Unit grafana-server.service not loaded.
+[21:23:20] WARNING: Grafana não consegue escrever em /opt/data/grafana, usando configuração padrão
+[21:23:20] Usando configuração padrão do Grafana
+Failed to reset failed state of unit grafana-server.service: Unit grafana-server.service not loaded.
+Synchronizing state of grafana-server.service with SysV service script with /usr/lib/systemd/systemd-sysv-install.
+Executing: /usr/lib/systemd/systemd-sysv-install enable grafana-server
+Created symlink /etc/systemd/system/multi-user.target.wants/grafana-server.service → /usr/lib/systemd/system/grafana-server.service.
+[21:23:23] Iniciando Grafana (aguarde 15 segundos)...
+[21:23:38] ✅ Grafana configurado e iniciado com sucesso
+[21:23:38] 🗄️ Instalando MinIO (backup local)...
+Removed "/etc/systemd/system/multi-user.target.wants/minio.service".
+--2025-08-25 21:23:46--  https://dl.min.io/server/minio/release/linux-amd64/minio
+Resolving dl.min.io (dl.min.io)... 138.68.11.125, 178.128.69.202
+Connecting to dl.min.io (dl.min.io)|138.68.11.125|:443... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 110780600 (106M) [application/octet-stream]
+Saving to: ‘/usr/local/bin/minio’
+
+/usr/local/bin/minio                                 100%[======================================================================================================================>] 105.65M  5.45MB/s    in 20s
+
+2025-08-25 21:24:06 (5.26 MB/s) - ‘/usr/local/bin/minio’ saved [110780600/110780600]
+
+usermod: no changes
+Created MinIO structure in /var/lib/minio
+[21:24:07] Estrutura MinIO criada:
+total 16
+drwxr-xr-x  4 minio minio 4096 Aug 25 21:24 .
+drwxr-xr-x 50 root  root  4096 Aug 25 21:24 ..
+drwxrwxr-x  2 minio minio 4096 Aug 25 21:24 config
+drwxrwxr-x  2 minio minio 4096 Aug 25 21:24 data
+[21:24:07] ✅ Diretório MinIO configurado
+[21:24:07] Testando acesso MinIO ao diretório...
+Created symlink /etc/systemd/system/multi-user.target.wants/minio.service → /etc/systemd/system/minio.service.
+[21:24:07] Iniciando MinIO...
+[21:24:14] ✅ MinIO configurado e iniciado com sucesso
+[21:24:14] 🔧 Configurando variáveis de ambiente...
+[21:24:14] Configuração de ambiente criada
+[21:24:14] 📝 Criando scripts de teste...
+[21:24:14] Scripts de teste criados
+[21:24:14] ⏰ Configurando cron para backups...
+[21:24:14] Cron jobs configurados
+[21:24:14] 📋 Configurando rotação de logs...
+[21:24:14] Rotação de logs configurada
+[21:24:14] 🎯 Finalizando instalação...
+[21:24:14] ✅ postgresql: Ativo
+[21:24:14] ✅ redis-server: Ativo
+[21:24:14] ✅ grafana-server: Ativo
+[21:24:14] ✅ minio: Ativo
+
+============================================================================
+🎉 INSTALAÇÃO vlxsam03 CONCLUÍDA
+============================================================================
+
+📊 SERVIÇOS INSTALADOS:
+  • PostgreSQL (Database): 172.24.1.153:5432
+  • Redis (Cache/Sessions): 172.24.1.153:6379
+  • Grafana (Monitoring): http://172.24.1.153:3000
+  • MinIO (Backup): http://172.24.1.153:9000
+
+🔑 CREDENCIAIS PADRÃO:
+  • PostgreSQL: samureye/SamurEye2024DB! (banco: samureye_db)
+  • Redis: senha 'SamurEye2024Redis!'
+  • Grafana: admin/SamurEye2024!
+  • MinIO: admin/SamurEye2024!
+
+⚠️ PRÓXIMOS PASSOS:
+  1. Configurar object storage no vlxsam02
+  2. Executar testes: /opt/samureye/scripts/health-check.sh
+  3. Verificar conectividade PostgreSQL: /opt/samureye/scripts/test-postgres-connection.sh
+
+📁 DIRETÓRIOS IMPORTANTES:
+  • Dados: /opt/data
+  • Backups: /opt/backup
+  • Scripts: /opt/samureye/scripts
+  • Configuração: /etc/samureye
+  • Logs: /var/log/samureye
+
+============================================================================
+[21:24:14] ✅ Instalação vlxsam03 concluída com sucesso!
+root@vlxsam03:~# /opt/samureye/scripts/health-check.sh
+=== SAMUREYE vlxsam03 HEALTH CHECK ===
+Data: Mon Aug 25 09:25:51 PM UTC 2025
+Servidor: vlxsam03 (172.24.1.153)
+
+🔴 REDIS:
+✅ Redis: Online
+Warning: Using a password with '-a' or '-u' option on the command line interface may not be safe.
+   Memória: 501.55K
+
+📊 GRAFANA:
+✅ Grafana: Online
+
+🗄️ MINIO (Backup):
+✅ MinIO: Online
+
+🌐 CONECTIVIDADE EXTERNA:
+❌ Neon Database: Desconectado
+✅ Google Cloud Storage: Conectado
+
+💻 SISTEMA:
+CPU: 0.0%
+Memória: 10.8%
+Disco: 9%
+
+=== FIM DO HEALTH CHECK ===
+root@vlxsam03:~# /opt/samureye/scripts/test-postgres-connection.sh
+[21:26:01] 🐘 Testando conectividade PostgreSQL local...
+[21:26:01] Testando conexão com banco samureye_db...
+[21:26:01] ERROR: ❌ Falha na conexão PostgreSQL local
+root@vlxsam03:~# cat /etc/samureye/.env
+# SamurEye vlxsam03 Configuration
+# Database and Services Server
+
+# Server Info
+VLXSAM03_IP=172.24.1.153
+NODE_ENV=production
+
+# Local PostgreSQL Database (configurado automaticamente)
+DATABASE_URL=postgresql://samureye:SamurEye2024DB!@172.24.1.153:5432/samureye_db?sslmode=disable
+PGDATABASE=samureye_db
+PGHOST=172.24.1.153
+PGPORT=5432
+PGUSER=samureye
+PGPASSWORD=SamurEye2024DB!
+
+# Redis Configuration
+REDIS_HOST=172.24.1.153
+REDIS_PORT=6379
+REDIS_PASSWORD=SamurEye2024Redis!
+REDIS_URL=redis://:SamurEye2024Redis!@172.24.1.153:6379
+REDIS_DATA_DIR=/var/lib/redis
+REDIS_LOG_FILE=/var/log/redis/redis-server.log
+
+# Object Storage (Google Cloud Storage)
+# Configurado automaticamente no vlxsam02 via object storage setup
+PUBLIC_OBJECT_SEARCH_PATHS=/repl-default-bucket-xyz/public
+PRIVATE_OBJECT_DIR=/repl-default-bucket-xyz/.private
+DEFAULT_OBJECT_STORAGE_BUCKET_ID=repl-default-bucket-xyz
+
+# MinIO Local (Backup)
+MINIO_HOST=172.24.1.153
+MINIO_PORT=9000
+MINIO_ROOT_USER=admin
+MINIO_ROOT_PASSWORD=SamurEye2024!
+MINIO_URL=http://172.24.1.153:9000
+
+# Grafana
+GRAFANA_URL=http://172.24.1.153:3000
+GRAFANA_USER=admin
+GRAFANA_PASSWORD=SamurEye2024!
+
+# Monitoring
+GRAFANA_DATASOURCE_URL=http://172.24.1.153:6379
+GRAFANA_REDIS_URL=redis://:SamurEye2024Redis!@172.24.1.153:6379
+
+# Backup Settings
+BACKUP_RETENTION_DAYS=30
+BACKUP_DIR=/opt/backup
+root@vlxsam03:~#
