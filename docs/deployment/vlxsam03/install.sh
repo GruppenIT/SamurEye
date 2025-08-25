@@ -262,23 +262,19 @@ if [ -d "/opt/data/minio" ]; then
 fi
 
 # Criar diretório do zero com permissões corretas
-mkdir -p /opt/data/minio
-chown minio:minio /opt/data/minio
-chmod 755 /opt/data/minio
+mkdir -p /opt/data/minio/data
+chown -R minio:minio /opt/data/minio
+chmod -R 755 /opt/data/minio
 
 # Definir o diretório como home do usuário minio após criação
 usermod -d /opt/data/minio minio
 
-# Verificar se as permissões estão corretas
-ls -la /opt/data/minio
-log "Diretório MinIO: $(ls -ld /opt/data/minio)"
+# Inicializar estrutura MinIO corretamente
+sudo -u minio mkdir -p /opt/data/minio/data/.minio.sys
 
-# Teste mais simples de escrita
-if [ -w /opt/data/minio ]; then
-    log "✅ Diretório MinIO criado e acessível"
-else
-    warn "⚠️ Problemas com permissões MinIO, mas continuando instalação"
-fi
+# Verificar se as permissões estão corretas
+log "Estrutura MinIO criada: $(ls -la /opt/data/minio/)"
+log "✅ Diretório MinIO criado e inicializado"
 
 # Configurar MinIO
 mkdir -p /etc/default
@@ -286,7 +282,7 @@ cat > /etc/default/minio << 'EOF'
 # MinIO configuration for SamurEye backup
 MINIO_ROOT_USER=admin
 MINIO_ROOT_PASSWORD=SamurEye2024!
-MINIO_VOLUMES=/opt/data/minio
+MINIO_VOLUMES=/opt/data/minio/data
 MINIO_OPTS="--console-address :9001"
 MINIO_SERVER_URL=http://172.24.1.153:9000
 EOF
