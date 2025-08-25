@@ -1,0 +1,76 @@
+root@vlxsam03:~# curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam03/install.sh | bash
+[20:50:59] 🚀 Iniciando instalação vlxsam03 - Database/Services Server
+[20:50:59] Servidor: 172.24.1.153
+[20:50:59] Data Directory: /opt/data
+[20:50:59] 📦 Atualizando sistema base...
+Hit:1 https://packages.grafana.com/oss/deb stable InRelease
+Hit:2 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:3 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:4 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Hit:5 http://security.ubuntu.com/ubuntu noble-security InRelease
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+All packages are up to date.
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+Calculating upgrade... Done
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+curl is already the newest version (8.5.0-2ubuntu10.6).
+wget is already the newest version (1.21.4-1ubuntu4.1).
+gnupg is already the newest version (2.4.4-2ubuntu17.3).
+software-properties-common is already the newest version (0.99.49.3).
+apt-transport-https is already the newest version (2.8.3).
+ca-certificates is already the newest version (20240203).
+lsb-release is already the newest version (12.0-2).
+jq is already the newest version (1.7.1-3ubuntu0.24.04.1).
+htop is already the newest version (3.3.0-4build1).
+iotop is already the newest version (0.6-42-ga14256a-0.2build1).
+netcat-openbsd is already the newest version (1.226-1ubuntu2).
+redis-tools is already the newest version (5:7.0.15-1ubuntu0.24.04.1).
+postgresql-client-16 is already the newest version (16.9-0ubuntu0.24.04.1).
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+[20:51:02] Sistema base atualizado
+[20:51:02] 👤 Configurando usuários e diretórios...
+[20:51:02] Usuários e diretórios configurados
+[20:51:02] 🔴 Instalando Redis...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+redis-server is already the newest version (5:7.0.15-1ubuntu0.24.04.1).
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+Synchronizing state of redis-server.service with SysV service script with /usr/lib/systemd/systemd-sysv-install.
+Executing: /usr/lib/systemd/systemd-sysv-install enable redis-server
+Warning: Using a password with '-a' or '-u' option on the command line interface may not be safe.
+[20:51:08] ✅ Redis configurado e testado com sucesso
+[20:51:08] Redis configurado e iniciado
+[20:51:08] 📊 Instalando Grafana...
+File '/usr/share/keyrings/grafana.gpg' exists. Overwrite? (y/N) y
+Hit:1 https://packages.grafana.com/oss/deb stable InRelease
+Hit:2 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:3 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:4 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:5 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+All packages are up to date.
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+grafana is already the newest version (12.1.1).
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+Synchronizing state of grafana-server.service with SysV service script with /usr/lib/systemd/systemd-sysv-install.
+Executing: /usr/lib/systemd/systemd-sysv-install enable grafana-server
+[20:51:18] WARNING: ⚠️ Problema com Grafana. Verificando logs...
+Aug 25 20:51:16 vlxsam03 systemd[1]: grafana-server.service: Start request repeated too quickly.
+Aug 25 20:51:16 vlxsam03 systemd[1]: grafana-server.service: Failed with result 'exit-code'.
+Aug 25 20:51:16 vlxsam03 systemd[1]: Failed to start grafana-server.service - Grafana instance.
+[20:51:18] ⚠️ Grafana pode precisar de ajustes manuais
+[20:51:18] 🗄️ Instalando MinIO (backup local)...
+/usr/local/bin/minio: Text file busy
+root@vlxsam03:~#

@@ -231,9 +231,14 @@ provisioning = /etc/grafana/provisioning
 default_home_dashboard_path = /opt/data/grafana/dashboards/samureye-overview.json
 EOF
 
-# Parar Grafana se estiver rodando com problemas
+# Parar Grafana completamente e resetar estado
 systemctl stop grafana-server || true
-sleep 2
+systemctl disable grafana-server || true
+systemctl reset-failed grafana-server || true
+sleep 5
+
+# Limpar possível PID file residual
+rm -f /var/run/grafana/grafana-server.pid
 
 # Limpar logs antigos problemáticos
 rm -f /var/log/samureye/grafana.log
@@ -252,11 +257,16 @@ sudo -u grafana test -w /opt/data/grafana || {
 
 # Reabilitar e reiniciar Grafana com delay adequado
 systemctl daemon-reload
+
+# Reset completo de qualquer estado de falha
+systemctl reset-failed grafana-server || true
+sleep 2
+
 systemctl enable grafana-server
 
-log "Iniciando Grafana..."
+log "Iniciando Grafana (aguarde 15 segundos)..."
 systemctl start grafana-server
-sleep 10
+sleep 15
 
 # Verificar Grafana com mais tempo
 if systemctl is-active --quiet grafana-server; then
@@ -282,6 +292,14 @@ fi
 # ============================================================================
 
 log "🗄️ Instalando MinIO (backup local)..."
+
+# Parar MinIO completamente antes de atualizar binário
+systemctl stop minio || true
+systemctl disable minio || true
+sleep 3
+
+# Remover binário antigo se existir
+rm -f /usr/local/bin/minio
 
 # Download e instalação MinIO
 wget -O /usr/local/bin/minio https://dl.min.io/server/minio/release/linux-amd64/minio
