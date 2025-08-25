@@ -131,22 +131,14 @@ chown redis:redis /var/log/redis
 chmod 750 /var/lib/redis
 chmod 750 /var/log/redis
 
-# Configuração Redis compatível com Ubuntu 24.04
+# Configuração Redis compatível com Ubuntu 24.04 (igual à solução manual testada)
 cat > /etc/redis/redis.conf << 'EOF'
-# Redis Configuration for SamurEye - Ubuntu 24.04 Compatible
-# vlxsam03 - Cache and Sessions
-
-# Network
 bind 0.0.0.0
 port 6379
 protected-mode yes
 requirepass SamurEye2024Redis!
-
-# Memory
 maxmemory 2gb
 maxmemory-policy allkeys-lru
-
-# Persistence (usando diretório padrão)
 save 900 1
 save 300 10
 save 60 10000
@@ -155,25 +147,11 @@ rdbcompression yes
 rdbchecksum yes
 dbfilename dump.rdb
 dir /var/lib/redis
-
-# Logging (usando diretório padrão)
 loglevel notice
 logfile /var/log/redis/redis-server.log
-
-# Performance
 timeout 0
 tcp-keepalive 300
-
-# Security
-rename-command FLUSHDB ""
-rename-command FLUSHALL ""
-rename-command KEYS ""
-rename-command CONFIG "CONFIG_b835e7b6c3f1"
-
-# Client connections
 maxclients 1000
-
-# System compatibility
 daemonize no
 supervised systemd
 EOF
