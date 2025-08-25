@@ -231,22 +231,50 @@ provisioning = /etc/grafana/provisioning
 default_home_dashboard_path = /opt/data/grafana/dashboards/samureye-overview.json
 EOF
 
-# Definir permissões Grafana
+# Parar Grafana se estiver rodando com problemas
+systemctl stop grafana-server || true
+sleep 2
+
+# Limpar logs antigos problemáticos
+rm -f /var/log/samureye/grafana.log
+touch /var/log/samureye/grafana.log
+
+# Definir permissões Grafana corretamente
 chown -R grafana:grafana /opt/data/grafana
-chown grafana:grafana /var/log/samureye/grafana.log 2>/dev/null || touch /var/log/samureye/grafana.log && chown grafana:grafana /var/log/samureye/grafana.log
+chmod -R 755 /opt/data/grafana
+chown grafana:grafana /var/log/samureye/grafana.log
+chmod 644 /var/log/samureye/grafana.log
 
-# Iniciar Grafana com verificações
+# Verificar se diretório está acessível
+sudo -u grafana test -w /opt/data/grafana || {
+    error "Grafana não consegue escrever em /opt/data/grafana"
+}
+
+# Reabilitar e reiniciar Grafana com delay adequado
+systemctl daemon-reload
 systemctl enable grafana-server
-systemctl start grafana-server
 
-# Aguardar e verificar Grafana
-sleep 5
+log "Iniciando Grafana..."
+systemctl start grafana-server
+sleep 10
+
+# Verificar Grafana com mais tempo
 if systemctl is-active --quiet grafana-server; then
     log "✅ Grafana configurado e iniciado com sucesso"
 else
-    warn "⚠️ Problema com Grafana. Verificando logs..."
-    journalctl -u grafana-server --no-pager --lines=3 || true
-    log "⚠️ Grafana pode precisar de ajustes manuais"
+    warn "⚠️ Problema persistente com Grafana. Logs detalhados:"
+    journalctl -u grafana-server --no-pager --lines=10 || true
+    
+    # Tentar iniciar uma vez mais
+    log "Tentando reiniciar Grafana..."
+    systemctl restart grafana-server
+    sleep 5
+    
+    if systemctl is-active --quiet grafana-server; then
+        log "✅ Grafana iniciado na segunda tentativa"
+    else
+        warn "⚠️ Grafana precisa de configuração manual"
+    fi
 fi
 
 # ============================================================================
