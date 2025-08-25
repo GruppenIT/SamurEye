@@ -1,0 +1,100 @@
+root@vlxsam03:~# pg_lsclusters
+Use of uninitialized value $data_directory in concatenation (.) or string at /usr/share/perl5/PgCommon.pm line 286.
+Use of uninitialized value $data_directory in concatenation (.) or string at /usr/share/perl5/PgCommon.pm line 286.
+Use of uninitialized value $data_directory in concatenation (.) or string at /usr/share/perl5/PgCommon.pm line 286.
+Error: Invalid data directory for cluster 16 main
+root@vlxsam03:~# sudo systemctl status postgresql@16-main.service
+× postgresql@16-main.service - PostgreSQL Cluster 16-main
+     Loaded: loaded (/usr/lib/systemd/system/postgresql@.service; enabled-runtime; preset: enabled)
+     Active: failed (Result: protocol) since Mon 2025-08-25 21:35:42 UTC; 58s ago
+   Duration: 2.569s
+    Process: 56953 ExecStart=/usr/bin/pg_ctlcluster --skip-systemctl-redirect 16-main start (code=exited, status=1/FAILURE)
+        CPU: 37ms
+
+Aug 25 21:35:42 vlxsam03 systemd[1]: Starting postgresql@16-main.service - PostgreSQL Cluster 16-main...
+Aug 25 21:35:42 vlxsam03 postgresql@16-main[56953]: Use of uninitialized value $data_directory in concatenation (.) or string at /usr/share/perl5/PgCommon.pm line 286.
+Aug 25 21:35:42 vlxsam03 postgresql@16-main[56953]: Use of uninitialized value $data_directory in concatenation (.) or string at /usr/share/perl5/PgCommon.pm line 286.
+Aug 25 21:35:42 vlxsam03 postgresql@16-main[56953]: Use of uninitialized value $data_directory in concatenation (.) or string at /usr/share/perl5/PgCommon.pm line 286.
+Aug 25 21:35:42 vlxsam03 postgresql@16-main[56953]: Error: Invalid data directory for cluster 16 main
+Aug 25 21:35:42 vlxsam03 systemd[1]: postgresql@16-main.service: Can't open PID file /run/postgresql/16-main.pid (yet?) after start: No such file or directory
+Aug 25 21:35:42 vlxsam03 systemd[1]: postgresql@16-main.service: Failed with result 'protocol'.
+Aug 25 21:35:42 vlxsam03 systemd[1]: Failed to start postgresql@16-main.service - PostgreSQL Cluster 16-main.
+root@vlxsam03:~# journalctl -u postgresql@16-main.service --no-pager -l
+Aug 25 21:22:57 vlxsam03 systemd[1]: Starting postgresql@16-main.service - PostgreSQL Cluster 16-main...
+Aug 25 21:22:59 vlxsam03 systemd[1]: Started postgresql@16-main.service - PostgreSQL Cluster 16-main.
+Aug 25 21:23:02 vlxsam03 systemd[1]: Stopping postgresql@16-main.service - PostgreSQL Cluster 16-main...
+Aug 25 21:23:02 vlxsam03 postgresql@16-main[55705]: Use of uninitialized value $data_directory in concatenation (.) or string at /usr/share/perl5/PgCommon.pm line 286.
+Aug 25 21:23:02 vlxsam03 postgresql@16-main[55705]: Use of uninitialized value $data_directory in concatenation (.) or string at /usr/share/perl5/PgCommon.pm line 286.
+Aug 25 21:23:02 vlxsam03 postgresql@16-main[55705]: Use of uninitialized value $data_directory in concatenation (.) or string at /usr/share/perl5/PgCommon.pm line 286.
+Aug 25 21:23:02 vlxsam03 postgresql@16-main[55705]: Error: Invalid data directory for cluster 16 main
+Aug 25 21:23:02 vlxsam03 systemd[1]: postgresql@16-main.service: Control process exited, code=exited, status=1/FAILURE
+Aug 25 21:23:02 vlxsam03 systemd[1]: postgresql@16-main.service: Failed with result 'exit-code'.
+Aug 25 21:23:02 vlxsam03 systemd[1]: Stopped postgresql@16-main.service - PostgreSQL Cluster 16-main.
+Aug 25 21:23:02 vlxsam03 systemd[1]: Starting postgresql@16-main.service - PostgreSQL Cluster 16-main...
+Aug 25 21:23:02 vlxsam03 postgresql@16-main[55707]: Use of uninitialized value $data_directory in concatenation (.) or string at /usr/share/perl5/PgCommon.pm line 286.
+Aug 25 21:23:02 vlxsam03 postgresql@16-main[55707]: Use of uninitialized value $data_directory in concatenation (.) or string at /usr/share/perl5/PgCommon.pm line 286.
+Aug 25 21:23:02 vlxsam03 postgresql@16-main[55707]: Use of uninitialized value $data_directory in concatenation (.) or string at /usr/share/perl5/PgCommon.pm line 286.
+Aug 25 21:23:02 vlxsam03 postgresql@16-main[55707]: Error: Invalid data directory for cluster 16 main
+Aug 25 21:23:02 vlxsam03 systemd[1]: postgresql@16-main.service: Can't open PID file /run/postgresql/16-main.pid (yet?) after start: No such file or directory
+Aug 25 21:23:02 vlxsam03 systemd[1]: postgresql@16-main.service: Failed with result 'protocol'.
+Aug 25 21:23:02 vlxsam03 systemd[1]: Failed to start postgresql@16-main.service - PostgreSQL Cluster 16-main.
+Aug 25 21:30:54 vlxsam03 systemd[1]: Starting postgresql@16-main.service - PostgreSQL Cluster 16-main...
+Aug 25 21:30:54 vlxsam03 postgresql@16-main[56848]: Use of uninitialized value $data_directory in concatenation (.) or string at /usr/share/perl5/PgCommon.pm line 286.
+Aug 25 21:30:54 vlxsam03 postgresql@16-main[56848]: Use of uninitialized value $data_directory in concatenation (.) or string at /usr/share/perl5/PgCommon.pm line 286.
+Aug 25 21:30:54 vlxsam03 postgresql@16-main[56848]: Use of uninitialized value $data_directory in concatenation (.) or string at /usr/share/perl5/PgCommon.pm line 286.
+Aug 25 21:30:54 vlxsam03 postgresql@16-main[56848]: Error: Invalid data directory for cluster 16 main
+Aug 25 21:30:54 vlxsam03 systemd[1]: postgresql@16-main.service: Can't open PID file /run/postgresql/16-main.pid (yet?) after start: No such file or directory
+Aug 25 21:30:54 vlxsam03 systemd[1]: postgresql@16-main.service: Failed with result 'protocol'.
+Aug 25 21:30:54 vlxsam03 systemd[1]: Failed to start postgresql@16-main.service - PostgreSQL Cluster 16-main.
+Aug 25 21:31:34 vlxsam03 systemd[1]: Starting postgresql@16-main.service - PostgreSQL Cluster 16-main...
+Aug 25 21:31:34 vlxsam03 postgresql@16-main[56861]: Use of uninitialized value $data_directory in concatenation (.) or string at /usr/share/perl5/PgCommon.pm line 286.
+Aug 25 21:31:34 vlxsam03 postgresql@16-main[56861]: Use of uninitialized value $data_directory in concatenation (.) or string at /usr/share/perl5/PgCommon.pm line 286.
+Aug 25 21:31:34 vlxsam03 postgresql@16-main[56861]: Use of uninitialized value $data_directory in concatenation (.) or string at /usr/share/perl5/PgCommon.pm line 286.
+Aug 25 21:31:34 vlxsam03 postgresql@16-main[56861]: Error: Invalid data directory for cluster 16 main
+Aug 25 21:31:34 vlxsam03 systemd[1]: postgresql@16-main.service: Can't open PID file /run/postgresql/16-main.pid (yet?) after start: No such file or directory
+Aug 25 21:31:34 vlxsam03 systemd[1]: postgresql@16-main.service: Failed with result 'protocol'.
+Aug 25 21:31:34 vlxsam03 systemd[1]: Failed to start postgresql@16-main.service - PostgreSQL Cluster 16-main.
+Aug 25 21:31:58 vlxsam03 systemd[1]: Starting postgresql@16-main.service - PostgreSQL Cluster 16-main...
+Aug 25 21:31:58 vlxsam03 postgresql@16-main[56867]: Use of uninitialized value $data_directory in concatenation (.) or string at /usr/share/perl5/PgCommon.pm line 286.
+Aug 25 21:31:58 vlxsam03 postgresql@16-main[56867]: Use of uninitialized value $data_directory in concatenation (.) or string at /usr/share/perl5/PgCommon.pm line 286.
+Aug 25 21:31:58 vlxsam03 postgresql@16-main[56867]: Use of uninitialized value $data_directory in concatenation (.) or string at /usr/share/perl5/PgCommon.pm line 286.
+Aug 25 21:31:58 vlxsam03 postgresql@16-main[56867]: Error: Invalid data directory for cluster 16 main
+Aug 25 21:31:58 vlxsam03 systemd[1]: postgresql@16-main.service: Can't open PID file /run/postgresql/16-main.pid (yet?) after start: No such file or directory
+Aug 25 21:31:58 vlxsam03 systemd[1]: postgresql@16-main.service: Failed with result 'protocol'.
+Aug 25 21:31:58 vlxsam03 systemd[1]: Failed to start postgresql@16-main.service - PostgreSQL Cluster 16-main.
+Aug 25 21:34:25 vlxsam03 systemd[1]: Starting postgresql@16-main.service - PostgreSQL Cluster 16-main...
+Aug 25 21:34:25 vlxsam03 postgresql@16-main[56901]: Use of uninitialized value $data_directory in concatenation (.) or string at /usr/share/perl5/PgCommon.pm line 286.
+Aug 25 21:34:25 vlxsam03 postgresql@16-main[56901]: Use of uninitialized value $data_directory in concatenation (.) or string at /usr/share/perl5/PgCommon.pm line 286.
+Aug 25 21:34:25 vlxsam03 postgresql@16-main[56901]: Use of uninitialized value $data_directory in concatenation (.) or string at /usr/share/perl5/PgCommon.pm line 286.
+Aug 25 21:34:25 vlxsam03 postgresql@16-main[56901]: Error: Invalid data directory for cluster 16 main
+Aug 25 21:34:25 vlxsam03 systemd[1]: postgresql@16-main.service: Can't open PID file /run/postgresql/16-main.pid (yet?) after start: No such file or directory
+Aug 25 21:34:25 vlxsam03 systemd[1]: postgresql@16-main.service: Failed with result 'protocol'.
+Aug 25 21:34:25 vlxsam03 systemd[1]: Failed to start postgresql@16-main.service - PostgreSQL Cluster 16-main.
+Aug 25 21:35:42 vlxsam03 systemd[1]: Starting postgresql@16-main.service - PostgreSQL Cluster 16-main...
+Aug 25 21:35:42 vlxsam03 postgresql@16-main[56953]: Use of uninitialized value $data_directory in concatenation (.) or string at /usr/share/perl5/PgCommon.pm line 286.
+Aug 25 21:35:42 vlxsam03 postgresql@16-main[56953]: Use of uninitialized value $data_directory in concatenation (.) or string at /usr/share/perl5/PgCommon.pm line 286.
+Aug 25 21:35:42 vlxsam03 postgresql@16-main[56953]: Use of uninitialized value $data_directory in concatenation (.) or string at /usr/share/perl5/PgCommon.pm line 286.
+Aug 25 21:35:42 vlxsam03 postgresql@16-main[56953]: Error: Invalid data directory for cluster 16 main
+Aug 25 21:35:42 vlxsam03 systemd[1]: postgresql@16-main.service: Can't open PID file /run/postgresql/16-main.pid (yet?) after start: No such file or directory
+Aug 25 21:35:42 vlxsam03 systemd[1]: postgresql@16-main.service: Failed with result 'protocol'.
+Aug 25 21:35:42 vlxsam03 systemd[1]: Failed to start postgresql@16-main.service - PostgreSQL Cluster 16-main.
+root@vlxsam03:~# systemctl stop postgresql
+root@vlxsam03:~# systemctl stop postgresql@16-main.service
+root@vlxsam03:~# sudo -u postgres /usr/lib/postgresql/16/bin/pg_ctl start -D /var/lib/postgresql/16/main
+waiting for server to start....postgres: could not access the server configuration file "/var/lib/postgresql/16/main/postgresql.conf": No such file or directory
+ stopped waiting
+pg_ctl: could not start server
+Examine the log output.
+root@vlxsam03:~# sudo pg_dropcluster 16 main --stop
+Use of uninitialized value $data_directory in concatenation (.) or string at /usr/share/perl5/PgCommon.pm line 286.
+Use of uninitialized value $data_directory in concatenation (.) or string at /usr/share/perl5/PgCommon.pm line 286.
+Use of uninitialized value $data_directory in concatenation (.) or string at /usr/share/perl5/PgCommon.pm line 286.
+Error: Invalid data directory for cluster 16 main
+root@vlxsam03:~# sudo pg_createcluster 16 main --start
+Error: cluster configuration already exists
+root@vlxsam03:~# systemctl start postgresql@16-main.service
+Job for postgresql@16-main.service failed because the service did not take the steps required by its unit configuration.
+See "systemctl status postgresql@16-main.service" and "journalctl -xeu postgresql@16-main.service" for details.
+root@vlxsam03:~# ps aux | grep postgres
+root       57006  0.0  0.0   6544  2304 pts/1    S+   21:39   0:00 grep --color=auto postgres
+root@vlxsam03:~#
