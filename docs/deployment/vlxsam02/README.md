@@ -35,10 +35,10 @@ O servidor vlxsam02 executa a aplicação principal do SamurEye, fornecendo:
 ssh root@172.24.1.152
 
 # Executar instalação
-curl -fsSL https://raw.githubusercontent.com/SamurEye/deploy/main/vlxsam02/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam02/install.sh | bash
 
 # OU clonar repositório e executar localmente
-git clone https://github.com/SamurEye/SamurEye.git
+git clone https://github.com/GruppenIT/SamurEye.git
 cd SamurEye/docs/deployment/vlxsam02/
 chmod +x install.sh
 ./install.sh

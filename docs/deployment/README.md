@@ -72,10 +72,10 @@ Após completar todos os servidores, execute a verificação completa:
 
 ```bash
 # Script de verificação consolidada (execute de qualquer local)
-curl -fsSL https://raw.githubusercontent.com/SamurEye/deploy/main/scripts/verify-full-installation.sh | bash
+curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/scripts/verify-full-installation.sh | bash
 
 # OU clonar e executar localmente
-git clone https://github.com/SamurEye/SamurEye.git
+git clone https://github.com/GruppenIT/SamurEye.git
 cd SamurEye/docs/deployment/
 chmod +x scripts/verify-full-installation.sh
 ./scripts/verify-full-installation.sh

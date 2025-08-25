@@ -31,10 +31,10 @@ O servidor vlxsam04 executa o agente coletor do SamurEye na rede interna:
 ssh root@192.168.100.151
 
 # Executar instalação
-curl -fsSL https://raw.githubusercontent.com/SamurEye/deploy/main/vlxsam04/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/install.sh | bash
 
 # OU clonar repositório e executar localmente
-git clone https://github.com/SamurEye/SamurEye.git
+git clone https://github.com/GruppenIT/SamurEye.git
 cd SamurEye/docs/deployment/vlxsam04/
 chmod +x install.sh
 ./install.sh

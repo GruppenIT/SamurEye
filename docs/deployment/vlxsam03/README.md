@@ -29,10 +29,10 @@ O servidor vlxsam03 fornece infraestrutura de dados local e conexões para a pla
 ssh root@172.24.1.153
 
 # Executar instalação
-curl -fsSL https://raw.githubusercontent.com/SamurEye/deploy/main/vlxsam03/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam03/install.sh | bash
 
 # OU clonar repositório e executar localmente
-git clone https://github.com/SamurEye/SamurEye.git
+git clone https://github.com/GruppenIT/SamurEye.git
 cd SamurEye/docs/deployment/vlxsam03/
 chmod +x install.sh
 ./install.sh

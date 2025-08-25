@@ -113,7 +113,7 @@ ssh root@172.24.1.153
 
 # Executar script de instalação
 cd /opt
-git clone https://github.com/SamurEye/SamurEye.git
+git clone https://github.com/GruppenIT/SamurEye.git
 cd SamurEye/docs/deployment/vlxsam03/
 chmod +x install.sh
 sudo ./install.sh
@@ -139,7 +139,7 @@ ssh root@172.24.1.151
 
 # Executar script de instalação
 cd /opt
-git clone https://github.com/SamurEye/SamurEye.git
+git clone https://github.com/GruppenIT/SamurEye.git
 cd SamurEye/docs/deployment/vlxsam01/
 chmod +x install.sh
 sudo ./install.sh
@@ -162,7 +162,7 @@ ssh root@172.24.1.152
 
 # Executar script de instalação
 cd /opt
-git clone https://github.com/SamurEye/SamurEye.git
+git clone https://github.com/GruppenIT/SamurEye.git
 cd SamurEye/docs/deployment/vlxsam02/
 chmod +x install.sh
 sudo ./install.sh
@@ -176,7 +176,7 @@ sudo nano /etc/samureye/.env
 
 # Deploy da aplicação SamurEye
 cd /opt/samureye
-git clone https://github.com/SamurEye/SamurEye.git .
+git clone https://github.com/GruppenIT/SamurEye.git .
 
 # Instalar dependências
 npm ci
@@ -204,7 +204,7 @@ ssh root@192.168.100.151
 
 # Executar script de instalação
 cd /opt
-git clone https://github.com/SamurEye/SamurEye.git
+git clone https://github.com/GruppenIT/SamurEye.git
 cd SamurEye/docs/deployment/vlxsam04/
 chmod +x install.sh
 sudo ./install.sh
