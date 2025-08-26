@@ -14,45 +14,62 @@ O certificado wildcard (*.samureye.com.br) permite cobrir todos os subdomínios 
 
 ### 2. Quando Solicitado, Adicionar Registros TXT
 
-O Certbot irá parar e mostrar algo como:
+⚠️ **IMPORTANTE**: Certificados wildcard requerem **DOIS** registros TXT com o mesmo nome!
 
+O Certbot irá pausar **DUAS VEZES** e solicitar registros diferentes:
+
+**Primeira pausa:**
 ```
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-Please deploy a DNS TXT record under the name
-_acme-challenge.samureye.com.br with the following value:
-
-XYZ123ABC456...
-
-Before continuing, verify the record is deployed.
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+Please deploy a DNS TXT record under the name:
+_acme-challenge.samureye.com.br.
+with the following value:
+z4LV2dfOV2DQmn3NIVex9hODoQpYha622okDAUXbtq0
 Press Enter to Continue
 ```
 
-### 3. Configurar DNS TXT Records
+**Segunda pausa:**
+```
+Please deploy a DNS TXT record under the name:
+_acme-challenge.samureye.com.br.
+with the following value:
+vzNQ6MJBrUrKEqeEAJE_MXNfJX-MLn9wOkP97vXWafg
+(This must be set up in addition to the previous challenges; do not remove...)
+Press Enter to Continue
+```
 
-No seu provedor de DNS (Cloudflare, Route53, etc.), adicione:
+### 3. Configurar AMBOS os Registros DNS TXT
 
-**Primeiro registro:**
+No seu provedor de DNS, você deve ter **DOIS** registros TXT com o MESMO nome:
+
+**Registro 1:**
 - **Nome**: `_acme-challenge.samureye.com.br`
 - **Tipo**: `TXT`
-- **Valor**: `XYZ123ABC456...` (valor mostrado pelo Certbot)
+- **Valor**: `z4LV2dfOV2DQmn3NIVex9hODoQpYha622okDAUXbtq0`
 
-**Segundo registro** (será solicitado):
+**Registro 2:**
 - **Nome**: `_acme-challenge.samureye.com.br`
 - **Tipo**: `TXT`
-- **Valor**: `DEF789GHI012...` (segundo valor)
+- **Valor**: `vzNQ6MJBrUrKEqeEAJE_MXNfJX-MLn9wOkP97vXWafg`
 
-### 4. Verificar DNS TXT
+🔴 **CRUCIAL**: NÃO remova o primeiro registro quando adicionar o segundo!
 
-Antes de pressionar Enter, verifique se os registros estão propagados:
+### 4. Verificar AMBOS os DNS TXT
+
+Antes de pressionar Enter no Certbot, verifique se AMBOS os registros estão propagados:
 
 ```bash
-# Verificar TXT records
+# Verificar TXT records - deve mostrar AMBOS os valores
 dig TXT _acme-challenge.samureye.com.br
+
+# Resposta esperada (exemplo):
+# _acme-challenge.samureye.com.br. 60 IN TXT "z4LV2dfOV2DQmn3NIVex9hODoQpYha622okDAUXbtq0"
+# _acme-challenge.samureye.com.br. 60 IN TXT "vzNQ6MJBrUrKEqeEAJE_MXNfJX-MLn9wOkP97vXWafg"
 
 # Ou usar nslookup
 nslookup -type=TXT _acme-challenge.samureye.com.br
 ```
+
+⚠️ **IMPORTANTE**: Se você ver apenas UM registro TXT, aguarde a propagação DNS antes de continuar no Certbot!
 
 ### 5. Continuar o Processo
 
@@ -60,16 +77,28 @@ Depois de verificar que os registros TXT estão ativos, pressione Enter no Certb
 
 ## Exemplos por Provedor DNS
 
-### Cloudflare
+### Cloudflare - DOIS Registros TXT
+
+**Para o primeiro registro:**
 1. Login no Cloudflare Dashboard
 2. Selecionar domínio `samureye.com.br`
 3. Ir em **DNS > Records**
 4. Clicar **Add record**
 5. **Type**: `TXT`
 6. **Name**: `_acme-challenge`
-7. **Content**: `[valor do certbot]`
+7. **Content**: `z4LV2dfOV2DQmn3NIVex9hODoQpYha622okDAUXbtq0`
 8. **TTL**: `Auto`
 9. Salvar
+
+**Para o segundo registro:**
+1. Clicar **Add record** novamente
+2. **Type**: `TXT`
+3. **Name**: `_acme-challenge` (mesmo nome!)
+4. **Content**: `vzNQ6MJBrUrKEqeEAJE_MXNfJX-MLn9wOkP97vXWafg`
+5. **TTL**: `Auto`
+6. Salvar
+
+**Resultado final:** Dois registros TXT com mesmo nome mas valores diferentes
 
 ### AWS Route53
 ```bash
@@ -120,9 +149,25 @@ curl -I https://app.samureye.com.br/nginx-health
 watch -n 30 'dig TXT _acme-challenge.samureye.com.br'
 ```
 
+### Erro: Apenas um registro TXT encontrado
+Se o erro mostrar "Incorrect TXT record", provavelmente você não adicionou AMBOS os registros:
+
+```bash
+# Verificar quantos registros existem
+dig TXT _acme-challenge.samureye.com.br | grep -c "TXT"
+
+# Deve retornar "2" - se retornar "1", adicione o segundo registro!
+```
+
+**Solução:**
+1. Verificar se ambos os registros TXT estão no DNS
+2. Aguardar propagação de ambos (pode levar 5-10 minutos)
+3. Executar `/opt/request-ssl.sh` novamente
+
 ### Erro de verificação
-- Verificar se os registros TXT estão corretos
-- Aguardar propagação DNS completa
+- Verificar se AMBOS os registros TXT estão corretos e ativos
+- Aguardar propagação DNS completa de ambos os registros
+- Limpar cache DNS local: `sudo systemctl flush-dns` ou `sudo resolvectl flush-caches`
 - Tentar novamente o comando `/opt/request-ssl.sh`
 
 ### Certificado não funciona
