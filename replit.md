@@ -12,15 +12,15 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-**August 25, 2025 - PostgreSQL Local Setup Complete**
-- Successfully migrated from Neon Database to PostgreSQL 16 on-premise (vlxsam03)
-- Implemented full PostgreSQL 16 installation with automatic cluster recovery
-- Database server running at 172.24.1.153:5432 with samureye_db database
-- All 13 tables created successfully with proper schema and extensions
+**August 26, 2025 - PostgreSQL Local Setup Complete with Schema Resolution**
+- Successfully resolved PostgreSQL cluster corruption through complete reinstallation
+- PostgreSQL 16 now running stable at 172.24.1.153:5432 with samureye_db database
+- Fixed install.sh automatic recovery logic - script now properly handles cluster corruption
+- Resolved schema conflicts by clearing existing tables and recreating from scratch
 - Connection string: postgresql://samureye:SamurEye2024DB!@172.24.1.153:5432/samureye_db
-- Automatic reinstallation logic added to handle cluster corruption issues
+- Manual cluster recovery commands documented for future reference
+- All 13 tables being recreated with proper UUID extensions and enums
 - PostgreSQL local setup provides better performance and control than serverless Neon
-- Updated all deployment documentation to reflect PostgreSQL local configuration
 
 **August 22, 2025 - Complete Dashboard Components Migration to API Data**
 - Created tenant-specific dashboard endpoints: /api/dashboard/attack-surface, /api/dashboard/edr-events, /api/dashboard/journey-results
