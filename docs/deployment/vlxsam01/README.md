@@ -76,20 +76,40 @@ curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deploy
 
 **Resultado:** NGINX funcionando com HTTP, ready para SSL
 
-### ⚠️ Etapa 2: Configuração SSL (Manual - Aguarda DNS)
+### ⚠️ Etapa 2: Configuração SSL Wildcard (Recomendado)
 
 ```bash
-# PRIMEIRO: Configurar DNS (obrigatório)
+# PRIMEIRO: Configurar DNS básico (obrigatório)
 # Criar registros DNS para:
 # samureye.com.br -> 172.24.1.151
-# app.samureye.com.br -> 172.24.1.151  
-# api.samureye.com.br -> 172.24.1.151
+# *.samureye.com.br -> 172.24.1.151
 
-# DEPOIS: Solicitar certificados SSL
+# DEPOIS: Solicitar certificado SSL WILDCARD (recomendado)
 /opt/request-ssl.sh
 
-# OU para certificado wildcard (se suportado pelo DNS):
-/opt/request-ssl-wildcard.sh
+# Seguir instruções interativas para:
+# 1. Adicionar registros TXT no DNS quando solicitado
+# 2. Verificar propagação DNS
+# 3. Continuar processo
+```
+
+**Vantagens do Wildcard:**
+- ✅ Cobre todos os subdomínios: app.samureye.com.br, api.samureye.com.br, admin.samureye.com.br, etc.
+- ✅ Não requer reconfigurações futuras para novos subdomínios
+- ✅ Maior segurança (DNS challenge vs HTTP challenge)
+
+### 📋 Processo DNS Challenge Detalhado
+
+Ver: [DNS Challenge Guide](DNS-CHALLENGE-GUIDE.md) para instruções passo a passo.
+
+### 🔄 Alternativa: Certificado HTTP (Fallback)
+
+```bash
+# Usar apenas se DNS challenge não for possível
+/opt/request-ssl-http.sh
+
+# Requer que TODOS os domínios apontem para o servidor
+# Verificação automática antes de continuar
 ```
 
 **Resultado:** NGINX com HTTPS funcionando, redirecionamento automático

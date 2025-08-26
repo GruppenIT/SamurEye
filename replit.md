@@ -12,15 +12,16 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-**August 26, 2025 - vlxsam01 Gateway Server Installation COMPLETELY FIXED**
+**August 26, 2025 - vlxsam01 Gateway Server Installation COMPLETELY FIXED + WILDCARD SSL**
 - ✅ CRITICAL FIX: Resolved NGINX SSL certificate error during installation
 - ✅ ROOT CAUSE: Script was trying to activate HTTPS configuration before SSL certificates existed
 - ✅ SOLUTION: Implemented two-stage NGINX configuration (temporary HTTP → final HTTPS)
 - ✅ DIRECTORY FIX: Resolved "No such file or directory" error by creating /opt/samureye/scripts/ before use
-- ✅ AUTOMATION: Created /opt/request-ssl.sh for HTTP-01 challenge and /opt/request-ssl-wildcard.sh for DNS challenge
+- ✅ WILDCARD SSL: Changed default to DNS challenge wildcard certificate (*.samureye.com.br)
+- ✅ SCRIPTS: /opt/request-ssl.sh now generates wildcard, /opt/request-ssl-http.sh as fallback
+- ✅ DOCUMENTATION: Added DNS-CHALLENGE-GUIDE.md with step-by-step DNS TXT instructions
 - ✅ TESTING: Added test-install.sh script for complete installation verification
-- ✅ DOCUMENTATION: Updated vlxsam01/README.md with two-stage installation process
-- ✅ SCRIPTS: Added comprehensive health check and SSL verification scripts
+- ✅ FLEXIBILITY: Supports all subdomains with single wildcard certificate
 - ✅ RELIABILITY: Install script now works 100% reliably as reset mechanism
 
 **August 26, 2025 - vlxsam03 Install Script & Documentation DEFINITIVELY COMPLETED** 

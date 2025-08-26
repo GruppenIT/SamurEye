@@ -550,18 +550,103 @@ log "NGINX configurado temporariamente (HTTP apenas)"
 
 log "📜 Configurando certificados SSL..."
 
-# Criar script de solicitação de certificado (HTTP-01 challenge)
+# Criar script principal para certificado wildcard (DNS challenge)
 cat > /opt/request-ssl.sh << 'EOF'
 #!/bin/bash
 
-# Script para solicitar certificado SSL para SamurEye
-# Usa HTTP-01 challenge (mais simples)
+# Script para solicitar certificado SSL wildcard para SamurEye
+# Usa DNS-01 challenge (certificado wildcard *.samureye.com.br)
 
 set -e
 
-echo "🔐 Solicitando certificado SSL com HTTP-01 challenge..."
+echo "🔐 Solicitando certificado SSL WILDCARD com DNS-01 challenge..."
+echo ""
+echo "IMPORTANTE: Você precisará adicionar registros TXT no DNS!"
+echo "=================================================="
 
-# Solicitar certificado usando HTTP-01 (mais simples que DNS)
+# Solicitar certificado wildcard usando DNS challenge manual
+certbot certonly \
+    --manual \
+    --preferred-challenges=dns \
+    --email admin@samureye.com.br \
+    --server https://acme-v02.api.letsencrypt.org/directory \
+    --agree-tos \
+    --no-eff-email \
+    --manual-public-ip-logging-ok \
+    -d samureye.com.br \
+    -d "*.samureye.com.br"
+
+if [ $? -eq 0 ]; then
+    echo ""
+    echo "✅ Certificado wildcard obtido com sucesso!"
+    
+    # Remover configuração temporária
+    rm -f /etc/nginx/sites-enabled/samureye-temp
+    
+    # Ativar configuração final com SSL
+    ln -sf /etc/nginx/sites-available/samureye /etc/nginx/sites-enabled/samureye
+    
+    # Testar configuração final
+    if nginx -t; then
+        # Recarregar NGINX
+        systemctl reload nginx
+        echo "🚀 SSL wildcard configurado com sucesso!"
+        echo ""
+        echo "URLs funcionais:"
+        echo "  https://samureye.com.br"
+        echo "  https://app.samureye.com.br"
+        echo "  https://api.samureye.com.br"
+        echo "  https://qualquer.samureye.com.br"
+    else
+        echo "❌ Erro na configuração NGINX"
+        exit 1
+    fi
+else
+    echo "❌ Falha ao obter certificado wildcard"
+    echo "Verifique se os registros DNS TXT foram adicionados corretamente"
+    exit 1
+fi
+EOF
+
+chmod +x /opt/request-ssl.sh
+
+# Criar script HTTP fallback (para casos específicos)
+cat > /opt/request-ssl-http.sh << 'EOF'
+#!/bin/bash
+
+# Script FALLBACK para certificado SSL com HTTP-01 challenge
+# Use apenas se DNS challenge não for possível
+
+set -e
+
+echo "🔐 Solicitando certificado SSL com HTTP-01 challenge (fallback)..."
+echo ""
+echo "AVISO: Este método requer que os domínios apontem para este servidor!"
+echo "================================================================="
+
+# Verificar se os domínios apontam para este servidor
+SERVER_IP=$(hostname -I | awk '{print $1}')
+echo "IP do servidor: $SERVER_IP"
+echo ""
+
+for domain in "samureye.com.br" "app.samureye.com.br" "api.samureye.com.br"; do
+    DOMAIN_IP=$(dig +short $domain | tail -1)
+    if [ "$DOMAIN_IP" = "$SERVER_IP" ]; then
+        echo "✅ $domain aponta para $SERVER_IP"
+    else
+        echo "❌ $domain aponta para $DOMAIN_IP (deveria ser $SERVER_IP)"
+    fi
+done
+
+echo ""
+read -p "Continuar com HTTP challenge? (y/N): " -n 1 -r
+echo
+if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    echo "Cancelado. Use /opt/request-ssl.sh para DNS challenge"
+    exit 1
+fi
+
+# Solicitar certificado usando HTTP-01
 certbot certonly \
     --webroot \
     --webroot-path=/var/www/html \
@@ -573,61 +658,27 @@ certbot certonly \
     -d app.samureye.com.br \
     -d api.samureye.com.br
 
-echo "✅ Certificado obtido. Ativando configuração HTTPS..."
-
-# Ativar configuração final com SSL
-ln -sf /etc/nginx/sites-available/samureye /etc/nginx/sites-enabled/samureye
-
-# Testar configuração final
-nginx -t
-
-# Recarregar NGINX
-systemctl reload nginx
-
-echo "🚀 SSL configurado com sucesso!"
-echo "Acesse: https://app.samureye.com.br"
-EOF
-
-chmod +x /opt/request-ssl.sh
-
-# Criar script wildcard para DNS challenge (manual)
-cat > /opt/request-ssl-wildcard.sh << 'EOF'
-#!/bin/bash
-
-# Script para solicitar certificado SSL wildcard (manual)
-# Execute após configurar DNS TXT records
-
-echo "🔐 Solicitando certificado SSL wildcard (DNS challenge)..."
-
-# Solicitar certificado wildcard usando DNS challenge
-certbot certonly \
-    --manual \
-    --preferred-challenges=dns \
-    --email admin@samureye.com.br \
-    --server https://acme-v02.api.letsencrypt.org/directory \
-    --agree-tos \
-    --no-eff-email \
-    -d samureye.com.br \
-    -d "*.samureye.com.br"
-
 if [ $? -eq 0 ]; then
-    echo "✅ Certificado wildcard obtido!"
+    echo "✅ Certificado HTTP obtido. Ativando configuração HTTPS..."
+    
+    # Remover configuração temporária
+    rm -f /etc/nginx/sites-enabled/samureye-temp
     
     # Ativar configuração final com SSL
     ln -sf /etc/nginx/sites-available/samureye /etc/nginx/sites-enabled/samureye
     
-    # Testar e recarregar
+    # Testar configuração final
     nginx -t && systemctl reload nginx
     
-    echo "🚀 SSL wildcard configurado!"
-    echo "Suporta todos os subdomínios: *.samureye.com.br"
+    echo "🚀 SSL HTTP configurado com sucesso!"
+    echo "Acesse: https://app.samureye.com.br"
 else
-    echo "❌ Falha ao obter certificado wildcard"
+    echo "❌ Falha ao obter certificado HTTP"
     exit 1
 fi
 EOF
 
-chmod +x /opt/request-ssl-wildcard.sh
+chmod +x /opt/request-ssl-http.sh
 
 # ============================================================================
 # 6. SCRIPTS DE MONITORAMENTO
@@ -875,21 +926,29 @@ echo ""
 echo "📋 PRÓXIMOS PASSOS:"
 echo "=================="
 echo ""
-echo "1. Solicitar certificado SSL:"
+echo "1. Solicitar certificado SSL WILDCARD (recomendado):"
 echo "   /opt/request-ssl.sh"
+echo "   ↳ Seguir instruções para adicionar registros TXT no DNS"
 echo ""
-echo "2. Configurar DNS para *.samureye.com.br apontando para $(hostname -I | awk '{print $1}')"
+echo "2. Alternativa - Certificado HTTP (se DNS não for possível):"
+echo "   /opt/request-ssl-http.sh"
+echo "   ↳ Requer DNS apontando para $(hostname -I | awk '{print $1}')"
 echo ""
-echo "3. Testar configuração:"
+echo "3. Configurar DNS (obrigatório):"
+echo "   samureye.com.br        → $(hostname -I | awk '{print $1}')"
+echo "   *.samureye.com.br      → $(hostname -I | awk '{print $1}')"
+echo ""
+echo "4. Testar configuração:"
 echo "   /opt/samureye/scripts/health-check.sh"
 echo "   /opt/samureye/scripts/check-ssl.sh"
 echo ""
-echo "4. Verificar logs:"
+echo "5. Verificar logs:"
 echo "   tail -f /var/log/nginx/samureye-access.log"
 echo "   tail -f /var/log/nginx/samureye-error.log"
 echo ""
-echo "🌐 URLs configuradas:"
+echo "🌐 URLs que funcionarão após SSL:"
 echo "   https://app.samureye.com.br"
 echo "   https://api.samureye.com.br"
+echo "   https://qualquer.samureye.com.br (wildcard)"
 echo ""
-echo "⚠️  IMPORTANTE: Configure o DNS e SSL antes de prosseguir com vlxsam02"
+echo "⚠️  IMPORTANTE: Wildcard DNS challenge é o método recomendado!"
