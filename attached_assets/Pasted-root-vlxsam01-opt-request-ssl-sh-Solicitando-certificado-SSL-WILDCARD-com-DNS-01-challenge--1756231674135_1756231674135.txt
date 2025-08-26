@@ -1,0 +1,101 @@
+root@vlxsam01:~# /opt/request-ssl.sh
+🔐 Solicitando certificado SSL WILDCARD com DNS-01 challenge...
+
+IMPORTANTE: Você precisará adicionar registros TXT no DNS!
+==================================================
+Use of --manual-public-ip-logging-ok is deprecated.
+Saving debug log to /var/log/letsencrypt/letsencrypt.log
+Requesting a certificate for samureye.com.br and *.samureye.com.br
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+Please deploy a DNS TXT record under the name:
+
+_acme-challenge.samureye.com.br.
+
+with the following value:
+
+6NDuDukhvPxOTgh713_WmgN99fQBHmHBAHVH5ZW7PMs
+
+Before continuing, verify the TXT record has been deployed. Depending on the DNS
+provider, this may take some time, from a few seconds to multiple minutes. You can
+check if it has finished deploying with aid of online tools, such as the Google
+Admin Toolbox: https://toolbox.googleapps.com/apps/dig/#TXT/_acme-challenge.samureye.com.br.
+Look for one or more bolded line(s) below the line ';ANSWER'. It should show the
+value(s) you've just added.
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+Press Enter to Continue
+
+Successfully received certificate.
+Certificate is saved at: /etc/letsencrypt/live/samureye.com.br/fullchain.pem
+Key is saved at:         /etc/letsencrypt/live/samureye.com.br/privkey.pem
+This certificate expires on 2025-11-24.
+These files will be updated when the certificate renews.
+
+NEXT STEPS:
+- This certificate will not be renewed automatically. Autorenewal of --manual certificates requires the use of an authentication hook script (--manual-auth-hook) but one was not provided. To renew this certificate, repeat this same certbot command before the certificate's expiry date.
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+If you like Certbot, please consider supporting our work by:
+ * Donating to ISRG / Let's Encrypt:   https://letsencrypt.org/donate
+ * Donating to EFF:                    https://eff.org/donate-le
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+✅ Certificado wildcard obtido com sucesso!
+2025/08/26 15:06:11 [warn] 73010#73010: "ssl_stapling" ignored, no OCSP responder URL in the certificate "/etc/letsencrypt/live/samureye.com.br/fullchain.pem"
+nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+nginx: configuration file /etc/nginx/nginx.conf test is successful
+🚀 SSL wildcard configurado com sucesso!
+
+URLs funcionais:
+  https://samureye.com.br
+  https://app.samureye.com.br
+  https://api.samureye.com.br
+  https://qualquer.samureye.com.br
+root@vlxsam01:~# /opt/samureye/scripts/health-check.sh
+=== SAMUREYE GATEWAY HEALTH CHECK ===
+Data: Tue Aug 26 03:06:35 PM -03 2025
+Servidor: vlxsam01 (172.24.1.151)
+
+🌐 NGINX:
+✅ Serviço ativo
+✅ Configuração válida
+
+🔐 CERTIFICADOS SSL:
+✅ Certificado válido (89 dias restantes)
+
+🔗 CONECTIVIDADE:
+❌ vlxsam02:3000 inacessível
+
+🧪 ENDPOINTS:
+✅ Health check local
+
+💻 RECURSOS:
+CPU: 0.0%
+Memória: 7.6%
+Disco: 8%
+
+🔌 CONEXÕES:
+HTTPS ativas: 0
+
+=== FIM DO HEALTH CHECK ===
+root@vlxsam01:~# /opt/samureye/scripts/check-ssl.sh
+🔐 VERIFICAÇÃO DE CERTIFICADOS SSL
+=================================
+Certificado encontrado: /etc/letsencrypt/live/samureye.com.br/fullchain.pem
+
+📋 INFORMAÇÕES DO CERTIFICADO:
+subject=CN = samureye.com.br
+issuer=C = US, O = Let's Encrypt, CN = E7
+notBefore=Aug 26 17:07:39 2025 GMT
+notAfter=Nov 24 17:07:38 2025 GMT
+
+🌐 DOMÍNIOS COBERTOS:
+                DNS:*.samureye.com.br, DNS:samureye.com.br
+
+🧪 TESTE HTTPS:
+✅ app.samureye.com.br
+❌ api.samureye.com.br
+root@vlxsam01:~# tail -f /var/log/nginx/samureye-access.log
+^C
+root@vlxsam01:~#

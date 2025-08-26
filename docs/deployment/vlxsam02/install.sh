@@ -665,12 +665,7 @@ EOF
 
 chown "$APP_USER:$APP_USER" "$APP_DIR/vite.config.ts"
 
-log "Systemd service já configurado anteriormente"
-WantedBy=multi-user.target
-EOF
-
-systemctl daemon-reload
-systemctl enable samureye-app
+log "Systemd service configurado"
 
 # ============================================================================
 # 12. LOGROTATE
@@ -732,7 +727,7 @@ maxretry = 5
 
 [samureye-app]
 enabled = true
-port = 3000,3001
+port = 5000
 logpath = /var/log/samureye/app.log
 maxretry = 10
 findtime = 600
@@ -764,14 +759,13 @@ Aplicação:
 - Config: /etc/samureye/.env
 
 Serviços:
-- App Principal: http://localhost:3000
-- Scanner: http://localhost:3001
+- App Unificado: http://localhost:5000
 
-PM2 Commands:
-- Status: pm2 status
-- Logs: pm2 logs
-- Restart: pm2 restart all
-- Monitor: pm2 monit
+Systemd Commands:
+- Status: systemctl status samureye-app
+- Logs: journalctl -u samureye-app -f
+- Restart: systemctl restart samureye-app
+- Stop: systemctl stop samureye-app
 
 Scripts Úteis:
 - Health Check: $APP_DIR/scripts/health-check.sh
@@ -816,8 +810,8 @@ echo "4. Executar migrações do banco:"
 echo "   sudo -u $APP_USER npm run db:push"
 echo ""
 echo "5. Iniciar aplicação:"
-echo "   sudo -u $APP_USER pm2 start $APP_DIR/ecosystem.config.js"
-echo "   sudo -u $APP_USER pm2 save"
+echo "   systemctl start samureye-app"
+echo "   systemctl status samureye-app"
 echo ""
 echo "6. Verificar instalação:"
 echo "   $APP_DIR/scripts/health-check.sh"
@@ -829,9 +823,9 @@ echo "   Senha: $APP_PASSWORD"
 echo "   Detalhes: $APP_DIR/CREDENTIALS.txt"
 echo ""
 echo "🌐 ENDPOINTS LOCAIS:"
-echo "   App: http://localhost:3000"
-echo "   Scanner: http://localhost:3001"
-echo "   Health: http://localhost:3000/api/health"
+echo "   App Unificado: http://localhost:5000"
+echo "   API: http://localhost:5000/api"
+echo "   Health: http://localhost:5000/api/health"
 echo ""
 echo "⚠️  IMPORTANTE:"
 echo "   - Configure /etc/samureye/.env com dados reais"
