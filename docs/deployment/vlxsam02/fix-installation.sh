@@ -211,7 +211,41 @@ else
 fi
 
 # ============================================================================
-# 6. EXECUTAR TESTES
+# 6. CORRIGIR INSTALAÇÃO DO NUCLEI
+# ============================================================================
+
+log "🔧 Corrigindo instalação do Nuclei..."
+
+cd /tmp
+NUCLEI_VERSION="3.2.9"
+NUCLEI_ZIP="nuclei_${NUCLEI_VERSION}_linux_amd64.zip"
+
+# Remover instalação anterior
+rm -f nuclei /usr/local/bin/nuclei "$NUCLEI_ZIP" 2>/dev/null
+
+if wget -q "https://github.com/projectdiscovery/nuclei/releases/download/v${NUCLEI_VERSION}/$NUCLEI_ZIP"; then
+    # Extrair de forma não-interativa
+    if unzip -o -q "$NUCLEI_ZIP" 2>/dev/null; then
+        if [ -f "nuclei" ]; then
+            mv nuclei /usr/local/bin/
+            chmod +x /usr/local/bin/nuclei
+            if /usr/local/bin/nuclei -version >/dev/null 2>&1; then
+                log "✅ Nuclei corrigido com sucesso"
+            else
+                log "⚠️ Nuclei instalado mas com problemas"
+            fi
+        fi
+        # Limpar arquivos
+        rm -f "$NUCLEI_ZIP" README*.md LICENSE.md 2>/dev/null
+    else
+        log "⚠️ Problema na extração do Nuclei (não crítico)"
+    fi
+else
+    log "⚠️ Falha ao baixar Nuclei (não crítico)"
+fi
+
+# ============================================================================
+# 7. EXECUTAR TESTES
 # ============================================================================
 
 log "🧪 Executando testes finais..."

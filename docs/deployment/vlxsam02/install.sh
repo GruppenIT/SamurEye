@@ -214,16 +214,33 @@ safe_install "masscan"
 log "Instalando Nuclei..."
 cd /tmp || exit 1
 NUCLEI_VERSION="3.2.9"
-if wget "https://github.com/projectdiscovery/nuclei/releases/download/v${NUCLEI_VERSION}/nuclei_${NUCLEI_VERSION}_linux_amd64.zip"; then
-    if unzip "nuclei_${NUCLEI_VERSION}_linux_amd64.zip"; then
-        mv nuclei /usr/local/bin/ 2>/dev/null || sudo mv nuclei /usr/local/bin/
-        chmod +x /usr/local/bin/nuclei
-        log "Nuclei instalado com sucesso"
+NUCLEI_ZIP="nuclei_${NUCLEI_VERSION}_linux_amd64.zip"
+
+# Remover instalação anterior se existir
+rm -f nuclei /usr/local/bin/nuclei "$NUCLEI_ZIP" 2>/dev/null
+
+if wget -q "https://github.com/projectdiscovery/nuclei/releases/download/v${NUCLEI_VERSION}/$NUCLEI_ZIP"; then
+    # Usar unzip com flags não-interativas: -o (sobrescrever) -q (silencioso)
+    if unzip -o -q "$NUCLEI_ZIP"; then
+        if [ -f "nuclei" ]; then
+            mv nuclei /usr/local/bin/
+            chmod +x /usr/local/bin/nuclei
+            # Verificar se instalação funcionou
+            if /usr/local/bin/nuclei -version >/dev/null 2>&1; then
+                log "✅ Nuclei instalado com sucesso"
+            else
+                log "⚠️  Nuclei instalado mas com problemas na execução"
+            fi
+        else
+            log "❌ Arquivo nuclei não encontrado após extração"
+        fi
+        # Limpar arquivos temporários
+        rm -f "$NUCLEI_ZIP" README*.md LICENSE.md 2>/dev/null
     else
-        log "AVISO: Falha ao extrair Nuclei"
+        log "❌ Falha ao extrair Nuclei"
     fi
 else
-    log "AVISO: Falha ao baixar Nuclei"
+    log "❌ Falha ao baixar Nuclei"
 fi
 
 # Instalar wscat via npm (já que não está disponível via apt)
