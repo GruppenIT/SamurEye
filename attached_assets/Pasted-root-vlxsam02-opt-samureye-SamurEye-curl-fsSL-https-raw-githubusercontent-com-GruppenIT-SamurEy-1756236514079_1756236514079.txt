@@ -1,0 +1,437 @@
+root@vlxsam02:/opt/samureye/SamurEye# curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam02/install.sh | bash
+[2025-08-26 15:46:45] 🚀 Iniciando instalação do SamurEye Application Server (vlxsam02)...
+[2025-08-26 15:46:45] 🔍 Executando validação de segurança do script...
+[2025-08-26 15:46:45] Verificação de pacotes problemáticos: OK (wscat será instalado via npm)
+[2025-08-26 15:46:45] INFO: 📋 Configurando sistema base...
+[2025-08-26 15:46:45] Atualizando sistema Ubuntu...
+Hit:1 https://deb.nodesource.com/node_20.x nodistro InRelease
+Hit:2 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:3 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:4 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:5 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists... Done
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+Calculating upgrade... Done
+The following packages have been kept back:
+  sosreport
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[2025-08-26 15:46:47] Configurando timezone para America/Sao_Paulo...
+[2025-08-26 15:46:47] Instalando pacotes essenciais...
+[2025-08-26 15:46:47] Instalando pacotes básicos do sistema...
+[2025-08-26 15:46:47] Verificando disponibilidade: curl
+[2025-08-26 15:46:47] Instalando curl...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+curl is already the newest version (8.5.0-2ubuntu10.6).
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[2025-08-26 15:46:48] ✅ curl instalado com sucesso
+[2025-08-26 15:46:48] Verificando disponibilidade: wget
+[2025-08-26 15:46:48] Instalando wget...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+wget is already the newest version (1.21.4-1ubuntu4.1).
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[2025-08-26 15:46:48] ✅ wget instalado com sucesso
+[2025-08-26 15:46:48] Verificando disponibilidade: git
+[2025-08-26 15:46:48] Instalando git...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+git is already the newest version (1:2.43.0-1ubuntu7.3).
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[2025-08-26 15:46:49] ✅ git instalado com sucesso
+[2025-08-26 15:46:49] Verificando disponibilidade: build-essential
+[2025-08-26 15:46:49] Instalando build-essential...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+build-essential is already the newest version (12.10ubuntu1).
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[2025-08-26 15:46:49] ✅ build-essential instalado com sucesso
+[2025-08-26 15:46:49] Verificando disponibilidade: python3
+[2025-08-26 15:46:49] Instalando python3...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+python3 is already the newest version (3.12.3-0ubuntu2).
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[2025-08-26 15:46:50] ✅ python3 instalado com sucesso
+[2025-08-26 15:46:50] Verificando disponibilidade: python3-pip
+[2025-08-26 15:46:50] Instalando python3-pip...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+python3-pip is already the newest version (24.0+dfsg-1ubuntu1.2).
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[2025-08-26 15:46:50] ✅ python3-pip instalado com sucesso
+[2025-08-26 15:46:50] Verificando disponibilidade: htop
+[2025-08-26 15:46:50] Instalando htop...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+htop is already the newest version (3.3.0-4build1).
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[2025-08-26 15:46:50] ✅ htop instalado com sucesso
+[2025-08-26 15:46:50] Verificando disponibilidade: unzip
+[2025-08-26 15:46:50] Instalando unzip...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+unzip is already the newest version (6.0-28ubuntu4.1).
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[2025-08-26 15:46:51] ✅ unzip instalado com sucesso
+[2025-08-26 15:46:51] Verificando disponibilidade: software-properties-common
+[2025-08-26 15:46:51] Instalando software-properties-common...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+software-properties-common is already the newest version (0.99.49.3).
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[2025-08-26 15:46:51] ✅ software-properties-common instalado com sucesso
+[2025-08-26 15:46:51] Verificando disponibilidade: ufw
+[2025-08-26 15:46:51] Instalando ufw...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+ufw is already the newest version (0.36.2-6).
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[2025-08-26 15:46:52] ✅ ufw instalado com sucesso
+[2025-08-26 15:46:52] Verificando disponibilidade: fail2ban
+[2025-08-26 15:46:52] Instalando fail2ban...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+fail2ban is already the newest version (1.0.2-3ubuntu0.1).
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[2025-08-26 15:46:52] ✅ fail2ban instalado com sucesso
+[2025-08-26 15:46:52] Verificando disponibilidade: supervisor
+[2025-08-26 15:46:52] Instalando supervisor...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+supervisor is already the newest version (4.2.5-1ubuntu0.1).
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[2025-08-26 15:46:53] ✅ supervisor instalado com sucesso
+[2025-08-26 15:46:53] Verificando disponibilidade: sqlite3
+[2025-08-26 15:46:53] Instalando sqlite3...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+sqlite3 is already the newest version (3.45.1-1ubuntu2.4).
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[2025-08-26 15:46:53] ✅ sqlite3 instalado com sucesso
+[2025-08-26 15:46:53] Verificando disponibilidade: ca-certificates
+[2025-08-26 15:46:53] Instalando ca-certificates...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+ca-certificates is already the newest version (20240203).
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[2025-08-26 15:46:54] ✅ ca-certificates instalado com sucesso
+[2025-08-26 15:46:54] Verificando disponibilidade: gnupg
+[2025-08-26 15:46:54] Instalando gnupg...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+gnupg is already the newest version (2.4.4-2ubuntu17.3).
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[2025-08-26 15:46:54] ✅ gnupg instalado com sucesso
+[2025-08-26 15:46:54] Verificando disponibilidade: lsb-release
+[2025-08-26 15:46:54] Instalando lsb-release...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+lsb-release is already the newest version (12.0-2).
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[2025-08-26 15:46:55] ✅ lsb-release instalado com sucesso
+[2025-08-26 15:46:55] Instalando cliente PostgreSQL...
+[2025-08-26 15:46:55] 👤 Configurando usuário samureye...
+[2025-08-26 15:46:55] Usuário samureye já existe
+[2025-08-26 15:46:55] Senha definida para o usuário samureye
+[2025-08-26 15:46:55] 📦 Instalando Node.js 20.x LTS...
+2025-08-26 15:46:55 - Installing pre-requisites
+Hit:1 https://deb.nodesource.com/node_20.x nodistro InRelease
+Hit:2 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:3 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:4 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:5 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists... Done
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+apt-transport-https is already the newest version (2.8.3).
+ca-certificates is already the newest version (20240203).
+curl is already the newest version (8.5.0-2ubuntu10.6).
+gnupg is already the newest version (2.4.4-2ubuntu17.3).
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+Hit:1 https://deb.nodesource.com/node_20.x nodistro InRelease
+Hit:2 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:3 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:4 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:5 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists... Done
+2025-08-26 15:46:59 - Repository configured successfully.
+2025-08-26 15:46:59 - To install Node.js, run: apt-get install nodejs -y
+2025-08-26 15:46:59 - You can use N|solid Runtime as a node.js alternative
+2025-08-26 15:46:59 - To install N|solid Runtime, run: apt-get install nsolid -y
+
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+nodejs is already the newest version (20.19.4-1nodesource1).
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[2025-08-26 15:47:00] Node.js: v20.19.4, NPM: 10.8.2
+[2025-08-26 15:47:00] Configurando ambiente de desenvolvimento...
+
+changed 6 packages in 2s
+
+2 packages are looking for funding
+  run `npm fund` for details
+npm warn using --force Recommended protections disabled.
+[2025-08-26 15:47:02] PM2 substituído por systemd service
+[2025-08-26 15:47:02] 🔥 Configurando firewall UFW...
+Default incoming policy changed to 'deny'
+(be sure to update your rules accordingly)
+Default outgoing policy changed to 'allow'
+(be sure to update your rules accordingly)
+Skipping adding existing rule
+Skipping adding existing rule (v6)
+Skipping adding existing rule
+Skipping adding existing rule (v6)
+Firewall is active and enabled on system startup
+[2025-08-26 15:47:05] Firewall configurado: SSH (22), App (5000)
+[2025-08-26 15:47:05] 🔧 Instalando ferramentas de segurança e cliente PostgreSQL...
+[2025-08-26 15:47:05] Instalando ferramentas de rede e banco...
+[2025-08-26 15:47:05] Verificando disponibilidade: redis-tools
+[2025-08-26 15:47:05] Instalando redis-tools...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+redis-tools is already the newest version (5:7.0.15-1ubuntu0.24.04.1).
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[2025-08-26 15:47:06] ✅ redis-tools instalado com sucesso
+[2025-08-26 15:47:06] Verificando disponibilidade: dnsutils
+[2025-08-26 15:47:06] Instalando dnsutils...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+dnsutils is already the newest version (1:9.18.30-0ubuntu0.24.04.2).
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[2025-08-26 15:47:06] ✅ dnsutils instalado com sucesso
+[2025-08-26 15:47:06] Verificando disponibilidade: netcat-openbsd
+[2025-08-26 15:47:06] Instalando netcat-openbsd...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+netcat-openbsd is already the newest version (1.226-1ubuntu2).
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[2025-08-26 15:47:07] ✅ netcat-openbsd instalado com sucesso
+[2025-08-26 15:47:07] Instalando ferramentas de segurança...
+[2025-08-26 15:47:07] Verificando disponibilidade: nmap
+[2025-08-26 15:47:07] Instalando nmap...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+nmap is already the newest version (7.94+git20230807.3be01efb1+dfsg-3build2).
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[2025-08-26 15:47:07] ✅ nmap instalado com sucesso
+[2025-08-26 15:47:07] Verificando disponibilidade: masscan
+[2025-08-26 15:47:07] Instalando masscan...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+masscan is already the newest version (2:1.3.2+ds1-1).
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[2025-08-26 15:47:08] ✅ masscan instalado com sucesso
+[2025-08-26 15:47:08] Instalando Nuclei...
+[2025-08-26 15:47:09] ✅ Nuclei instalado com sucesso
+[2025-08-26 15:47:09] Instalando wscat via npm...
+
+changed 9 packages in 1s
+[2025-08-26 15:47:10] Verificando ferramentas instaladas...
+Nmap version 7.94SVN ( https://nmap.org )
+[INF] Nuclei Engine Version: v3.2.9
+[INF] Nuclei Config Directory: /root/.config/nuclei
+[INF] Nuclei Cache Directory: /root/.cache/nuclei
+[INF] PDCP Directory: /root/.pdcp
+
+Masscan version 1.3.2 ( https://github.com/robertdavidgraham/masscan )
+Compiled on: Feb  2 2021 11:13:27
+Compiler: gcc 10.2.1 20210130
+OS: Linux
+CPU: unknown (64 bits)
+GIT version: unknown
+[2025-08-26 15:47:10] Masscan não instalado
+[2025-08-26 15:47:10] wscat instalado
+[INF] Nuclei Engine Version: v3.2.9
+[INF] Nuclei Config Directory: /root/.config/nuclei
+[INF] Nuclei Cache Directory: /root/.cache/nuclei
+[INF] PDCP Directory: /root/.pdcp
+
+
+                     __     _
+   ____  __  _______/ /__  (_)
+  / __ \/ / / / ___/ / _ \/ /
+ / / / / /_/ / /__/ /  __/ /
+/_/ /_/\__,_/\___/_/\___/_/   v3.2.9
+
+                projectdiscovery.io
+
+[INF] No new updates found for nuclei templates
+[2025-08-26 15:47:11] 📁 Configurando código da aplicação...
+[2025-08-26 15:47:11] Diretório da aplicação já existe
+[2025-08-26 15:47:11] ⚙️ Configurando variáveis de ambiente...
+[2025-08-26 15:47:11] ⚡ Configurando systemd service...
+[2025-08-26 15:47:11] Systemd service configurado e habilitado
+[2025-08-26 15:47:11] 📦 Configurando aplicação SamurEye...
+[2025-08-26 15:47:11] Nota: dependências serão instaladas após clonagem do código fonte
+[2025-08-26 15:47:11] 📊 Criando scripts de monitoramento...
+[2025-08-26 15:47:11] ⚙️ Finalizando instalação...
+[2025-08-26 15:47:11] Systemd service configurado
+[2025-08-26 15:47:11] 📝 Configurando logrotate...
+[2025-08-26 15:47:11] ⏰ Configurando cron jobs...
+[2025-08-26 15:47:11] 🛡️ Configurando Fail2Ban...
+Synchronizing state of fail2ban.service with SysV service script with /usr/lib/systemd/systemd-sysv-install.
+Executing: /usr/lib/systemd/systemd-sysv-install enable fail2ban
+[2025-08-26 15:47:12] 📋 Criando arquivo de credenciais...
+[2025-08-26 15:47:12] 🚀 Executando automação completa da instalação...
+[2025-08-26 15:47:12] 📂 Clonando código da aplicação...
+[2025-08-26 15:47:12] Removendo instalação anterior...
+Cloning into '/opt/samureye/SamurEye'...
+remote: Enumerating objects: 1064, done.
+remote: Counting objects: 100% (30/30), done.
+remote: Compressing objects: 100% (17/17), done.
+remote: Total 1064 (delta 14), reused 21 (delta 10), pack-reused 1034 (from 1)
+Receiving objects: 100% (1064/1064), 880.00 KiB | 6.15 MiB/s, done.
+Resolving deltas: 100% (688/688), done.
+[2025-08-26 15:47:13] 📦 Instalando dependências da aplicação...
+[15:47:13] 📦 Instalando dependências Node.js...
+npm warn using --force Recommended protections disabled.
+[15:47:14] Executando npm install...
+npm warn deprecated node-domexception@1.0.0: Use your platform's native DOMException instead
+npm warn deprecated @esbuild-kit/core-utils@3.3.2: Merged into tsx: https://tsx.is
+npm warn deprecated @esbuild-kit/esm-loader@2.6.5: Merged into tsx: https://tsx.is
+
+added 644 packages, and audited 645 packages in 1m
+
+90 packages are looking for funding
+  run `npm fund` for details
+
+5 moderate severity vulnerabilities
+
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+
+Run `npm audit` for details.
+[15:48:21] Verificando TypeScript...
+[15:48:22] ✅ TypeScript funciona
+[15:48:22] ✅ Dependências instaladas com sucesso!
+[15:48:22] Execute 'npm run dev' para iniciar a aplicação
+[2025-08-26 15:48:22] 🔧 Configurando variáveis de ambiente para db:push...
+[2025-08-26 15:48:22] 🗄️ Executando migrações do banco de dados...
+bash: line 1: /etc/samureye/.env: Permission denied
+[2025-08-26 15:48:22] AVISO: Falha na migração do banco - configure manualmente
+[2025-08-26 15:48:22] 🚀 Iniciando aplicação...
+[2025-08-26 15:48:27] ✅ Serviço samureye-app: INICIADO COM SUCESSO
+[2025-08-26 15:48:27] ✅ Instalação automatizada do vlxsam02 concluída com sucesso!
+
+📋 VERIFICAÇÃO FINAL:
+===================
+
+Status da aplicação:
+● samureye-app.service - SamurEye Application (React 18 + Vite + Node.js)
+     Loaded: loaded (/etc/systemd/system/samureye-app.service; enabled; preset: enabled)
+     Active: active (running) since Tue 2025-08-26 15:48:22 -03; 5s ago
+   Main PID: 75678 (npm run dev)
+      Tasks: 51 (limit: 9443)
+     Memory: 741.8M (peak: 742.5M)
+        CPU: 4.811s
+     CGroup: /system.slice/samureye-app.service
+             ├─75678 "npm run dev"
+             ├─75690 sh -c "NODE_ENV=development tsx server/index.ts"
+             ├─75691 node /opt/samureye/SamurEye/node_modules/.bin/tsx server/index.ts
+             ├─75702 /usr/bin/node --require /opt/samureye/SamurEye/node_modules/tsx/dist/preflight.cjs --import file:///opt/samureye/SamurEye/node_modules/tsx/dist/loader.mjs server/index.ts
+             ├─75714 /opt/samureye/SamurEye/node_modules/@esbuild/linux-x64/bin/esbuild --service=0.25.9 --ping
+             └─75721 /opt/samureye/SamurEye/node_modules/vite/node_modules/@esbuild/linux-x64/bin/esbuild --service=0.21.5 --ping
+
+Aug 26 15:48:22 vlxsam02 systemd[1]: Started samureye-app.service - SamurEye Application (React 18 + Vite + Node.js).
+Aug 26 15:48:22 vlxsam02 samureye-app[75678]: > rest-express@1.0.0 dev
+Aug 26 15:48:22 vlxsam02 samureye-app[75678]: > NODE_ENV=development tsx server/index.ts
+Aug 26 15:48:23 vlxsam02 samureye-app[75702]: 3:48:23 PM [express] serving on port 5000
+
+Verificar instalação:
+   /opt/samureye/scripts/health-check.sh
+   /opt/samureye/scripts/test-connectivity.sh
+
+🎯 CREDENCIAIS:
+   Usuário: samureye
+   Senha: SamurEye2024!
+   Detalhes: /opt/samureye/CREDENTIALS.txt
+
+🌐 ENDPOINTS LOCAIS:
+   App Unificado: http://localhost:5000
+   API: http://localhost:5000/api
+   Health: http://localhost:5000/api/health
+
+⚠️  IMPORTANTE:
+   - Configure /etc/samureye/.env com dados reais
+   - Instale o código da aplicação
+   - Teste conectividade com vlxsam03 (database)
+
+[2025-08-26 15:48:27] 🔍 Executando validação final da instalação...
+
+=== RELATÓRIO DE VALIDAÇÃO ===
+
+🔧 Comandos e Ferramentas:
+[2025-08-26 15:48:27] ✅ Node.js: OK
+[2025-08-26 15:48:27] ✅ NPM: OK
+[2025-08-26 15:48:27] ✅ TSX: OK
+[2025-08-26 15:48:27] ✅ Git: OK
+[2025-08-26 15:48:27] ✅ PostgreSQL Client: OK
+[2025-08-26 15:48:27] ✅ Redis Client: OK
+[2025-08-26 15:48:27] ✅ Nmap: OK
+[2025-08-26 15:48:27] ✅ Nuclei: OK
+[2025-08-26 15:48:27] ✅ Masscan: OK
+[2025-08-26 15:48:27] ✅ WebSocket CLI: OK
+
+🛠️ Serviços do Sistema:
+[2025-08-26 15:48:27] ✅ Serviço ufw: ATIVO
+[2025-08-26 15:48:27] ✅ Serviço fail2ban: ATIVO
+[2025-08-26 15:48:27] ✅ Serviço supervisor: ATIVO
+
+📁 Estrutura de Diretórios:
+[2025-08-26 15:48:27] ✅ Diretório App Directory: OK (/opt/samureye)
+[2025-08-26 15:48:27] ✅ Diretório Log Directory: OK (/var/log/samureye)
+[2025-08-26 15:48:27] ✅ Diretório Scripts Directory: OK (/opt/samureye/scripts)
+[2025-08-26 15:48:27] ✅ Diretório Config Directory: OK (/etc/samureye)
+
+📄 Arquivos de Configuração:
+[2025-08-26 15:48:27] ✅ Variáveis de Ambiente: OK
+[2025-08-26 15:48:27] ✅ Credenciais: OK
+[2025-08-26 15:48:27] ✅ Package.json: OK
+[2025-08-26 15:48:27] ✅ Vite Config: OK
+[2025-08-26 15:48:27] ✅ Systemd Service: OK
+[2025-08-26 15:48:27] ✅ Health Check: OK
+[2025-08-26 15:48:27] ✅ Test Connectivity: OK
+
+👤 Usuário e Permissões:
+[2025-08-26 15:48:27] ✅ Usuário samureye: EXISTS
+[2025-08-26 15:48:27] ✅ Usuário samureye: HAS SUDO
+
+🌐 Verificação de Ports:
+[2025-08-26 15:48:27] ✅ Porta 5000: DISPONÍVEL PARA BIND
+
+🔗 Conectividade Básica:
+[2025-08-26 15:48:27] ✅ Conectividade Internet: OK
+[2025-08-26 15:48:27] ✅ Conectividade vlxsam03: OK
+
+=== FIM DA VALIDAÇÃO ===
+
+[2025-08-26 15:48:27] 🆕 PRIMEIRA INSTALAÇÃO DETECTADA
+[2025-08-26 15:48:27] 📊 Instalação vlxsam02 completada com validação!
+[2025-08-26 15:48:27] 📖 Consulte: /opt/samureye/CREDENTIALS.txt para próximos passos
+root@vlxsam02:/opt/samureye/SamurEye#
