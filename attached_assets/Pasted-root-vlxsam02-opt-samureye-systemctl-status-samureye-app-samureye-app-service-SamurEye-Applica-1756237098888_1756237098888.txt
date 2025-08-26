@@ -1,0 +1,41 @@
+root@vlxsam02:/opt/samureye# systemctl status samureye-app
+● samureye-app.service - SamurEye Application (React 18 + Vite + Node.js)
+     Loaded: loaded (/etc/systemd/system/samureye-app.service; enabled; preset: enabled)
+     Active: active (running) since Tue 2025-08-26 15:48:22 -03; 49min ago
+   Main PID: 75678 (npm run dev)
+      Tasks: 51 (limit: 9443)
+     Memory: 274.3M (peak: 743.2M)
+        CPU: 15.106s
+     CGroup: /system.slice/samureye-app.service
+             ├─75678 "npm run dev"
+             ├─75690 sh -c "NODE_ENV=development tsx server/index.ts"
+             ├─75691 node /opt/samureye/SamurEye/node_modules/.bin/tsx server/index.ts
+             ├─75702 /usr/bin/node --require /opt/samureye/SamurEye/node_modules/tsx/dist/preflight.cjs --import file:///opt/samureye/SamurEye/node_modules/tsx/dist/loader.mjs server/index.ts
+             ├─75714 /opt/samureye/SamurEye/node_modules/@esbuild/linux-x64/bin/esbuild --service=0.25.9 --ping
+             └─75721 /opt/samureye/SamurEye/node_modules/vite/node_modules/@esbuild/linux-x64/bin/esbuild --service=0.21.5 --ping
+
+Aug 26 16:35:01 vlxsam02 samureye-app[75702]:       at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16) {
+Aug 26 16:35:01 vlxsam02 samureye-app[75702]:     errno: -111,
+Aug 26 16:35:01 vlxsam02 samureye-app[75702]:     code: 'ECONNREFUSED',
+Aug 26 16:35:01 vlxsam02 samureye-app[75702]:     syscall: 'connect',
+Aug 26 16:35:01 vlxsam02 samureye-app[75702]:     address: '172.24.1.153',
+Aug 26 16:35:01 vlxsam02 samureye-app[75702]:     port: 443
+Aug 26 16:35:01 vlxsam02 samureye-app[75702]:   },
+Aug 26 16:35:01 vlxsam02 samureye-app[75702]:   [Symbol(kMessage)]: 'connect ECONNREFUSED 172.24.1.153:443'
+Aug 26 16:35:01 vlxsam02 samureye-app[75702]: }
+Aug 26 16:35:01 vlxsam02 samureye-app[75702]: 4:35:01 PM [express] GET /api/system/settings 500 in 3ms :: {"message":"Failed to fetch system setti…
+root@vlxsam02:/opt/samureye# curl http://localhost:5000/api/system/settings
+{"message":"Failed to fetch system settings"}root@vlxsam02:/opt/samureye#
+root@vlxsam02:/opt/samureye#
+root@vlxsam02:/opt/samureye# curl http://localhost:5000/api/user
+{"message":"Não autenticado"}root@vlxsam02:/opt/samureye# journalctl -u samureye-app -f
+Aug 26 16:38:22 vlxsam02 samureye-app[75702]:     errno: -111,
+Aug 26 16:38:22 vlxsam02 samureye-app[75702]:     code: 'ECONNREFUSED',
+Aug 26 16:38:22 vlxsam02 samureye-app[75702]:     syscall: 'connect',
+Aug 26 16:38:22 vlxsam02 samureye-app[75702]:     address: '172.24.1.153',
+Aug 26 16:38:22 vlxsam02 samureye-app[75702]:     port: 443
+Aug 26 16:38:22 vlxsam02 samureye-app[75702]:   },
+Aug 26 16:38:22 vlxsam02 samureye-app[75702]:   [Symbol(kMessage)]: 'connect ECONNREFUSED 172.24.1.153:443'
+Aug 26 16:38:22 vlxsam02 samureye-app[75702]: }
+Aug 26 16:38:22 vlxsam02 samureye-app[75702]: 4:38:22 PM [express] GET /api/system/settings 500 in 4ms :: {"message":"Failed to fetch system setti…
+Aug 26 16:38:31 vlxsam02 samureye-app[75702]: 4:38:31 PM [express] GET /api/user 401 in 2ms :: {"message":"Não autenticado"}

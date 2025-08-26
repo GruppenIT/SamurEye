@@ -349,9 +349,9 @@ DEFAULT_TENANT_SLUG=default
 ADMIN_EMAIL=admin@samureye.com.br
 ADMIN_PASSWORD=SamurEye2024!
 
-# Frontend URLs
-FRONTEND_URL=https://app.samureye.com.br
-API_BASE_URL=https://api.samureye.com.br
+# Frontend URLs (Development - usando IPs diretos)
+FRONTEND_URL=http://172.24.1.152:5000
+API_BASE_URL=http://172.24.1.152:5000
 
 # File Upload & Object Storage
 UPLOAD_MAX_SIZE=100MB
@@ -366,11 +366,11 @@ FORTISIEM_PORT=514
 RATE_LIMIT_WINDOW_MS=900000
 RATE_LIMIT_MAX_REQUESTS=100
 
-# CORS
-CORS_ORIGINS=https://app.samureye.com.br,https://api.samureye.com.br
+# CORS (Development - permitir IPs locais)
+CORS_ORIGINS=http://172.24.1.152:5000,http://localhost:5000
 
-# Development (Vite specific)
-VITE_API_BASE_URL=https://api.samureye.com.br
+# Development (Vite specific - usar IP local)
+VITE_API_BASE_URL=http://172.24.1.152:5000
 VITE_APP_NAME=SamurEye
 EOF
 

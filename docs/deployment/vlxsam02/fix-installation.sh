@@ -211,7 +211,29 @@ else
 fi
 
 # ============================================================================
-# 6. CORRIGIR INSTALAÇÃO DO NUCLEI
+# 6. CORRIGIR CONFIGURAÇÕES DE URL
+# ============================================================================
+
+log "🔧 Corrigindo configurações de URL..."
+
+# Corrigir URLs que estão causando erro de conexão HTTPS
+if [ -f "/etc/samureye/.env" ]; then
+    # Backup do arquivo original
+    cp /etc/samureye/.env /etc/samureye/.env.backup.$(date +%s)
+    
+    # Corrigir URLs para desenvolvimento local
+    sed -i 's|FRONTEND_URL=https://app.samureye.com.br|FRONTEND_URL=http://172.24.1.152:5000|g' /etc/samureye/.env
+    sed -i 's|API_BASE_URL=https://api.samureye.com.br|API_BASE_URL=http://172.24.1.152:5000|g' /etc/samureye/.env
+    sed -i 's|VITE_API_BASE_URL=https://api.samureye.com.br|VITE_API_BASE_URL=http://172.24.1.152:5000|g' /etc/samureye/.env
+    sed -i 's|CORS_ORIGINS=https://app.samureye.com.br,https://api.samureye.com.br|CORS_ORIGINS=http://172.24.1.152:5000,http://localhost:5000|g' /etc/samureye/.env
+    
+    log "✅ URLs corrigidas para desenvolvimento local"
+else
+    log "⚠️ Arquivo .env não encontrado"
+fi
+
+# ============================================================================
+# 7. CORRIGIR INSTALAÇÃO DO NUCLEI
 # ============================================================================
 
 log "🔧 Corrigindo instalação do Nuclei..."
@@ -245,7 +267,7 @@ else
 fi
 
 # ============================================================================
-# 7. EXECUTAR TESTES
+# 8. EXECUTAR TESTES
 # ============================================================================
 
 log "🧪 Executando testes finais..."
