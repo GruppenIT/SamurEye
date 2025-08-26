@@ -134,8 +134,9 @@ sudo systemctl restart samureye-app
 systemctl status samureye-app
 
 # Testar endpoints principais
-curl http://localhost:5000/api/admin/stats
-curl http://localhost:5000/api/system/settings
+curl http://localhost:5000/api/health           # Health check básico
+curl http://localhost:5000/api/user            # Deve retornar erro 401 (esperado)
+curl http://localhost:5000/api/system-info     # Informações do sistema
 
 # Testar autenticação admin
 curl -X POST http://localhost:5000/api/admin/login \
@@ -153,14 +154,30 @@ journalctl -u samureye-app -f
 tail -f /var/log/samureye/*.log
 ```
 
-### Health Check Completo
+### Teste da Instalação
 
 ```bash
-# Executar verificação completa
-./scripts/health-check.sh
+# Executar teste completo da instalação
+./test-installation.sh
 
+# O script verificará:
+# - Status do serviço samureye-app
+# - Funcionamento das APIs (/api/health, /api/user)
+# - Configuração do arquivo .env
+# - Ferramentas instaladas (nmap, nuclei, masscan, wscat)
+# - Conectividade com vlxsam03
+# - Logs do sistema
+
+# Se houver problemas, use:
+./fix-installation.sh
+```
+
+### Health Check Manual
+
+```bash
 # Verificar conectividade com outros servidores
-./scripts/test-connectivity.sh
+ping -c 1 172.24.1.153    # vlxsam03 (Database)
+ping -c 1 172.24.1.151    # vlxsam01 (Gateway)
 ```
 
 ## Estrutura da Aplicação

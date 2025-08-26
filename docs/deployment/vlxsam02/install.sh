@@ -251,12 +251,35 @@ npm install -g wscat 2>/dev/null || {
 
 # Verificar instalações
 log "Verificando ferramentas instaladas..."
-command -v nmap >/dev/null && nmap --version | head -1 || log "Nmap não instalado"
-command -v nuclei >/dev/null && nuclei -version || log "Nuclei não instalado"
-command -v masscan >/dev/null && masscan --version || log "Masscan não instalado"
-command -v wscat >/dev/null && log "wscat instalado" || log "wscat não instalado"
-nuclei --version
-masscan --version | head -1
+if command -v nmap >/dev/null; then
+    nmap --version | head -1
+else
+    log "❌ Nmap não instalado"
+fi
+
+if command -v nuclei >/dev/null; then
+    nuclei -version
+else
+    log "❌ Nuclei não instalado"
+fi
+
+if command -v masscan >/dev/null; then
+    masscan --version | head -1
+    log "✅ Masscan instalado"
+else
+    log "❌ Masscan não instalado"
+fi
+
+if command -v wscat >/dev/null; then
+    log "✅ wscat instalado"
+else
+    log "❌ wscat não instalado"
+fi
+
+# Mostrar versões detalhadas
+if command -v nuclei >/dev/null; then
+    nuclei --version
+fi
 
 # Atualizar templates do Nuclei
 sudo -u "$APP_USER" nuclei -update-templates
@@ -330,7 +353,7 @@ PRIVATE_OBJECT_DIR=/samureye-storage/.private
 # Delinea Secret Server (Optional)
 DELINEA_API_KEY=your_delinea_api_key_here
 DELINEA_BASE_URL=https://gruppenztna.secretservercloud.com
-DELINEA_RULE_NAME=SamurEye Integration
+DELINEA_RULE_NAME="SamurEye Integration"
 
 # Scanner Tools (Integrated)
 NMAP_PATH=/usr/bin/nmap
@@ -1253,6 +1276,22 @@ if ping -c 1 172.24.1.153 >/dev/null 2>&1; then
     log "✅ Conectividade vlxsam03: OK"
 else
     log "❌ Conectividade vlxsam03: FALHA"
+fi
+
+# Verificar se API está respondendo
+echo ""
+echo "🧪 Teste de API:"
+if curl -s http://localhost:5000/api/health >/dev/null 2>&1; then
+    log "✅ API Health Check: OK"
+    
+    # Testar endpoint que deve retornar 401 (esperado)
+    if curl -s http://localhost:5000/api/user 2>&1 | grep -q "autenticado\|401\|Unauthorized"; then
+        log "✅ API User Endpoint: OK (401 esperado)"
+    else
+        log "⚠️ API User Endpoint: Resposta inesperada"
+    fi
+else
+    log "❌ API Health Check: FALHA - Aplicação pode não estar funcionando"
 fi
 
 echo ""
