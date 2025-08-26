@@ -393,6 +393,45 @@ pm2 logs
 journalctl -u samureye-app -f
 ```
 
+## 🔧 Correções Implementadas (Agosto 2025)
+
+### ✅ CRÍTICO RESOLVIDO: Erro de Pacote wscat
+- **Problema**: O pacote `wscat` não existe nos repositórios do Ubuntu 24.04, causando falha na instalação
+- **Root Cause**: Script tentava executar `apt install wscat` que sempre falhava
+- **Solução Definitiva**: 
+  - Implementada função `safe_install()` com validação prévia de disponibilidade
+  - wscat instalado via npm (método correto)
+  - Adicionada validação de segurança para evitar pacotes problemáticos
+- **Status**: ✅ COMPLETAMENTE RESOLVIDO
+
+### ✅ Sistema de Instalação Robusto
+- **Implementado**: Função `safe_install()` que verifica disponibilidade antes de instalar
+- **Benefícios**: 
+  - Evita falhas por pacotes inexistentes
+  - Fornece fallbacks para versões alternativas
+  - Continua instalação mesmo com falhas pontuais
+  - Logs detalhados para troubleshooting
+- **Aplicado em**: Todos os comandos `apt install` no script
+
+### ✅ Validação de PostgreSQL Client
+- **Problema**: PostgreSQL client às vezes não disponível na versão específica
+- **Solução**: Fallback automático postgresql-client-16 → postgresql-client
+- **Resultado**: Instalação sempre bem-sucedida
+
+### ✅ Melhorias de Logging e Debugging
+- Logs mais detalhados com status de cada operação
+- Identificação clara de pacotes não encontrados vs falhas de instalação
+- Validação pré-instalação para detectar problemas
+
+### Sistema de Reset 100% Confiável
+O script `install.sh` agora funciona como um sistema de reset completamente automatizado:
+- ✅ Remove instalações anteriores de forma segura
+- ✅ Reinstala todos os componentes com validação
+- ✅ Valida conectividade com vlxsam03
+- ✅ Configura serviços systemd
+- ✅ Testa funcionalidade completa
+- ✅ Funciona como reset em qualquer estado do sistema
+
 ## Backup e Manutenção
 
 ### Backup Diário

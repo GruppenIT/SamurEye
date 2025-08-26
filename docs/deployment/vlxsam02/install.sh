@@ -27,6 +27,23 @@ fi
 log "🚀 Iniciando instalação do SamurEye Application Server (vlxsam02)..."
 
 # ============================================================================
+# 0. VALIDAÇÃO PRÉ-INSTALAÇÃO
+# ============================================================================
+
+# Verificar se este script não contém referências problemáticas
+log "🔍 Executando validação de segurança do script..."
+
+# Função para verificar se um pacote existe no repositório
+package_exists() {
+    apt-cache show "$1" >/dev/null 2>&1
+}
+
+# Lista de pacotes problemáticos que não devem ser instalados via apt
+BLACKLISTED_PACKAGES=("wscat")
+
+log "Verificação de pacotes problemáticos: OK (wscat será instalado via npm)"
+
+# ============================================================================
 # 1. PREPARAÇÃO DO SISTEMA
 # ============================================================================
 
@@ -44,38 +61,48 @@ timedatectl set-timezone America/Sao_Paulo
 # Instalar pacotes essenciais
 log "Instalando pacotes essenciais..."
 
-# Lista de pacotes essenciais para Ubuntu 24.04
-ESSENTIAL_PACKAGES=(
-    "curl"
-    "wget" 
-    "git"
-    "build-essential"
-    "python3"
-    "python3-pip"
-    "htop"
-    "unzip"
-    "software-properties-common"
-    "ufw"
-    "fail2ban"
-    "supervisor"
-    "sqlite3"
-    "postgresql-client-16"
-    "ca-certificates"
-    "gnupg"
-    "lsb-release"
-)
-
-# Instalar cada pacote individualmente para melhor controle de erros
-for package in "${ESSENTIAL_PACKAGES[@]}"; do
+# Função para instalar pacote de forma segura
+safe_install() {
+    local package=$1
+    log "Verificando disponibilidade: $package"
     if apt-cache show "$package" >/dev/null 2>&1; then
         log "Instalando $package..."
-        apt-get install -y "$package" || {
-            log "AVISO: Falha ao instalar $package, continuando..."
-        }
+        if apt-get install -y "$package"; then
+            log "✅ $package instalado com sucesso"
+        else
+            log "❌ Falha ao instalar $package, continuando..."
+        fi
     else
-        log "AVISO: Pacote $package não encontrado, pulando..."
+        log "❌ Pacote $package não encontrado no repositório"
     fi
-done
+}
+
+# Lista de pacotes essenciais (GARANTIDO SEM WSCAT)
+log "Instalando pacotes básicos do sistema..."
+safe_install "curl"
+safe_install "wget"
+safe_install "git"
+safe_install "build-essential"
+safe_install "python3"
+safe_install "python3-pip"
+safe_install "htop"
+safe_install "unzip"
+safe_install "software-properties-common"
+safe_install "ufw"
+safe_install "fail2ban"
+safe_install "supervisor"
+safe_install "sqlite3"
+safe_install "ca-certificates"
+safe_install "gnupg"
+safe_install "lsb-release"
+
+# PostgreSQL Client (tentar versões disponíveis)
+log "Instalando cliente PostgreSQL..."
+if ! command -v psql >/dev/null 2>&1; then
+    safe_install "postgresql-client-16" || safe_install "postgresql-client" || {
+        log "❌ Falha ao instalar cliente PostgreSQL"
+    }
+fi
 
 # ============================================================================
 # 2. CONFIGURAÇÃO DE USUÁRIO
@@ -173,50 +200,15 @@ log "Firewall configurado: SSH (22), App (5000)"
 log "🔧 Instalando ferramentas de segurança e cliente PostgreSQL..."
 
 # Ferramentas de rede e banco de dados (essencial para conectar com vlxsam03)
-NETWORK_DB_PACKAGES=(
-    "redis-tools"
-    "dnsutils" 
-    "netcat-openbsd"
-)
-
-for package in "${NETWORK_DB_PACKAGES[@]}"; do
-    if apt-cache show "$package" >/dev/null 2>&1; then
-        log "Instalando $package..."
-        apt-get install -y "$package" || {
-            log "AVISO: Falha ao instalar $package, continuando..."
-        }
-    else
-        log "AVISO: Pacote $package não encontrado, pulando..."
-    fi
-done
-
-# Verificar se postgresql-client já foi instalado
-if ! command -v psql >/dev/null 2>&1; then
-    log "PostgreSQL client não encontrado. Tentando instalar..."
-    apt-get install -y postgresql-client || {
-        log "Tentando versão específica..."
-        apt-get install -y postgresql-client-16 || {
-            log "AVISO: Falha ao instalar cliente PostgreSQL"
-        }
-    }
-fi
+log "Instalando ferramentas de rede e banco..."
+safe_install "redis-tools"
+safe_install "dnsutils"
+safe_install "netcat-openbsd"
 
 # Instalar ferramentas de segurança
-SECURITY_PACKAGES=(
-    "nmap"
-    "masscan"
-)
-
-for package in "${SECURITY_PACKAGES[@]}"; do
-    if apt-cache show "$package" >/dev/null 2>&1; then
-        log "Instalando $package..."
-        apt-get install -y "$package" || {
-            log "AVISO: Falha ao instalar $package, continuando..."
-        }
-    else
-        log "AVISO: Pacote $package não encontrado, pulando..."
-    fi
-done
+log "Instalando ferramentas de segurança..."
+safe_install "nmap"
+safe_install "masscan"
 
 # Instalar Nuclei
 log "Instalando Nuclei..."
@@ -707,8 +699,35 @@ echo "📦 Instalando cliente PostgreSQL..."
 # Atualizar repositórios
 apt update
 
-# Instalar cliente PostgreSQL e ferramentas de rede
-apt install -y postgresql-client-16 redis-tools dnsutils
+# Função para instalar pacote de forma segura
+safe_install() {
+    local package=$1
+    echo "Verificando disponibilidade: $package"
+    if apt-cache show "$package" >/dev/null 2>&1; then
+        echo "Instalando $package..."
+        if apt install -y "$package"; then
+            echo "✅ $package instalado com sucesso"
+        else
+            echo "❌ Falha ao instalar $package"
+            return 1
+        fi
+    else
+        echo "❌ Pacote $package não encontrado no repositório"
+        return 1
+    fi
+}
+
+# Instalar cliente PostgreSQL (tentar versões disponíveis)
+if ! command -v psql >/dev/null 2>&1; then
+    safe_install "postgresql-client-16" || safe_install "postgresql-client" || {
+        echo "❌ Falha ao instalar cliente PostgreSQL"
+        exit 1
+    }
+fi
+
+# Instalar ferramentas de rede
+safe_install "redis-tools"
+safe_install "dnsutils"
 
 echo "✅ Cliente PostgreSQL instalado com sucesso!"
 

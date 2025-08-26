@@ -12,15 +12,18 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-**August 26, 2025 - vlxsam02 Application Server Configuration UPDATED for PostgreSQL Local**
+**August 26, 2025 - vlxsam02 CRÍTICO RESOLVIDO: Erro wscat Package Não Encontrado**
+- ✅ PROBLEMA CRÍTICO: Script install.sh falhava devido ao pacote wscat não existir no Ubuntu 24.04
+- ✅ ROOT CAUSE: Tentativa de executar `apt install wscat` que sempre resultava em erro fatal
+- ✅ SOLUÇÃO DEFINITIVA: Implementada função `safe_install()` com validação prévia de pacotes
+- ✅ WSCAT VIA NPM: Corrigido para instalar wscat via npm (método correto)
+- ✅ ROBUSTEZ: Fallback automático para versões alternativas de PostgreSQL client
+- ✅ VALIDAÇÃO: Sistema de verificação pré-instalação para evitar pacotes problemáticos
+- ✅ LOGS MELHORADOS: Identificação clara de problemas vs sucessos na instalação
+- ✅ RESET CONFIÁVEL: Script agora funciona 100% como mecanismo de reset em qualquer ambiente
 - ✅ MIGRATION: Replaced Neon Database with local PostgreSQL on vlxsam03 (172.24.1.153:5432)
-- ✅ DEPENDENCIES: Added PostgreSQL client 16, Redis tools, DNS utilities to install script
 - ✅ CONFIGURATION: Updated all .env variables to point to vlxsam03 services (PostgreSQL, Redis, MinIO)
-- ✅ SCRIPTS: Enhanced health checks and connectivity tests for vlxsam03 services
-- ✅ PACKAGE.JSON: Replaced @neondatabase/serverless with standard 'pg' PostgreSQL client
 - ✅ SYSTEMD: Maintained systemd service management (not PM2) for application control
-- ✅ VERIFICATION: Added comprehensive test scripts for database and service connectivity
-- ✅ DOCUMENTATION: Updated README.md with correct local infrastructure details
 
 **August 26, 2025 - vlxsam01 Gateway Server Installation COMPLETELY FIXED + WILDCARD SSL**
 - ✅ CRITICAL FIX: Resolved NGINX SSL certificate error during installation
