@@ -86,81 +86,43 @@ chmod +x install.sh
    - Masscan para scanning rápido
    - Scripts auxiliares de scanning
 
-## Configuração Pós-Instalação
+## ✅ Instalação Completa!
 
-### 1. Configurar Variáveis de Ambiente
+O script `install.sh` já configurou tudo automaticamente. **Não são necessários passos adicionais!**
+
+### O Que Já Foi Configurado
+
+✅ **Aplicação funcionando na porta 5000**  
+✅ **Conexão com vlxsam03 (PostgreSQL/Redis)** configurada  
+✅ **Variáveis de ambiente** em `/etc/samureye/.env`  
+✅ **Serviço systemd** ativo e funcionando  
+✅ **Ferramentas de segurança** instaladas (Nmap, Nuclei, Masscan)  
+✅ **Firewall configurado** (SSH:22, App:5000)  
+
+### Como Verificar Se Está Funcionando
 
 ```bash
-# Editar arquivo de configuração
+# 1. Verificar se aplicação está rodando
+systemctl status samureye-app
+
+# 2. Testar APIs principais
+curl http://localhost:5000/api/system/settings
+curl http://localhost:5000/api/user  # Deve retornar 401 (esperado)
+
+# 3. Ver logs em tempo real
+journalctl -u samureye-app -f
+```
+
+### Configuração Opcional
+
+Apenas se quiser personalizar algumas configurações:
+
+```bash
+# Editar variáveis de ambiente (opcional)
 sudo nano /etc/samureye/.env
 
-# Configurações principais - PostgreSQL Local (vlxsam03):
-DATABASE_URL=postgresql://samureye:SamurEye2024!@172.24.1.153:5432/samureye_prod
-PGHOST=172.24.1.153
-PGPORT=5432
-PGUSER=samureye
-PGPASSWORD=SamurEye2024!
-PGDATABASE=samureye_prod
-
-# Redis (vlxsam03):
-REDIS_URL=redis://172.24.1.153:6379
-REDIS_HOST=172.24.1.153
-REDIS_PORT=6379
-
-# MinIO Object Storage (vlxsam03):
-MINIO_ENDPOINT=http://172.24.1.153:9000
-MINIO_ACCESS_KEY=samureye
-MINIO_SECRET_KEY=SamurEye2024!
-MINIO_BUCKET=samureye-storage
-
-# Outras configurações:
-SESSION_SECRET=sua_chave_secreta_segura_aqui
-DELINEA_API_KEY=sua_api_key_aqui (opcional)
-DELINEA_BASE_URL=https://gruppenztna.secretservercloud.com (opcional)
-```
-
-### 2. Configurar Banco de Dados
-
-```bash
-# Navegar para diretório da aplicação
-cd /opt/samureye
-
-# Executar migrações Drizzle
-sudo -u samureye npm run db:push
-
-# Forçar migração se necessário
-sudo -u samureye npm run db:push --force
-
-# Verificar conexão
-./scripts/test-database.sh
-
-# Verificar schema multi-tenant
-psql $DATABASE_URL -c "SELECT id, name, slug FROM tenants LIMIT 5;"
-psql $DATABASE_URL -c "SELECT id, email, currentTenantId FROM users LIMIT 5;"
-```
-
-### 3. Configurar Object Storage
-
-```bash
-# Object Storage é configurado automaticamente
-# Verificar configuração
-curl http://localhost:5000/api/system/settings
-
-# Testar upload (após autenticação)
-curl -X POST http://localhost:5000/api/objects/upload
-
-# Verificar variáveis de ambiente
-grep OBJECT /etc/samureye/.env
-```
-
-### 4. Configurar Delinea Secret Server (Opcional)
-
-```bash
-# Configurar integração (se necessário)
-./scripts/configure-delinea.sh
-
-# Testar conectividade
-./scripts/test-delinea.sh
+# Reiniciar após mudanças
+sudo systemctl restart samureye-app
 ```
 
 ## Verificação da Instalação
@@ -317,20 +279,17 @@ npm run typecheck
 ### Problemas de Banco
 
 ```bash
-# Testar conexão Neon Database
-./scripts/test-database.sh
+# O banco é gerenciado pelo vlxsam03, não pelo vlxsam02
+# Para testar conectividade:
 
-# Verificar migrações Drizzle
-npm run db:push --verbose
-npm run db:push --force  # se necessário
+# Testar se consegue conectar no PostgreSQL do vlxsam03
+nc -zv 172.24.1.153 5432
 
-# Verificar schema multi-tenant
-psql $DATABASE_URL -c "\dt"
-psql $DATABASE_URL -c "SELECT * FROM tenants;"
-psql $DATABASE_URL -c "SELECT * FROM users LIMIT 3;"
+# Testar se aplicação consegue acessar o banco
+curl http://localhost:5000/api/system/settings
 
-# Verificar sessões
-psql $DATABASE_URL -c "SELECT * FROM sessions LIMIT 3;"
+# Ver logs se há erros de conexão
+journalctl -u samureye-app -f | grep -i database
 ```
 
 ### Problemas Scanner
