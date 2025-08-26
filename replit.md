@@ -12,15 +12,17 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-**August 26, 2025 - PostgreSQL Local Setup Complete with Schema Resolution**
-- Successfully resolved PostgreSQL cluster corruption through complete reinstallation
-- PostgreSQL 16 now running stable at 172.24.1.153:5432 with samureye_db database
-- Fixed install.sh automatic recovery logic - script now properly handles cluster corruption
-- Resolved schema conflicts by clearing existing tables and recreating from scratch
-- Connection string: postgresql://samureye:SamurEye2024DB!@172.24.1.153:5432/samureye_db
-- Manual cluster recovery commands documented for future reference
-- All 13 tables being recreated with proper UUID extensions and enums
-- PostgreSQL local setup provides better performance and control than serverless Neon
+**August 26, 2025 - vlxsam03 Install Script Enhanced with Auto-Reset and Detection**
+- Enhanced vlxsam03 install.sh script to function as reliable "reset" mechanism for server
+- Added auto-detection of PostgreSQL connection (postgres user → localhost → vlxsam03 IP)
+- Implemented automatic cluster corruption detection and complete PostgreSQL reinstallation
+- Created reset-postgres.sh emergency script with full database recreation from scratch
+- Database reset now includes: DROP DATABASE/ROLE IF EXISTS + clean recreation + extensions
+- Added connection testing with multiple fallback methods for environment compatibility
+- Script works as complete server reset - can be re-run safely multiple times
+- Created symlink samureye-reset-postgres for easy emergency PostgreSQL recovery
+- Updated vlxsam03 README with comprehensive troubleshooting and reset procedures
+- Migration from vlxsam03 PostgreSQL (172.24.1.153:5432) to Replit PostgreSQL completed successfully
 
 **August 22, 2025 - Complete Dashboard Components Migration to API Data**
 - Created tenant-specific dashboard endpoints: /api/dashboard/attack-surface, /api/dashboard/edr-events, /api/dashboard/journey-results

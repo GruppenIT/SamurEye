@@ -214,9 +214,22 @@ if ! systemctl is-active --quiet postgresql; then
     sleep 5
 fi
 
-# Criar usuário samureye e banco de dados
+# Criar usuário samureye e banco de dados (com reset automático)
+log "🗄️ Configurando usuário e banco de dados..."
+
+# Função de reset do banco (para funcionar como reset completo do servidor)
 sudo -u postgres psql << 'EOF'
+-- Finalizar conexões existentes ao banco samureye_db se existir
+SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = 'samureye_db' AND pid <> pg_backend_pid();
+
+-- Dropar banco se existir (reset completo)
+DROP DATABASE IF EXISTS samureye_db;
+
+-- Dropar e recriar usuário (reset completo)
+DROP ROLE IF EXISTS samureye;
 CREATE ROLE samureye WITH LOGIN PASSWORD 'SamurEye2024DB!' CREATEDB;
+
+-- Criar banco novamente
 CREATE DATABASE samureye_db OWNER samureye;
 GRANT ALL PRIVILEGES ON DATABASE samureye_db TO samureye;
 EOF
@@ -515,11 +528,22 @@ else
     error "❌ Falha ao iniciar PostgreSQL"
 fi
 
-# Testar conexão
+# Testar conexão PostgreSQL com detecção automática de ambiente
+log "🔍 Testando conectividade PostgreSQL..."
+
+# Tentar conexão local via postgres user primeiro (padrão vlxsam03)
 if sudo -u postgres psql -d samureye_db -c "SELECT version();" > /dev/null 2>&1; then
-    log "✅ Teste de conexão PostgreSQL bem-sucedido"
+    log "✅ Teste de conexão PostgreSQL local bem-sucedido"
+    POSTGRES_TYPE="local"
+elif PGPASSWORD="SamurEye2024DB!" psql -h 127.0.0.1 -U samureye -d samureye_db -c "SELECT version();" > /dev/null 2>&1; then
+    log "✅ Teste de conexão PostgreSQL via IP bem-sucedido"
+    POSTGRES_TYPE="network"
+elif PGPASSWORD="SamurEye2024DB!" psql -h 172.24.1.153 -U samureye -d samureye_db -c "SELECT version();" > /dev/null 2>&1; then
+    log "✅ Teste de conexão PostgreSQL vlxsam03 bem-sucedido"
+    POSTGRES_TYPE="vlxsam03"
 else
-    warn "⚠️ Problema na conexão PostgreSQL"
+    warn "⚠️ Problema na conexão PostgreSQL - todas as tentativas falharam"
+    POSTGRES_TYPE="failed"
 fi
 
 # Limpar arquivo temporário
@@ -807,13 +831,18 @@ cat > "$CONFIG_DIR/.env" << 'EOF'
 VLXSAM03_IP=172.24.1.153
 NODE_ENV=production
 
-# Local PostgreSQL Database (configurado automaticamente)
-DATABASE_URL=postgresql://samureye:SamurEye2024DB!@172.24.1.153:5432/samureye_db?sslmode=disable
+# PostgreSQL Database (auto-detected connection)
+# Priority: 1. Local postgres user, 2. localhost, 3. vlxsam03 IP
+DATABASE_URL=postgresql://samureye:SamurEye2024DB!@127.0.0.1:5432/samureye_db?sslmode=disable
 PGDATABASE=samureye_db
-PGHOST=172.24.1.153
+PGHOST=127.0.0.1
 PGPORT=5432
 PGUSER=samureye
 PGPASSWORD=SamurEye2024DB!
+
+# Alternative connection strings for fallback
+DATABASE_URL_VLXSAM03=postgresql://samureye:SamurEye2024DB!@172.24.1.153:5432/samureye_db?sslmode=disable
+DATABASE_URL_LOCAL=postgresql://samureye:SamurEye2024DB!@127.0.0.1:5432/samureye_db?sslmode=disable
 
 # Redis Configuration  
 REDIS_HOST=172.24.1.153
@@ -902,55 +931,44 @@ fi
 log "Teste Neon Database concluído"
 EOF
 
-# Script de teste PostgreSQL local
+# Script de teste PostgreSQL com detecção automática
 cat > "$SCRIPTS_DIR/test-postgres-connection.sh" << 'EOF'
 #!/bin/bash
 
-# Teste de conectividade PostgreSQL local
-
-source /etc/samureye/.env
+# Teste de conectividade PostgreSQL com detecção automática de ambiente
 
 log() { echo "[$(date '+%H:%M:%S')] $1"; }
 error() { echo "[$(date '+%H:%M:%S')] ERROR: $1"; exit 1; }
 
-log "🐘 Testando conectividade PostgreSQL local..."
+log "🐘 Testando conectividade PostgreSQL..."
 
-# Teste básico de conectividade
-log "Testando conexão com banco samureye_db..."
-if PGPASSWORD="$PGPASSWORD" psql -h "$PGHOST" -U "$PGUSER" -d "$PGDATABASE" -c "SELECT version();" >/dev/null 2>&1; then
-    log "✅ Conexão PostgreSQL: OK"
-    
-    # Teste de latência
-    start_time=$(date +%s%N)
-    PGPASSWORD="$PGPASSWORD" psql -h "$PGHOST" -U "$PGUSER" -d "$PGDATABASE" -c "SELECT 1;" >/dev/null 2>&1
-    end_time=$(date +%s%N)
-    latency=$(( (end_time - start_time) / 1000000 ))
-    
-    log "⚡ Latência local: ${latency}ms"
+# Função para testar tabelas e estrutura
+test_database_structure() {
+    local conn_cmd="$1"
     
     # Teste de tabelas
-    table_count=$(PGPASSWORD="$PGPASSWORD" psql -h "$PGHOST" -U "$PGUSER" -d "$PGDATABASE" -t -c "SELECT count(*) FROM information_schema.tables WHERE table_schema = 'public';" 2>/dev/null | xargs)
+    table_count=$($conn_cmd -t -c "SELECT count(*) FROM information_schema.tables WHERE table_schema = 'public';" 2>/dev/null | xargs)
     log "📊 Tabelas encontradas: $table_count"
     
     # Verificar algumas tabelas específicas
     log "🔍 Verificando estrutura do banco..."
     
     # Verificar tabela de usuários
-    if PGPASSWORD="$PGPASSWORD" psql -h "$PGHOST" -U "$PGUSER" -d "$PGDATABASE" -c "\d users" >/dev/null 2>&1; then
+    if $conn_cmd -c "\d users" >/dev/null 2>&1; then
         log "✅ Tabela 'users': OK"
     else
         log "⚠️ Tabela 'users': não encontrada"
     fi
     
     # Verificar tabela de tenants
-    if PGPASSWORD="$PGPASSWORD" psql -h "$PGHOST" -U "$PGUSER" -d "$PGDATABASE" -c "\d tenants" >/dev/null 2>&1; then
+    if $conn_cmd -c "\d tenants" >/dev/null 2>&1; then
         log "✅ Tabela 'tenants': OK"
     else
         log "⚠️ Tabela 'tenants': não encontrada"
     fi
     
     # Verificar tabela de collectors
-    if PGPASSWORD="$PGPASSWORD" psql -h "$PGHOST" -U "$PGUSER" -d "$PGDATABASE" -c "\d collectors" >/dev/null 2>&1; then
+    if $conn_cmd -c "\d collectors" >/dev/null 2>&1; then
         log "✅ Tabela 'collectors': OK"
     else
         log "⚠️ Tabela 'collectors': não encontrada"
@@ -958,18 +976,142 @@ if PGPASSWORD="$PGPASSWORD" psql -h "$PGHOST" -U "$PGUSER" -d "$PGDATABASE" -c "
     
     # Verificar extensões
     log "🔧 Verificando extensões..."
-    ext_uuid=$(PGPASSWORD="$PGPASSWORD" psql -h "$PGHOST" -U "$PGUSER" -d "$PGDATABASE" -t -c "SELECT count(*) FROM pg_extension WHERE extname = 'uuid-ossp';" 2>/dev/null | xargs)
+    ext_uuid=$($conn_cmd -t -c "SELECT count(*) FROM pg_extension WHERE extname = 'uuid-ossp';" 2>/dev/null | xargs)
     if [ "$ext_uuid" = "1" ]; then
         log "✅ Extensão 'uuid-ossp': instalada"
     else
         log "⚠️ Extensão 'uuid-ossp': não instalada"
     fi
+}
+
+# Teste básico de conectividade com detecção automática
+log "Testando conexão com banco samureye_db..."
+
+# Tentar conexão local via postgres user primeiro (padrão vlxsam03)
+if sudo -u postgres psql -d samureye_db -c "SELECT version();" >/dev/null 2>&1; then
+    log "✅ Conexão PostgreSQL local via postgres user: OK"
+    
+    # Teste de latência
+    start_time=$(date +%s%N)
+    sudo -u postgres psql -d samureye_db -c "SELECT 1;" >/dev/null 2>&1
+    end_time=$(date +%s%N)
+    latency=$(( (end_time - start_time) / 1000000 ))
+    
+    log "⚡ Latência local: ${latency}ms"
+    
+    # Testar estrutura do banco
+    test_database_structure "sudo -u postgres psql -d samureye_db"
+    
+elif PGPASSWORD="SamurEye2024DB!" psql -h 127.0.0.1 -U samureye -d samureye_db -c "SELECT version();" >/dev/null 2>&1; then
+    log "✅ Conexão PostgreSQL via localhost: OK"
+    
+    # Teste de latência
+    start_time=$(date +%s%N)
+    PGPASSWORD="SamurEye2024DB!" psql -h 127.0.0.1 -U samureye -d samureye_db -c "SELECT 1;" >/dev/null 2>&1
+    end_time=$(date +%s%N)
+    latency=$(( (end_time - start_time) / 1000000 ))
+    
+    log "⚡ Latência localhost: ${latency}ms"
+    
+    # Testar estrutura do banco
+    test_database_structure "PGPASSWORD=SamurEye2024DB! psql -h 127.0.0.1 -U samureye -d samureye_db"
+    
+elif PGPASSWORD="SamurEye2024DB!" psql -h 172.24.1.153 -U samureye -d samureye_db -c "SELECT version();" >/dev/null 2>&1; then
+    log "✅ Conexão PostgreSQL via vlxsam03: OK"
+    
+    # Teste de latência
+    start_time=$(date +%s%N)
+    PGPASSWORD="SamurEye2024DB!" psql -h 172.24.1.153 -U samureye -d samureye_db -c "SELECT 1;" >/dev/null 2>&1
+    end_time=$(date +%s%N)
+    latency=$(( (end_time - start_time) / 1000000 ))
+    
+    log "⚡ Latência vlxsam03: ${latency}ms"
+    
+    # Testar estrutura do banco
+    test_database_structure "PGPASSWORD=SamurEye2024DB! psql -h 172.24.1.153 -U samureye -d samureye_db"
     
 else
-    error "❌ Falha na conexão PostgreSQL local"
+    error "❌ Falha na conexão PostgreSQL - todas as tentativas falharam"
 fi
 
-log "Teste PostgreSQL local concluído"
+log "Teste PostgreSQL concluído"
+EOF
+
+# Script de reset automático PostgreSQL para casos emergenciais
+cat > "$SCRIPTS_DIR/reset-postgres.sh" << 'EOF'
+#!/bin/bash
+
+# Script de reset automático PostgreSQL - para casos emergenciais
+# Este script corrige problemas de cluster e recria tudo do zero
+
+log() { echo "[$(date '+%H:%M:%S')] $1"; }
+error() { echo "[$(date '+%H:%M:%S')] ERROR: $1"; exit 1; }
+
+log "🔄 Iniciando reset completo PostgreSQL..."
+
+# Parar PostgreSQL
+systemctl stop postgresql 2>/dev/null || true
+sleep 2
+
+# Verificar se PostgreSQL tem problemas de cluster
+if ! systemctl start postgresql 2>/dev/null; then
+    log "⚠️ PostgreSQL com problemas - executando limpeza completa..."
+    
+    # Limpeza completa
+    systemctl stop postgresql 2>/dev/null || true
+    apt-get purge postgresql-16 postgresql-common postgresql-client-16 -y
+    apt-get autoremove -y
+    rm -rf /var/lib/postgresql/ /etc/postgresql/ /var/log/postgresql/ /run/postgresql/
+    userdel postgres 2>/dev/null || true
+    
+    # Reinstalação limpa
+    apt-get update
+    apt-get install -y postgresql-16 postgresql-contrib
+    
+    log "✅ PostgreSQL reinstalado"
+fi
+
+# Iniciar PostgreSQL
+systemctl start postgresql
+systemctl enable postgresql
+sleep 3
+
+# Verificar se iniciou corretamente
+if ! systemctl is-active --quiet postgresql; then
+    error "❌ Falha ao iniciar PostgreSQL após reset"
+fi
+
+# Recriar usuário e banco
+log "🗄️ Recriando usuário e banco de dados..."
+
+sudo -u postgres psql << 'PSQL_EOF'
+-- Finalizar conexões existentes
+SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = 'samureye_db' AND pid <> pg_backend_pid();
+
+-- Limpar e recriar
+DROP DATABASE IF EXISTS samureye_db;
+DROP ROLE IF EXISTS samureye;
+CREATE ROLE samureye WITH LOGIN PASSWORD 'SamurEye2024DB!' CREATEDB;
+CREATE DATABASE samureye_db OWNER samureye;
+GRANT ALL PRIVILEGES ON DATABASE samureye_db TO samureye;
+PSQL_EOF
+
+# Ativar extensões
+sudo -u postgres psql -d samureye_db << 'PSQL_EOF'
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS pg_stat_statements;
+GRANT ALL ON SCHEMA public TO samureye;
+PSQL_EOF
+
+log "✅ Reset PostgreSQL concluído com sucesso"
+
+# Testar conexão
+if sudo -u postgres psql -d samureye_db -c "SELECT version();" >/dev/null 2>&1; then
+    log "✅ Teste de conexão: OK"
+else
+    error "❌ Teste de conexão falhou"
+fi
+
 EOF
 
 # Script de teste Object Storage
@@ -1144,6 +1286,10 @@ EOF
 chmod +x "$SCRIPTS_DIR"/*.sh
 chown -R samureye:samureye "$SCRIPTS_DIR"
 
+# Criar link simbólico para facilitar acesso ao reset PostgreSQL
+ln -sf "$SCRIPTS_DIR/reset-postgres.sh" /usr/local/bin/samureye-reset-postgres
+chmod +x /usr/local/bin/samureye-reset-postgres
+
 log "Scripts de teste criados"
 
 # ============================================================================
@@ -1231,6 +1377,7 @@ echo "⚠️ PRÓXIMOS PASSOS:"
 echo "  1. Configurar object storage no vlxsam02"
 echo "  2. Executar testes: /opt/samureye/scripts/health-check.sh"
 echo "  3. Verificar conectividade PostgreSQL: /opt/samureye/scripts/test-postgres-connection.sh"
+echo "  4. Para reset completo PostgreSQL (emergencial): samureye-reset-postgres"
 echo ""
 echo "📁 DIRETÓRIOS IMPORTANTES:"
 echo "  • Dados: /opt/data"

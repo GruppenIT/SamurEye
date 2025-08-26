@@ -3,12 +3,13 @@
 ## Visão Geral
 
 O servidor vlxsam03 fornece infraestrutura de dados local e conexões para a plataforma SamurEye:
-- **Neon Database** (PostgreSQL serverless) para dados da aplicação
+- **PostgreSQL 16** (local) para dados da aplicação com auto-detecção de conexão
 - **Redis** para cache e sessões
 - **Google Cloud Storage** para object storage (via integração)
 - **MinIO** (opcional) para armazenamento local de backup
 - **Grafana** para monitoramento e dashboards
 - **Sistema Multi-tenant** com isolamento de dados
+- **Reset automático** para PostgreSQL em casos de problemas de cluster
 - **Backup automático** de configurações e logs
 
 ## Especificações
@@ -73,6 +74,11 @@ chmod +x install.sh
 # Database: samureye_db
 # Usuário: samureye
 # Senha: SamurEye2024DB!
+
+# O sistema detecta automaticamente a melhor forma de conexão:
+# 1. Conexão local via postgres user (padrão vlxsam03)
+# 2. Conexão via localhost (127.0.0.1)
+# 3. Conexão via IP vlxsam03 (172.24.1.153)
 
 # As configurações estão em:
 cat /etc/samureye/.env
@@ -422,4 +428,75 @@ Secret Key: SamurEye2024! (ALTERAR)
 # Grafana
 Usuário: admin
 Senha: admin (ALTERAR no primeiro login)
+```
+
+## Troubleshooting e Reset
+
+### Problemas PostgreSQL
+
+Se o PostgreSQL não estiver funcionando corretamente após a instalação, o script inclui funcionalidades de reset automático:
+
+```bash
+# Testar conectividade PostgreSQL com auto-detecção
+/opt/samureye/scripts/test-postgres-connection.sh
+
+# Reset completo PostgreSQL (em caso de problemas de cluster)
+samureye-reset-postgres
+
+# OU usando o caminho completo
+/opt/samureye/scripts/reset-postgres.sh
+```
+
+### Reset Completo do Servidor vlxsam03
+
+Para um reset completo do servidor (equivalente a reinstalação):
+
+```bash
+# Re-executar script de instalação (funciona como reset automático)
+curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam03/install.sh | bash
+```
+
+O script de instalação foi projetado para funcionar como um **"reset" confiável** do servidor:
+
+- ✅ **Detecta automaticamente** problemas de cluster PostgreSQL
+- ✅ **Reinstala PostgreSQL** se necessário (limpeza completa)
+- ✅ **Recria usuários e banco** do zero
+- ✅ **Configura todas as permissões** automaticamente
+- ✅ **Testa conectividade** com múltiplos métodos
+- ✅ **Cria scripts de recuperação** automática
+
+### Detecção Automática de Conexão
+
+O sistema detecta automaticamente a melhor forma de conectar no PostgreSQL:
+
+1. **Conexão local via postgres user** (padrão vlxsam03)
+2. **Conexão via localhost** (127.0.0.1)
+3. **Conexão via IP vlxsam03** (172.24.1.153)
+
+Isso garante compatibilidade entre ambientes de desenvolvimento e produção.
+
+### Scripts de Emergência
+
+```bash
+# Scripts disponíveis em /opt/samureye/scripts/
+test-postgres-connection.sh      # Teste de conectividade
+reset-postgres.sh               # Reset completo PostgreSQL
+health-check.sh                 # Verificação geral do sistema
+daily-backup.sh                 # Backup manual
+
+# Links simbólicos para facilitar acesso
+samureye-reset-postgres         # Link para reset-postgres.sh
+```
+
+### Logs para Diagnóstico
+
+```bash
+# Logs PostgreSQL
+journalctl -u postgresql -f
+
+# Logs do script de instalação
+/var/log/samureye/install.log
+
+# Logs gerais do sistema
+/var/log/samureye/
 ```

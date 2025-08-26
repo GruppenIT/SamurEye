@@ -1,0 +1,201 @@
+root@vlxsam03:~# curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam03/install.sh | bash
+[13:51:39] 🚀 Iniciando instalação vlxsam03 - Database/Services Server
+[13:51:39] Servidor: 172.24.1.153
+[13:51:39] Data Directory: /opt/data
+[13:51:39] 📦 Atualizando sistema base...
+Hit:1 https://packages.grafana.com/oss/deb stable InRelease
+Hit:2 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:3 http://security.ubuntu.com/ubuntu noble-security InRelease
+Get:4 http://archive.ubuntu.com/ubuntu noble-updates InRelease [126 kB]
+Hit:5 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Fetched 126 kB in 2s (76.9 kB/s)
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+All packages are up to date.
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+Calculating upgrade... Done
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+curl is already the newest version (8.5.0-2ubuntu10.6).
+wget is already the newest version (1.21.4-1ubuntu4.1).
+gnupg is already the newest version (2.4.4-2ubuntu17.3).
+software-properties-common is already the newest version (0.99.49.3).
+apt-transport-https is already the newest version (2.8.3).
+ca-certificates is already the newest version (20240203).
+lsb-release is already the newest version (12.0-2).
+jq is already the newest version (1.7.1-3ubuntu0.24.04.1).
+htop is already the newest version (3.3.0-4build1).
+iotop is already the newest version (0.6-42-ga14256a-0.2build1).
+netcat-openbsd is already the newest version (1.226-1ubuntu2).
+redis-tools is already the newest version (5:7.0.15-1ubuntu0.24.04.1).
+postgresql-client-16 is already the newest version (16.9-0ubuntu0.24.04.1).
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+[13:51:44] Sistema base atualizado
+[13:51:44] 👤 Configurando usuários e diretórios...
+[13:51:44] Usuários e diretórios configurados
+[13:51:44] 🔴 Instalando Redis...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+redis-server is already the newest version (5:7.0.15-1ubuntu0.24.04.1).
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+Synchronizing state of redis-server.service with SysV service script with /usr/lib/systemd/systemd-sysv-install.
+Executing: /usr/lib/systemd/systemd-sysv-install enable redis-server
+Warning: Using a password with '-a' or '-u' option on the command line interface may not be safe.
+[13:51:51] ✅ Redis configurado e testado com sucesso
+[13:51:51] Redis configurado e iniciado
+[13:51:51] 🐘 Instalando PostgreSQL 16...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+postgresql-16 is already the newest version (16.9-0ubuntu0.24.04.1).
+postgresql-contrib is already the newest version (16+257build1.1).
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+Synchronizing state of postgresql.service with SysV service script with /usr/lib/systemd/systemd-sysv-install.
+Executing: /usr/lib/systemd/systemd-sysv-install enable postgresql
+ERROR:  role "samureye" already exists
+ERROR:  database "samureye_db" already exists
+GRANT
+NOTICE:  extension "uuid-ossp" already exists, skipping
+CREATE EXTENSION
+CREATE EXTENSION
+GRANT
+[13:51:55] ✅ PostgreSQL configurado com sucesso
+[13:51:55] 🗄️ Criando estrutura do banco de dados...
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TABLE
+CREATE INDEX
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+INSERT 0 2
+INSERT 0 1
+GRANT
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+[13:52:00] ✅ PostgreSQL configurado e iniciado com sucesso
+[13:52:00] WARNING: ⚠️ Problema na conexão PostgreSQL
+[13:52:00] PostgreSQL configurado e banco samureye_db criado
+[13:52:00] 📊 Instalando Grafana...
+File '/usr/share/keyrings/grafana.gpg' exists. Overwrite? (y/N) y
+Hit:1 https://packages.grafana.com/oss/deb stable InRelease
+Hit:2 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:3 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:4 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:5 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+All packages are up to date.
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+grafana is already the newest version (12.1.1).
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+Synchronizing state of grafana-server.service with SysV service script with /usr/lib/systemd/systemd-sysv-install.
+Executing: /usr/lib/systemd/systemd-sysv-install disable grafana-server
+Removed "/etc/systemd/system/multi-user.target.wants/grafana-server.service".
+Failed to reset failed state of unit grafana-server.service: Unit grafana-server.service not loaded.
+[13:52:39] WARNING: Grafana não consegue escrever em /opt/data/grafana, usando configuração padrão
+[13:52:39] Usando configuração padrão do Grafana
+Failed to reset failed state of unit grafana-server.service: Unit grafana-server.service not loaded.
+Synchronizing state of grafana-server.service with SysV service script with /usr/lib/systemd/systemd-sysv-install.
+Executing: /usr/lib/systemd/systemd-sysv-install enable grafana-server
+Created symlink /etc/systemd/system/multi-user.target.wants/grafana-server.service → /usr/lib/systemd/system/grafana-server.service.
+[13:52:42] Iniciando Grafana (aguarde 15 segundos)...
+[13:52:57] ✅ Grafana configurado e iniciado com sucesso
+[13:52:57] 🗄️ Instalando MinIO (backup local)...
+Removed "/etc/systemd/system/multi-user.target.wants/minio.service".
+--2025-08-26 13:53:04--  https://dl.min.io/server/minio/release/linux-amd64/minio
+Resolving dl.min.io (dl.min.io)... 138.68.11.125, 178.128.69.202
+Connecting to dl.min.io (dl.min.io)|138.68.11.125|:443... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 110780600 (106M) [application/octet-stream]
+Saving to: ‘/usr/local/bin/minio’
+
+/usr/local/bin/mini 100%[===================>] 105.65M  6.14MB/s    in 19s
+
+2025-08-26 13:53:24 (5.51 MB/s) - ‘/usr/local/bin/minio’ saved [110780600/110780600]
+
+usermod: no changes
+Created MinIO structure in /var/lib/minio
+[13:53:24] Estrutura MinIO criada:
+total 16
+drwxr-xr-x  4 minio minio 4096 Aug 26 13:53 .
+drwxr-xr-x 50 root  root  4096 Aug 26 13:53 ..
+drwxrwxr-x  2 minio minio 4096 Aug 26 13:53 config
+drwxrwxr-x  2 minio minio 4096 Aug 26 13:53 data
+[13:53:24] ✅ Diretório MinIO configurado
+[13:53:24] Testando acesso MinIO ao diretório...
+Created symlink /etc/systemd/system/multi-user.target.wants/minio.service → /etc/systemd/system/minio.service.
+[13:53:25] Iniciando MinIO...
+[13:53:32] ✅ MinIO configurado e iniciado com sucesso
+[13:53:32] 🔧 Configurando variáveis de ambiente...
+[13:53:32] Configuração de ambiente criada
+[13:53:32] 📝 Criando scripts de teste...
+[13:53:32] Scripts de teste criados
+[13:53:32] ⏰ Configurando cron para backups...
+[13:53:32] Cron jobs configurados
+[13:53:32] 📋 Configurando rotação de logs...
+[13:53:32] Rotação de logs configurada
+[13:53:32] 🎯 Finalizando instalação...
+[13:53:32] ✅ postgresql: Ativo
+[13:53:32] ✅ redis-server: Ativo
+[13:53:32] ✅ grafana-server: Ativo
+[13:53:32] ✅ minio: Ativo
+
+============================================================================
+🎉 INSTALAÇÃO vlxsam03 CONCLUÍDA
+============================================================================
+
+📊 SERVIÇOS INSTALADOS:
+  • PostgreSQL (Database): 172.24.1.153:5432
+  • Redis (Cache/Sessions): 172.24.1.153:6379
+  • Grafana (Monitoring): http://172.24.1.153:3000
+  • MinIO (Backup): http://172.24.1.153:9000
+
+🔑 CREDENCIAIS PADRÃO:
+  • PostgreSQL: samureye/SamurEye2024DB! (banco: samureye_db)
+  • Redis: senha 'SamurEye2024Redis!'
+  • Grafana: admin/SamurEye2024!
+  • MinIO: admin/SamurEye2024!
+
+⚠️ PRÓXIMOS PASSOS:
+  1. Configurar object storage no vlxsam02
+  2. Executar testes: /opt/samureye/scripts/health-check.sh
+  3. Verificar conectividade PostgreSQL: /opt/samureye/scripts/test-postgres-connection.sh
+
+📁 DIRETÓRIOS IMPORTANTES:
+  • Dados: /opt/data
+  • Backups: /opt/backup
+  • Scripts: /opt/samureye/scripts
+  • Configuração: /etc/samureye
+  • Logs: /var/log/samureye
+
+============================================================================
+[13:53:32] ✅ Instalação vlxsam03 concluída com sucesso!
+root@vlxsam03:~# /opt/samureye/scripts/test-postgres-connection.sh
+[14:01:49] 🐘 Testando conectividade PostgreSQL local...
+[14:01:49] Testando conexão com banco samureye_db...
+[14:01:49] ERROR: ❌ Falha na conexão PostgreSQL local
+root@vlxsam03:~#
