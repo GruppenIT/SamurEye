@@ -200,12 +200,19 @@ log "🐘 Instalando PostgreSQL 16..."
 # DEBUG: Verificar se PostgreSQL já está instalado e funcionando
 log "🔍 DEBUG: Verificando estado atual do PostgreSQL..."
 if command -v pg_lsclusters >/dev/null 2>&1; then
-    log "🔍 DEBUG: pg_lsclusters encontrado - verificando saída:"
-    pg_lsclusters_output=$(pg_lsclusters 2>&1 || echo "ERRO_EXECUCAO")
-    log "🔍 DEBUG: Saída pg_lsclusters: $pg_lsclusters_output"
+    log "🔍 DEBUG: pg_lsclusters encontrado - executando com timeout..."
+    
+    # Usar timeout e capturar saída de forma mais robusta
+    if pg_lsclusters_output=$(timeout 15 pg_lsclusters 2>&1); then
+        log "🔍 DEBUG: pg_lsclusters executado com sucesso"
+        log "🔍 DEBUG: Saída pg_lsclusters: $pg_lsclusters_output"
+    else
+        log "🔍 DEBUG: pg_lsclusters falhou ou timeout - assumindo corrupção"
+        pg_lsclusters_output="ERRO_TIMEOUT_OU_CORRUPCAO"
+    fi
     
     # Verificar se há clusters corrompidos
-    if echo "$pg_lsclusters_output" | grep -q "Invalid data directory\|Use of uninitialized value"; then
+    if echo "$pg_lsclusters_output" | grep -q "Invalid data directory\|Use of uninitialized value\|ERRO_TIMEOUT_OU_CORRUPCAO"; then
         warn "🧹 DEBUG: Cluster PostgreSQL corrompido detectado - executando limpeza completa..."
         
         # Parar serviços
