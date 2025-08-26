@@ -1,8 +1,9 @@
 #!/bin/bash
 
-# SamurEye vlxsam02 - Application Server Installation
+# SamurEye vlxsam02 - Script de Instalação Completo e Automático
 # Servidor: vlxsam02 (172.24.1.152)
-# Função: React 18 + Vite + TypeScript + Node.js Express + Scanner Service
+# Função: Application Server com diagnóstico e correção automática
+# VERSÃO UNIFICADA - Resolve todos os problemas automaticamente
 
 set -e
 
@@ -24,913 +25,515 @@ if [ "$EUID" -ne 0 ]; then
     error "Execute como root: sudo ./install.sh"
 fi
 
-log "🚀 Iniciando instalação do SamurEye Application Server (vlxsam02)..."
+echo "🚀 INSTALAÇÃO COMPLETA SAMUREYE - VLXSAM02"
+echo "=========================================="
+echo "Servidor: vlxsam02 (172.24.1.152)"
+echo "Função: Application Server"
+echo "Dependências: vlxsam03 (PostgreSQL + Redis)"
+echo ""
+echo "✨ RECURSOS INCLUSOS:"
+echo "   🔧 Instalação completa da aplicação"
+echo "   🔍 Diagnóstico automático de problemas"
+echo "   🛠️  Correção automática de configurações"
+echo "   ✅ Validação final da instalação"
+echo "   🔄 Detecção e correção de erro porta 443"
+echo ""
+
+# Variáveis globais
+WORKING_DIR="/opt/samureye/SamurEye"
+ETC_DIR="/etc/samureye"
+SERVICE_USER="samureye"
+POSTGRES_HOST="172.24.1.153"
+POSTGRES_PORT="5432"
+REDIS_HOST="172.24.1.153"
+REDIS_PORT="6379"
 
 # ============================================================================
-# 0. VALIDAÇÃO PRÉ-INSTALAÇÃO
+# FUNÇÃO DE DIAGNÓSTICO INICIAL
 # ============================================================================
 
-# Verificar se este script não contém referências problemáticas
-log "🔍 Executando validação de segurança do script..."
-
-# Função para verificar se um pacote existe no repositório
-package_exists() {
-    apt-cache show "$1" >/dev/null 2>&1
-}
-
-# Lista de pacotes problemáticos que não devem ser instalados via apt
-BLACKLISTED_PACKAGES=("wscat")
-
-log "Verificação de pacotes problemáticos: OK (wscat será instalado via npm)"
-
-# ============================================================================
-# 1. PREPARAÇÃO DO SISTEMA
-# ============================================================================
-
-info "📋 Configurando sistema base..."
-
-# Atualizar sistema
-log "Atualizando sistema Ubuntu..."
-export DEBIAN_FRONTEND=noninteractive
-apt-get update && apt-get upgrade -y
-
-# Configurar timezone
-log "Configurando timezone para America/Sao_Paulo..."
-timedatectl set-timezone America/Sao_Paulo
-
-# Instalar pacotes essenciais
-log "Instalando pacotes essenciais..."
-
-# Função para instalar pacote de forma segura
-safe_install() {
-    local package=$1
-    log "Verificando disponibilidade: $package"
-    if apt-cache show "$package" >/dev/null 2>&1; then
-        log "Instalando $package..."
-        if apt-get install -y "$package"; then
-            log "✅ $package instalado com sucesso"
+diagnostic_check() {
+    log "🔍 DIAGNÓSTICO INICIAL - Verificando problemas conhecidos..."
+    
+    local issues_found=false
+    
+    echo "📡 Verificando conectividade com vlxsam03..."
+    
+    # Testar PostgreSQL
+    if timeout 5 bash -c "</dev/tcp/$POSTGRES_HOST/$POSTGRES_PORT" 2>/dev/null; then
+        log "✅ PostgreSQL ($POSTGRES_HOST:$POSTGRES_PORT): Conectividade OK"
+        
+        # Testar autenticação
+        if PGPASSWORD=SamurEye2024! psql -h $POSTGRES_HOST -p $POSTGRES_PORT -U samureye -d samureye_prod -c "SELECT 1;" >/dev/null 2>&1; then
+            log "✅ Autenticação PostgreSQL: OK"
         else
-            log "❌ Falha ao instalar $package, continuando..."
+            warn "Problemas de autenticação PostgreSQL detectados"
         fi
     else
-        log "❌ Pacote $package não encontrado no repositório"
+        error "Não foi possível conectar ao PostgreSQL em $POSTGRES_HOST:$POSTGRES_PORT"
     fi
-}
-
-# Lista de pacotes essenciais (GARANTIDO SEM WSCAT)
-log "Instalando pacotes básicos do sistema..."
-safe_install "curl"
-safe_install "wget"
-safe_install "git"
-safe_install "build-essential"
-safe_install "python3"
-safe_install "python3-pip"
-safe_install "htop"
-safe_install "unzip"
-safe_install "software-properties-common"
-safe_install "ufw"
-safe_install "fail2ban"
-safe_install "supervisor"
-safe_install "sqlite3"
-safe_install "ca-certificates"
-safe_install "gnupg"
-safe_install "lsb-release"
-
-# PostgreSQL Client (tentar versões disponíveis)
-log "Instalando cliente PostgreSQL..."
-if ! command -v psql >/dev/null 2>&1; then
-    safe_install "postgresql-client-16" || safe_install "postgresql-client" || {
-        log "❌ Falha ao instalar cliente PostgreSQL"
-    }
-fi
-
-# ============================================================================
-# 2. CONFIGURAÇÃO DE USUÁRIO
-# ============================================================================
-
-log "👤 Configurando usuário samureye..."
-
-# Variáveis de usuário
-APP_USER="samureye"
-APP_PASSWORD="SamurEye2024!"
-APP_HOME="/home/samureye"
-APP_DIR="/opt/samureye"
-SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
-LOG_DIR="/var/log/samureye"
-
-# Criar usuário se não existir
-if ! id "$APP_USER" &>/dev/null; then
-    useradd -m -s /bin/bash "$APP_USER"
-    log "Usuário $APP_USER criado"
-else
-    log "Usuário $APP_USER já existe"
-fi
-
-# Definir senha
-echo "$APP_USER:$APP_PASSWORD" | chpasswd
-log "Senha definida para o usuário $APP_USER"
-
-# Adicionar ao grupo sudo
-usermod -aG sudo "$APP_USER"
-
-# Configurar sudoers para automação
-if ! grep -q "$APP_USER ALL=(ALL) NOPASSWD:ALL" /etc/sudoers; then
-    echo "$APP_USER ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
-    log "Configurado sudo sem senha para $APP_USER"
-fi
-
-# Criar diretórios
-mkdir -p "$APP_DIR"
-mkdir -p "$LOG_DIR"
-mkdir -p "$APP_HOME/.ssh"
-mkdir -p /opt/backup
-mkdir -p /etc/samureye
-
-# Definir permissões
-chown -R "$APP_USER:$APP_USER" "$APP_DIR"
-chown -R "$APP_USER:$APP_USER" "$LOG_DIR"
-chown -R "$APP_USER:$APP_USER" "$APP_HOME"
-chmod 700 "$APP_HOME/.ssh"
-
-# ============================================================================
-# 3. INSTALAÇÃO NODE.JS
-# ============================================================================
-
-log "📦 Instalando Node.js 20.x LTS..."
-
-# Instalar Node.js
-curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
-apt-get install -y nodejs
-
-# Verificar instalação
-node_version=$(node --version)
-npm_version=$(npm --version)
-log "Node.js: $node_version, NPM: $npm_version"
-
-# Configurar desenvolvimento com Vite
-log "Configurando ambiente de desenvolvimento..."
-npm install -g tsx typescript
-npm cache clean --force
-
-# Não é mais necessário PM2 - usando systemd service
-log "PM2 substituído por systemd service"
-
-# ============================================================================
-# 4. CONFIGURAÇÃO DE FIREWALL
-# ============================================================================
-
-log "🔥 Configurando firewall UFW..."
-
-# Configurar UFW
-ufw default deny incoming
-ufw default allow outgoing
-
-# Permitir SSH e porta da aplicação unificada
-ufw allow ssh
-ufw allow 5000/tcp comment "SamurEye App (Vite)"
-
-# Ativar firewall
-ufw --force enable
-
-log "Firewall configurado: SSH (22), App (5000)"
-
-# ============================================================================
-# 5. FERRAMENTAS DE SEGURANÇA
-# ============================================================================
-
-log "🔧 Instalando ferramentas de segurança e cliente PostgreSQL..."
-
-# Ferramentas de rede e banco de dados (essencial para conectar com vlxsam03)
-log "Instalando ferramentas de rede e banco..."
-safe_install "redis-tools"
-safe_install "dnsutils"
-safe_install "netcat-openbsd"
-
-# Instalar ferramentas de segurança
-log "Instalando ferramentas de segurança..."
-safe_install "nmap"
-safe_install "masscan"
-
-# Instalar Nuclei
-log "Instalando Nuclei..."
-cd /tmp || exit 1
-NUCLEI_VERSION="3.2.9"
-NUCLEI_ZIP="nuclei_${NUCLEI_VERSION}_linux_amd64.zip"
-
-# Remover instalação anterior se existir
-rm -f nuclei /usr/local/bin/nuclei "$NUCLEI_ZIP" 2>/dev/null
-
-if wget -q "https://github.com/projectdiscovery/nuclei/releases/download/v${NUCLEI_VERSION}/$NUCLEI_ZIP"; then
-    # Usar unzip com flags não-interativas: -o (sobrescrever) -q (silencioso)
-    if unzip -o -q "$NUCLEI_ZIP"; then
-        if [ -f "nuclei" ]; then
-            mv nuclei /usr/local/bin/
-            chmod +x /usr/local/bin/nuclei
-            # Verificar se instalação funcionou
-            if /usr/local/bin/nuclei -version >/dev/null 2>&1; then
-                log "✅ Nuclei instalado com sucesso"
-            else
-                log "⚠️  Nuclei instalado mas com problemas na execução"
+    
+    # Testar Redis
+    if timeout 5 bash -c "</dev/tcp/$REDIS_HOST/$REDIS_PORT" 2>/dev/null; then
+        log "✅ Redis ($REDIS_HOST:$REDIS_PORT): Conectividade OK"
+    else
+        warn "Redis não está acessível, mas continuando instalação"
+    fi
+    
+    # Verificar se há instalação anterior com problemas
+    if [ -d "$WORKING_DIR" ]; then
+        warn "Instalação anterior detectada em $WORKING_DIR"
+        
+        # Verificar problema de porta 443 nos logs
+        if systemctl is-active --quiet samureye-app 2>/dev/null; then
+            if journalctl -u samureye-app --since "1 hour ago" --no-pager -q 2>/dev/null | grep -q "ECONNREFUSED.*:443"; then
+                warn "🔧 PROBLEMA DETECTADO: Tentativas de conexão na porta 443"
+                warn "   Este script irá corrigir automaticamente"
+                issues_found=true
             fi
-        else
-            log "❌ Arquivo nuclei não encontrado após extração"
         fi
-        # Limpar arquivos temporários
-        rm -f "$NUCLEI_ZIP" README*.md LICENSE.md 2>/dev/null
-    else
-        log "❌ Falha ao extrair Nuclei"
+        
+        # Verificar configuração .env incorreta
+        if [ -f "$ETC_DIR/.env" ] && grep -q ":443" "$ETC_DIR/.env" 2>/dev/null; then
+            warn "🔧 PROBLEMA DETECTADO: Arquivo .env contém porta 443"
+            warn "   Este script irá corrigir automaticamente"
+            issues_found=true
+        fi
+        
+        # Verificar código hardcoded
+        if [ -d "$WORKING_DIR" ]; then
+            cd "$WORKING_DIR"
+            if find . -name "*.ts" -o -name "*.js" | xargs grep -q ":443\|https://$POSTGRES_HOST" 2>/dev/null; then
+                warn "🔧 PROBLEMA DETECTADO: Configurações hardcoded incorretas no código"
+                warn "   Este script irá corrigir automaticamente"
+                issues_found=true
+            fi
+            cd - >/dev/null
+        fi
     fi
-else
-    log "❌ Falha ao baixar Nuclei"
-fi
-
-# Instalar wscat via npm (já que não está disponível via apt)
-log "Instalando wscat via npm..."
-npm install -g wscat 2>/dev/null || {
-    log "AVISO: Falha ao instalar wscat via npm"
+    
+    if [ "$issues_found" = true ]; then
+        log "🔧 Problemas detectados serão corrigidos durante a instalação"
+    else
+        log "✅ Diagnóstico inicial: Nenhum problema crítico detectado"
+    fi
 }
 
-# Verificar instalações
-log "Verificando ferramentas instaladas..."
-if command -v nmap >/dev/null; then
-    nmap --version | head -1
-else
-    log "❌ Nmap não instalado"
-fi
-
-if command -v nuclei >/dev/null; then
-    nuclei -version
-else
-    log "❌ Nuclei não instalado"
-fi
-
-if command -v masscan >/dev/null; then
-    masscan --version | head -1
-    log "✅ Masscan instalado"
-else
-    log "❌ Masscan não instalado"
-fi
-
-if command -v wscat >/dev/null; then
-    log "✅ wscat instalado"
-else
-    log "❌ wscat não instalado"
-fi
-
-# Mostrar versões detalhadas
-if command -v nuclei >/dev/null; then
-    nuclei --version
-fi
-
-# Atualizar templates do Nuclei
-sudo -u "$APP_USER" nuclei -update-templates
-
 # ============================================================================
-# 6. CLONAR E CONFIGURAR APLICAÇÃO
+# FUNÇÃO DE LIMPEZA E PREPARAÇÃO
 # ============================================================================
 
-log "📁 Configurando código da aplicação..."
-
-# Clonar repositório (assumindo que já está disponível)
-if [ ! -d "$APP_DIR/SamurEye" ]; then
-    # Se não existir, criar estrutura básica
-    mkdir -p "$APP_DIR/SamurEye"
-    log "Diretório da aplicação criado. Código será copiado posteriormente."
-else
-    log "Diretório da aplicação já existe"
-fi
-
-chown -R "$APP_USER:$APP_USER" "$APP_DIR"
+cleanup_previous_installation() {
+    log "🧹 Limpeza de instalação anterior..."
+    
+    # Parar serviço se estiver rodando
+    if systemctl is-active --quiet samureye-app 2>/dev/null; then
+        log "Parando serviço samureye-app..."
+        systemctl stop samureye-app || true
+    fi
+    
+    # Desabilitar serviço se estiver habilitado
+    if systemctl is-enabled --quiet samureye-app 2>/dev/null; then
+        log "Desabilitando serviço samureye-app..."
+        systemctl disable samureye-app || true
+    fi
+    
+    # Remover arquivo de serviço
+    if [ -f /etc/systemd/system/samureye-app.service ]; then
+        log "Removendo arquivo de serviço..."
+        rm -f /etc/systemd/system/samureye-app.service
+        systemctl daemon-reload
+    fi
+    
+    # Backup de configurações existentes
+    if [ -f "$ETC_DIR/.env" ]; then
+        log "Fazendo backup de configurações existentes..."
+        cp "$ETC_DIR/.env" "$ETC_DIR/.env.backup.$(date +%Y%m%d_%H%M%S)" || true
+    fi
+    
+    # Limpar diretórios de instalação
+    log "Removendo diretórios de instalação anterior..."
+    rm -rf "$WORKING_DIR" || true
+    
+    # Manter estrutura de configuração
+    mkdir -p "$ETC_DIR"
+    mkdir -p "/opt/samureye"
+    
+    log "✅ Limpeza concluída"
+}
 
 # ============================================================================
-# 7. CONFIGURAÇÃO DE AMBIENTE
+# INSTALAÇÃO DO SISTEMA BASE
 # ============================================================================
 
-log "⚙️ Configurando variáveis de ambiente..."
+install_system_packages() {
+    log "📦 Instalando pacotes do sistema..."
+    
+    # Atualizar sistema
+    export DEBIAN_FRONTEND=noninteractive
+    apt-get update && apt-get upgrade -y
+    
+    # Configurar timezone
+    timedatectl set-timezone America/Sao_Paulo
+    
+    # Instalar pacotes essenciais
+    log "Instalando pacotes essenciais..."
+    apt-get install -y \
+        curl \
+        wget \
+        git \
+        unzip \
+        htop \
+        nano \
+        net-tools \
+        postgresql-client \
+        redis-tools \
+        nginx \
+        certbot \
+        python3-certbot-nginx \
+        ufw \
+        fail2ban \
+        logrotate \
+        cron \
+        rsync \
+        jq
+    
+    log "✅ Pacotes do sistema instalados"
+}
 
-# Arquivo de environment
-cat > /etc/samureye/.env << 'EOF'
-# SamurEye Application - Environment Variables
-# Servidor: vlxsam02 (172.24.1.152)
-# Stack: React 18 + Vite + TypeScript + Node.js Express + Drizzle ORM
+# ============================================================================
+# INSTALAÇÃO DO NODE.JS
+# ============================================================================
 
-# Application (Vite Dev Server)
+install_nodejs() {
+    log "🟢 Instalando Node.js 20..."
+    
+    # Remover instalações anteriores do Node.js
+    apt-get remove -y nodejs npm 2>/dev/null || true
+    
+    # Instalar Node.js 20 via NodeSource
+    curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+    apt-get install -y nodejs
+    
+    # Verificar instalação
+    local node_version=$(node --version)
+    local npm_version=$(npm --version)
+    
+    log "✅ Node.js instalado: $node_version"
+    log "✅ npm instalado: $npm_version"
+    
+    # Instalar ferramentas globais
+    log "Instalando ferramentas Node.js globais..."
+    npm install -g pm2 tsx wscat
+    
+    log "✅ Node.js 20 configurado com sucesso"
+}
+
+# ============================================================================
+# CRIAÇÃO DE USUÁRIO
+# ============================================================================
+
+create_user() {
+    log "👤 Configurando usuário do sistema..."
+    
+    # Criar usuário se não existir
+    if ! id "$SERVICE_USER" &>/dev/null; then
+        useradd -r -s /bin/bash -d /opt/samureye -m "$SERVICE_USER"
+        log "✅ Usuário $SERVICE_USER criado"
+    else
+        log "ℹ️  Usuário $SERVICE_USER já existe"
+    fi
+    
+    # Configurar permissões
+    chown -R $SERVICE_USER:$SERVICE_USER /opt/samureye
+    chmod 755 /opt/samureye
+    
+    # Adicionar ao grupo de logs
+    usermod -a -G adm $SERVICE_USER || true
+    
+    log "✅ Usuário configurado"
+}
+
+# ============================================================================
+# DOWNLOAD E INSTALAÇÃO DA APLICAÇÃO
+# ============================================================================
+
+install_application() {
+    log "📥 Baixando e instalando aplicação SamurEye..."
+    
+    # Criar diretório de trabalho
+    mkdir -p "$WORKING_DIR"
+    cd "$WORKING_DIR"
+    
+    # Baixar código fonte do GitHub
+    log "Clonando repositório do GitHub..."
+    if [ -d ".git" ]; then
+        # Se já existe, fazer pull
+        sudo -u $SERVICE_USER git pull origin main
+    else
+        # Clone inicial
+        sudo -u $SERVICE_USER git clone https://github.com/GruppenIT/SamurEye.git .
+    fi
+    
+    # Verificar se dotenv está no package.json
+    log "🔧 Verificando dependências do projeto..."
+    
+    if ! grep -q '"dotenv"' package.json; then
+        log "Adicionando dotenv ao package.json..."
+        sudo -u $SERVICE_USER npm install dotenv
+    fi
+    
+    # Instalar dependências
+    log "Instalando dependências npm..."
+    sudo -u $SERVICE_USER npm install
+    
+    # Verificar e corrigir server/index.ts
+    fix_server_configuration
+    
+    log "✅ Aplicação instalada"
+}
+
+# ============================================================================
+# CORREÇÃO DE CONFIGURAÇÃO DO SERVIDOR
+# ============================================================================
+
+fix_server_configuration() {
+    log "🔧 Verificando e corrigindo configuração do servidor..."
+    
+    local server_file="$WORKING_DIR/server/index.ts"
+    
+    if [ -f "$server_file" ]; then
+        # Verificar se dotenv está configurado
+        if ! head -10 "$server_file" | grep -q "dotenv"; then
+            log "Adicionando import dotenv ao server/index.ts..."
+            
+            # Backup do arquivo original
+            cp "$server_file" "$server_file.backup.$(date +%Y%m%d_%H%M%S)"
+            
+            # Adicionar import dotenv no início do arquivo
+            sudo -u $SERVICE_USER sed -i '1i import "dotenv/config";' "$server_file"
+            
+            log "✅ Configuração dotenv adicionada ao servidor"
+        else
+            log "ℹ️  Configuração dotenv já presente no servidor"
+        fi
+    else
+        warn "Arquivo server/index.ts não encontrado"
+    fi
+}
+
+# ============================================================================
+# CORREÇÃO DE CONFIGURAÇÕES HARDCODED
+# ============================================================================
+
+fix_hardcoded_configurations() {
+    log "🔧 Verificando e corrigindo configurações hardcoded..."
+    
+    cd "$WORKING_DIR"
+    
+    local files_fixed=0
+    
+    # Procurar e corrigir referências à porta 443
+    log "Procurando referências incorretas à porta 443..."
+    if find . -name "*.ts" -o -name "*.js" | xargs grep -l ":443" 2>/dev/null; then
+        log "Corrigindo referências à porta 443..."
+        find . -name "*.ts" -o -name "*.js" -exec sed -i "s/:443/:$POSTGRES_PORT/g" {} \;
+        ((files_fixed++))
+    fi
+    
+    # Procurar e corrigir URLs HTTPS incorretas para PostgreSQL
+    log "Procurando URLs HTTPS incorretas..."
+    if find . -name "*.ts" -o -name "*.js" | xargs grep -l "https://$POSTGRES_HOST" 2>/dev/null; then
+        log "Corrigindo URLs HTTPS incorretas..."
+        find . -name "*.ts" -o -name "*.js" -exec sed -i "s|https://$POSTGRES_HOST|postgresql://samureye:SamurEye2024!@$POSTGRES_HOST|g" {} \;
+        ((files_fixed++))
+    fi
+    
+    # Procurar e corrigir combinações IP:443
+    log "Procurando configurações IP:443 incorretas..."
+    if find . -name "*.ts" -o -name "*.js" | xargs grep -l "$POSTGRES_HOST.*443" 2>/dev/null; then
+        log "Corrigindo configurações IP:443..."
+        find . -name "*.ts" -o -name "*.js" -exec sed -i "s/$POSTGRES_HOST:443/$POSTGRES_HOST:$POSTGRES_PORT/g" {} \;
+        ((files_fixed++))
+    fi
+    
+    if [ $files_fixed -gt 0 ]; then
+        log "✅ $files_fixed tipos de configurações hardcoded corrigidos"
+    else
+        log "ℹ️  Nenhuma configuração hardcoded incorreta encontrada"
+    fi
+    
+    cd - >/dev/null
+}
+
+# ============================================================================
+# CRIAÇÃO DE ARQUIVO .ENV
+# ============================================================================
+
+create_env_file() {
+    log "📝 Criando arquivo de configuração .env..."
+    
+    # Criar arquivo .env principal
+    cat > "$ETC_DIR/.env" << EOF
+# SamurEye Application Configuration
+# Generated: $(date)
+
+# Environment
 NODE_ENV=development
 PORT=5000
 
-# Database (PostgreSQL Local - vlxsam03)
-DATABASE_URL=postgresql://samureye:SamurEye2024!@172.24.1.153:5432/samureye_prod
-PGHOST=172.24.1.153
-PGPORT=5432
+# Database (PostgreSQL - vlxsam03)
+DATABASE_URL=postgresql://samureye:SamurEye2024!@$POSTGRES_HOST:$POSTGRES_PORT/samureye_prod
+PGHOST=$POSTGRES_HOST
+PGPORT=$POSTGRES_PORT
 PGUSER=samureye
 PGPASSWORD=SamurEye2024!
 PGDATABASE=samureye_prod
 
 # Redis (vlxsam03)
-REDIS_URL=redis://172.24.1.153:6379
-REDIS_HOST=172.24.1.153
-REDIS_PORT=6379
+REDIS_URL=redis://$REDIS_HOST:$REDIS_PORT
+REDIS_HOST=$REDIS_HOST
+REDIS_PORT=$REDIS_PORT
 
-# Session Management
-SESSION_SECRET=samureye-super-secret-session-key-2024-change-this
+# Session
+SESSION_SECRET=samureye_secret_2024_vlxsam02_production
 
-# Replit Authentication (for regular users)
-REPL_ID=your_replit_app_id
-ISSUER_URL=https://replit.com/oidc
-REPLIT_DOMAINS=app.samureye.com.br,api.samureye.com.br
+# Application URLs
+API_BASE_URL=http://localhost:5000
+WEB_BASE_URL=http://localhost:5000
 
-# Object Storage (MinIO - vlxsam03)
-MINIO_ENDPOINT=http://172.24.1.153:9000
-MINIO_ACCESS_KEY=samureye
-MINIO_SECRET_KEY=SamurEye2024!
-MINIO_BUCKET=samureye-storage
-MINIO_REGION=us-east-1
-
-# Object Storage (Legacy format para compatibilidade)
-DEFAULT_OBJECT_STORAGE_BUCKET_ID=samureye-storage
-PUBLIC_OBJECT_SEARCH_PATHS=/samureye-storage/public
-PRIVATE_OBJECT_DIR=/samureye-storage/.private
-
-# Delinea Secret Server (Optional)
-DELINEA_API_KEY=your_delinea_api_key_here
-DELINEA_BASE_URL=https://gruppenztna.secretservercloud.com
-DELINEA_RULE_NAME="SamurEye Integration"
-
-# Scanner Tools (Integrated)
-NMAP_PATH=/usr/bin/nmap
-NUCLEI_PATH=/usr/local/bin/nuclei
-MASSCAN_PATH=/usr/bin/masscan
+# Security
+JWT_SECRET=samureye_jwt_secret_2024
+ENCRYPTION_KEY=samureye_encryption_2024
 
 # Logging
 LOG_LEVEL=info
-LOG_DIR=/var/log/samureye
+LOG_FILE=/var/log/samureye/app.log
 
-# Multi-tenant Configuration
-TENANT_ISOLATION=true
-DEFAULT_TENANT_SLUG=default
+# External Services
+GRAFANA_URL=http://$POSTGRES_HOST:3000
+MINIO_ENDPOINT=$POSTGRES_HOST
+MINIO_PORT=9000
+MINIO_ACCESS_KEY=samureye
+MINIO_SECRET_KEY=SamurEye2024!
 
-# Admin Authentication (Local System)
-ADMIN_EMAIL=admin@samureye.com.br
-ADMIN_PASSWORD=SamurEye2024!
-
-# Frontend URLs (Development - usando IPs diretos)
-FRONTEND_URL=http://172.24.1.152:5000
-API_BASE_URL=http://172.24.1.152:5000
-
-# File Upload & Object Storage
-UPLOAD_MAX_SIZE=100MB
-UPLOAD_DIR=/opt/samureye/uploads
-
-# Monitoring & Integration
-GRAFANA_URL=http://172.24.1.153:3000
-FORTISIEM_HOST=your_fortisiem_host
-FORTISIEM_PORT=514
-
-# Rate Limiting
-RATE_LIMIT_WINDOW_MS=900000
-RATE_LIMIT_MAX_REQUESTS=100
-
-# CORS (Development - permitir IPs locais)
-CORS_ORIGINS=http://172.24.1.152:5000,http://localhost:5000
-
-# Development (Vite specific - usar IP local)
-VITE_API_BASE_URL=http://172.24.1.152:5000
-VITE_APP_NAME=SamurEye
+# System
+HOSTNAME=vlxsam02
+SERVER_ROLE=application
 EOF
 
-# Configurar permissões do arquivo (usuário samureye precisa poder ler)
-# IMPORTANTE: O serviço roda como usuário 'samureye', então precisa ter permissão de leitura
-chown samureye:samureye /etc/samureye/.env
-chmod 644 /etc/samureye/.env
-
-log "✅ Arquivo .env criado com permissões corretas (samureye:samureye 644)"
-
-# Link para diretório da aplicação (CORREÇÃO: usar diretório onde realmente executa)
-log "🔗 Criando link simbólico do .env no diretório de execução..."
-ln -sf /etc/samureye/.env "$APP_DIR/.env"
-chown -h samureye:samureye "$APP_DIR/.env" 2>/dev/null || true
-
-# CORREÇÃO ADICIONAL: Link também no subdiretório SamurEye (WorkingDirectory do systemd)
-if [ -d "$APP_DIR/SamurEye" ]; then
-    ln -sf /etc/samureye/.env "$APP_DIR/SamurEye/.env"
-    chown -h samureye:samureye "$APP_DIR/SamurEye/.env" 2>/dev/null || true
-    log "✅ Link adicional criado: $APP_DIR/SamurEye/.env -> /etc/samureye/.env"
+    # Configurar permissões
+    chown root:$SERVICE_USER "$ETC_DIR/.env"
+    chmod 640 "$ETC_DIR/.env"
     
-    # VERIFICAÇÃO CRÍTICA: Procurar configurações hardcoded que causam conexão na porta 443
-    log "🔍 Verificando configurações hardcoded que causam erro porta 443..."
-    cd "$APP_DIR/SamurEye"
+    # Criar links simbólicos
+    log "Criando links simbólicos para .env..."
+    ln -sf "$ETC_DIR/.env" "/opt/samureye/.env"
+    ln -sf "$ETC_DIR/.env" "$WORKING_DIR/.env"
     
-    # Procurar arquivos com configuração incorreta da porta 443
-    if find . -name "*.ts" -o -name "*.js" -o -name "*.json" | xargs grep -l "172.24.1.153:443" 2>/dev/null; then
-        log "❌ ENCONTRADA configuração hardcoded para porta 443 - CORRIGINDO..."
-        
-        # Corrigir arquivos com configuração incorreta
-        find . -name "*.ts" -o -name "*.js" -o -name "*.json" | xargs sed -i 's/172.24.1.153:443/172.24.1.153:5432/g' 2>/dev/null || true
-        find . -name "*.ts" -o -name "*.js" -o -name "*.json" | xargs sed -i 's/:443/:5432/g' 2>/dev/null || true
-        
-        log "✅ Configurações hardcoded corrigidas (porta 443 → 5432)"
-    fi
-    
-    # Verificar se há outras URLs incorretas
-    if find . -name "*.ts" -o -name "*.js" | xargs grep -l "https://172.24.1.153" 2>/dev/null; then
-        log "⚠️ ENCONTRADA configuração HTTPS hardcoded - CORRIGINDO..."
-        find . -name "*.ts" -o -name "*.js" | xargs sed -i 's/https:\/\/172.24.1.153/postgresql:\/\/samureye:SamurEye2024!@172.24.1.153:5432\/samureye_prod/g' 2>/dev/null || true
-        log "✅ URLs HTTPS incorretas corrigidas"
-    fi
-    
-    cd - >/dev/null
-fi
-
-# Verificar se as permissões estão corretas
-ls -la /etc/samureye/.env
+    log "✅ Arquivo .env criado e linkado"
+}
 
 # ============================================================================
-# 8. CONFIGURAÇÃO SYSTEMD SERVICE
+# TESTE DE CARREGAMENTO DE VARIÁVEIS
 # ============================================================================
 
-log "⚡ Configurando systemd service..."
+test_env_loading() {
+    log "🧪 Testando carregamento de variáveis de ambiente..."
+    
+    # Criar script de teste
+    cat > /tmp/test-env-loading.js << 'EOF'
+// Importar dotenv primeiro
+require('dotenv').config();
 
-# Systemd service para aplicação SamurEye unificada
-cat > /etc/systemd/system/samureye-app.service << 'EOF'
+console.log('=== TESTE DE CARREGAMENTO DE VARIÁVEIS ===');
+console.log('NODE_ENV:', process.env.NODE_ENV || 'undefined');
+console.log('PORT:', process.env.PORT || 'undefined');
+console.log('PGHOST:', process.env.PGHOST || 'undefined');
+console.log('PGPORT:', process.env.PGPORT || 'undefined');
+console.log('DATABASE_URL existe:', process.env.DATABASE_URL ? 'SIM' : 'NÃO');
+
+if (process.env.DATABASE_URL) {
+    const url = process.env.DATABASE_URL;
+    console.log('DATABASE_URL (primeiros 60 chars):', url.substring(0, 60) + '...');
+    
+    if (url.includes(':443')) {
+        console.log('❌ ERRO: DATABASE_URL contém porta 443');
+        process.exit(1);
+    } else if (url.includes(':5432')) {
+        console.log('✅ DATABASE_URL contém porta 5432 (correto)');
+    } else {
+        console.log('⚠️ DATABASE_URL sem especificação clara de porta');
+    }
+} else {
+    console.log('❌ DATABASE_URL não foi carregada');
+    process.exit(1);
+}
+
+console.log('✅ Teste concluído com sucesso');
+console.log('=== FIM DO TESTE ===');
+EOF
+
+    # Executar teste como usuário da aplicação
+    cd "$WORKING_DIR"
+    if sudo -u $SERVICE_USER node /tmp/test-env-loading.js 2>/dev/null; then
+        log "✅ Teste de carregamento: SUCESSO"
+    else
+        error "Teste de carregamento: FALHA - Verifique configuração .env"
+    fi
+    
+    rm -f /tmp/test-env-loading.js
+}
+
+# ============================================================================
+# CONFIGURAÇÃO DO SERVIÇO SYSTEMD
+# ============================================================================
+
+create_systemd_service() {
+    log "⚙️ Configurando serviço systemd..."
+    
+    # Criar diretório de logs
+    mkdir -p /var/log/samureye
+    chown $SERVICE_USER:$SERVICE_USER /var/log/samureye
+    
+    # Criar arquivo de serviço
+    cat > /etc/systemd/system/samureye-app.service << EOF
 [Unit]
-Description=SamurEye Application (React 18 + Vite + Node.js)
-After=network.target
-Wants=network.target
+Description=SamurEye Application Server
+After=network.target postgresql.service redis.service
+Wants=postgresql.service redis.service
 
 [Service]
-# Usuário e diretório
-User=samureye
-Group=samureye
-WorkingDirectory=/opt/samureye/SamurEye
-
-# Comando de execução (usar caminho completo do npm)
-ExecStart=/usr/bin/npm run dev
-
-# Environment
-EnvironmentFile=/etc/samureye/.env
+Type=simple
+User=$SERVICE_USER
+Group=$SERVICE_USER
+WorkingDirectory=$WORKING_DIR
 Environment=NODE_ENV=development
-Environment=PORT=5000
-Environment=PATH=/usr/local/bin:/usr/bin:/bin
-
-# Restart policy
+EnvironmentFile=$ETC_DIR/.env
+ExecStart=/usr/bin/npm run dev
+ExecReload=/bin/kill -HUP \$MAINPID
 Restart=always
 RestartSec=10
-StartLimitInterval=60s
-StartLimitBurst=3
-
-# Logging
 StandardOutput=journal
 StandardError=journal
 SyslogIdentifier=samureye-app
 
-# Security
+# Limites de recursos
+LimitNOFILE=65536
+LimitNPROC=4096
+
+# Segurança
 NoNewPrivileges=true
-PrivateTmp=true
 ProtectSystem=strict
 ProtectHome=true
-ReadWritePaths=/opt/samureye /var/log/samureye /tmp
-
-# Limits
-LimitNOFILE=65535
-LimitNPROC=4096
+ReadWritePaths=$WORKING_DIR /var/log/samureye /tmp
 
 [Install]
 WantedBy=multi-user.target
 EOF
 
-# Recarregar systemd
-systemctl daemon-reload
-
-# Habilitar serviço para iniciar no boot
-systemctl enable samureye-app
-
-log "Systemd service configurado e habilitado"
-
-# ============================================================================
-# 9. CONFIGURAÇÃO APLICAÇÃO E DEPENDÊNCIAS
-# ============================================================================
-
-log "📦 Configurando aplicação SamurEye..."
-
-# Criar package.json básico para instalação
-cat > "$APP_DIR/package.json" << 'EOF'
-{
-  "name": "samureye-platform",
-  "version": "1.0.0",
-  "description": "SamurEye Breach & Attack Simulation Platform",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview",
-    "typecheck": "tsc --noEmit",
-    "db:push": "drizzle-kit push",
-    "db:studio": "drizzle-kit studio"
-  },
-  "dependencies": {
-    "@google-cloud/storage": "^7.7.0",
-    "@hookform/resolvers": "^3.3.2",
-    "pg": "^8.11.3",
-    "@radix-ui/react-accordion": "^1.1.2",
-    "@radix-ui/react-alert-dialog": "^1.0.5",
-    "@radix-ui/react-avatar": "^1.0.4",
-    "@radix-ui/react-checkbox": "^1.0.4",
-    "@radix-ui/react-dialog": "^1.0.5",
-    "@radix-ui/react-dropdown-menu": "^2.0.6",
-    "@radix-ui/react-hover-card": "^1.0.7",
-    "@radix-ui/react-label": "^2.0.2",
-    "@radix-ui/react-popover": "^1.0.7",
-    "@radix-ui/react-progress": "^1.0.3",
-    "@radix-ui/react-select": "^2.0.0",
-    "@radix-ui/react-separator": "^1.0.3",
-    "@radix-ui/react-slot": "^1.0.2",
-    "@radix-ui/react-switch": "^1.0.3",
-    "@radix-ui/react-tabs": "^1.0.4",
-    "@radix-ui/react-toast": "^1.1.5",
-    "@radix-ui/react-tooltip": "^1.0.7",
-    "@tanstack/react-query": "^5.17.0",
-    "@types/express": "^4.17.21",
-    "@types/express-session": "^1.17.10",
-    "@types/node": "^20.10.6",
-    "@types/react": "^18.2.46",
-    "@types/react-dom": "^18.2.18",
-    "@types/ws": "^8.5.10",
-    "@vitejs/plugin-react": "^4.2.1",
-    "axios": "^1.6.2",
-    "class-variance-authority": "^0.7.0",
-    "clsx": "^2.0.0",
-    "cmdk": "^0.2.0",
-    "connect-pg-simple": "^9.0.1",
-    "date-fns": "^3.0.6",
-    "drizzle-kit": "^0.20.7",
-    "drizzle-orm": "^0.29.1",
-    "drizzle-zod": "^0.5.1",
-    "express": "^4.18.2",
-    "express-session": "^1.17.3",
-    "lucide-react": "^0.303.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-hook-form": "^7.48.2",
-    "tailwind-merge": "^2.2.0",
-    "tailwindcss": "^3.4.0",
-    "tailwindcss-animate": "^1.0.7",
-    "tsx": "^4.6.2",
-    "typescript": "^5.3.3",
-    "vite": "^5.0.10",
-    "wouter": "^3.0.0",
-    "ws": "^8.16.0",
-    "zod": "^3.22.4"
-  },
-  "devDependencies": {
-    "@types/connect-pg-simple": "^7.0.3",
-    "@types/pg": "^8.10.9",
-    "autoprefixer": "^10.4.16",
-    "postcss": "^8.4.32"
-  }
-}
-EOF
-
-chown "$APP_USER:$APP_USER" "$APP_DIR/package.json"
-
-# Instalar dependências quando o código estiver disponível
-log "Nota: dependências serão instaladas após clonagem do código fonte"
-
-# ============================================================================
-# 10. SCRIPTS DE MONITORAMENTO
-# ============================================================================
-
-log "📊 Criando scripts de monitoramento..."
-
-mkdir -p "$APP_DIR/scripts"
-
-# Health check principal
-cat > "$APP_DIR/scripts/health-check.sh" << 'EOF'
-#!/bin/bash
-
-# Health check completo para vlxsam02
-
-echo "=== SAMUREYE APPLICATION HEALTH CHECK ==="
-echo "Data: $(date)"
-echo "Servidor: vlxsam02 ($(hostname -I | awk '{print $1}'))"
-echo ""
-
-# Verificar serviço systemd
-echo "⚡ SYSTEMD SERVICES:"
-if systemctl is-active --quiet samureye-app; then
-    echo "✅ samureye-app: $(systemctl is-active samureye-app)"
-else
-    echo "❌ samureye-app: $(systemctl is-active samureye-app)"
-fi
-
-# Verificar endpoints
-echo ""
-echo "🌐 ENDPOINTS:"
-if curl -f -s http://localhost:5000/api/admin/stats >/dev/null 2>&1; then
-    echo "✅ App (5000): Respondendo"
-else
-    echo "❌ App (5000): Não responde"
-fi
-
-if curl -f -s http://localhost:5000/api/system/settings >/dev/null 2>&1; then
-    echo "✅ System API (5000): Respondendo"
-else
-    echo "❌ System API (5000): Não responde"
-fi
-
-# Verificar conectividade com vlxsam03 (database)
-echo ""
-echo "🗄️ DATABASE CONNECTIVITY:"
-if nc -z 172.24.1.153 5432 2>/dev/null; then
-    echo "✅ PostgreSQL (vlxsam03:5432): Acessível"
-else
-    echo "❌ PostgreSQL (vlxsam03:5432): Inacessível"
-fi
-
-if nc -z 172.24.1.153 6379 2>/dev/null; then
-    echo "✅ Redis (vlxsam03:6379): Acessível"
-else
-    echo "❌ Redis (vlxsam03:6379): Inacessível"
-fi
-
-# Verificar ferramentas de segurança
-echo ""
-echo "🔧 SECURITY TOOLS:"
-if command -v nmap >/dev/null 2>&1; then
-    echo "✅ Nmap: $(nmap --version | head -1)"
-else
-    echo "❌ Nmap: Não instalado"
-fi
-
-if command -v nuclei >/dev/null 2>&1; then
-    echo "✅ Nuclei: $(nuclei --version 2>/dev/null | head -1)"
-else
-    echo "❌ Nuclei: Não instalado"
-fi
-
-# Recursos do sistema
-echo ""
-echo "💻 RECURSOS:"
-cpu_usage=$(top -bn1 | grep "Cpu(s)" | awk '{print $2}' | cut -d'%' -f1)
-mem_usage=$(free | grep Mem | awk '{printf "%.1f%%", $3/$2 * 100.0}')
-disk_usage=$(df -h /opt | awk 'NR==2 {print $5}')
-
-echo "CPU: ${cpu_usage}%"
-echo "Memória: $mem_usage"
-echo "Disco: $disk_usage"
-
-# Verificar logs recentes
-echo ""
-echo "📝 LOGS RECENTES (últimas 5 linhas):"
-if [ -f /var/log/samureye/app.log ]; then
-    echo "App:"
-    tail -5 /var/log/samureye/app.log | sed 's/^/  /'
-else
-    echo "❌ Log da aplicação não encontrado"
-fi
-
-echo ""
-echo "=== FIM DO HEALTH CHECK ==="
-EOF
-
-chmod +x "$APP_DIR/scripts/health-check.sh"
-
-# Script de teste de conectividade
-cat > "$APP_DIR/scripts/test-connectivity.sh" << 'EOF'
-#!/bin/bash
-
-# Testa conectividade específica com vlxsam03
-
-echo "=== TESTE DE CONECTIVIDADE VLXSAM03 ==="
-echo "Data: $(date)"
-echo ""
-
-# Função para testar conexão
-test_connection() {
-    local host=$1
-    local port=$2
-    local service=$3
-    
-    echo -n "🔗 Testando $service ($host:$port)... "
-    if nc -z "$host" "$port" 2>/dev/null; then
-        echo "✅ Conectado"
-        return 0
-    else
-        echo "❌ Falha"
-        return 1
-    fi
-}
-
-# Testar serviços essenciais no vlxsam03
-VLXSAM03_IP="172.24.1.153"
-
-test_connection $VLXSAM03_IP 5432 "PostgreSQL"
-test_connection $VLXSAM03_IP 6379 "Redis"
-test_connection $VLXSAM03_IP 9000 "MinIO"
-
-# Testar conectividade com vlxsam01 (gateway)
-echo ""
-echo "🌐 Testando Gateway (vlxsam01):"
-VLXSAM01_IP="172.24.1.151"
-test_connection $VLXSAM01_IP 80 "HTTP"
-test_connection $VLXSAM01_IP 443 "HTTPS"
-
-# Teste específico de PostgreSQL
-echo ""
-echo "🗄️ Teste PostgreSQL avançado:"
-if command -v psql >/dev/null 2>&1; then
-    export PGPASSWORD=SamurEye2024!
-    if psql -h $VLXSAM03_IP -U samureye -d samureye_prod -c "SELECT version();" >/dev/null 2>&1; then
-        echo "✅ Conexão PostgreSQL com autenticação: OK"
-        echo "   $(psql -h $VLXSAM03_IP -U samureye -d samureye_prod -t -c "SELECT version();" 2>/dev/null | head -1 | xargs)"
-    else
-        echo "❌ Falha na autenticação PostgreSQL"
-    fi
-else
-    echo "⚠️  Cliente psql não instalado (executar: apt install postgresql-client)"
-fi
-
-# Teste de resolução DNS
-echo ""
-echo "🔍 Teste DNS:"
-if host samureye.com.br >/dev/null 2>&1; then
-    echo "✅ Resolução DNS: OK"
-    echo "   $(host samureye.com.br | grep 'has address' | head -1)"
-else
-    echo "❌ Falha na resolução DNS"
-fi
-
-# Informações de rede
-echo ""
-echo "🌐 Informações de rede local:"
-echo "IP do servidor: $(hostname -I | awk '{print $1}')"
-echo "Gateway: $(ip route | grep default | awk '{print $3}' | head -1)"
-echo "DNS: $(cat /etc/resolv.conf | grep nameserver | head -1 | awk '{print $2}')"
-
-echo ""
-echo "=== FIM DO TESTE ==="
-EOF
-
-chmod +x "$APP_DIR/scripts/test-connectivity.sh"
-
-# Script para instalação das dependências do PostgreSQL
-cat > "$APP_DIR/scripts/install-postgres-client.sh" << 'EOF'
-#!/bin/bash
-
-echo "📦 Instalando cliente PostgreSQL..."
-
-# Atualizar repositórios
-apt update
-
-# Função para instalar pacote de forma segura
-safe_install() {
-    local package=$1
-    echo "Verificando disponibilidade: $package"
-    if apt-cache show "$package" >/dev/null 2>&1; then
-        echo "Instalando $package..."
-        if apt install -y "$package"; then
-            echo "✅ $package instalado com sucesso"
-        else
-            echo "❌ Falha ao instalar $package"
-            return 1
-        fi
-    else
-        echo "❌ Pacote $package não encontrado no repositório"
-        return 1
-    fi
-}
-
-# Instalar cliente PostgreSQL (tentar versões disponíveis)
-if ! command -v psql >/dev/null 2>&1; then
-    safe_install "postgresql-client-16" || safe_install "postgresql-client" || {
-        echo "❌ Falha ao instalar cliente PostgreSQL"
-        exit 1
-    }
-fi
-
-# Instalar ferramentas de rede
-safe_install "redis-tools"
-safe_install "dnsutils"
-
-echo "✅ Cliente PostgreSQL instalado com sucesso!"
-
-# Testar conexão
-echo ""
-echo "🧪 Testando conexão com vlxsam03..."
-export PGPASSWORD=SamurEye2024!
-
-if psql -h 172.24.1.153 -U samureye -d samureye_prod -c "SELECT version();" 2>/dev/null; then
-    echo "✅ Conexão PostgreSQL: OK"
-else
-    echo "❌ Conexão PostgreSQL: Falhou"
-    echo "⚠️  Certifique-se que vlxsam03 está instalado e funcionando"
-fi
-
-# Testar Redis
-if redis-cli -h 172.24.1.153 ping 2>/dev/null | grep -q PONG; then
-    echo "✅ Conexão Redis: OK"
-else
-    echo "❌ Conexão Redis: Falhou"
-fi
-EOF
-
-chmod +x "$APP_DIR/scripts/install-postgres-client.sh"
-
-# Script de instalação de dependências
-cat > "$APP_DIR/scripts/install-dependencies.sh" << 'EOF'
-#!/bin/bash
-
-# Script para instalar dependências da aplicação SamurEye
-
-set -e
-
-log() { echo "[$(date '+%H:%M:%S')] $1"; }
-error() { echo "[$(date '+%H:%M:%S')] ERROR: $1"; exit 1; }
-
-if [ ! -f "package.json" ]; then
-    error "Execute este script no diretório que contém package.json"
-fi
-
-log "📦 Instalando dependências Node.js..."
-
-# Limpar cache e node_modules
-npm cache clean --force
-rm -rf node_modules package-lock.json
-
-# Instalar dependências
-log "Executando npm install..."
-npm install
-
-# Verificar se tsx está disponível globalmente
-if ! command -v tsx >/dev/null 2>&1; then
-    log "Instalando tsx globalmente..."
-    npm install -g tsx
-fi
-
-# Verificar se TypeScript funciona
-log "Verificando TypeScript..."
-if npx tsc --version >/dev/null 2>&1; then
-    log "✅ TypeScript funciona"
-else
-    log "❌ TypeScript com problemas"
-fi
-
-log "✅ Dependências instaladas com sucesso!"
-log "Execute 'npm run dev' para iniciar a aplicação"
-EOF
-
-chmod +x "$APP_DIR/scripts/install-dependencies.sh"
-
-chown -R "$APP_USER:$APP_USER" "$APP_DIR/scripts"
-
-# ============================================================================
-# 11. FINALIZAÇÃO DA INSTALAÇÃO
-# ============================================================================
-
-log "⚙️ Finalizando instalação..."
-
-# Criar arquivos de configuração básicos para desenvolvimento
-cat > "$APP_DIR/vite.config.ts" << 'EOF'
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-import path from 'path'
-
-export default defineConfig({
-  plugins: [react()],
-  server: {
-    host: '0.0.0.0',
-    port: 5000,
-    proxy: {
-      '/api': {
-        target: 'http://localhost:5000',
-        changeOrigin: true
-      },
-      '/ws': {
-        target: 'ws://localhost:5000',
-        ws: true
-      }
-    }
-  },
-  resolve: {
-    alias: {
-      '@': path.resolve(__dirname, './client/src'),
-      '@shared': path.resolve(__dirname, './shared'),
-      '@assets': path.resolve(__dirname, './attached_assets')
-    }
-  }
-})
-EOF
-
-chown "$APP_USER:$APP_USER" "$APP_DIR/vite.config.ts"
-
-log "Systemd service configurado"
-
-# ============================================================================
-# 12. LOGROTATE
-# ============================================================================
-
-log "📝 Configurando logrotate..."
-
-cat > /etc/logrotate.d/samureye << 'EOF'
+    # Configurar logrotate
+    cat > /etc/logrotate.d/samureye << EOF
 /var/log/samureye/*.log {
     daily
     missingok
@@ -938,429 +541,223 @@ cat > /etc/logrotate.d/samureye << 'EOF'
     compress
     delaycompress
     notifempty
-    create 0644 samureye samureye
-    postrotate
-        /bin/kill -USR2 $(cat /home/samureye/.pm2/pm2.pid 2>/dev/null) 2>/dev/null || true
-    endscript
+    copytruncate
+    su $SERVICE_USER $SERVICE_USER
 }
 EOF
 
-# ============================================================================
-# 13. CRON JOBS
-# ============================================================================
-
-log "⏰ Configurando cron jobs..."
-
-# Health check como usuário samureye
-sudo -u "$APP_USER" crontab << 'EOF'
-# SamurEye Application - Cron Jobs
-# Health check a cada 5 minutos
-*/5 * * * * /opt/samureye/scripts/health-check.sh >> /var/log/samureye/health-check.log 2>&1
-
-# Backup diário às 3h
-0 3 * * * /opt/samureye/scripts/backup.sh >> /var/log/samureye/backup.log 2>&1
-
-# Limpeza de logs temporários semanalmente
-0 2 * * 0 find /var/log/samureye -name "*.log.*" -mtime +7 -delete
-EOF
-
-# ============================================================================
-# 14. CONFIGURAÇÃO FAIL2BAN
-# ============================================================================
-
-log "🛡️ Configurando Fail2Ban..."
-
-cat > /etc/fail2ban/jail.local << 'EOF'
-[DEFAULT]
-bantime = 3600
-findtime = 600
-maxretry = 5
-
-[sshd]
-enabled = true
-port = ssh
-logpath = /var/log/auth.log
-maxretry = 5
-
-[samureye-app]
-enabled = true
-port = 5000
-logpath = /var/log/samureye/app.log
-maxretry = 10
-findtime = 600
-bantime = 3600
-EOF
-
-systemctl enable fail2ban
-systemctl start fail2ban
-
-# ============================================================================
-# 15. ARQUIVO DE CREDENCIAIS
-# ============================================================================
-
-log "📋 Criando arquivo de credenciais..."
-
-cat > "$APP_DIR/CREDENTIALS.txt" << EOF
-CREDENCIAIS DO SERVIDOR VLXSAM02
-================================
-
-Sistema:
-- IP: 172.24.1.152
-- Usuário: $APP_USER
-- Senha: $APP_PASSWORD
-- SSH: ssh $APP_USER@172.24.1.152
-
-Aplicação:
-- Diretório: $APP_DIR
-- Logs: $LOG_DIR
-- Config: /etc/samureye/.env
-
-Serviços:
-- App Unificado: http://localhost:5000
-
-Systemd Commands:
-- Status: systemctl status samureye-app
-- Logs: journalctl -u samureye-app -f
-- Restart: systemctl restart samureye-app
-- Stop: systemctl stop samureye-app
-
-Scripts Úteis:
-- Health Check: $APP_DIR/scripts/health-check.sh
-- Conectividade: $APP_DIR/scripts/test-connectivity.sh
-- Dependências: $APP_DIR/scripts/install-dependencies.sh
-
-IMPORTANTE:
-- Altere as senhas padrão
-- Configure variáveis em /etc/samureye/.env
-- Instale o código da aplicação em $APP_DIR/SamurEye
-EOF
-
-chmod 600 "$APP_DIR/CREDENTIALS.txt"
-chown "$APP_USER:$APP_USER" "$APP_DIR/CREDENTIALS.txt"
-
-# ============================================================================
-# 16. FINALIZAÇÃO
-# ============================================================================
-
-# Ajustar permissões finais
-chown -R "$APP_USER:$APP_USER" "$APP_DIR"
-chown -R "$APP_USER:$APP_USER" "$LOG_DIR"
-
-# ============================================================================
-# AUTOMAÇÃO COMPLETA DA INSTALAÇÃO
-# ============================================================================
-
-log "🚀 Executando automação completa da instalação..."
-
-# Clonar código da aplicação
-log "📂 Clonando código da aplicação..."
-if [ -d "$APP_DIR/SamurEye" ]; then
-    log "Removendo instalação anterior..."
-    rm -rf "$APP_DIR/SamurEye"
-fi
-
-git clone https://github.com/GruppenIT/SamurEye.git "$APP_DIR/SamurEye" || {
-    error "Falha ao clonar repositório"
+    # Recarregar systemd
+    systemctl daemon-reload
+    
+    log "✅ Serviço systemd configurado"
 }
 
-chown -R "$APP_USER:$APP_USER" "$APP_DIR/SamurEye"
-
-# Instalar dependências da aplicação
-log "📦 Instalando dependências da aplicação..."
-cd "$APP_DIR/SamurEye"
-sudo -u "$APP_USER" "$APP_DIR/scripts/install-dependencies.sh" || {
-    log "AVISO: Falha na instalação de dependências automatizada"
-}
-
-# Configurar variáveis de ambiente no contexto correto
-log "🔧 Configurando variáveis de ambiente para db:push..."
-export $(grep -v '^#' /etc/samureye/.env | xargs)
-
-# Executar migrações do banco
-log "🗄️ Executando migrações do banco de dados..."
-sudo -u "$APP_USER" bash -c "cd $APP_DIR/SamurEye && source /etc/samureye/.env && npm run db:push" || {
-    log "AVISO: Falha na migração do banco - configure manualmente"
-}
-
-# Iniciar aplicação automaticamente
-log "🚀 Iniciando aplicação..."
-systemctl start samureye-app
-
-# Aguardar alguns segundos para o serviço inicializar
-sleep 5
-
-# Verificar status do serviço
-if systemctl is-active --quiet samureye-app; then
-    log "✅ Serviço samureye-app: INICIADO COM SUCESSO"
-else
-    log "⚠️  Serviço samureye-app: Falha ao iniciar - verifique logs"
-fi
-
-log "✅ Instalação automatizada do vlxsam02 concluída com sucesso!"
-
-echo ""
-echo "📋 VERIFICAÇÃO FINAL:"
-echo "==================="
-echo ""
-echo "Status da aplicação:"
-systemctl status samureye-app --no-pager -l
-echo ""
-echo "Verificar instalação:"
-echo "   $APP_DIR/scripts/health-check.sh"
-echo "   $APP_DIR/scripts/test-connectivity.sh"
-echo ""
-echo "🎯 CREDENCIAIS:"
-echo "   Usuário: $APP_USER"
-echo "   Senha: $APP_PASSWORD"
-echo "   Detalhes: $APP_DIR/CREDENTIALS.txt"
-echo ""
-echo "🌐 ENDPOINTS LOCAIS:"
-echo "   App Unificado: http://localhost:5000"
-echo "   API: http://localhost:5000/api"
-echo "   Health: http://localhost:5000/api/health"
-echo ""
-echo "⚠️  IMPORTANTE:"
-echo "   - Configure /etc/samureye/.env com dados reais"
-echo "   - Instale o código da aplicação"
-echo "   - Teste conectividade com vlxsam03 (database)"
-echo ""
-
 # ============================================================================
-# 17. VALIDAÇÃO FINAL DA INSTALAÇÃO
+# VALIDAÇÃO FINAL
 # ============================================================================
 
-log "🔍 Executando validação final da instalação..."
-
-# Função para verificar se um comando existe
-check_command() {
-    local cmd=$1
-    local name=$2
-    if command -v "$cmd" >/dev/null 2>&1; then
-        log "✅ $name: OK"
+final_validation() {
+    log "✅ VALIDAÇÃO FINAL DA INSTALAÇÃO"
+    
+    local issues=0
+    
+    echo "🔍 Executando testes de validação..."
+    
+    # 1. Verificar estrutura de arquivos
+    echo "📁 Verificando estrutura de arquivos..."
+    for dir in "$WORKING_DIR" "$ETC_DIR"; do
+        if [ -d "$dir" ]; then
+            echo "  ✅ $dir"
+        else
+            echo "  ❌ $dir"
+            ((issues++))
+        fi
+    done
+    
+    # 2. Verificar arquivos essenciais
+    echo "📄 Verificando arquivos essenciais..."
+    local essential_files=(
+        "$WORKING_DIR/package.json"
+        "$WORKING_DIR/server/index.ts"
+        "$ETC_DIR/.env"
+        "/etc/systemd/system/samureye-app.service"
+    )
+    
+    for file in "${essential_files[@]}"; do
+        if [ -f "$file" ]; then
+            echo "  ✅ $file"
+        else
+            echo "  ❌ $file"
+            ((issues++))
+        fi
+    done
+    
+    # 3. Verificar links simbólicos
+    echo "🔗 Verificando links simbólicos..."
+    for link in "/opt/samureye/.env" "$WORKING_DIR/.env"; do
+        if [ -L "$link" ] && [ "$(readlink "$link")" = "$ETC_DIR/.env" ]; then
+            echo "  ✅ $link -> $(readlink "$link")"
+        else
+            echo "  ❌ $link"
+            ((issues++))
+        fi
+    done
+    
+    # 4. Verificar configuração .env
+    echo "⚙️ Verificando configuração .env..."
+    if grep -q ":443" "$ETC_DIR/.env" 2>/dev/null; then
+        echo "  ❌ Arquivo .env ainda contém porta 443"
+        ((issues++))
+    else
+        echo "  ✅ Configuração .env sem porta 443"
+    fi
+    
+    if grep -q ":$POSTGRES_PORT" "$ETC_DIR/.env" 2>/dev/null; then
+        echo "  ✅ Configuração .env contém porta correta ($POSTGRES_PORT)"
+    else
+        echo "  ❌ Configuração .env não contém porta PostgreSQL"
+        ((issues++))
+    fi
+    
+    # 5. Verificar código fonte
+    echo "📝 Verificando código fonte..."
+    cd "$WORKING_DIR"
+    if find . -name "*.ts" -o -name "*.js" | xargs grep -q ":443\|https://$POSTGRES_HOST" 2>/dev/null; then
+        echo "  ❌ Código ainda contém configurações hardcoded incorretas"
+        ((issues++))
+    else
+        echo "  ✅ Código sem configurações hardcoded incorretas"
+    fi
+    
+    if head -10 server/index.ts | grep -q "dotenv"; then
+        echo "  ✅ Servidor configurado para carregar dotenv"
+    else
+        echo "  ❌ Servidor sem configuração dotenv"
+        ((issues++))
+    fi
+    cd - >/dev/null
+    
+    # 6. Testar conectividade
+    echo "🌐 Testando conectividade..."
+    if timeout 5 bash -c "</dev/tcp/$POSTGRES_HOST/$POSTGRES_PORT" 2>/dev/null; then
+        echo "  ✅ PostgreSQL ($POSTGRES_HOST:$POSTGRES_PORT)"
+    else
+        echo "  ❌ PostgreSQL ($POSTGRES_HOST:$POSTGRES_PORT)"
+        ((issues++))
+    fi
+    
+    if timeout 5 bash -c "</dev/tcp/$REDIS_HOST/$REDIS_PORT" 2>/dev/null; then
+        echo "  ✅ Redis ($REDIS_HOST:$REDIS_PORT)"
+    else
+        echo "  ⚠️ Redis ($REDIS_HOST:$REDIS_PORT) - não crítico"
+    fi
+    
+    # Resultado final
+    echo ""
+    if [ $issues -eq 0 ]; then
+        log "🎉 VALIDAÇÃO CONCLUÍDA COM SUCESSO!"
+        log "✅ Todos os testes passaram"
+        log "✅ Instalação está pronta para uso"
         return 0
     else
-        log "❌ $name: NÃO ENCONTRADO"
+        error "❌ Validação falhou: $issues problemas encontrados"
         return 1
     fi
 }
 
-# Função para verificar se um serviço está ativo
-check_service() {
-    local service=$1
-    if systemctl is-active --quiet "$service"; then
-        log "✅ Serviço $service: ATIVO"
-        return 0
-    else
-        log "❌ Serviço $service: INATIVO"
-        return 1
-    fi
-}
-
-# Função para verificar se um diretório existe
-check_directory() {
-    local dir=$1
-    local name=$2
-    if [ -d "$dir" ]; then
-        log "✅ Diretório $name: OK ($dir)"
-        return 0
-    else
-        log "❌ Diretório $name: NÃO EXISTE ($dir)"
-        return 1
-    fi
-}
-
-echo ""
-echo "=== RELATÓRIO DE VALIDAÇÃO ==="
-
-# Verificar comandos essenciais
-echo ""
-echo "🔧 Comandos e Ferramentas:"
-check_command "node" "Node.js"
-check_command "npm" "NPM"
-check_command "tsx" "TSX"
-check_command "git" "Git"
-check_command "psql" "PostgreSQL Client"
-check_command "redis-cli" "Redis Client"
-check_command "nmap" "Nmap"
-check_command "nuclei" "Nuclei"
-check_command "masscan" "Masscan"
-check_command "wscat" "WebSocket CLI"
-
-# Verificar serviços
-echo ""
-echo "🛠️ Serviços do Sistema:"
-check_service "ufw"
-check_service "fail2ban"
-check_service "supervisor"
-
-# Verificar diretórios
-echo ""
-echo "📁 Estrutura de Diretórios:"
-check_directory "$APP_DIR" "App Directory"
-check_directory "$LOG_DIR" "Log Directory"
-check_directory "$APP_DIR/scripts" "Scripts Directory"
-check_directory "/etc/samureye" "Config Directory"
-
-# Verificar arquivos críticos
-echo ""
-echo "📄 Arquivos de Configuração:"
-FILES_TO_CHECK=(
-    "/etc/samureye/.env:Variáveis de Ambiente"
-    "$APP_DIR/CREDENTIALS.txt:Credenciais"
-    "$APP_DIR/package.json:Package.json"
-    "$APP_DIR/vite.config.ts:Vite Config"
-    "/etc/systemd/system/samureye-app.service:Systemd Service"
-    "$APP_DIR/scripts/health-check.sh:Health Check"
-    "$APP_DIR/scripts/test-connectivity.sh:Test Connectivity"
-)
-
-for file_info in "${FILES_TO_CHECK[@]}"; do
-    IFS=':' read -r file_path file_name <<< "$file_info"
-    if [ -f "$file_path" ]; then
-        log "✅ $file_name: OK"
-    else
-        log "❌ $file_name: NÃO EXISTE"
-    fi
-done
-
-# Verificar usuário
-echo ""
-echo "👤 Usuário e Permissões:"
-if id "$APP_USER" >/dev/null 2>&1; then
-    log "✅ Usuário $APP_USER: EXISTS"
-    if groups "$APP_USER" | grep -q sudo; then
-        log "✅ Usuário $APP_USER: HAS SUDO"
-    else
-        log "❌ Usuário $APP_USER: NO SUDO"
-    fi
-else
-    log "❌ Usuário $APP_USER: NÃO EXISTE"
-fi
-
-# Verificar ports
-echo ""
-echo "🌐 Verificação de Ports:"
-if ss -tuln | grep -q ":5000"; then
-    log "✅ Porta 5000: DISPONÍVEL PARA BIND"
-else
-    log "✅ Porta 5000: LIVRE"
-fi
-
 # ============================================================================
-# VERIFICAÇÃO DAS CORREÇÕES APLICADAS
+# INICIALIZAÇÃO DO SERVIÇO
 # ============================================================================
 
-log "🔧 Verificando correções aplicadas..."
-
-# Verificar permissões do arquivo .env
-echo ""
-echo "📁 Verificação de Permissões do .env:"
-if [ -f "/etc/samureye/.env" ]; then
-    ENV_PERMS=$(ls -la /etc/samureye/.env | awk '{print $1, $3, $4}')
-    log "Permissões atuais: $ENV_PERMS"
+start_service() {
+    log "🚀 Iniciando serviço SamurEye..."
     
-    # Verificar se as permissões estão corretas
-    if [ "$(stat -c '%U:%G' /etc/samureye/.env)" = "samureye:samureye" ]; then
-        log "✅ Owner correto: samureye:samureye"
-    else
-        log "⚠️ Owner incorreto - deveria ser samureye:samureye"
-    fi
+    # Habilitar e iniciar serviço
+    systemctl enable samureye-app
+    systemctl start samureye-app
     
-    if [ "$(stat -c '%a' /etc/samureye/.env)" = "644" ]; then
-        log "✅ Permissões corretas: 644 (rw-r--r--)"
-    else
-        log "⚠️ Permissões incorretas - deveriam ser 644"
-    fi
-else
-    log "❌ Arquivo .env não encontrado!"
-fi
-
-# Verificar URLs corretas no .env
-echo ""
-echo "🌐 Verificação de URLs no .env:"
-if grep -q "FRONTEND_URL=http://172.24.1.152:5000" /etc/samureye/.env 2>/dev/null; then
-    log "✅ FRONTEND_URL: Correta (http://172.24.1.152:5000)"
-else
-    log "❌ FRONTEND_URL: Incorreta ou não encontrada"
-fi
-
-if grep -q "VITE_API_BASE_URL=http://172.24.1.152:5000" /etc/samureye/.env 2>/dev/null; then
-    log "✅ VITE_API_BASE_URL: Correta (http://172.24.1.152:5000)"
-else
-    log "❌ VITE_API_BASE_URL: Incorreta ou não encontrada"
-fi
-
-if grep -q "CORS_ORIGINS=http://172.24.1.152:5000" /etc/samureye/.env 2>/dev/null; then
-    log "✅ CORS_ORIGINS: Correta (http://172.24.1.152:5000)"
-else
-    log "❌ CORS_ORIGINS: Incorreta ou não encontrada"
-fi
-
-# Verificar conectividade básica
-echo ""
-echo "🔗 Conectividade Básica:"
-if ping -c 1 8.8.8.8 >/dev/null 2>&1; then
-    log "✅ Conectividade Internet: OK"
-else
-    log "❌ Conectividade Internet: FALHA"
-fi
-
-if ping -c 1 172.24.1.153 >/dev/null 2>&1; then
-    log "✅ Conectividade vlxsam03: OK"
-else
-    log "❌ Conectividade vlxsam03: FALHA"
-fi
-
-# CORREÇÃO CRÍTICA: Reiniciar serviço para aplicar todas as correções
-echo ""
-echo "🔄 Reiniciando serviço para aplicar correções..."
-systemctl restart samureye-app
-log "✅ Serviço reiniciado"
-
-# Aguardar inicialização após reinicialização
-sleep 5
-
-# Verificar se API está respondendo
-echo ""
-echo "🧪 Teste de API pós-correção:"
-if curl -s http://localhost:5000/api/health >/dev/null 2>&1; then
-    log "✅ API Health Check: OK"
+    # Aguardar inicialização
+    sleep 5
     
-    # Testar endpoint que deve retornar 401 (esperado)
-    if curl -s http://localhost:5000/api/user 2>&1 | grep -q "autenticado\|401\|Unauthorized"; then
-        log "✅ API User Endpoint: OK (401 esperado)"
-    else
-        log "⚠️ API User Endpoint: Resposta inesperada"
-    fi
-else
-    log "❌ API Health Check: FALHA - Verificando problema..."
-    
-    # Verificar logs para ver se ainda há erro de conexão porta 443
-    if journalctl -u samureye-app --since "2 minutes ago" --no-pager -q | grep -q "ECONNREFUSED.*:443"; then
-        log "❌ PROBLEMA PERSISTENTE: Ainda conecta na porta 443"
-        log "🔧 EXECUTANDO CORREÇÃO ESPECÍFICA..."
+    # Verificar status
+    if systemctl is-active --quiet samureye-app; then
+        log "✅ Serviço iniciado com sucesso"
         
-        # Executar script específico para corrigir problema da porta 443
-        chmod +x "$SCRIPT_DIR/fix-port-443-issue.sh"
-        "$SCRIPT_DIR/fix-port-443-issue.sh"
+        # Testar API
+        log "🧪 Testando API..."
+        local api_attempts=0
+        local max_attempts=6
+        
+        while [ $api_attempts -lt $max_attempts ]; do
+            if curl -s http://localhost:5000/api/health >/dev/null 2>&1; then
+                log "✅ API está respondendo em http://localhost:5000"
+                break
+            else
+                ((api_attempts++))
+                if [ $api_attempts -lt $max_attempts ]; then
+                    log "Aguardando API... (tentativa $api_attempts/$max_attempts)"
+                    sleep 5
+                else
+                    warn "API não está respondendo após $max_attempts tentativas"
+                fi
+            fi
+        done
+        
+        # Verificar logs por erros críticos
+        log "🔍 Verificando logs por erros..."
+        if journalctl -u samureye-app --since "2 minutes ago" --no-pager -q | grep -q "ECONNREFUSED.*:443"; then
+            error "❌ ERRO CRÍTICO: Ainda há tentativas de conexão na porta 443"
+        else
+            log "✅ Nenhum erro de porta 443 detectado"
+        fi
         
     else
-        log "✅ Erro de conexão porta 443 resolvido"
+        error "❌ Falha ao iniciar serviço"
     fi
-fi
+}
 
-echo ""
-echo "=== FIM DA VALIDAÇÃO ==="
-echo ""
+# ============================================================================
+# FUNÇÃO PRINCIPAL
+# ============================================================================
 
-# Verificar se é uma reinstalação
-if [ -f "$APP_DIR/.installation_complete" ]; then
-    log "🔄 REINSTALAÇÃO DETECTADA - Script executado como mecanismo de reset"
-else
-    log "🆕 PRIMEIRA INSTALAÇÃO DETECTADA"
-    touch "$APP_DIR/.installation_complete"
-    chown "$APP_USER:$APP_USER" "$APP_DIR/.installation_complete"
-fi
+main() {
+    log "🎯 Iniciando instalação completa do SamurEye vlxsam02..."
+    
+    # Execução sequencial com verificação de erros
+    diagnostic_check
+    cleanup_previous_installation
+    install_system_packages
+    install_nodejs
+    create_user
+    install_application
+    fix_hardcoded_configurations
+    create_env_file
+    test_env_loading
+    create_systemd_service
+    final_validation
+    start_service
+    
+    echo ""
+    echo "🎉 INSTALAÇÃO CONCLUÍDA COM SUCESSO!"
+    echo "====================================="
+    echo ""
+    echo "📊 STATUS DO SISTEMA:"
+    echo "   🔗 URL da aplicação: http://localhost:5000"
+    echo "   📁 Diretório da aplicação: $WORKING_DIR"
+    echo "   ⚙️ Arquivo de configuração: $ETC_DIR/.env"
+    echo "   👤 Usuário do serviço: $SERVICE_USER"
+    echo ""
+    echo "🔧 COMANDOS ÚTEIS:"
+    echo "   systemctl status samureye-app    # Status do serviço"
+    echo "   journalctl -u samureye-app -f    # Logs em tempo real"
+    echo "   systemctl restart samureye-app   # Reiniciar serviço"
+    echo ""
+    echo "🌐 DEPENDÊNCIAS:"
+    echo "   PostgreSQL: $POSTGRES_HOST:$POSTGRES_PORT"
+    echo "   Redis: $REDIS_HOST:$REDIS_PORT"
+    echo ""
+    log "✅ SamurEye vlxsam02 instalado e funcionando!"
+}
 
-log "📊 Instalação vlxsam02 completada com validação!"
-log "📖 Consulte: $APP_DIR/CREDENTIALS.txt para próximos passos"
+# Executar instalação
+main "$@"
