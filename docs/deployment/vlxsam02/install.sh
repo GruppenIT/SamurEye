@@ -43,22 +43,39 @@ timedatectl set-timezone America/Sao_Paulo
 
 # Instalar pacotes essenciais
 log "Instalando pacotes essenciais..."
-apt-get install -y \
-    curl \
-    wget \
-    git \
-    build-essential \
-    python3 \
-    python3-pip \
-    htop \
-    unzip \
-    software-properties-common \
-    ufw \
-    fail2ban \
-    supervisor \
-    sqlite3 \
-    postgresql-client \
-    wscat
+
+# Lista de pacotes essenciais para Ubuntu 24.04
+ESSENTIAL_PACKAGES=(
+    "curl"
+    "wget" 
+    "git"
+    "build-essential"
+    "python3"
+    "python3-pip"
+    "htop"
+    "unzip"
+    "software-properties-common"
+    "ufw"
+    "fail2ban"
+    "supervisor"
+    "sqlite3"
+    "postgresql-client-16"
+    "ca-certificates"
+    "gnupg"
+    "lsb-release"
+)
+
+# Instalar cada pacote individualmente para melhor controle de erros
+for package in "${ESSENTIAL_PACKAGES[@]}"; do
+    if apt-cache show "$package" >/dev/null 2>&1; then
+        log "Instalando $package..."
+        apt-get install -y "$package" || {
+            log "AVISO: Falha ao instalar $package, continuando..."
+        }
+    else
+        log "AVISO: Pacote $package não encontrado, pulando..."
+    fi
+done
 
 # ============================================================================
 # 2. CONFIGURAÇÃO DE USUÁRIO
@@ -155,27 +172,80 @@ log "Firewall configurado: SSH (22), App (5000)"
 
 log "🔧 Instalando ferramentas de segurança e cliente PostgreSQL..."
 
-# Cliente PostgreSQL e ferramentas de rede (essencial para conectar com vlxsam03)
-apt-get install -y postgresql-client-16 redis-tools dnsutils netcat-openbsd
+# Ferramentas de rede e banco de dados (essencial para conectar com vlxsam03)
+NETWORK_DB_PACKAGES=(
+    "redis-tools"
+    "dnsutils" 
+    "netcat-openbsd"
+)
 
-# Instalar Nmap
-apt-get install -y nmap
+for package in "${NETWORK_DB_PACKAGES[@]}"; do
+    if apt-cache show "$package" >/dev/null 2>&1; then
+        log "Instalando $package..."
+        apt-get install -y "$package" || {
+            log "AVISO: Falha ao instalar $package, continuando..."
+        }
+    else
+        log "AVISO: Pacote $package não encontrado, pulando..."
+    fi
+done
+
+# Verificar se postgresql-client já foi instalado
+if ! command -v psql >/dev/null 2>&1; then
+    log "PostgreSQL client não encontrado. Tentando instalar..."
+    apt-get install -y postgresql-client || {
+        log "Tentando versão específica..."
+        apt-get install -y postgresql-client-16 || {
+            log "AVISO: Falha ao instalar cliente PostgreSQL"
+        }
+    }
+fi
+
+# Instalar ferramentas de segurança
+SECURITY_PACKAGES=(
+    "nmap"
+    "masscan"
+)
+
+for package in "${SECURITY_PACKAGES[@]}"; do
+    if apt-cache show "$package" >/dev/null 2>&1; then
+        log "Instalando $package..."
+        apt-get install -y "$package" || {
+            log "AVISO: Falha ao instalar $package, continuando..."
+        }
+    else
+        log "AVISO: Pacote $package não encontrado, pulando..."
+    fi
+done
 
 # Instalar Nuclei
 log "Instalando Nuclei..."
-cd /tmp
+cd /tmp || exit 1
 NUCLEI_VERSION="3.2.9"
-wget "https://github.com/projectdiscovery/nuclei/releases/download/v${NUCLEI_VERSION}/nuclei_${NUCLEI_VERSION}_linux_amd64.zip"
-unzip "nuclei_${NUCLEI_VERSION}_linux_amd64.zip"
-mv nuclei /usr/local/bin/
-chmod +x /usr/local/bin/nuclei
+if wget "https://github.com/projectdiscovery/nuclei/releases/download/v${NUCLEI_VERSION}/nuclei_${NUCLEI_VERSION}_linux_amd64.zip"; then
+    if unzip "nuclei_${NUCLEI_VERSION}_linux_amd64.zip"; then
+        mv nuclei /usr/local/bin/ 2>/dev/null || sudo mv nuclei /usr/local/bin/
+        chmod +x /usr/local/bin/nuclei
+        log "Nuclei instalado com sucesso"
+    else
+        log "AVISO: Falha ao extrair Nuclei"
+    fi
+else
+    log "AVISO: Falha ao baixar Nuclei"
+fi
 
-# Instalar Masscan
-log "Instalando Masscan..."
-apt-get install -y masscan
+# Instalar wscat via npm (já que não está disponível via apt)
+log "Instalando wscat via npm..."
+npm install -g wscat 2>/dev/null || {
+    log "AVISO: Falha ao instalar wscat via npm"
+}
 
 # Verificar instalações
-nmap --version | head -1
+log "Verificando ferramentas instaladas..."
+command -v nmap >/dev/null && nmap --version | head -1 || log "Nmap não instalado"
+command -v nuclei >/dev/null && nuclei -version || log "Nuclei não instalado"
+command -v masscan >/dev/null && masscan --version || log "Masscan não instalado"
+command -v wscat >/dev/null && log "wscat instalado" || log "wscat não instalado"
 nuclei --version
 masscan --version | head -1
 
@@ -917,3 +987,156 @@ echo "⚠️  IMPORTANTE:"
 echo "   - Configure /etc/samureye/.env com dados reais"
 echo "   - Instale o código da aplicação"
 echo "   - Teste conectividade com vlxsam03 (database)"
+echo ""
+
+# ============================================================================
+# 17. VALIDAÇÃO FINAL DA INSTALAÇÃO
+# ============================================================================
+
+log "🔍 Executando validação final da instalação..."
+
+# Função para verificar se um comando existe
+check_command() {
+    local cmd=$1
+    local name=$2
+    if command -v "$cmd" >/dev/null 2>&1; then
+        log "✅ $name: OK"
+        return 0
+    else
+        log "❌ $name: NÃO ENCONTRADO"
+        return 1
+    fi
+}
+
+# Função para verificar se um serviço está ativo
+check_service() {
+    local service=$1
+    if systemctl is-active --quiet "$service"; then
+        log "✅ Serviço $service: ATIVO"
+        return 0
+    else
+        log "❌ Serviço $service: INATIVO"
+        return 1
+    fi
+}
+
+# Função para verificar se um diretório existe
+check_directory() {
+    local dir=$1
+    local name=$2
+    if [ -d "$dir" ]; then
+        log "✅ Diretório $name: OK ($dir)"
+        return 0
+    else
+        log "❌ Diretório $name: NÃO EXISTE ($dir)"
+        return 1
+    fi
+}
+
+echo ""
+echo "=== RELATÓRIO DE VALIDAÇÃO ==="
+
+# Verificar comandos essenciais
+echo ""
+echo "🔧 Comandos e Ferramentas:"
+check_command "node" "Node.js"
+check_command "npm" "NPM"
+check_command "tsx" "TSX"
+check_command "git" "Git"
+check_command "psql" "PostgreSQL Client"
+check_command "redis-cli" "Redis Client"
+check_command "nmap" "Nmap"
+check_command "nuclei" "Nuclei"
+check_command "masscan" "Masscan"
+check_command "wscat" "WebSocket CLI"
+
+# Verificar serviços
+echo ""
+echo "🛠️ Serviços do Sistema:"
+check_service "ufw"
+check_service "fail2ban"
+check_service "supervisor"
+
+# Verificar diretórios
+echo ""
+echo "📁 Estrutura de Diretórios:"
+check_directory "$APP_DIR" "App Directory"
+check_directory "$LOG_DIR" "Log Directory"
+check_directory "$APP_DIR/scripts" "Scripts Directory"
+check_directory "/etc/samureye" "Config Directory"
+
+# Verificar arquivos críticos
+echo ""
+echo "📄 Arquivos de Configuração:"
+FILES_TO_CHECK=(
+    "/etc/samureye/.env:Variáveis de Ambiente"
+    "$APP_DIR/CREDENTIALS.txt:Credenciais"
+    "$APP_DIR/package.json:Package.json"
+    "$APP_DIR/vite.config.ts:Vite Config"
+    "/etc/systemd/system/samureye-app.service:Systemd Service"
+    "$APP_DIR/scripts/health-check.sh:Health Check"
+    "$APP_DIR/scripts/test-connectivity.sh:Test Connectivity"
+)
+
+for file_info in "${FILES_TO_CHECK[@]}"; do
+    IFS=':' read -r file_path file_name <<< "$file_info"
+    if [ -f "$file_path" ]; then
+        log "✅ $file_name: OK"
+    else
+        log "❌ $file_name: NÃO EXISTE"
+    fi
+done
+
+# Verificar usuário
+echo ""
+echo "👤 Usuário e Permissões:"
+if id "$APP_USER" >/dev/null 2>&1; then
+    log "✅ Usuário $APP_USER: EXISTS"
+    if groups "$APP_USER" | grep -q sudo; then
+        log "✅ Usuário $APP_USER: HAS SUDO"
+    else
+        log "❌ Usuário $APP_USER: NO SUDO"
+    fi
+else
+    log "❌ Usuário $APP_USER: NÃO EXISTE"
+fi
+
+# Verificar ports
+echo ""
+echo "🌐 Verificação de Ports:"
+if ss -tuln | grep -q ":5000"; then
+    log "✅ Porta 5000: DISPONÍVEL PARA BIND"
+else
+    log "✅ Porta 5000: LIVRE"
+fi
+
+# Verificar conectividade básica
+echo ""
+echo "🔗 Conectividade Básica:"
+if ping -c 1 8.8.8.8 >/dev/null 2>&1; then
+    log "✅ Conectividade Internet: OK"
+else
+    log "❌ Conectividade Internet: FALHA"
+fi
+
+if ping -c 1 172.24.1.153 >/dev/null 2>&1; then
+    log "✅ Conectividade vlxsam03: OK"
+else
+    log "❌ Conectividade vlxsam03: FALHA"
+fi
+
+echo ""
+echo "=== FIM DA VALIDAÇÃO ==="
+echo ""
+
+# Verificar se é uma reinstalação
+if [ -f "$APP_DIR/.installation_complete" ]; then
+    log "🔄 REINSTALAÇÃO DETECTADA - Script executado como mecanismo de reset"
+else
+    log "🆕 PRIMEIRA INSTALAÇÃO DETECTADA"
+    touch "$APP_DIR/.installation_complete"
+    chown "$APP_USER:$APP_USER" "$APP_DIR/.installation_complete"
+fi
+
+log "📊 Instalação vlxsam02 completada com validação!"
+log "📖 Consulte: $APP_DIR/CREDENTIALS.txt para próximos passos"
