@@ -1,0 +1,246 @@
+root@vlxsam03:~# curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam03/install.sh | bash
+[16:17:25] 🚀 Iniciando instalação vlxsam03 - Database/Services Server
+[16:17:25] Servidor: 172.24.1.153
+[16:17:25] Data Directory: /opt/data
+[16:17:25] 📦 Atualizando sistema base...
+Hit:1 https://packages.grafana.com/oss/deb stable InRelease
+Hit:2 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:3 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:4 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:5 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+All packages are up to date.
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+Calculating upgrade... Done
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+curl is already the newest version (8.5.0-2ubuntu10.6).
+wget is already the newest version (1.21.4-1ubuntu4.1).
+gnupg is already the newest version (2.4.4-2ubuntu17.3).
+software-properties-common is already the newest version (0.99.49.3).
+apt-transport-https is already the newest version (2.8.3).
+ca-certificates is already the newest version (20240203).
+lsb-release is already the newest version (12.0-2).
+jq is already the newest version (1.7.1-3ubuntu0.24.04.1).
+htop is already the newest version (3.3.0-4build1).
+iotop is already the newest version (0.6-42-ga14256a-0.2build1).
+netcat-openbsd is already the newest version (1.226-1ubuntu2).
+redis-tools is already the newest version (5:7.0.15-1ubuntu0.24.04.1).
+postgresql-client-16 is already the newest version (16.9-0ubuntu0.24.04.1).
+postgresql-client-16 set to manually installed.
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+[16:17:28] Sistema base atualizado
+[16:17:28] 👤 Configurando usuários e diretórios...
+[16:17:28] Usuários e diretórios configurados
+[16:17:28] 🔴 Instalando Redis...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+redis-server is already the newest version (5:7.0.15-1ubuntu0.24.04.1).
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+Synchronizing state of redis-server.service with SysV service script with /usr/lib/systemd/systemd-sysv-install.
+Executing: /usr/lib/systemd/systemd-sysv-install enable redis-server
+Warning: Using a password with '-a' or '-u' option on the command line interface may not be safe.
+[16:17:34] ✅ Redis configurado e testado com sucesso
+[16:17:34] Redis configurado e iniciado
+[16:17:34] 🐘 Instalando PostgreSQL 16...
+[16:17:34] 🔍 DEBUG: Verificando estado atual do PostgreSQL...
+[16:17:34] 🔍 DEBUG: pg_lsclusters encontrado - executando com timeout...
+[16:17:34] 🔍 DEBUG: pg_lsclusters executado com sucesso
+[16:17:34] 🔍 DEBUG: Saída pg_lsclusters: Ver Cluster Port Status Owner    Data directory              Log file
+16  main    5432 online postgres /var/lib/postgresql/16/main /var/log/postgresql/postgresql-16-main.log
+[16:17:34] 🔍 DEBUG: Clusters parecem OK - verificando se PostgreSQL está funcionando...
+[16:17:34] 🔍 DEBUG: Serviço PostgreSQL está ATIVO
+[16:17:34] 🔍 DEBUG: Testando conexão PostgreSQL...
+[16:17:34] 🔍 DEBUG: Conexão PostgreSQL funcionando
+[16:17:34] 🔍 DEBUG: PostgreSQL já instalado e funcionando - pulando instalação
+[16:17:34] 🗄️ DEBUG: Configurando usuário e banco de dados...
+[16:17:34] 🗄️ DEBUG: PostgreSQL ainda ativo antes da configuração do banco
+[16:17:34] 🗄️ DEBUG: Testando conexão PostgreSQL antes da configuração...
+[16:17:34] 🗄️ DEBUG: Conexão PostgreSQL OK antes da configuração do banco
+[16:17:34] 🗄️ DEBUG: Executando comandos SQL para configurar banco...
+ pg_terminate_backend
+----------------------
+(0 rows)
+
+DROP DATABASE
+DROP ROLE
+CREATE ROLE
+CREATE DATABASE
+GRANT
+CREATE EXTENSION
+CREATE EXTENSION
+GRANT
+[16:17:34] 🗄️ DEBUG: Comandos SQL executados - verificando se PostgreSQL ainda funciona...
+[16:17:34] 🗄️ DEBUG: PostgreSQL ainda ativo após configuração do banco
+[16:17:34] 🗄️ DEBUG: Conexão PostgreSQL ainda funcionando após configuração
+[16:17:34] 🗄️ DEBUG: Configurando PostgreSQL para aceitar conexões TCP/IP...
+[16:17:34] 🗄️ DEBUG: Reiniciando PostgreSQL para aplicar configurações de rede...
+[16:17:40] 🗄️ DEBUG: PostgreSQL ainda ativo após configuração de rede
+[16:17:40] 🗄️ DEBUG: Verificando configurações aplicadas...
+[16:17:40] 🗄️ DEBUG: listen_addresses em postgresql.conf:
+listen_addresses = '*'          # what IP address(es) to listen on;
+[16:17:40] 🗄️ DEBUG: port em postgresql.conf:
+[16:17:40] 🗄️ DEBUG: Últimas linhas do pg_hba.conf:
+host    replication     all             ::1/128                 scram-sha-256
+# Configurações SamurEye para conexões TCP/IP
+host    samureye_db     samureye        127.0.0.1/32            scram-sha-256
+host    samureye_db     samureye        172.24.1.153/32         scram-sha-256
+host    samureye_db     samureye        0.0.0.0/0               scram-sha-256
+[16:17:40] 🗄️ DEBUG: Testando conexão TCP imediatamente após configuração...
+[16:17:40] 🗄️ DEBUG: ✅ Conexão TCP funcionando imediatamente após configuração!
+[16:17:40] ✅ DEBUG: PostgreSQL configurado com sucesso (incluindo rede TCP/IP)
+[16:17:40] 🗄️ Criando estrutura do banco de dados...
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TABLE
+CREATE INDEX
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+INSERT 0 2
+INSERT 0 1
+GRANT
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+[16:17:40] 🗄️ DEBUG: Configurações TCP/IP já aplicadas anteriormente - mantendo configuração existente
+[16:17:40] 🗄️ DEBUG: Aplicando configurações de performance...
+[16:17:40] 🗄️ DEBUG: Adicionando configurações de rede adicionais ao pg_hba.conf...
+[16:17:40] 🗄️ DEBUG: Recarregando configurações PostgreSQL (sem restart)...
+[16:17:42] ✅ PostgreSQL configurado e iniciado com sucesso
+[16:17:42] 🔍 Testando conectividade PostgreSQL...
+[16:17:42] ✅ Teste de conexão PostgreSQL local bem-sucedido
+[16:17:42] PostgreSQL configurado e banco samureye_db criado
+[16:17:42] 📊 Instalando Grafana...
+File '/usr/share/keyrings/grafana.gpg' exists. Overwrite? (y/N) y
+Hit:1 https://packages.grafana.com/oss/deb stable InRelease
+Hit:2 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:3 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:4 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:5 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+All packages are up to date.
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+grafana is already the newest version (12.1.1).
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+Synchronizing state of grafana-server.service with SysV service script with /usr/lib/systemd/systemd-sysv-install.
+Executing: /usr/lib/systemd/systemd-sysv-install disable grafana-server
+Removed "/etc/systemd/system/multi-user.target.wants/grafana-server.service".
+Failed to reset failed state of unit grafana-server.service: Unit grafana-server.service not loaded.
+[16:17:57] WARNING: Grafana não consegue escrever em /opt/data/grafana, usando configuração padrão
+[16:17:57] Usando configuração padrão do Grafana
+Failed to reset failed state of unit grafana-server.service: Unit grafana-server.service not loaded.
+Synchronizing state of grafana-server.service with SysV service script with /usr/lib/systemd/systemd-sysv-install.
+Executing: /usr/lib/systemd/systemd-sysv-install enable grafana-server
+Created symlink /etc/systemd/system/multi-user.target.wants/grafana-server.service → /usr/lib/systemd/system/grafana-server.service.
+[16:18:00] Iniciando Grafana (aguarde 15 segundos)...
+[16:18:15] ✅ Grafana configurado e iniciado com sucesso
+[16:18:15] 🗄️ Instalando MinIO (backup local)...
+Removed "/etc/systemd/system/multi-user.target.wants/minio.service".
+--2025-08-26 16:18:22--  https://dl.min.io/server/minio/release/linux-amd64/minio
+Resolving dl.min.io (dl.min.io)... 138.68.11.125, 178.128.69.202
+Connecting to dl.min.io (dl.min.io)|138.68.11.125|:443... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 110780600 (106M) [application/octet-stream]
+Saving to: ‘/usr/local/bin/minio’
+
+/usr/local/bin/minio                                 100%[======================================================================================================================>] 105.65M  7.59MB/s    in 16s
+
+2025-08-26 16:18:39 (6.48 MB/s) - ‘/usr/local/bin/minio’ saved [110780600/110780600]
+
+usermod: no changes
+Created MinIO structure in /var/lib/minio
+[16:18:39] Estrutura MinIO criada:
+total 16
+drwxr-xr-x  4 minio minio 4096 Aug 26 16:18 .
+drwxr-xr-x 50 root  root  4096 Aug 26 16:18 ..
+drwxrwxr-x  2 minio minio 4096 Aug 26 16:18 config
+drwxrwxr-x  2 minio minio 4096 Aug 26 16:18 data
+[16:18:39] ✅ Diretório MinIO configurado
+[16:18:39] Testando acesso MinIO ao diretório...
+Created symlink /etc/systemd/system/multi-user.target.wants/minio.service → /etc/systemd/system/minio.service.
+[16:18:40] Iniciando MinIO...
+[16:18:47] ✅ MinIO configurado e iniciado com sucesso
+[16:18:47] 🔧 Configurando variáveis de ambiente...
+[16:18:47] Configuração de ambiente criada
+[16:18:47] 📝 Criando scripts de teste...
+[16:18:47] Scripts de teste criados
+[16:18:47] ⏰ Configurando cron para backups...
+[16:18:47] Cron jobs configurados
+[16:18:47] 📋 Configurando rotação de logs...
+[16:18:47] Rotação de logs configurada
+[16:18:47] 🎯 Finalizando instalação...
+[16:18:47] ✅ postgresql: Ativo
+[16:18:47] ✅ redis-server: Ativo
+[16:18:47] ✅ grafana-server: Ativo
+[16:18:47] ✅ minio: Ativo
+
+============================================================================
+🎉 INSTALAÇÃO vlxsam03 CONCLUÍDA
+============================================================================
+
+📊 SERVIÇOS INSTALADOS:
+  • PostgreSQL (Database): 172.24.1.153:5432
+  • Redis (Cache/Sessions): 172.24.1.153:6379
+  • Grafana (Monitoring): http://172.24.1.153:3000
+  • MinIO (Backup): http://172.24.1.153:9000
+
+🔑 CREDENCIAIS PADRÃO:
+  • PostgreSQL: samureye/SamurEye2024DB! (banco: samureye_db)
+  • Redis: senha 'SamurEye2024Redis!'
+  • Grafana: admin/SamurEye2024!
+  • MinIO: admin/SamurEye2024!
+
+⚠️ PRÓXIMOS PASSOS:
+  1. Configurar object storage no vlxsam02
+  2. Executar testes: /opt/samureye/scripts/health-check.sh
+  3. Verificar conectividade PostgreSQL: /opt/samureye/scripts/test-postgres-connection.sh
+  4. Para reset completo PostgreSQL (emergencial): samureye-reset-postgres
+
+📁 DIRETÓRIOS IMPORTANTES:
+  • Dados: /opt/data
+  • Backups: /opt/backup
+  • Scripts: /opt/samureye/scripts
+  • Configuração: /etc/samureye
+  • Logs: /var/log/samureye
+
+============================================================================
+[16:18:47] ✅ Instalação vlxsam03 concluída com sucesso!
+root@vlxsam03:~# /opt/samureye/scripts/test-postgres-connection.sh
+[16:18:52] 🐘 Testando conectividade PostgreSQL...
+[16:18:52] Testando conexão com banco samureye_db...
+[16:18:53] ✅ Conexão PostgreSQL local via postgres user: OK
+[16:18:53] ⚡ Latência local: 36ms
+[16:18:53] 📊 Tabelas encontradas: 14
+[16:18:53] 🔍 Verificando estrutura do banco...
+[16:18:53] ✅ Tabela 'users': OK
+[16:18:53] ✅ Tabela 'tenants': OK
+[16:18:53] ✅ Tabela 'collectors': OK
+[16:18:53] 🔧 Verificando extensões...
+[16:18:53] ✅ Extensão 'uuid-ossp': instalada
+[16:18:53] Teste PostgreSQL concluído
+root@vlxsam03:~#

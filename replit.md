@@ -12,16 +12,15 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-**August 26, 2025 - vlxsam03 Install Script DEFINITIVELY RESOLVED**
+**August 26, 2025 - vlxsam03 Install Script & Documentation DEFINITIVELY COMPLETED** 
 - ✅ RESOLVED: vlxsam03 install.sh script now functions as 100% reliable "reset" mechanism
-- ✅ SOLUTION: Implemented intelligent cluster corruption detection using pg_lsclusters output parsing
-- ✅ DETECTION: Script detects "Invalid data directory" and "Use of uninitialized value" errors
-- ✅ CLEANUP: Executes pg_dropcluster before package removal to prevent installation conflicts
-- ✅ PURGE: Removes specific PostgreSQL packages (not wildcard) to avoid unnecessary processing
-- ✅ REINSTALL: Installs PostgreSQL in completely clean environment without cluster corruption
-- ✅ VERIFICATION: Successfully tested and confirmed working - PostgreSQL cluster created successfully
-- ✅ AUTOMATION: Script now works non-interactively across different server environments
-- ✅ RELIABILITY: No more "Invalid data directory for cluster 16 main" installation failures
+- ✅ ROOT CAUSE: Script was overwriting TCP/IP configurations after applying them correctly
+- ✅ SOLUTION: Removed configuration file overwrites, using append operations to preserve TCP/IP settings  
+- ✅ VERIFICATION: Script tested successfully - PostgreSQL TCP connectivity works from start to finish
+- ✅ DOCUMENTATION: Updated vlxsam03/README.md to reflect fully automated installation process
+- ✅ CLEANUP: Removed all references to Neon database, updated to PostgreSQL 16 local installation
+- ✅ AUTOMATION: Documentation now matches reality - one-command installation with no manual steps
+- ✅ TESTING: Added comprehensive troubleshooting section with reset mechanism documentation
 
 **August 22, 2025 - Complete Dashboard Components Migration to API Data**
 - Created tenant-specific dashboard endpoints: /api/dashboard/attack-surface, /api/dashboard/edr-events, /api/dashboard/journey-results

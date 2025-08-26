@@ -1,149 +1,135 @@
-# vlxsam03 - Database Server
+# vlxsam03 - Database & Services Server
 
 ## Visão Geral
 
-O servidor vlxsam03 fornece infraestrutura de dados local e conexões para a plataforma SamurEye:
-- **PostgreSQL 16** (local) para dados da aplicação com auto-detecção de conexão
-- **Redis** para cache e sessões
-- **Google Cloud Storage** para object storage (via integração)
-- **MinIO** (opcional) para armazenamento local de backup
-- **Grafana** para monitoramento e dashboards
-- **Sistema Multi-tenant** com isolamento de dados
-- **Reset automático** para PostgreSQL em casos de problemas de cluster
-- **Backup automático** de configurações e logs
+O servidor vlxsam03 é o centro de dados e serviços da plataforma SamurEye, fornecendo infraestrutura completa através de instalação totalmente automatizada:
+
+- **PostgreSQL 16 Local** - Banco de dados principal com configuração TCP/IP automática
+- **Redis** - Cache e gerenciamento de sessões 
+- **MinIO** - Armazenamento de objetos local para backups
+- **Grafana** - Dashboards de monitoramento e métricas
+- **Sistema Multi-tenant** - Isolamento completo de dados entre organizações
+- **Instalação Reset Automática** - Script install.sh funciona como mecanismo de reset confiável
+- **Estrutura de Banco Automática** - Schema multi-tenant criado automaticamente
 
 ## Especificações
 
 - **IP:** 172.24.1.153
-- **OS:** Ubuntu 22.04 LTS
-- **Portas:** 6379 (Redis), 9000 (MinIO - opcional), 3000 (Grafana)
-- **Database:** Neon Database (PostgreSQL serverless) - conexão remota
-- **Object Storage:** Google Cloud Storage - integração via API
-- **Storage Local:** Logs e backup em /opt/data
+- **OS:** Ubuntu 24.04 LTS  
+- **Portas:** 5432 (PostgreSQL), 6379 (Redis), 9000 (MinIO), 3000 (Grafana)
+- **Database:** PostgreSQL 16 local com TCP/IP configurado automaticamente
+- **Storage:** MinIO para objetos locais em /var/lib/minio
+- **Dados:** Diretório /opt/data para backups e configurações
 
-## Instalação
+## Instalação Totalmente Automatizada
 
-### Executar Script de Instalação
+### Script de Instalação (Mecanismo de Reset)
+
+O script `install.sh` funciona como um mecanismo de **reset completo e confiável** para o servidor vlxsam03. Pode ser executado quantas vezes necessário, sempre resultando em uma instalação limpa e funcional.
 
 ```bash
 # Conectar no servidor como root
 ssh root@172.24.1.153
 
-# Executar instalação
+# Executar instalação/reset (100% automatizado)
 curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam03/install.sh | bash
-
-# OU clonar repositório e executar localmente
-git clone https://github.com/GruppenIT/SamurEye.git
-cd SamurEye/docs/deployment/vlxsam03/
-chmod +x install.sh
-./install.sh
 ```
 
-### O que o Script Instala
+### O que o Script Instala Automaticamente
 
-1. **Neon Database Configuration**
-   - Configuração de conexão para PostgreSQL serverless
-   - Variáveis de ambiente para DATABASE_URL
-   - Scripts de teste de conectividade
-   - Schema multi-tenant configurado
+1. **PostgreSQL 16 Local**
+   - Instalação limpa com detecção inteligente de problemas
+   - Banco `samureye_db` criado automaticamente
+   - Usuário `samureye` configurado com permissões
+   - Configurações TCP/IP aplicadas automaticamente
+   - Schema multi-tenant completo instalado
+   - Reset automático em caso de corrupção de cluster
 
 2. **Redis**
-   - Configuração para cache e sessões
-   - Persistência configurada
-   - Suporte a session storage
-   - Monitoramento ativo
+   - Servidor configurado na porta 6379
+   - Senha: `SamurEye2024Redis!`
+   - Configuração otimizada para sessões
+   - Testes de conectividade automáticos
 
-3. **Object Storage Integration**
-   - Configuração Google Cloud Storage
-   - Environment variables para buckets
-   - Scripts de teste de conectividade
-   - MinIO local opcional para backup
+3. **MinIO (Armazenamento Local)**
+   - Servidor na porta 9000
+   - Credenciais: `admin/SamurEye2024!`
+   - Estrutura de buckets criada automaticamente
+   - Configurado para backups locais
 
 4. **Grafana**
-   - Dashboards de monitoramento multi-tenant
-   - Integração com PostgreSQL local
-   - Métricas de sistema e aplicação
-   - Alertas configurados
+   - Servidor na porta 3000
+   - Credenciais: `admin/SamurEye2024!`
+   - Integração com PostgreSQL configurada
+   - Dashboards básicos instalados
 
-## Configuração Pós-Instalação
+## Verificação Pós-Instalação (Tudo Automatizado)
 
-### 1. PostgreSQL Local (Configurado Automaticamente)
+### Credenciais Instaladas Automaticamente
+
+Após a instalação, todos os serviços estão configurados com as seguintes credenciais:
+
+```
+PostgreSQL:
+- Host: 172.24.1.153:5432
+- Database: samureye_db
+- Usuário: samureye
+- Senha: SamurEye2024DB!
+
+Redis:
+- Host: 172.24.1.153:6379
+- Senha: SamurEye2024Redis!
+
+MinIO:
+- Interface: http://172.24.1.153:9000
+- Credenciais: admin/SamurEye2024!
+
+Grafana:
+- Interface: http://172.24.1.153:3000
+- Credenciais: admin/SamurEye2024!
+```
+
+### Scripts de Teste Automático
 
 ```bash
-# PostgreSQL 16 foi instalado e configurado automaticamente
-# Database: samureye_db
-# Usuário: samureye
-# Senha: SamurEye2024DB!
+# Testar conectividade PostgreSQL (automaticamente instalado)
+/opt/samureye/scripts/test-postgres-connection.sh
 
-# O sistema detecta automaticamente a melhor forma de conexão:
-# 1. Conexão local via postgres user (padrão vlxsam03)
-# 2. Conexão via localhost (127.0.0.1)
-# 3. Conexão via IP vlxsam03 (172.24.1.153)
+# Verificar todos os serviços
+/opt/samureye/scripts/health-check.sh
 
-# As configurações estão em:
+# Verificar configurações
 cat /etc/samureye/.env
-
-# Testar conexão local
-./scripts/test-postgres-connection.sh
-
-# Verificar status do serviço
-systemctl status postgresql
 ```
 
-### 2. Configurar Object Storage
+## Testes de Conectividade
+
+### Teste Local (no próprio vlxsam03)
 
 ```bash
-# Object Storage é configurado automaticamente via Google Cloud Storage
-# Verificar configuração
-./scripts/test-object-storage.sh
+# Teste completo automático
+/opt/samureye/scripts/health-check.sh
 
-# Configurar MinIO local (opcional - backup)
-# Acessar interface web MinIO
-# http://172.24.1.153:9001 (admin/SamurEye2024!)
-./scripts/setup-minio-buckets.sh
+# Teste específico PostgreSQL (mostra latência e tabelas)  
+/opt/samureye/scripts/test-postgres-connection.sh
+
+# Testes individuais
+systemctl status postgresql redis-server grafana-server minio
+redis-cli -a 'SamurEye2024Redis!' ping
+curl -s http://localhost:9000/minio/health/live
 ```
 
-### 3. Configurar Grafana
+### Teste Remoto (de outros servidores vlxsam)
 
 ```bash
-# Acessar Grafana
-# http://172.24.1.153:3000 (admin/admin)
-
-# Importar dashboards pré-configurados
-./scripts/setup-grafana-dashboards.sh
-```
-
-## Verificação da Instalação
-
-### Testar Serviços
-
-```bash
-# Verificar status de todos os serviços
-./scripts/health-check.sh
-
-# Testar conectividade individual
-./scripts/test-postgres-connection.sh
-redis-cli ping
-./scripts/test-object-storage.sh
-curl http://localhost:9000/minio/health/live  # MinIO local (opcional)
-```
-
-### Testar Conexões Remotas
-
-```bash
-# Do vlxsam02, testar conexão
-# PostgreSQL local - testar do vlxsam02
+# Do vlxsam02, testar conectividade com vlxsam03
 PGPASSWORD='SamurEye2024DB!' psql -h 172.24.1.153 -U samureye -d samureye_db -c "SELECT version();"
 
-# Redis local
-redis-cli -h 172.24.1.153 ping
+# Redis remoto
+redis-cli -h 172.24.1.153 -a 'SamurEye2024Redis!' ping
 
-# Object Storage (Google Cloud) - testar conectividade
-curl -s "https://storage.googleapis.com" > /dev/null
-echo "Object Storage: $?"
-
-# MinIO local (opcional)
-curl http://172.24.1.153:9000/minio/health/live
+# MinIO remoto
+curl -s http://172.24.1.153:9000/minio/health/live
 ```
 
 ## Estrutura de Dados
@@ -204,43 +190,99 @@ samureye-backup/
   └── redis/           # Snapshots Redis
 ```
 
-## Backup e Recuperação
+## Resolução de Problemas
 
-### Backup Automático
+### Reset Completo (Mecanismo Confiável)
+
+Se houver qualquer problema com a instalação, execute o reset automático:
 
 ```bash
-# Backup diário configurado via cron
+# Reset completo - funciona 100% das vezes
+curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam03/install.sh | bash
+```
+
+### Problemas Específicos
+
+```bash
+# PostgreSQL não conecta
+systemctl restart postgresql
+/opt/samureye/scripts/test-postgres-connection.sh
+
+# Reset emergencial PostgreSQL apenas
+samureye-reset-postgres
+
+# Redis não responde  
+systemctl restart redis-server
+redis-cli -a 'SamurEye2024Redis!' ping
+
+# MinIO não inicia
+systemctl restart minio
+curl -s http://localhost:9000/minio/health/live
+```
+
+## Backup e Recuperação
+
+### Backup Automático (Configurado Automaticamente)
+
+```bash
+# Backup diário via cron (já configurado)
 /opt/samureye/scripts/daily-backup.sh
 
-# Localização dos backups locais
+# Localização dos backups
 /opt/backup/
-├── neon/            # Dumps Neon Database (diários)
-├── redis/           # RDB snapshots
-├── configs/         # Configurações do sistema
-├── logs/            # Logs de sistema
-└── object-storage/  # Backup metadados (opcional)
-
-# Nota: Neon Database tem backup automático nativo
-# Object Storage tem versionamento automático
+├── postgresql/      # Dumps PostgreSQL locais  
+├── redis/          # Snapshots Redis
+├── configs/        # Configurações do sistema
+└── logs/           # Logs arquivados
 ```
 
 ### Restauração Manual
 
-```bash
-# Restaurar Neon Database (via backup local)
-./scripts/restore-neon.sh [backup-date]
+```bash  
+# Restaurar PostgreSQL local
+/opt/samureye/scripts/restore-postgresql.sh [backup-date]
 
 # Restaurar Redis
-./scripts/restore-redis.sh [backup-date]
-
-# Restaurar configurações
-./scripts/restore-configs.sh [backup-date]
-
-# Nota: Object Storage tem versionamento nativo
-# Neon Database tem point-in-time recovery nativo
+/opt/samureye/scripts/restore-redis.sh [backup-date]
 ```
 
-## Monitoramento
+## Monitoramento e Logs
+
+### Logs dos Serviços
+
+```bash
+# Logs PostgreSQL
+journalctl -u postgresql -f
+
+# Logs Redis  
+journalctl -u redis-server -f
+
+# Logs MinIO
+journalctl -u minio -f
+
+# Logs Grafana
+journalctl -u grafana-server -f
+
+# Logs do sistema SamurEye
+tail -f /var/log/samureye/vlxsam03.log
+```
+
+### Métricas Automáticas
+
+- **Grafana**: Dashboards automáticos em http://172.24.1.153:3000
+- **Health Checks**: Scripts automáticos em `/opt/samureye/scripts/`  
+- **System Metrics**: PostgreSQL performance, Redis uso, storage disponível
+
+## Arquivos Importantes
+
+```
+/opt/samureye/scripts/     # Scripts de teste e manutenção
+/etc/samureye/.env         # Configurações de ambiente  
+/opt/backup/              # Backups locais automáticos
+/var/log/samureye/        # Logs da aplicação
+/var/lib/minio/           # Dados MinIO
+/etc/postgresql/16/main/  # Configurações PostgreSQL
+```
 
 ### Grafana Dashboards
 
