@@ -201,7 +201,7 @@ log "🐘 Instalando PostgreSQL 16..."
 log "🔍 DEBUG: Verificando estado atual do PostgreSQL..."
 if command -v pg_lsclusters >/dev/null 2>&1; then
     log "🔍 DEBUG: pg_lsclusters encontrado - verificando saída:"
-    pg_lsclusters_output=$(pg_lsclusters 2>&1)
+    pg_lsclusters_output=$(pg_lsclusters 2>&1 || echo "ERRO_EXECUCAO")
     log "🔍 DEBUG: Saída pg_lsclusters: $pg_lsclusters_output"
     
     # Verificar se há clusters corrompidos
@@ -236,7 +236,8 @@ if command -v pg_lsclusters >/dev/null 2>&1; then
         fi
         
         # DEBUG: Tentar conexão
-        if sudo -u postgres psql -c "SELECT version();" >/dev/null 2>&1; then
+        log "🔍 DEBUG: Testando conexão PostgreSQL..."
+        if timeout 10 sudo -u postgres psql -c "SELECT version();" >/dev/null 2>&1; then
             log "🔍 DEBUG: Conexão PostgreSQL funcionando"
             connection_ok=true
         else
@@ -322,12 +323,12 @@ if [ "$jump_to_database_config" != "true" ]; then
 
     # Verificar conexão PostgreSQL
     log "📦 DEBUG: Testando conexão PostgreSQL..."
-    if sudo -u postgres psql -c "SELECT version();" >/dev/null 2>&1; then
+    if timeout 10 sudo -u postgres psql -c "SELECT version();" >/dev/null 2>&1; then
         log "📦 DEBUG: Conexão PostgreSQL funcionando"
     else
         log "📦 DEBUG: ERRO - Conexão PostgreSQL falhando"
         log "📦 DEBUG: Tentando diagnóstico de conexão..."
-        sudo -u postgres psql -c "SELECT version();" 2>&1 || true
+        timeout 10 sudo -u postgres psql -c "SELECT version();" 2>&1 || true
         error "❌ Falha de conexão PostgreSQL - instalação corrompida"
     fi
 
@@ -346,7 +347,8 @@ else
 fi
 
 # DEBUG: Teste de conexão antes da configuração
-if sudo -u postgres psql -c "SELECT 1;" >/dev/null 2>&1; then
+log "🗄️ DEBUG: Testando conexão PostgreSQL antes da configuração..."
+if timeout 10 sudo -u postgres psql -c "SELECT 1;" >/dev/null 2>&1; then
     log "🗄️ DEBUG: Conexão PostgreSQL OK antes da configuração do banco"
 else
     log "🗄️ DEBUG: ERRO - Conexão PostgreSQL falhou antes da configuração do banco"
@@ -388,7 +390,7 @@ else
     systemctl status postgresql --no-pager || true
 fi
 
-if sudo -u postgres psql -c "SELECT 1;" >/dev/null 2>&1; then
+if timeout 10 sudo -u postgres psql -c "SELECT 1;" >/dev/null 2>&1; then
     log "🗄️ DEBUG: Conexão PostgreSQL ainda funcionando após configuração"
 else
     log "🗄️ DEBUG: ERRO CRÍTICO - Conexão PostgreSQL falhou após configuração"
