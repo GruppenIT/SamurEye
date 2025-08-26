@@ -227,7 +227,12 @@ if [ -f "/etc/samureye/.env" ]; then
     sed -i 's|VITE_API_BASE_URL=https://api.samureye.com.br|VITE_API_BASE_URL=http://172.24.1.152:5000|g' /etc/samureye/.env
     sed -i 's|CORS_ORIGINS=https://app.samureye.com.br,https://api.samureye.com.br|CORS_ORIGINS=http://172.24.1.152:5000,http://localhost:5000|g' /etc/samureye/.env
     
+    # Corrigir permissões do arquivo .env
+    chown samureye:samureye /etc/samureye/.env
+    chmod 644 /etc/samureye/.env
+    
     log "✅ URLs corrigidas para desenvolvimento local"
+    log "✅ Permissões do arquivo .env corrigidas"
 else
     log "⚠️ Arquivo .env não encontrado"
 fi

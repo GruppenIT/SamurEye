@@ -374,8 +374,9 @@ VITE_API_BASE_URL=http://172.24.1.152:5000
 VITE_APP_NAME=SamurEye
 EOF
 
-chmod 600 /etc/samureye/.env
-chown root:root /etc/samureye/.env
+# Configurar permissões do arquivo (usuário samureye precisa poder ler)
+chown samureye:samureye /etc/samureye/.env
+chmod 644 /etc/samureye/.env
 
 # Link para diretório da aplicação
 ln -sf /etc/samureye/.env "$APP_DIR/.env"

@@ -35,6 +35,11 @@ sed -i 's|API_BASE_URL=https://api.samureye.com.br|API_BASE_URL=http://172.24.1.
 sed -i 's|VITE_API_BASE_URL=https://api.samureye.com.br|VITE_API_BASE_URL=http://172.24.1.152:5000|g' /etc/samureye/.env
 sed -i 's|CORS_ORIGINS=https://app.samureye.com.br,https://api.samureye.com.br|CORS_ORIGINS=http://172.24.1.152:5000,http://localhost:5000|g' /etc/samureye/.env
 
+# Corrigir permissões do arquivo .env
+chown samureye:samureye /etc/samureye/.env
+chmod 644 /etc/samureye/.env
+log "✅ Permissões do arquivo .env corrigidas"
+
 # Mostrar URLs após correção
 log "✅ URLs corrigidas:"
 grep -E "(FRONTEND_URL|API_BASE_URL|VITE_API_BASE_URL|CORS_ORIGINS)" /etc/samureye/.env
