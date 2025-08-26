@@ -222,6 +222,12 @@ O script agora detecta e corrige automaticamente problemas de permissões. Se ai
    curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam02/install.sh | sudo bash
    ```
 
+### 📋 Teste Rápido de Configuração
+```bash
+# Verificar se as variáveis de ambiente estão carregando corretamente
+curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam02/test-env-quick.sh | sudo bash
+```
+
 ### 📋 Para Problemas Não Resolvidos Automaticamente
 
 #### 1. Verificar logs detalhados

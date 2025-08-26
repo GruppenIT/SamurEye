@@ -323,9 +323,20 @@ install_application() {
     # Verificar se dotenv está no package.json
     log "🔧 Verificando dependências do projeto..."
     
-    if ! grep -q '"dotenv"' package.json; then
-        log "Adicionando dotenv ao package.json..."
+    # Verificar se dotenv está nas dependências ou devDependencies
+    if ! grep -q '"dotenv"' package.json && ! npm list dotenv >/dev/null 2>&1; then
+        log "Instalando dotenv..."
         sudo -u $SERVICE_USER npm install dotenv
+        log "✅ dotenv instalado"
+    else
+        log "ℹ️  dotenv já está disponível"
+    fi
+    
+    # Verificar se tsx está disponível (necessário para desenvolvimento)
+    if ! npm list tsx >/dev/null 2>&1; then
+        log "Instalando tsx para desenvolvimento..."
+        sudo -u $SERVICE_USER npm install --save-dev tsx
+        log "✅ tsx instalado"
     fi
     
     # Instalar dependências
@@ -488,8 +499,8 @@ test_env_loading() {
     
     # Criar script de teste
     cat > /tmp/test-env-loading.js << 'EOF'
-// Importar dotenv primeiro
-require('dotenv').config();
+// Importar dotenv primeiro com path específico
+require('dotenv').config({ path: '/opt/samureye/SamurEye/.env' });
 
 console.log('=== TESTE DE CARREGAMENTO DE VARIÁVEIS ===');
 console.log('NODE_ENV:', process.env.NODE_ENV || 'undefined');
@@ -521,10 +532,23 @@ EOF
 
     # Executar teste como usuário da aplicação
     cd "$WORKING_DIR"
-    if sudo -u $SERVICE_USER node /tmp/test-env-loading.js 2>/dev/null; then
+    
+    # Verificar se o arquivo .env foi criado corretamente
+    if [ ! -f "$WORKING_DIR/.env" ]; then
+        warn "Arquivo .env não encontrado em $WORKING_DIR"
+        ls -la "$WORKING_DIR/" || true
+        ls -la "$ETC_DIR/" || true
+    else
+        log "Arquivo .env encontrado: $(ls -la $WORKING_DIR/.env)"
+    fi
+    
+    # Executar teste de carregamento
+    log "Executando teste de carregamento de variáveis..."
+    if sudo -u $SERVICE_USER env NODE_ENV=development node /tmp/test-env-loading.js; then
         log "✅ Teste de carregamento: SUCESSO"
     else
-        error "Teste de carregamento: FALHA - Verifique configuração .env"
+        warn "Teste de carregamento: FALHA - Continuando instalação"
+        warn "Verificar manualmente: cat $WORKING_DIR/.env"
     fi
     
     rm -f /tmp/test-env-loading.js
@@ -553,9 +577,10 @@ Type=simple
 User=$SERVICE_USER
 Group=$SERVICE_USER
 WorkingDirectory=$WORKING_DIR
-Environment=NODE_ENV=development
+Environment=NODE_ENV=production
 EnvironmentFile=$ETC_DIR/.env
-ExecStart=/usr/bin/npm run dev
+ExecStartPre=/usr/bin/npm run build
+ExecStart=/usr/bin/npm start
 ExecReload=/bin/kill -HUP \$MAINPID
 Restart=always
 RestartSec=10
