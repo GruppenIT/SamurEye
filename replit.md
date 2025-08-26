@@ -12,17 +12,17 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-**August 26, 2025 - vlxsam03 Install Script Enhanced with Auto-Reset and Detection**
+**August 26, 2025 - vlxsam03 Install Script Enhanced with Advanced Cluster Detection**
 - Enhanced vlxsam03 install.sh script to function as reliable "reset" mechanism for server
-- Added auto-detection of PostgreSQL connection (postgres user → localhost → vlxsam03 IP)
-- Implemented automatic cluster corruption detection and complete PostgreSQL reinstallation
-- Created reset-postgres.sh emergency script with full database recreation from scratch
-- Database reset now includes: DROP DATABASE/ROLE IF EXISTS + clean recreation + extensions
-- Added connection testing with multiple fallback methods for environment compatibility
-- Script works as complete server reset - can be re-run safely multiple times
-- Created symlink samureye-reset-postgres for easy emergency PostgreSQL recovery
+- Added advanced PostgreSQL cluster corruption detection ("Invalid data directory" errors)
+- Implemented automatic cluster corruption detection with complete PostgreSQL reinstallation
+- Fixed cluster status checking logic to detect and resolve "Invalid data directory" errors
+- Created cluster_status_check() function for comprehensive PostgreSQL health verification
+- Enhanced reset-postgres.sh emergency script with improved cluster issue detection
+- Script performs complete purge: postgresql-common, user/group removal, directory cleanup
+- Added multiple detection methods: systemctl status, connection tests, cluster validation
 - Updated vlxsam03 README with comprehensive troubleshooting and reset procedures
-- Migration from vlxsam03 PostgreSQL (172.24.1.153:5432) to Replit PostgreSQL completed successfully
+- Script now reliably detects and fixes PostgreSQL cluster corruption automatically
 
 **August 22, 2025 - Complete Dashboard Components Migration to API Data**
 - Created tenant-specific dashboard endpoints: /api/dashboard/attack-surface, /api/dashboard/edr-events, /api/dashboard/journey-results
