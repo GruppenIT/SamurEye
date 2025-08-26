@@ -123,13 +123,10 @@ fi
 # 8. Teste de carregamento
 log "Testando carregamento de variáveis..."
 
-cat > /tmp/test-simple.js << 'EOF'
+cat > "$WORKING_DIR/test-simple.js" << 'EOF'
 try {
-    const path = require('path');
-    const envPath = '/opt/samureye/SamurEye/.env';
-    
-    console.log('Carregando .env de:', envPath);
-    require('dotenv').config({ path: envPath });
+    console.log('Carregando .env do diretório atual');
+    require('dotenv').config();
     
     const required = ['DATABASE_URL', 'PGHOST', 'PGPORT'];
     let success = true;
@@ -161,13 +158,13 @@ try {
 EOF
 
 cd "$WORKING_DIR"
-if sudo -u $SERVICE_USER node /tmp/test-simple.js; then
+if sudo -u $SERVICE_USER node test-simple.js; then
     log "✅ Configuração .env funcionando corretamente"
 else
     warn "Teste de carregamento falhou, mas arquivo foi criado"
 fi
 
-rm -f /tmp/test-simple.js
+rm -f "$WORKING_DIR/test-simple.js"
 
 log "✅ INSTALAÇÃO SIMPLIFICADA CONCLUÍDA"
 log "Arquivo .env disponível em: $WORKING_DIR/.env"
