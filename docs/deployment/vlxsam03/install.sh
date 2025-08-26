@@ -19,6 +19,15 @@
 
 set -e
 
+# Configuração para modo não-interativo (OBRIGATÓRIO para reset automático)
+export DEBIAN_FRONTEND=noninteractive
+export NEEDRESTART_MODE=a
+export APT_LISTCHANGES_FRONTEND=none
+
+# Configurar respostas automáticas para PostgreSQL
+echo "postgresql-16 postgresql-16/remove_clusters boolean true" | debconf-set-selections
+echo "postgresql-common postgresql-common/obsolete-major boolean true" | debconf-set-selections
+
 # Cores para output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -213,7 +222,7 @@ if cluster_has_issues; then
     systemctl stop postgresql 2>/dev/null || true
     systemctl disable postgresql 2>/dev/null || true
     
-    # Purgar completamente PostgreSQL
+    # Purgar completamente PostgreSQL (não-interativo)
     apt-get purge postgresql-16 postgresql-common postgresql-client-16 postgresql-client-common -y
     apt-get autoremove --purge -y
     
@@ -242,7 +251,7 @@ fi
 if ! sudo -u postgres psql -c "SELECT version();" >/dev/null 2>&1; then
     warn "⚠️ Falha de conexão - executando reset emergencial..."
     
-    # Reset emergencial
+    # Reset emergencial (não-interativo)
     systemctl stop postgresql 2>/dev/null || true
     apt-get purge postgresql-16 postgresql-common postgresql-client-16 postgresql-client-common -y
     apt-get autoremove --purge -y
