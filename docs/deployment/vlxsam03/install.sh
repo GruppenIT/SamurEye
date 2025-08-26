@@ -197,36 +197,34 @@ log "Redis configurado e iniciado"
 
 log "🐘 Instalando PostgreSQL 16..."
 
-# LIMPEZA PREVENTIVA TOTAL - remover qualquer vestígio de PostgreSQL existente
-warn "🧹 Executando limpeza preventiva completa do PostgreSQL..."
-
-# Parar todos os serviços PostgreSQL
-systemctl stop postgresql 2>/dev/null || true
-systemctl stop postgresql@16-main 2>/dev/null || true
-systemctl disable postgresql 2>/dev/null || true
-systemctl disable postgresql@16-main 2>/dev/null || true
-
-# Purgar TODOS os pacotes PostgreSQL existentes
-apt-get purge postgresql* -y 2>/dev/null || true
-apt-get autoremove --purge -y
-
-# Remover TODOS os diretórios e configurações PostgreSQL
-rm -rf /var/lib/postgresql/
-rm -rf /etc/postgresql/
-rm -rf /var/log/postgresql/
-rm -rf /run/postgresql/
-rm -rf /var/cache/postgresql/
-
-# Remover usuário e grupo postgres se existirem
-userdel postgres 2>/dev/null || true
-groupdel postgres 2>/dev/null || true
-
-# Limpar configurações debconf que podem estar corrompidas
-echo PURGE | debconf-communicate postgresql-common 2>/dev/null || true
-rm -f /var/cache/debconf/templates.dat-old
-rm -f /var/cache/debconf/config.dat-old
-
-log "✅ Limpeza preventiva concluída - ambiente limpo para instalação"
+# Verificar se há clusters corrompidos ANTES de tentar instalar
+if command -v pg_lsclusters >/dev/null 2>&1; then
+    if pg_lsclusters 2>&1 | grep -q "Invalid data directory\|Use of uninitialized value"; then
+        warn "🧹 Cluster PostgreSQL corrompido detectado - executando limpeza completa..."
+        
+        # Parar serviços
+        systemctl stop postgresql 2>/dev/null || true
+        systemctl disable postgresql 2>/dev/null || true
+        
+        # Remover cluster corrompido ANTES da desinstalação
+        pg_dropcluster --stop 16 main 2>/dev/null || true
+        
+        # Purgar completamente
+        apt-get purge postgresql-16 postgresql-common postgresql-client-16 postgresql-client-common postgresql-contrib -y
+        apt-get autoremove --purge -y
+        
+        # Limpeza de diretórios
+        rm -rf /var/lib/postgresql/ /etc/postgresql/ /var/log/postgresql/ /run/postgresql/
+        userdel postgres 2>/dev/null || true
+        groupdel postgres 2>/dev/null || true
+        
+        log "✅ Cluster corrompido removido"
+    else
+        log "🔍 Clusters PostgreSQL existentes estão OK - prosseguindo com instalação normal"
+    fi
+else
+    log "🔍 Nenhum PostgreSQL detectado - instalação limpa"
+fi
 
 # Instalar PostgreSQL 16 em ambiente completamente limpo
 log "📦 Instalando PostgreSQL 16 em ambiente limpo..."
