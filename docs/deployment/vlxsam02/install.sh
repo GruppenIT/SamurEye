@@ -153,7 +153,10 @@ log "Firewall configurado: SSH (22), App (5000)"
 # 5. FERRAMENTAS DE SEGURANÇA
 # ============================================================================
 
-log "🔧 Instalando ferramentas de segurança..."
+log "🔧 Instalando ferramentas de segurança e cliente PostgreSQL..."
+
+# Cliente PostgreSQL e ferramentas de rede (essencial para conectar com vlxsam03)
+apt-get install -y postgresql-client-16 redis-tools dnsutils netcat-openbsd
 
 # Instalar Nmap
 apt-get install -y nmap
@@ -212,13 +215,18 @@ cat > /etc/samureye/.env << 'EOF'
 NODE_ENV=development
 PORT=5000
 
-# Database (Neon Database)
+# Database (PostgreSQL Local - vlxsam03)
 DATABASE_URL=postgresql://samureye:SamurEye2024!@172.24.1.153:5432/samureye_prod
 PGHOST=172.24.1.153
 PGPORT=5432
 PGUSER=samureye
 PGPASSWORD=SamurEye2024!
 PGDATABASE=samureye_prod
+
+# Redis (vlxsam03)
+REDIS_URL=redis://172.24.1.153:6379
+REDIS_HOST=172.24.1.153
+REDIS_PORT=6379
 
 # Session Management
 SESSION_SECRET=samureye-super-secret-session-key-2024-change-this
@@ -228,10 +236,17 @@ REPL_ID=your_replit_app_id
 ISSUER_URL=https://replit.com/oidc
 REPLIT_DOMAINS=app.samureye.com.br,api.samureye.com.br
 
-# Object Storage (Google Cloud Storage Integration)
-DEFAULT_OBJECT_STORAGE_BUCKET_ID=repl-default-bucket-your-repl-id
-PUBLIC_OBJECT_SEARCH_PATHS=/repl-default-bucket-your-repl-id/public
-PRIVATE_OBJECT_DIR=/repl-default-bucket-your-repl-id/.private
+# Object Storage (MinIO - vlxsam03)
+MINIO_ENDPOINT=http://172.24.1.153:9000
+MINIO_ACCESS_KEY=samureye
+MINIO_SECRET_KEY=SamurEye2024!
+MINIO_BUCKET=samureye-storage
+MINIO_REGION=us-east-1
+
+# Object Storage (Legacy format para compatibilidade)
+DEFAULT_OBJECT_STORAGE_BUCKET_ID=samureye-storage
+PUBLIC_OBJECT_SEARCH_PATHS=/samureye-storage/public
+PRIVATE_OBJECT_DIR=/samureye-storage/.private
 
 # Delinea Secret Server (Optional)
 DELINEA_API_KEY=your_delinea_api_key_here
@@ -371,7 +386,7 @@ cat > "$APP_DIR/package.json" << 'EOF'
   "dependencies": {
     "@google-cloud/storage": "^7.7.0",
     "@hookform/resolvers": "^3.3.2",
-    "@neondatabase/serverless": "^0.9.0",
+    "pg": "^8.11.3",
     "@radix-ui/react-accordion": "^1.1.2",
     "@radix-ui/react-alert-dialog": "^1.0.5",
     "@radix-ui/react-avatar": "^1.0.4",
@@ -424,6 +439,7 @@ cat > "$APP_DIR/package.json" << 'EOF'
   },
   "devDependencies": {
     "@types/connect-pg-simple": "^7.0.3",
+    "@types/pg": "^8.10.9",
     "autoprefixer": "^10.4.16",
     "postcss": "^8.4.32"
   }
@@ -538,47 +554,115 @@ chmod +x "$APP_DIR/scripts/health-check.sh"
 cat > "$APP_DIR/scripts/test-connectivity.sh" << 'EOF'
 #!/bin/bash
 
-# Teste de conectividade com outros servidores
+# Testa conectividade específica com vlxsam03
 
-echo "🔗 TESTE DE CONECTIVIDADE"
-echo "========================"
+echo "=== TESTE DE CONECTIVIDADE VLXSAM03 ==="
+echo "Data: $(date)"
+echo ""
 
-servers=(
-    "vlxsam01:172.24.1.151:443:NGINX Gateway"
-    "vlxsam03:172.24.1.153:5432:PostgreSQL"
-    "vlxsam03:172.24.1.153:6379:Redis"
-    "vlxsam03:172.24.1.153:9000:MinIO"
-    "vlxsam04:192.168.100.151:22:Collector SSH"
-)
-
-for server_info in "${servers[@]}"; do
-    IFS=':' read -r name ip port service <<< "$server_info"
+# Função para testar conexão
+test_connection() {
+    local host=$1
+    local port=$2
+    local service=$3
     
-    if nc -z "$ip" "$port" 2>/dev/null; then
-        echo "✅ $name ($ip:$port) - $service"
+    echo -n "🔗 Testando $service ($host:$port)... "
+    if nc -z "$host" "$port" 2>/dev/null; then
+        echo "✅ Conectado"
+        return 0
     else
-        echo "❌ $name ($ip:$port) - $service"
+        echo "❌ Falha"
+        return 1
     fi
-done
+}
+
+# Testar serviços essenciais no vlxsam03
+VLXSAM03_IP="172.24.1.153"
+
+test_connection $VLXSAM03_IP 5432 "PostgreSQL"
+test_connection $VLXSAM03_IP 6379 "Redis"
+test_connection $VLXSAM03_IP 9000 "MinIO"
+
+# Testar conectividade com vlxsam01 (gateway)
+echo ""
+echo "🌐 Testando Gateway (vlxsam01):"
+VLXSAM01_IP="172.24.1.151"
+test_connection $VLXSAM01_IP 80 "HTTP"
+test_connection $VLXSAM01_IP 443 "HTTPS"
+
+# Teste específico de PostgreSQL
+echo ""
+echo "🗄️ Teste PostgreSQL avançado:"
+if command -v psql >/dev/null 2>&1; then
+    export PGPASSWORD=SamurEye2024!
+    if psql -h $VLXSAM03_IP -U samureye -d samureye_prod -c "SELECT version();" >/dev/null 2>&1; then
+        echo "✅ Conexão PostgreSQL com autenticação: OK"
+        echo "   $(psql -h $VLXSAM03_IP -U samureye -d samureye_prod -t -c "SELECT version();" 2>/dev/null | head -1 | xargs)"
+    else
+        echo "❌ Falha na autenticação PostgreSQL"
+    fi
+else
+    echo "⚠️  Cliente psql não instalado (executar: apt install postgresql-client)"
+fi
+
+# Teste de resolução DNS
+echo ""
+echo "🔍 Teste DNS:"
+if host samureye.com.br >/dev/null 2>&1; then
+    echo "✅ Resolução DNS: OK"
+    echo "   $(host samureye.com.br | grep 'has address' | head -1)"
+else
+    echo "❌ Falha na resolução DNS"
+fi
+
+# Informações de rede
+echo ""
+echo "🌐 Informações de rede local:"
+echo "IP do servidor: $(hostname -I | awk '{print $1}')"
+echo "Gateway: $(ip route | grep default | awk '{print $3}' | head -1)"
+echo "DNS: $(cat /etc/resolv.conf | grep nameserver | head -1 | awk '{print $2}')"
 
 echo ""
-echo "🌐 TESTES EXTERNOS:"
-
-# Teste de conectividade externa
-if curl -f -s https://app.samureye.com.br/nginx-health >/dev/null 2>&1; then
-    echo "✅ HTTPS público (via vlxsam01)"
-else
-    echo "❌ HTTPS público (via vlxsam01)"
-fi
-
-if curl -f -s https://gruppenztna.secretservercloud.com >/dev/null 2>&1; then
-    echo "✅ Delinea Secret Server"
-else
-    echo "❌ Delinea Secret Server"
-fi
+echo "=== FIM DO TESTE ==="
 EOF
 
 chmod +x "$APP_DIR/scripts/test-connectivity.sh"
+
+# Script para instalação das dependências do PostgreSQL
+cat > "$APP_DIR/scripts/install-postgres-client.sh" << 'EOF'
+#!/bin/bash
+
+echo "📦 Instalando cliente PostgreSQL..."
+
+# Atualizar repositórios
+apt update
+
+# Instalar cliente PostgreSQL e ferramentas de rede
+apt install -y postgresql-client-16 redis-tools dnsutils
+
+echo "✅ Cliente PostgreSQL instalado com sucesso!"
+
+# Testar conexão
+echo ""
+echo "🧪 Testando conexão com vlxsam03..."
+export PGPASSWORD=SamurEye2024!
+
+if psql -h 172.24.1.153 -U samureye -d samureye_prod -c "SELECT version();" 2>/dev/null; then
+    echo "✅ Conexão PostgreSQL: OK"
+else
+    echo "❌ Conexão PostgreSQL: Falhou"
+    echo "⚠️  Certifique-se que vlxsam03 está instalado e funcionando"
+fi
+
+# Testar Redis
+if redis-cli -h 172.24.1.153 ping 2>/dev/null | grep -q PONG; then
+    echo "✅ Conexão Redis: OK"
+else
+    echo "❌ Conexão Redis: Falhou"
+fi
+EOF
+
+chmod +x "$APP_DIR/scripts/install-postgres-client.sh"
 
 # Script de instalação de dependências
 cat > "$APP_DIR/scripts/install-dependencies.sh" << 'EOF'
@@ -611,14 +695,16 @@ if ! command -v tsx >/dev/null 2>&1; then
     npm install -g tsx
 fi
 
-# Verificar se é possível executar o dev server
-if npm run dev --version >/dev/null 2>&1; then
-    log "Vite dev server configurado"
+# Verificar se TypeScript funciona
+log "Verificando TypeScript..."
+if npx tsc --version >/dev/null 2>&1; then
+    log "✅ TypeScript funciona"
 else
-    log "Vite dev server não configurado ainda (normal antes da clonagem do código)"
+    log "❌ TypeScript com problemas"
 fi
 
 log "✅ Dependências instaladas com sucesso!"
+log "Execute 'npm run dev' para iniciar a aplicação"
 EOF
 
 chmod +x "$APP_DIR/scripts/install-dependencies.sh"
@@ -799,7 +885,7 @@ echo "1. Configurar variáveis de ambiente:"
 echo "   sudo nano /etc/samureye/.env"
 echo ""
 echo "2. Copiar código da aplicação:"
-echo "   git clone <repo> $APP_DIR/SamurEye"
+echo "   git clone https://github.com/GruppenIT/SamurEye.git $APP_DIR/SamurEye"
 echo "   chown -R $APP_USER:$APP_USER $APP_DIR/SamurEye"
 echo ""
 echo "3. Instalar dependências da aplicação:"

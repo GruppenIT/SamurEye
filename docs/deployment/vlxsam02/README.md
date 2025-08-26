@@ -6,9 +6,9 @@ O servidor vlxsam02 executa a aplicação principal do SamurEye, fornecendo:
 - **Frontend React 18** com Vite e interface multi-tenant
 - **Backend Node.js/Express** com TypeScript e APIs REST
 - **WebSocket** para comunicação em tempo real
-- **Drizzle ORM** com Neon Database PostgreSQL
+- **Drizzle ORM** com PostgreSQL local (vlxsam03)
 - **Autenticação Dual**: Sistema admin local + Replit Auth
-- **Object Storage** com Google Cloud Storage
+- **Object Storage** com MinIO (vlxsam03)
 - **Sistema Multi-tenant** com isolamento de dados
 - **Scanner Service** para execução de ferramentas de segurança
 - **Integração Delinea** para gerenciamento de credenciais
@@ -21,9 +21,9 @@ O servidor vlxsam02 executa a aplicação principal do SamurEye, fornecendo:
 - **Porta:** 5000 (Vite dev server - unificado)
 - **Usuário:** samureye
 - **Diretório:** /opt/samureye
-- **ORM:** Drizzle com Neon Database
+- **ORM:** Drizzle com PostgreSQL local
 - **Autenticação:** Dual system (Admin local + Replit Auth)
-- **Object Storage:** Google Cloud Storage integration
+- **Object Storage:** MinIO (vlxsam03:9000)
 - **Gerenciamento:** systemd service
 
 ## Instalação
@@ -63,13 +63,14 @@ chmod +x install.sh
 3. **Backend e Banco**
    - Express.js com TypeScript
    - Drizzle ORM
-   - Conexão Neon Database
+   - Cliente PostgreSQL 16
+   - Redis tools para cache
    - Session management
    - WebSocket support
 
 4. **Autenticação e Storage**
    - Sistema dual de autenticação
-   - Object Storage integration
+   - MinIO para object storage
    - Session-based auth
    - Multi-tenant architecture
 
@@ -93,21 +94,29 @@ chmod +x install.sh
 # Editar arquivo de configuração
 sudo nano /etc/samureye/.env
 
-# Configurações principais que devem ser editadas:
-DATABASE_URL=postgresql://samureye:password@172.24.1.153:5432/samureye
-SESSION_SECRET=sua_chave_secreta_segura_aqui
-DEFAULT_OBJECT_STORAGE_BUCKET_ID=bucket_id_from_object_storage
-PUBLIC_OBJECT_SEARCH_PATHS=/bucket/public
-PRIVATE_OBJECT_DIR=/bucket/.private
-DELINEA_API_KEY=sua_api_key_aqui (opcional)
-DELINEA_BASE_URL=https://gruppenztna.secretservercloud.com (opcional)
-
-# Variáveis automáticas (geradas pelo sistema)
-PGDATABASE=samureye
+# Configurações principais - PostgreSQL Local (vlxsam03):
+DATABASE_URL=postgresql://samureye:SamurEye2024!@172.24.1.153:5432/samureye_prod
 PGHOST=172.24.1.153
 PGPORT=5432
 PGUSER=samureye
-PGPASSWORD=password_from_vlxsam03
+PGPASSWORD=SamurEye2024!
+PGDATABASE=samureye_prod
+
+# Redis (vlxsam03):
+REDIS_URL=redis://172.24.1.153:6379
+REDIS_HOST=172.24.1.153
+REDIS_PORT=6379
+
+# MinIO Object Storage (vlxsam03):
+MINIO_ENDPOINT=http://172.24.1.153:9000
+MINIO_ACCESS_KEY=samureye
+MINIO_SECRET_KEY=SamurEye2024!
+MINIO_BUCKET=samureye-storage
+
+# Outras configurações:
+SESSION_SECRET=sua_chave_secreta_segura_aqui
+DELINEA_API_KEY=sua_api_key_aqui (opcional)
+DELINEA_BASE_URL=https://gruppenztna.secretservercloud.com (opcional)
 ```
 
 ### 2. Configurar Banco de Dados

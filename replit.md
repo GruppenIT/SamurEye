@@ -12,6 +12,16 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+**August 26, 2025 - vlxsam02 Application Server Configuration UPDATED for PostgreSQL Local**
+- ✅ MIGRATION: Replaced Neon Database with local PostgreSQL on vlxsam03 (172.24.1.153:5432)
+- ✅ DEPENDENCIES: Added PostgreSQL client 16, Redis tools, DNS utilities to install script
+- ✅ CONFIGURATION: Updated all .env variables to point to vlxsam03 services (PostgreSQL, Redis, MinIO)
+- ✅ SCRIPTS: Enhanced health checks and connectivity tests for vlxsam03 services
+- ✅ PACKAGE.JSON: Replaced @neondatabase/serverless with standard 'pg' PostgreSQL client
+- ✅ SYSTEMD: Maintained systemd service management (not PM2) for application control
+- ✅ VERIFICATION: Added comprehensive test scripts for database and service connectivity
+- ✅ DOCUMENTATION: Updated README.md with correct local infrastructure details
+
 **August 26, 2025 - vlxsam01 Gateway Server Installation COMPLETELY FIXED + WILDCARD SSL**
 - ✅ CRITICAL FIX: Resolved NGINX SSL certificate error during installation
 - ✅ ROOT CAUSE: Script was trying to activate HTTPS configuration before SSL certificates existed
