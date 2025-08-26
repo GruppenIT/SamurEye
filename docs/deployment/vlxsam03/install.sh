@@ -197,11 +197,16 @@ log "Redis configurado e iniciado"
 
 log "🐘 Instalando PostgreSQL 16..."
 
-# Verificar se PostgreSQL já está instalado e funcionando
+# DEBUG: Verificar se PostgreSQL já está instalado e funcionando
+log "🔍 DEBUG: Verificando estado atual do PostgreSQL..."
 if command -v pg_lsclusters >/dev/null 2>&1; then
+    log "🔍 DEBUG: pg_lsclusters encontrado - verificando saída:"
+    pg_lsclusters_output=$(pg_lsclusters 2>&1)
+    log "🔍 DEBUG: Saída pg_lsclusters: $pg_lsclusters_output"
+    
     # Verificar se há clusters corrompidos
-    if pg_lsclusters 2>&1 | grep -q "Invalid data directory\|Use of uninitialized value"; then
-        warn "🧹 Cluster PostgreSQL corrompido detectado - executando limpeza completa..."
+    if echo "$pg_lsclusters_output" | grep -q "Invalid data directory\|Use of uninitialized value"; then
+        warn "🧹 DEBUG: Cluster PostgreSQL corrompido detectado - executando limpeza completa..."
         
         # Parar serviços
         systemctl stop postgresql 2>/dev/null || true
@@ -221,13 +226,33 @@ if command -v pg_lsclusters >/dev/null 2>&1; then
         
         log "✅ Cluster corrompido removido"
     else
+        log "🔍 DEBUG: Clusters parecem OK - verificando se PostgreSQL está funcionando..."
+        
+        # DEBUG: Verificar status do serviço
+        if systemctl is-active --quiet postgresql; then
+            log "🔍 DEBUG: Serviço PostgreSQL está ATIVO"
+        else
+            log "🔍 DEBUG: Serviço PostgreSQL está INATIVO"
+        fi
+        
+        # DEBUG: Tentar conexão
+        if sudo -u postgres psql -c "SELECT version();" >/dev/null 2>&1; then
+            log "🔍 DEBUG: Conexão PostgreSQL funcionando"
+            connection_ok=true
+        else
+            log "🔍 DEBUG: Conexão PostgreSQL falhando"
+            connection_ok=false
+        fi
+        
         # PostgreSQL existe e está funcionando - verificar se precisa reinstalar
-        if systemctl is-active --quiet postgresql && sudo -u postgres psql -c "SELECT version();" >/dev/null 2>&1; then
-            log "🔍 PostgreSQL já instalado e funcionando - pulando instalação"
+        if systemctl is-active --quiet postgresql && [ "$connection_ok" = "true" ]; then
+            log "🔍 DEBUG: PostgreSQL já instalado e funcionando - pulando instalação"
             # Pular para próxima seção
             jump_to_database_config=true
         else
-            warn "🔄 PostgreSQL instalado mas não funcionando - reinstalando..."
+            warn "🔄 DEBUG: PostgreSQL instalado mas não funcionando - reinstalando..."
+            log "🔍 DEBUG: Status serviço: $(systemctl is-active postgresql)"
+            log "🔍 DEBUG: Status conexão: $connection_ok"
             # Fazer reinstalação limpa
             systemctl stop postgresql 2>/dev/null || true
             apt-get purge postgresql-16 postgresql-common postgresql-client-16 postgresql-client-common postgresql-contrib -y
@@ -244,32 +269,92 @@ fi
 # Instalar apenas se necessário
 if [ "$jump_to_database_config" != "true" ]; then
     # Instalar PostgreSQL 16 em ambiente completamente limpo
-    log "📦 Instalando PostgreSQL 16 em ambiente limpo..."
+    log "📦 DEBUG: Instalando PostgreSQL 16 em ambiente limpo..."
     apt-get update
     apt install -y postgresql-16 postgresql-contrib
+    log "📦 DEBUG: Instalação de pacotes concluída"
+
+    # DEBUG: Verificar se serviço foi criado
+    if systemctl list-unit-files | grep -q postgresql.service; then
+        log "📦 DEBUG: Serviço postgresql.service encontrado"
+    else
+        log "📦 DEBUG: ERRO - Serviço postgresql.service NÃO encontrado"
+    fi
 
     # Iniciar e habilitar PostgreSQL
+    log "📦 DEBUG: Iniciando serviço PostgreSQL..."
     systemctl start postgresql
+    log "📦 DEBUG: Comando start executado - status: $?"
+    
+    log "📦 DEBUG: Habilitando serviço PostgreSQL..."
     systemctl enable postgresql
+    log "📦 DEBUG: Comando enable executado - status: $?"
+    
+    log "📦 DEBUG: Aguardando 5 segundos..."
     sleep 5
 
+    # DEBUG: Verificar status detalhado
+    log "📦 DEBUG: Status detalhado do PostgreSQL:"
+    systemctl status postgresql --no-pager || true
+    
     # Verificar se PostgreSQL iniciou corretamente
-    if ! systemctl is-active --quiet postgresql; then
-        error "❌ Falha ao iniciar PostgreSQL após instalação"
+    if systemctl is-active --quiet postgresql; then
+        log "📦 DEBUG: Serviço PostgreSQL está ATIVO após instalação"
+    else
+        log "📦 DEBUG: ERRO - Serviço PostgreSQL está INATIVO após instalação"
+        log "📦 DEBUG: Tentando restart..."
+        systemctl restart postgresql
+        sleep 3
+        if systemctl is-active --quiet postgresql; then
+            log "📦 DEBUG: Serviço PostgreSQL ATIVO após restart"
+        else
+            log "📦 DEBUG: ERRO CRÍTICO - PostgreSQL não inicia nem após restart"
+            error "❌ Falha ao iniciar PostgreSQL após instalação"
+        fi
+    fi
+
+    # DEBUG: Verificar se usuário postgres existe
+    if id postgres >/dev/null 2>&1; then
+        log "📦 DEBUG: Usuário postgres existe"
+    else
+        log "📦 DEBUG: ERRO - Usuário postgres NÃO existe"
     fi
 
     # Verificar conexão PostgreSQL
-    if ! sudo -u postgres psql -c "SELECT version();" >/dev/null 2>&1; then
+    log "📦 DEBUG: Testando conexão PostgreSQL..."
+    if sudo -u postgres psql -c "SELECT version();" >/dev/null 2>&1; then
+        log "📦 DEBUG: Conexão PostgreSQL funcionando"
+    else
+        log "📦 DEBUG: ERRO - Conexão PostgreSQL falhando"
+        log "📦 DEBUG: Tentando diagnóstico de conexão..."
+        sudo -u postgres psql -c "SELECT version();" 2>&1 || true
         error "❌ Falha de conexão PostgreSQL - instalação corrompida"
     fi
 
-    log "✅ PostgreSQL configurado e iniciado com sucesso"
+    log "✅ DEBUG: PostgreSQL configurado e iniciado com sucesso"
 fi
 
 # Criar usuário samureye e banco de dados (com reset automático)
-log "🗄️ Configurando usuário e banco de dados..."
+log "🗄️ DEBUG: Configurando usuário e banco de dados..."
+
+# DEBUG: Verificar se PostgreSQL ainda está funcionando
+if systemctl is-active --quiet postgresql; then
+    log "🗄️ DEBUG: PostgreSQL ainda ativo antes da configuração do banco"
+else
+    log "🗄️ DEBUG: ERRO - PostgreSQL não está ativo antes da configuração do banco"
+    systemctl status postgresql --no-pager || true
+fi
+
+# DEBUG: Teste de conexão antes da configuração
+if sudo -u postgres psql -c "SELECT 1;" >/dev/null 2>&1; then
+    log "🗄️ DEBUG: Conexão PostgreSQL OK antes da configuração do banco"
+else
+    log "🗄️ DEBUG: ERRO - Conexão PostgreSQL falhou antes da configuração do banco"
+    error "❌ PostgreSQL não está funcionando antes da configuração do banco"
+fi
 
 # Função de reset do banco (para funcionar como reset completo do servidor)
+log "🗄️ DEBUG: Executando comandos SQL para configurar banco..."
 sudo -u postgres psql << 'EOF'
 -- Finalizar conexões existentes ao banco samureye_db se existir
 SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = 'samureye_db' AND pid <> pg_backend_pid();
@@ -293,7 +378,23 @@ CREATE EXTENSION IF NOT EXISTS pg_stat_statements;
 GRANT ALL ON SCHEMA public TO samureye;
 EOF
 
-log "✅ PostgreSQL configurado com sucesso"
+log "🗄️ DEBUG: Comandos SQL executados - verificando se PostgreSQL ainda funciona..."
+
+# DEBUG: Verificação final
+if systemctl is-active --quiet postgresql; then
+    log "🗄️ DEBUG: PostgreSQL ainda ativo após configuração do banco"
+else
+    log "🗄️ DEBUG: ERRO CRÍTICO - PostgreSQL parou após configuração do banco"
+    systemctl status postgresql --no-pager || true
+fi
+
+if sudo -u postgres psql -c "SELECT 1;" >/dev/null 2>&1; then
+    log "🗄️ DEBUG: Conexão PostgreSQL ainda funcionando após configuração"
+else
+    log "🗄️ DEBUG: ERRO CRÍTICO - Conexão PostgreSQL falhou após configuração"
+fi
+
+log "✅ DEBUG: PostgreSQL configurado com sucesso"
 
 # Criar script SQL do schema
 cat > /tmp/samureye_schema.sql << 'SCHEMA_EOF'
