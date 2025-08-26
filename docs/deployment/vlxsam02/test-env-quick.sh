@@ -36,8 +36,40 @@ echo ""
 echo "3. Teste de carregamento como usuário $SERVICE_USER:"
 
 cat > /tmp/quick-test.js << 'EOF'
+const path = require('path');
+const fs = require('fs');
+
+// Definir caminhos possíveis para .env
+const envPaths = [
+    '/opt/samureye/SamurEye/.env',
+    '/etc/samureye/.env',
+    './.env'
+];
+
+console.log('   Procurando arquivo .env...');
+let envFound = false;
+let envPath = '';
+
+for (const testPath of envPaths) {
+    if (fs.existsSync(testPath)) {
+        console.log('   ✅ Arquivo .env encontrado:', testPath);
+        envPath = testPath;
+        envFound = true;
+        break;
+    } else {
+        console.log('   ❌ Não encontrado:', testPath);
+    }
+}
+
+if (!envFound) {
+    console.log('   ❌ ERRO: Arquivo .env não encontrado em nenhum local');
+    process.exit(1);
+}
+
 try {
-    require('dotenv').config();
+    // Carregar dotenv com path específico
+    require('dotenv').config({ path: envPath });
+    
     console.log('   DATABASE_URL carregada:', process.env.DATABASE_URL ? 'SIM' : 'NÃO');
     console.log('   PGHOST:', process.env.PGHOST || 'undefined');
     console.log('   PGPORT:', process.env.PGPORT || 'undefined');
@@ -57,6 +89,7 @@ try {
 }
 EOF
 
+cd "$WORKING_DIR"
 if sudo -u $SERVICE_USER node /tmp/quick-test.js; then
     echo "✅ TESTE SUCESSO: Carregamento funcionando"
 else

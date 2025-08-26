@@ -323,8 +323,12 @@ install_application() {
     # Verificar se dotenv está no package.json
     log "🔧 Verificando dependências do projeto..."
     
-    # Verificar se dotenv está nas dependências ou devDependencies
-    if ! grep -q '"dotenv"' package.json && ! npm list dotenv >/dev/null 2>&1; then
+    # Instalar dependências primeiro
+    log "Instalando dependências npm..."
+    sudo -u $SERVICE_USER npm install
+    
+    # Verificar e garantir que dotenv está instalado
+    if ! sudo -u $SERVICE_USER npm list dotenv >/dev/null 2>&1; then
         log "Instalando dotenv..."
         sudo -u $SERVICE_USER npm install dotenv
         log "✅ dotenv instalado"
@@ -333,15 +337,11 @@ install_application() {
     fi
     
     # Verificar se tsx está disponível (necessário para desenvolvimento)
-    if ! npm list tsx >/dev/null 2>&1; then
+    if ! sudo -u $SERVICE_USER npm list tsx >/dev/null 2>&1; then
         log "Instalando tsx para desenvolvimento..."
         sudo -u $SERVICE_USER npm install --save-dev tsx
         log "✅ tsx instalado"
     fi
-    
-    # Instalar dependências
-    log "Instalando dependências npm..."
-    sudo -u $SERVICE_USER npm install
     
     # Verificar e corrigir server/index.ts
     fix_server_configuration
@@ -484,8 +484,28 @@ EOF
     
     # Criar links simbólicos
     log "Criando links simbólicos para .env..."
+    
+    # Verificar se o arquivo foi criado
+    if [ ! -f "$ETC_DIR/.env" ]; then
+        error "Arquivo .env não foi criado em $ETC_DIR"
+    fi
+    
+    # Remover links existentes se houver
+    rm -f "/opt/samureye/.env" "$WORKING_DIR/.env"
+    
+    # Criar novos links
     ln -sf "$ETC_DIR/.env" "/opt/samureye/.env"
     ln -sf "$ETC_DIR/.env" "$WORKING_DIR/.env"
+    
+    # Verificar se os links foram criados
+    if [ -L "$WORKING_DIR/.env" ] && [ -f "$WORKING_DIR/.env" ]; then
+        log "✅ Link simbólico criado: $WORKING_DIR/.env -> $(readlink $WORKING_DIR/.env)"
+    else
+        warn "Falha ao criar link simbólico para $WORKING_DIR/.env"
+    fi
+    
+    # Configurar permissões para os links
+    chown -h $SERVICE_USER:$SERVICE_USER "$WORKING_DIR/.env" 2>/dev/null || true
     
     log "✅ Arquivo .env criado e linkado"
 }
