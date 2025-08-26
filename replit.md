@@ -26,6 +26,30 @@ A **WebSocket server** provides live updates for various events, including colle
 ### Security Features
 The platform implements **mTLS** for secure collector-to-cloud communication using an internal **step-ca** Certificate Authority. Public-facing services use **Let's Encrypt** certificates with **HTTPS enforcement** and HSTS headers. **CSP headers** and other security middleware are also applied.
 
+## Recent Progress and Fixes
+
+### vlxsam02 Deployment Issues Resolution (August 2025)
+Successfully identified and resolved critical port 443 connection issues affecting vlxsam02 application server:
+
+**Problem**: Application attempting HTTPS connections to PostgreSQL server on port 443 instead of port 5432.
+
+**Root Cause**: 
+- Missing dotenv configuration in server startup
+- Potential hardcoded URL configurations in codebase
+- Environment variable loading issues in production environment
+
+**Solutions Implemented**:
+1. **Enhanced server/index.ts** - Added `import "dotenv/config"` to ensure environment variables load correctly
+2. **Created diagnostic tools**:
+   - `diagnose-connection.sh` - Comprehensive connection analysis
+   - `fix-env-loading.sh` - Automated .env file recreation and environment setup
+   - `fix-port-443-issue.sh` - Hardcoded configuration correction
+   - `test-installation.sh` - Complete installation validation
+3. **Improved install.sh** - Added automatic detection and correction of port 443 issues
+4. **Documentation** - Created comprehensive README.md for vlxsam02 troubleshooting
+
+**Current Status**: Tools ready for deployment testing on actual vlxsam02 server. Development environment confirmed working with proper PostgreSQL configuration.
+
 ## External Dependencies
 
 ### Database & Storage
