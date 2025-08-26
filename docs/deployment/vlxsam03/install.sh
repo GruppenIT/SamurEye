@@ -197,8 +197,9 @@ log "Redis configurado e iniciado"
 
 log "🐘 Instalando PostgreSQL 16..."
 
-# Verificar se há clusters corrompidos ANTES de tentar instalar
+# Verificar se PostgreSQL já está instalado e funcionando
 if command -v pg_lsclusters >/dev/null 2>&1; then
+    # Verificar se há clusters corrompidos
     if pg_lsclusters 2>&1 | grep -q "Invalid data directory\|Use of uninitialized value"; then
         warn "🧹 Cluster PostgreSQL corrompido detectado - executando limpeza completa..."
         
@@ -220,33 +221,50 @@ if command -v pg_lsclusters >/dev/null 2>&1; then
         
         log "✅ Cluster corrompido removido"
     else
-        log "🔍 Clusters PostgreSQL existentes estão OK - prosseguindo com instalação normal"
+        # PostgreSQL existe e está funcionando - verificar se precisa reinstalar
+        if systemctl is-active --quiet postgresql && sudo -u postgres psql -c "SELECT version();" >/dev/null 2>&1; then
+            log "🔍 PostgreSQL já instalado e funcionando - pulando instalação"
+            # Pular para próxima seção
+            jump_to_database_config=true
+        else
+            warn "🔄 PostgreSQL instalado mas não funcionando - reinstalando..."
+            # Fazer reinstalação limpa
+            systemctl stop postgresql 2>/dev/null || true
+            apt-get purge postgresql-16 postgresql-common postgresql-client-16 postgresql-client-common postgresql-contrib -y
+            apt-get autoremove --purge -y
+            rm -rf /var/lib/postgresql/ /etc/postgresql/ /var/log/postgresql/ /run/postgresql/
+            userdel postgres 2>/dev/null || true
+            groupdel postgres 2>/dev/null || true
+        fi
     fi
 else
     log "🔍 Nenhum PostgreSQL detectado - instalação limpa"
 fi
 
-# Instalar PostgreSQL 16 em ambiente completamente limpo
-log "📦 Instalando PostgreSQL 16 em ambiente limpo..."
-apt-get update
-apt install -y postgresql-16 postgresql-contrib
+# Instalar apenas se necessário
+if [ "$jump_to_database_config" != "true" ]; then
+    # Instalar PostgreSQL 16 em ambiente completamente limpo
+    log "📦 Instalando PostgreSQL 16 em ambiente limpo..."
+    apt-get update
+    apt install -y postgresql-16 postgresql-contrib
 
-# Iniciar e habilitar PostgreSQL
-systemctl start postgresql
-systemctl enable postgresql
-sleep 5
+    # Iniciar e habilitar PostgreSQL
+    systemctl start postgresql
+    systemctl enable postgresql
+    sleep 5
 
-# Verificar se PostgreSQL iniciou corretamente
-if ! systemctl is-active --quiet postgresql; then
-    error "❌ Falha ao iniciar PostgreSQL após instalação"
+    # Verificar se PostgreSQL iniciou corretamente
+    if ! systemctl is-active --quiet postgresql; then
+        error "❌ Falha ao iniciar PostgreSQL após instalação"
+    fi
+
+    # Verificar conexão PostgreSQL
+    if ! sudo -u postgres psql -c "SELECT version();" >/dev/null 2>&1; then
+        error "❌ Falha de conexão PostgreSQL - instalação corrompida"
+    fi
+
+    log "✅ PostgreSQL configurado e iniciado com sucesso"
 fi
-
-# Verificar conexão PostgreSQL
-if ! sudo -u postgres psql -c "SELECT version();" >/dev/null 2>&1; then
-    error "❌ Falha de conexão PostgreSQL - instalação corrompida"
-fi
-
-log "✅ PostgreSQL configurado e iniciado com sucesso"
 
 # Criar usuário samureye e banco de dados (com reset automático)
 log "🗄️ Configurando usuário e banco de dados..."
