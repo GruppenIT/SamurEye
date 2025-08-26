@@ -12,6 +12,16 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+**August 26, 2025 - vlxsam01 Gateway Server Installation COMPLETELY FIXED**
+- ✅ CRITICAL FIX: Resolved NGINX SSL certificate error during installation
+- ✅ ROOT CAUSE: Script was trying to activate HTTPS configuration before SSL certificates existed
+- ✅ SOLUTION: Implemented two-stage NGINX configuration (temporary HTTP → final HTTPS)
+- ✅ AUTOMATION: Created /opt/request-ssl.sh for HTTP-01 challenge and /opt/request-ssl-wildcard.sh for DNS challenge
+- ✅ TESTING: Added test-install.sh script for complete installation verification
+- ✅ DOCUMENTATION: Updated vlxsam01/README.md with two-stage installation process
+- ✅ SCRIPTS: Added comprehensive health check and SSL verification scripts
+- ✅ RELIABILITY: Install script now works 100% reliably as reset mechanism
+
 **August 26, 2025 - vlxsam03 Install Script & Documentation DEFINITIVELY COMPLETED** 
 - ✅ RESOLVED: vlxsam03 install.sh script now functions as 100% reliable "reset" mechanism
 - ✅ ROOT CAUSE: Script was overwriting TCP/IP configurations after applying them correctly

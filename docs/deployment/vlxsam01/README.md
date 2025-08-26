@@ -39,39 +39,157 @@ chmod +x install.sh
 ./install.sh
 ```
 
-### O que o Script Instala
+### O que o Script Instala (100% Automatizado)
 
 1. **Sistema Base**
-   - Atualização do sistema Ubuntu
-   - Instalação do NGINX
-   - Configuração de firewall UFW
-   - Configuração de timezone
+   - Atualização completa do sistema Ubuntu
+   - Instalação do NGINX, Certbot, Fail2Ban
+   - Configuração de firewall UFW (portas 22, 80, 443)
+   - Timezone America/Sao_Paulo
 
-2. **SSL/TLS**
-   - Certbot para Let's Encrypt
-   - Configuração DNS-01 challenge
-   - Certificados wildcard (*.samureye.com.br)
-   - Renovação automática via cron
+2. **NGINX Configuração Inteligente**
+   - Configuração temporária HTTP (sem SSL) ativada automaticamente
+   - Configuração final HTTPS preparada (será ativada após SSL)
+   - Rate limiting avançado por endpoint
+   - Headers de segurança obrigatórios
+   - Proxy reverso para vlxsam02:5000
 
-3. **NGINX**
-   - Configuração proxy reverso
-   - Rate limiting avançado
-   - Headers de segurança
-   - Compressão gzip
-   - Cache otimizado
+3. **Scripts SSL Automáticos**
+   - `/opt/request-ssl.sh` - HTTP-01 challenge (simples)
+   - `/opt/request-ssl-wildcard.sh` - DNS challenge (wildcard)
+   - Renovação automática via cron (2x por dia)
 
-4. **Monitoramento**
-   - Scripts de health check
-   - Logs estruturados
-   - Alertas automáticos
+4. **Monitoramento e Scripts**
+   - `/opt/samureye/scripts/health-check.sh` - Status completo
+   - `/opt/samureye/scripts/check-ssl.sh` - Verificação SSL
+   - Logs estruturados e rotação automática
+   - Fail2Ban configurado
 
-## Configuração Pós-Instalação
+## Processo de Instalação em Duas Etapas
 
-### 1. Verificar Certificados SSL
+### ✅ Etapa 1: Instalação Base (Automática)
 
 ```bash
-# Verificar status dos certificados
-./scripts/check-ssl.sh
+# Script de instalação - executa tudo automaticamente
+curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam01/install.sh | bash
+```
+
+**Resultado:** NGINX funcionando com HTTP, ready para SSL
+
+### ⚠️ Etapa 2: Configuração SSL (Manual - Aguarda DNS)
+
+```bash
+# PRIMEIRO: Configurar DNS (obrigatório)
+# Criar registros DNS para:
+# samureye.com.br -> 172.24.1.151
+# app.samureye.com.br -> 172.24.1.151  
+# api.samureye.com.br -> 172.24.1.151
+
+# DEPOIS: Solicitar certificados SSL
+/opt/request-ssl.sh
+
+# OU para certificado wildcard (se suportado pelo DNS):
+/opt/request-ssl-wildcard.sh
+```
+
+**Resultado:** NGINX com HTTPS funcionando, redirecionamento automático
+
+## Verificação e Testes
+
+### Scripts de Teste Automático
+
+```bash
+# Teste completo da instalação
+curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam01/test-install.sh | bash
+
+# Health check completo
+/opt/samureye/scripts/health-check.sh
+
+# Verificação específica SSL
+/opt/samureye/scripts/check-ssl.sh
+```
+
+### Testes Manuais
+
+```bash
+# Testar proxy reverso HTTP (sem SSL)
+curl -I http://172.24.1.151/nginx-health
+
+# Testar HTTPS (após configurar SSL)
+curl -I https://app.samureye.com.br/nginx-health
+
+# Verificar rate limiting
+for i in {1..5}; do curl -I https://app.samureye.com.br/api/; done
+
+# Testar WebSocket (após vlxsam02 configurado)
+wscat -c wss://app.samureye.com.br/ws
+```
+
+## Troubleshooting
+
+### Problemas Comuns
+
+```bash
+# NGINX não inicia - verificar configuração
+nginx -t
+systemctl status nginx
+
+# SSL não funciona - verificar certificados
+/opt/samureye/scripts/check-ssl.sh
+ls -la /etc/letsencrypt/live/samureye.com.br/
+
+# Proxy reverso falha - verificar vlxsam02
+nc -z 172.24.1.152 5000
+curl -I http://172.24.1.152:5000/
+
+# Rate limiting muito restritivo - ajustar configuração
+nano /etc/nginx/sites-available/samureye
+nginx -t && systemctl reload nginx
+```
+
+### Reset Completo 
+
+```bash
+# Reset completo - funciona sempre
+curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam01/install.sh | bash
+```
+
+## Arquivos Importantes
+
+```
+/opt/request-ssl.sh              # Script solicitação SSL (HTTP-01)
+/opt/request-ssl-wildcard.sh     # Script SSL wildcard (DNS)
+/opt/samureye/scripts/           # Scripts de manutenção
+/etc/nginx/sites-available/      # Configurações NGINX
+/etc/letsencrypt/live/           # Certificados SSL
+/var/log/nginx/                  # Logs NGINX
+/var/log/samureye/               # Logs sistema
+```
+
+## Monitoramento
+
+### Logs em Tempo Real
+
+```bash
+# Logs de acesso
+tail -f /var/log/nginx/samureye-access.log
+
+# Logs de erro
+tail -f /var/log/nginx/samureye-error.log
+
+# Logs de API
+tail -f /var/log/nginx/api-access.log
+
+# Health check automático
+tail -f /var/log/samureye/health-check.log
+```
+
+### Métricas Automáticas
+
+- **Health check**: A cada 5 minutos via cron
+- **Renovação SSL**: 2x por dia (2h e 14h)
+- **Fail2Ban**: Monitoramento ativo de IPs maliciosos
+- **Log rotation**: Logs rotacionados diariamente (30 dias de retenção)
 
 # Testar renovação
 certbot renew --dry-run

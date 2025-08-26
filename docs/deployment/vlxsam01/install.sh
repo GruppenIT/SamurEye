@@ -223,7 +223,39 @@ EOF
 # Remover configuração padrão
 rm -f /etc/nginx/sites-enabled/default
 
-# Configuração do site SamurEye
+# Configuração temporária do site SamurEye (sem SSL)
+cat > /etc/nginx/sites-available/samureye-temp << 'EOF'
+# SamurEye - Configuração NGINX Gateway (Temporária - sem SSL)
+# Domínio: *.samureye.com.br
+# Servidor: vlxsam01 (172.24.1.151)
+
+# Servidor HTTP temporário para validação Let's Encrypt
+server {
+    listen 80;
+    listen [::]:80;
+    server_name samureye.com.br *.samureye.com.br app.samureye.com.br;
+    
+    # Permitir validação Let's Encrypt
+    location /.well-known/acme-challenge/ {
+        root /var/www/html;
+        allow all;
+    }
+    
+    # Proxy para aplicação durante configuração
+    location / {
+        proxy_pass http://samureye_app;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        
+        # Rate limiting básico
+        limit_req zone=general burst=20 nodelay;
+    }
+}
+EOF
+
+# Configuração HTTPS final (será aplicada após obter certificados)
 cat > /etc/nginx/sites-available/samureye << 'EOF'
 # SamurEye - Configuração NGINX Gateway
 # Domínio: *.samureye.com.br
@@ -235,8 +267,16 @@ server {
     listen [::]:80;
     server_name samureye.com.br *.samureye.com.br;
     
-    # Redirecionamento permanente para HTTPS
-    return 301 https://$server_name$request_uri;
+    # Permitir validação Let's Encrypt
+    location /.well-known/acme-challenge/ {
+        root /var/www/html;
+        allow all;
+    }
+    
+    # Redirecionamento permanente para HTTPS (exceto acme-challenge)
+    location / {
+        return 301 https://$server_name$request_uri;
+    }
 }
 
 # Configuração HTTPS principal
@@ -488,11 +528,21 @@ server {
 }
 EOF
 
-# Ativar configuração
-ln -sf /etc/nginx/sites-available/samureye /etc/nginx/sites-enabled/
+# PRIMEIRO: Ativar configuração temporária SEM SSL
+log "Ativando configuração temporária (sem SSL)..."
+ln -sf /etc/nginx/sites-available/samureye-temp /etc/nginx/sites-enabled/samureye
 
-# Testar configuração
+# Criar diretório para validação Let's Encrypt
+mkdir -p /var/www/html/.well-known/acme-challenge
+chown -R www-data:www-data /var/www/html
+
+# Testar configuração temporária
 nginx -t
+
+# Recarregar NGINX com configuração temporária
+systemctl reload nginx
+
+log "NGINX configurado temporariamente (HTTP apenas)"
 
 # ============================================================================
 # 5. CONFIGURAÇÃO DE CERTIFICADOS SSL
@@ -500,14 +550,54 @@ nginx -t
 
 log "📜 Configurando certificados SSL..."
 
-# Criar script de solicitação de certificado
+# Criar script de solicitação de certificado (HTTP-01 challenge)
 cat > /opt/request-ssl.sh << 'EOF'
 #!/bin/bash
 
-# Script para solicitar certificado SSL wildcard
-# Execute após configurar DNS
+# Script para solicitar certificado SSL para SamurEye
+# Usa HTTP-01 challenge (mais simples)
 
-echo "🔐 Solicitando certificado SSL wildcard..."
+set -e
+
+echo "🔐 Solicitando certificado SSL com HTTP-01 challenge..."
+
+# Solicitar certificado usando HTTP-01 (mais simples que DNS)
+certbot certonly \
+    --webroot \
+    --webroot-path=/var/www/html \
+    --email admin@samureye.com.br \
+    --agree-tos \
+    --no-eff-email \
+    --force-renewal \
+    -d samureye.com.br \
+    -d app.samureye.com.br \
+    -d api.samureye.com.br
+
+echo "✅ Certificado obtido. Ativando configuração HTTPS..."
+
+# Ativar configuração final com SSL
+ln -sf /etc/nginx/sites-available/samureye /etc/nginx/sites-enabled/samureye
+
+# Testar configuração final
+nginx -t
+
+# Recarregar NGINX
+systemctl reload nginx
+
+echo "🚀 SSL configurado com sucesso!"
+echo "Acesse: https://app.samureye.com.br"
+EOF
+
+chmod +x /opt/request-ssl.sh
+
+# Criar script wildcard para DNS challenge (manual)
+cat > /opt/request-ssl-wildcard.sh << 'EOF'
+#!/bin/bash
+
+# Script para solicitar certificado SSL wildcard (manual)
+# Execute após configurar DNS TXT records
+
+echo "🔐 Solicitando certificado SSL wildcard (DNS challenge)..."
 
 # Solicitar certificado wildcard usando DNS challenge
 certbot certonly \
@@ -516,14 +606,28 @@ certbot certonly \
     --email admin@samureye.com.br \
     --server https://acme-v02.api.letsencrypt.org/directory \
     --agree-tos \
+    --no-eff-email \
     -d samureye.com.br \
     -d "*.samureye.com.br"
 
-echo "✅ Certificado solicitado. Configure o NGINX e reinicie:"
-echo "systemctl reload nginx"
+if [ $? -eq 0 ]; then
+    echo "✅ Certificado wildcard obtido!"
+    
+    # Ativar configuração final com SSL
+    ln -sf /etc/nginx/sites-available/samureye /etc/nginx/sites-enabled/samureye
+    
+    # Testar e recarregar
+    nginx -t && systemctl reload nginx
+    
+    echo "🚀 SSL wildcard configurado!"
+    echo "Suporta todos os subdomínios: *.samureye.com.br"
+else
+    echo "❌ Falha ao obter certificado wildcard"
+    exit 1
+fi
 EOF
 
-chmod +x /opt/request-ssl.sh
+chmod +x /opt/request-ssl-wildcard.sh
 
 # ============================================================================
 # 6. SCRIPTS DE MONITORAMENTO
