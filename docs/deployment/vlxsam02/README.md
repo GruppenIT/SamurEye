@@ -13,6 +13,19 @@ O vlxsam02 é o servidor principal da aplicação SamurEye, responsável por exe
 
 ### Script Principal
 ```bash
+# Download e execute o script diretamente
+curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam02/install.sh | sudo bash
+
+# OU baixe e execute localmente
+sudo ./install.sh
+```
+
+### Se Houver Erro de Permissões
+```bash
+# Execute este script de correção primeiro
+sudo ./quick-fix.sh
+
+# Depois execute a instalação normal
 sudo ./install.sh
 ```
 
@@ -186,6 +199,28 @@ O script detectará a instalação anterior e fará limpeza completa automaticam
 - ✅ Links simbólicos ausentes
 - ✅ Serviço não configurado
 - ✅ Dependências ausentes
+- ✅ Problemas de permissões no clone do repositório
+
+### 🚨 Problemas Conhecidos e Soluções
+
+#### Erro: "Permission denied" no Clone do Git
+**Sintoma:**
+```
+/opt/samureye/SamurEye/.git: Permission denied
+```
+
+**Solução Automática:**
+O script agora detecta e corrige automaticamente problemas de permissões. Se ainda ocorrer:
+
+1. **Execute o script de correção:**
+   ```bash
+   curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam02/quick-fix.sh | sudo bash
+   ```
+
+2. **Depois execute a instalação normal:**
+   ```bash
+   curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam02/install.sh | sudo bash
+   ```
 
 ### 📋 Para Problemas Não Resolvidos Automaticamente
 

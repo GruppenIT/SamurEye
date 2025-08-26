@@ -159,6 +159,16 @@ cleanup_previous_installation() {
     mkdir -p "$ETC_DIR"
     mkdir -p "/opt/samureye"
     
+    # Garantir que o usuário samureye existe antes de configurar permissões
+    if ! id "$SERVICE_USER" &>/dev/null; then
+        log "Criando usuário $SERVICE_USER temporariamente..."
+        useradd -r -s /bin/bash -d /opt/samureye -m "$SERVICE_USER" || true
+    fi
+    
+    # Configurar permissões básicas
+    chown -R $SERVICE_USER:$SERVICE_USER /opt/samureye 2>/dev/null || true
+    chmod 755 /opt/samureye
+    
     log "✅ Limpeza concluída"
 }
 
@@ -238,10 +248,17 @@ create_user() {
     
     # Criar usuário se não existir
     if ! id "$SERVICE_USER" &>/dev/null; then
+        log "Criando usuário $SERVICE_USER..."
         useradd -r -s /bin/bash -d /opt/samureye -m "$SERVICE_USER"
         log "✅ Usuário $SERVICE_USER criado"
     else
         log "ℹ️  Usuário $SERVICE_USER já existe"
+        
+        # Garantir que o diretório home existe
+        if [ ! -d "/opt/samureye" ]; then
+            mkdir -p /opt/samureye
+            log "Diretório home criado para usuário existente"
+        fi
     fi
     
     # Configurar permissões
@@ -261,18 +278,46 @@ create_user() {
 install_application() {
     log "📥 Baixando e instalando aplicação SamurEye..."
     
-    # Criar diretório de trabalho
+    # Criar diretório de trabalho e configurar permissões
     mkdir -p "$WORKING_DIR"
+    chown -R $SERVICE_USER:$SERVICE_USER /opt/samureye
+    chmod 755 /opt/samureye
+    
+    # Verificar se as permissões estão corretas
+    local dir_owner=$(stat -c '%U' "$WORKING_DIR" 2>/dev/null || echo "unknown")
+    if [ "$dir_owner" != "$SERVICE_USER" ]; then
+        warn "Permissões incorretas detectadas, corrigindo..."
+        chown -R $SERVICE_USER:$SERVICE_USER "$WORKING_DIR"
+        chmod 755 "$WORKING_DIR"
+    fi
+    
     cd "$WORKING_DIR"
     
     # Baixar código fonte do GitHub
     log "Clonando repositório do GitHub..."
     if [ -d ".git" ]; then
         # Se já existe, fazer pull
+        log "Repositório já existe, atualizando..."
         sudo -u $SERVICE_USER git pull origin main
     else
-        # Clone inicial
-        sudo -u $SERVICE_USER git clone https://github.com/GruppenIT/SamurEye.git .
+        # Clone inicial - verificar se diretório está vazio
+        if [ "$(ls -A .)" ]; then
+            log "Diretório não está vazio, limpando..."
+            rm -rf * .* 2>/dev/null || true
+        fi
+        
+        log "Clonando repositório..."
+        
+        # Testar se o usuário pode escrever no diretório
+        if ! sudo -u $SERVICE_USER touch "$WORKING_DIR/.test_write" 2>/dev/null; then
+            error "Usuário $SERVICE_USER não pode escrever em $WORKING_DIR. Verificar permissões."
+        fi
+        rm -f "$WORKING_DIR/.test_write"
+        
+        # Executar clone
+        if ! sudo -u $SERVICE_USER git clone https://github.com/GruppenIT/SamurEye.git .; then
+            error "Falha no clone do repositório. Verificar conectividade e permissões."
+        fi
     fi
     
     # Verificar se dotenv está no package.json
@@ -568,6 +613,17 @@ final_validation() {
     for dir in "$WORKING_DIR" "$ETC_DIR"; do
         if [ -d "$dir" ]; then
             echo "  ✅ $dir"
+            
+            # Verificar permissões
+            if [ "$dir" = "$WORKING_DIR" ]; then
+                local owner=$(stat -c '%U' "$dir" 2>/dev/null || echo "unknown")
+                if [ "$owner" = "$SERVICE_USER" ]; then
+                    echo "  ✅ Permissões corretas: $owner"
+                else
+                    echo "  ⚠️ Permissões incorretas: $owner (esperado: $SERVICE_USER)"
+                    chown -R $SERVICE_USER:$SERVICE_USER "$dir" || true
+                fi
+            fi
         else
             echo "  ❌ $dir"
             ((issues++))

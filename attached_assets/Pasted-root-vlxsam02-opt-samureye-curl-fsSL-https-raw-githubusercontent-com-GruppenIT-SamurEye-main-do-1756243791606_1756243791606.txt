@@ -1,0 +1,267 @@
+root@vlxsam02:/opt/samureye# curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam02/install.sh | bash
+🚀 INSTALAÇÃO COMPLETA SAMUREYE - VLXSAM02
+==========================================
+Servidor: vlxsam02 (172.24.1.152)
+Função: Application Server
+Dependências: vlxsam03 (PostgreSQL + Redis)
+
+✨ RECURSOS INCLUSOS:
+   🔧 Instalação completa da aplicação
+   🔍 Diagnóstico automático de problemas
+   🛠️  Correção automática de configurações
+   ✅ Validação final da instalação
+   🔄 Detecção e correção de erro porta 443
+
+[2025-08-26 18:29:09] 🎯 Iniciando instalação completa do SamurEye vlxsam02...
+[2025-08-26 18:29:09] 🔍 DIAGNÓSTICO INICIAL - Verificando problemas conhecidos...
+📡 Verificando conectividade com vlxsam03...
+[2025-08-26 18:29:09] ✅ PostgreSQL (172.24.1.153:5432): Conectividade OK
+[2025-08-26 18:29:09] WARNING: Problemas de autenticação PostgreSQL detectados
+[2025-08-26 18:29:09] ✅ Redis (172.24.1.153:6379): Conectividade OK
+[2025-08-26 18:29:09] WARNING: Instalação anterior detectada em /opt/samureye/SamurEye
+[2025-08-26 18:29:09] WARNING: 🔧 PROBLEMA DETECTADO: Tentativas de conexão na porta 443
+[2025-08-26 18:29:09] WARNING:    Este script irá corrigir automaticamente
+[2025-08-26 18:29:09] 🔧 Problemas detectados serão corrigidos durante a instalação
+[2025-08-26 18:29:09] 🧹 Limpeza de instalação anterior...
+[2025-08-26 18:29:09] Parando serviço samureye-app...
+[2025-08-26 18:29:09] Desabilitando serviço samureye-app...
+Removed "/etc/systemd/system/multi-user.target.wants/samureye-app.service".
+[2025-08-26 18:29:09] Removendo arquivo de serviço...
+[2025-08-26 18:29:10] Fazendo backup de configurações existentes...
+[2025-08-26 18:29:10] Removendo diretórios de instalação anterior...
+[2025-08-26 18:29:10] ✅ Limpeza concluída
+[2025-08-26 18:29:10] 📦 Instalando pacotes do sistema...
+Hit:1 https://deb.nodesource.com/node_20.x nodistro InRelease
+Hit:2 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:3 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:4 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:5 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists... Done
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+Calculating upgrade... Done
+The following packages have been kept back:
+  sosreport
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[2025-08-26 18:29:12] Instalando pacotes essenciais...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+curl is already the newest version (8.5.0-2ubuntu10.6).
+wget is already the newest version (1.21.4-1ubuntu4.1).
+git is already the newest version (1:2.43.0-1ubuntu7.3).
+unzip is already the newest version (6.0-28ubuntu4.1).
+htop is already the newest version (3.3.0-4build1).
+nano is already the newest version (7.2-2ubuntu0.1).
+nano set to manually installed.
+postgresql-client is already the newest version (16+257build1.1).
+redis-tools is already the newest version (5:7.0.15-1ubuntu0.24.04.1).
+ufw is already the newest version (0.36.2-6).
+fail2ban is already the newest version (1.0.2-3ubuntu0.1).
+logrotate is already the newest version (3.21.0-2build1).
+logrotate set to manually installed.
+cron is already the newest version (3.0pl1-184ubuntu2).
+cron set to manually installed.
+rsync is already the newest version (3.2.7-1ubuntu1.2).
+rsync set to manually installed.
+jq is already the newest version (1.7.1-3ubuntu0.24.04.1).
+jq set to manually installed.
+The following additional packages will be installed:
+  nginx-common python3-acme python3-certbot python3-configargparse python3-icu python3-josepy python3-parsedatetime python3-rfc3339
+Suggested packages:
+  python-certbot-doc python3-certbot-apache fcgiwrap nginx-doc ssl-cert python-acme-doc python-certbot-nginx-doc
+The following NEW packages will be installed:
+  certbot net-tools nginx nginx-common python3-acme python3-certbot python3-certbot-nginx python3-configargparse python3-icu python3-josepy python3-parsedatetime python3-rfc3339
+0 upgraded, 12 newly installed, 0 to remove and 1 not upgraded.
+Need to get 1,865 kB of archives.
+After this operation, 8,106 kB of additional disk space will be used.
+Get:1 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 net-tools amd64 2.10-0.1ubuntu4.4 [204 kB]
+Get:2 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 nginx-common all 1.24.0-2ubuntu7.5 [43.4 kB]
+Get:3 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 nginx amd64 1.24.0-2ubuntu7.5 [520 kB]
+Get:4 http://archive.ubuntu.com/ubuntu noble/universe amd64 python3-josepy all 1.14.0-1 [22.1 kB]
+Get:5 http://archive.ubuntu.com/ubuntu noble/universe amd64 python3-rfc3339 all 1.1-4 [6,744 B]
+Get:6 http://archive.ubuntu.com/ubuntu noble/universe amd64 python3-acme all 2.9.0-1 [48.5 kB]
+Get:7 http://archive.ubuntu.com/ubuntu noble/universe amd64 python3-configargparse all 1.7-1 [31.7 kB]
+Get:8 http://archive.ubuntu.com/ubuntu noble/universe amd64 python3-parsedatetime all 2.6-3 [32.8 kB]
+Get:9 http://archive.ubuntu.com/ubuntu noble/universe amd64 python3-certbot all 2.9.0-1 [267 kB]
+Get:10 http://archive.ubuntu.com/ubuntu noble/universe amd64 certbot all 2.9.0-1 [89.2 kB]
+Get:11 http://archive.ubuntu.com/ubuntu noble/universe amd64 python3-certbot-nginx all 2.9.0-1 [66.0 kB]
+Get:12 http://archive.ubuntu.com/ubuntu noble/main amd64 python3-icu amd64 2.12-1build2 [534 kB]
+Fetched 1,865 kB in 2s (856 kB/s)
+Preconfiguring packages ...
+Selecting previously unselected package net-tools.
+(Reading database ... 132783 files and directories currently installed.)
+Preparing to unpack .../00-net-tools_2.10-0.1ubuntu4.4_amd64.deb ...
+Unpacking net-tools (2.10-0.1ubuntu4.4) ...
+Selecting previously unselected package nginx-common.
+Preparing to unpack .../01-nginx-common_1.24.0-2ubuntu7.5_all.deb ...
+Unpacking nginx-common (1.24.0-2ubuntu7.5) ...
+Selecting previously unselected package nginx.
+Preparing to unpack .../02-nginx_1.24.0-2ubuntu7.5_amd64.deb ...
+Unpacking nginx (1.24.0-2ubuntu7.5) ...
+Selecting previously unselected package python3-josepy.
+Preparing to unpack .../03-python3-josepy_1.14.0-1_all.deb ...
+Unpacking python3-josepy (1.14.0-1) ...
+Selecting previously unselected package python3-rfc3339.
+Preparing to unpack .../04-python3-rfc3339_1.1-4_all.deb ...
+Unpacking python3-rfc3339 (1.1-4) ...
+Selecting previously unselected package python3-acme.
+Preparing to unpack .../05-python3-acme_2.9.0-1_all.deb ...
+Unpacking python3-acme (2.9.0-1) ...
+Selecting previously unselected package python3-configargparse.
+Preparing to unpack .../06-python3-configargparse_1.7-1_all.deb ...
+Unpacking python3-configargparse (1.7-1) ...
+Selecting previously unselected package python3-parsedatetime.
+Preparing to unpack .../07-python3-parsedatetime_2.6-3_all.deb ...
+Unpacking python3-parsedatetime (2.6-3) ...
+Selecting previously unselected package python3-certbot.
+Preparing to unpack .../08-python3-certbot_2.9.0-1_all.deb ...
+Unpacking python3-certbot (2.9.0-1) ...
+Selecting previously unselected package certbot.
+Preparing to unpack .../09-certbot_2.9.0-1_all.deb ...
+Unpacking certbot (2.9.0-1) ...
+Selecting previously unselected package python3-certbot-nginx.
+Preparing to unpack .../10-python3-certbot-nginx_2.9.0-1_all.deb ...
+Unpacking python3-certbot-nginx (2.9.0-1) ...
+Selecting previously unselected package python3-icu.
+Preparing to unpack .../11-python3-icu_2.12-1build2_amd64.deb ...
+Unpacking python3-icu (2.12-1build2) ...
+Setting up python3-configargparse (1.7-1) ...
+Setting up net-tools (2.10-0.1ubuntu4.4) ...
+Setting up python3-parsedatetime (2.6-3) ...
+Setting up python3-icu (2.12-1build2) ...
+Setting up nginx-common (1.24.0-2ubuntu7.5) ...
+Created symlink /etc/systemd/system/multi-user.target.wants/nginx.service → /usr/lib/systemd/system/nginx.service.
+Setting up python3-josepy (1.14.0-1) ...
+Setting up python3-rfc3339 (1.1-4) ...
+Setting up nginx (1.24.0-2ubuntu7.5) ...
+ * Upgrading binary nginx                                                [ OK ]
+Setting up python3-acme (2.9.0-1) ...
+Setting up python3-certbot (2.9.0-1) ...
+Setting up certbot (2.9.0-1) ...
+Created symlink /etc/systemd/system/timers.target.wants/certbot.timer → /usr/lib/systemd/system/certbot.timer.
+Setting up python3-certbot-nginx (2.9.0-1) ...
+Processing triggers for man-db (2.12.0-4build2) ...
+Processing triggers for ufw (0.36.2-6) ...
+Scanning processes...
+Scanning candidates...
+Scanning linux images...
+
+Pending kernel upgrade!
+Running kernel version:
+  6.8.0-41-generic
+Diagnostics:
+  The currently running kernel version is not the expected kernel version 6.8.0-78-generic.
+
+Restarting the system to load the new kernel will not be handled automatically, so you should consider rebooting.
+
+Restarting services...
+
+Service restarts being deferred:
+ /etc/needrestart/restart.d/dbus.service
+ systemctl restart getty@tty1.service
+ systemctl restart systemd-logind.service
+ systemctl restart unattended-upgrades.service
+
+No containers need to be restarted.
+
+No user sessions are running outdated binaries.
+
+No VM guests are running outdated hypervisor (qemu) binaries on this host.
+[2025-08-26 18:29:21] ✅ Pacotes do sistema instalados
+[2025-08-26 18:29:21] 🟢 Instalando Node.js 20...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+Package 'npm' is not installed, so not removed
+The following packages will be REMOVED:
+  nodejs
+0 upgraded, 0 newly installed, 1 to remove and 1 not upgraded.
+After this operation, 199 MB disk space will be freed.
+(Reading database ... 133276 files and directories currently installed.)
+Removing nodejs (20.19.4-1nodesource1) ...
+dpkg: warning: while removing nodejs, directory '/usr/lib/node_modules' not empty so not removed
+Processing triggers for man-db (2.12.0-4build2) ...
+2025-08-26 18:29:23 - Installing pre-requisites
+Hit:1 https://deb.nodesource.com/node_20.x nodistro InRelease
+Hit:2 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:3 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:4 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:5 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists... Done
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+apt-transport-https is already the newest version (2.8.3).
+ca-certificates is already the newest version (20240203).
+curl is already the newest version (8.5.0-2ubuntu10.6).
+gnupg is already the newest version (2.4.4-2ubuntu17.3).
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+Hit:1 https://deb.nodesource.com/node_20.x nodistro InRelease
+Hit:2 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:3 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:4 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:5 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists... Done
+2025-08-26 18:29:27 - Repository configured successfully.
+2025-08-26 18:29:27 - To install Node.js, run: apt-get install nodejs -y
+2025-08-26 18:29:27 - You can use N|solid Runtime as a node.js alternative
+2025-08-26 18:29:27 - To install N|solid Runtime, run: apt-get install nsolid -y
+
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following NEW packages will be installed:
+  nodejs
+0 upgraded, 1 newly installed, 0 to remove and 1 not upgraded.
+Need to get 0 B/32.0 MB of archives.
+After this operation, 199 MB of additional disk space will be used.
+Selecting previously unselected package nodejs.
+(Reading database ... 127913 files and directories currently installed.)
+Preparing to unpack .../nodejs_20.19.4-1nodesource1_amd64.deb ...
+Unpacking nodejs (20.19.4-1nodesource1) ...
+Setting up nodejs (20.19.4-1nodesource1) ...
+Processing triggers for man-db (2.12.0-4build2) ...
+Scanning processes...
+Scanning candidates...
+Scanning linux images...
+
+Pending kernel upgrade!
+Running kernel version:
+  6.8.0-41-generic
+Diagnostics:
+  The currently running kernel version is not the expected kernel version 6.8.0-78-generic.
+
+Restarting the system to load the new kernel will not be handled automatically, so you should consider rebooting.
+
+Restarting services...
+
+Service restarts being deferred:
+ /etc/needrestart/restart.d/dbus.service
+ systemctl restart getty@tty1.service
+ systemctl restart systemd-logind.service
+ systemctl restart unattended-upgrades.service
+
+No containers need to be restarted.
+
+No user sessions are running outdated binaries.
+
+No VM guests are running outdated hypervisor (qemu) binaries on this host.
+[2025-08-26 18:29:31] ✅ Node.js instalado: v20.19.4
+[2025-08-26 18:29:31] ✅ npm instalado: 10.8.2
+[2025-08-26 18:29:31] Instalando ferramentas Node.js globais...
+
+added 133 packages, and changed 14 packages in 8s
+
+15 packages are looking for funding
+  run `npm fund` for details
+[2025-08-26 18:29:39] ✅ Node.js 20 configurado com sucesso
+[2025-08-26 18:29:39] 👤 Configurando usuário do sistema...
+[2025-08-26 18:29:39] ℹ️  Usuário samureye já existe
+[2025-08-26 18:29:39] ✅ Usuário configurado
+[2025-08-26 18:29:39] 📥 Baixando e instalando aplicação SamurEye...
+[2025-08-26 18:29:39] Clonando repositório do GitHub...
+Cloning into '.'...
+/opt/samureye/SamurEye/.git: Permission denied
+root@vlxsam02:/opt/samureye#
