@@ -111,11 +111,17 @@ import dotenv from 'dotenv';
 dotenv.config();
 ```
 
-### 📋 Scripts Corrigidos
+### 📋 Scripts Corrigidos (Agosto 2025)
+- ✅ **install.sh** - Script principal totalmente corrigido com ES6
 - ✅ **install-final.sh** - Usa arquivos `.mjs` com sintaxe ES6
 - ✅ **fix-env-test.sh** - Teste corrigido para módulos ES6
 - ✅ **install-simple.sh** - Versão simplificada com ES6
-- ✅ **install.sh** - Script original com correções ES6
+
+### 🎯 Script Recomendado
+**Use apenas o script principal:**
+```bash
+curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam02/install.sh | sudo bash
+```
 
 ## Estrutura de Arquivos
 

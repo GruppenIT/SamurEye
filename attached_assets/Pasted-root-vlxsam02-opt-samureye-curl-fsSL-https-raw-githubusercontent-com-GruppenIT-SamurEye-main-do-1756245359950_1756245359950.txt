@@ -1,0 +1,305 @@
+root@vlxsam02:/opt/samureye# curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam02/install-final.sh | sudo bash
+🚀 INSTALAÇÃO FINAL SAMUREYE - VLXSAM02
+========================================
+[2025-08-26 18:55:26] Iniciando instalação final corrigida...
+[2025-08-26 18:55:26] Criando configuração .env...
+[2025-08-26 18:55:26] Executando teste final de configuração...
+
+=== EXECUTANDO TESTE FINAL ===
+=== TESTE FINAL DE CONFIGURAÇÃO ===
+Diretório: /opt/samureye/SamurEye
+Usuário: samureye
+❌ ERRO CRÍTICO: require is not defined
+Stack trace: ReferenceError: require is not defined
+    at file:///opt/samureye/SamurEye/final-test.js:7:20
+    at ModuleJob.run (node:internal/modules/esm/module_job:263:25)
+    at async ModuleLoader.import (node:internal/modules/esm/loader:540:24)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+[2025-08-26 18:55:26] WARNING: TESTE FINAL: FALHOU
+
+=================== RESULTADO FINAL ===================
+[2025-08-26 18:55:26] WARNING: ⚠️  INSTALAÇÃO CONCLUÍDA COM PROBLEMAS
+[2025-08-26 18:55:26] WARNING: Arquivo .env criado mas teste de carregamento falhou
+[2025-08-26 18:55:26] WARNING: Verificar manualmente: cat /opt/samureye/SamurEye/.env
+=======================================================
+root@vlxsam02:/opt/samureye# curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam02/fix-env-test.sh | sudo bash
+[2025-08-26 18:55:31] 🔧 CORREÇÃO ESPECÍFICA - TESTE ENV
+[2025-08-26 18:55:31] Verificando instalação do dotenv...
+[2025-08-26 18:55:31] ✅ dotenv já está instalado
+[2025-08-26 18:55:31] Criando teste corrigido...
+[2025-08-26 18:55:31] Executando teste corrigido...
+=== DEBUG INFO ===
+Working directory: /opt/samureye/SamurEye
+User: root
+Node version: v20.19.4
+npm version: 10.8.2
+
+[2025-08-26 18:55:31] Executando como usuário samureye...
+Diretório atual: /opt/samureye/SamurEye
+Carregando dotenv...
+❌ ERRO JAVASCRIPT: require is not defined
+Stack: ReferenceError: require is not defined
+    at file:///opt/samureye/SamurEye/fix-test.js:5:5
+    at ModuleJob.run (node:internal/modules/esm/module_job:263:25)
+    at async ModuleLoader.import (node:internal/modules/esm/loader:540:24)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+[2025-08-26 18:55:31] ❌ Teste ainda falhando - verificar logs acima
+[2025-08-26 18:55:31] ✅ Correção concluída
+root@vlxsam02:/opt/samureye# curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam02/install.sh | sudo bash
+🚀 INSTALAÇÃO COMPLETA SAMUREYE - VLXSAM02
+==========================================
+Servidor: vlxsam02 (172.24.1.152)
+Função: Application Server
+Dependências: vlxsam03 (PostgreSQL + Redis)
+
+✨ RECURSOS INCLUSOS:
+   🔧 Instalação completa da aplicação
+   🔍 Diagnóstico automático de problemas
+   🛠️  Correção automática de configurações
+   ✅ Validação final da instalação
+   🔄 Detecção e correção de erro porta 443
+
+[2025-08-26 18:55:44] 🎯 Iniciando instalação completa do SamurEye vlxsam02...
+[2025-08-26 18:55:44] 🔍 DIAGNÓSTICO INICIAL - Verificando problemas conhecidos...
+📡 Verificando conectividade com vlxsam03...
+[2025-08-26 18:55:44] ✅ PostgreSQL (172.24.1.153:5432): Conectividade OK
+[2025-08-26 18:55:44] WARNING: Problemas de autenticação PostgreSQL detectados
+[2025-08-26 18:55:44] ✅ Redis (172.24.1.153:6379): Conectividade OK
+[2025-08-26 18:55:44] WARNING: Instalação anterior detectada em /opt/samureye/SamurEye
+[2025-08-26 18:55:44] ✅ Diagnóstico inicial: Nenhum problema crítico detectado
+[2025-08-26 18:55:44] 🧹 Limpeza de instalação anterior...
+[2025-08-26 18:55:44] Desabilitando serviço samureye-app...
+Removed "/etc/systemd/system/multi-user.target.wants/samureye-app.service".
+[2025-08-26 18:55:44] Removendo arquivo de serviço...
+[2025-08-26 18:55:44] Fazendo backup de configurações existentes...
+[2025-08-26 18:55:44] Removendo diretórios de instalação anterior...
+[2025-08-26 18:55:45] ✅ Limpeza concluída
+[2025-08-26 18:55:45] 📦 Instalando pacotes do sistema...
+Hit:1 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:2 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:3 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:4 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Hit:5 https://deb.nodesource.com/node_20.x nodistro InRelease
+Reading package lists... Done
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+Calculating upgrade... Done
+The following packages have been kept back:
+  sosreport
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[2025-08-26 18:55:47] Instalando pacotes essenciais...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+curl is already the newest version (8.5.0-2ubuntu10.6).
+wget is already the newest version (1.21.4-1ubuntu4.1).
+git is already the newest version (1:2.43.0-1ubuntu7.3).
+unzip is already the newest version (6.0-28ubuntu4.1).
+htop is already the newest version (3.3.0-4build1).
+nano is already the newest version (7.2-2ubuntu0.1).
+net-tools is already the newest version (2.10-0.1ubuntu4.4).
+postgresql-client is already the newest version (16+257build1.1).
+redis-tools is already the newest version (5:7.0.15-1ubuntu0.24.04.1).
+nginx is already the newest version (1.24.0-2ubuntu7.5).
+certbot is already the newest version (2.9.0-1).
+python3-certbot-nginx is already the newest version (2.9.0-1).
+ufw is already the newest version (0.36.2-6).
+fail2ban is already the newest version (1.0.2-3ubuntu0.1).
+logrotate is already the newest version (3.21.0-2build1).
+cron is already the newest version (3.0pl1-184ubuntu2).
+rsync is already the newest version (3.2.7-1ubuntu1.2).
+jq is already the newest version (1.7.1-3ubuntu0.24.04.1).
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[2025-08-26 18:55:47] ✅ Pacotes do sistema instalados
+[2025-08-26 18:55:47] 🟢 Instalando Node.js 20...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+Package 'npm' is not installed, so not removed
+The following packages will be REMOVED:
+  nodejs
+0 upgraded, 0 newly installed, 1 to remove and 1 not upgraded.
+After this operation, 199 MB disk space will be freed.
+(Reading database ... 133276 files and directories currently installed.)
+Removing nodejs (20.19.4-1nodesource1) ...
+dpkg: warning: while removing nodejs, directory '/usr/lib/node_modules' not empty so not removed
+Processing triggers for man-db (2.12.0-4build2) ...
+2025-08-26 18:55:50 - Installing pre-requisites
+Hit:1 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:2 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:3 https://deb.nodesource.com/node_20.x nodistro InRelease
+Hit:4 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:5 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists... Done
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+apt-transport-https is already the newest version (2.8.3).
+ca-certificates is already the newest version (20240203).
+curl is already the newest version (8.5.0-2ubuntu10.6).
+gnupg is already the newest version (2.4.4-2ubuntu17.3).
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+Hit:1 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:2 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:3 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:4 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Hit:5 https://deb.nodesource.com/node_20.x nodistro InRelease
+Reading package lists... Done
+2025-08-26 18:55:54 - Repository configured successfully.
+2025-08-26 18:55:54 - To install Node.js, run: apt-get install nodejs -y
+2025-08-26 18:55:54 - You can use N|solid Runtime as a node.js alternative
+2025-08-26 18:55:54 - To install N|solid Runtime, run: apt-get install nsolid -y
+
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following NEW packages will be installed:
+  nodejs
+0 upgraded, 1 newly installed, 0 to remove and 1 not upgraded.
+Need to get 0 B/32.0 MB of archives.
+After this operation, 199 MB of additional disk space will be used.
+Selecting previously unselected package nodejs.
+(Reading database ... 127913 files and directories currently installed.)
+Preparing to unpack .../nodejs_20.19.4-1nodesource1_amd64.deb ...
+Unpacking nodejs (20.19.4-1nodesource1) ...
+Setting up nodejs (20.19.4-1nodesource1) ...
+Processing triggers for man-db (2.12.0-4build2) ...
+Scanning processes...
+Scanning candidates...
+Scanning linux images...
+
+Pending kernel upgrade!
+Running kernel version:
+  6.8.0-41-generic
+Diagnostics:
+  The currently running kernel version is not the expected kernel version 6.8.0-78-generic.
+
+Restarting the system to load the new kernel will not be handled automatically, so you should consider rebooting.
+
+Restarting services...
+
+Service restarts being deferred:
+ /etc/needrestart/restart.d/dbus.service
+ systemctl restart getty@tty1.service
+ systemctl restart systemd-logind.service
+ systemctl restart unattended-upgrades.service
+
+No containers need to be restarted.
+
+No user sessions are running outdated binaries.
+
+No VM guests are running outdated hypervisor (qemu) binaries on this host.
+[2025-08-26 18:55:58] ✅ Node.js instalado: v20.19.4
+[2025-08-26 18:55:58] ✅ npm instalado: 10.8.2
+[2025-08-26 18:55:58] Instalando ferramentas Node.js globais...
+
+changed 147 packages in 10s
+
+15 packages are looking for funding
+  run `npm fund` for details
+[2025-08-26 18:56:09] ✅ Node.js 20 configurado com sucesso
+[2025-08-26 18:56:09] 👤 Configurando usuário do sistema...
+[2025-08-26 18:56:09] ℹ️  Usuário samureye já existe
+[2025-08-26 18:56:09] ✅ Usuário configurado
+[2025-08-26 18:56:09] 📥 Baixando e instalando aplicação SamurEye...
+[2025-08-26 18:56:09] Clonando repositório do GitHub...
+[2025-08-26 18:56:09] Clonando repositório...
+Cloning into '.'...
+remote: Enumerating objects: 1221, done.
+remote: Counting objects: 100% (187/187), done.
+remote: Compressing objects: 100% (99/99), done.
+remote: Total 1221 (delta 122), reused 129 (delta 69), pack-reused 1034 (from 1)
+Receiving objects: 100% (1221/1221), 1.05 MiB | 8.87 MiB/s, done.
+Resolving deltas: 100% (796/796), done.
+[2025-08-26 18:56:10] 🔧 Verificando dependências do projeto...
+[2025-08-26 18:56:10] Instalando dependências npm...
+npm warn deprecated @esbuild-kit/esm-loader@2.6.5: Merged into tsx: https://tsx.is
+npm warn deprecated @esbuild-kit/core-utils@3.3.2: Merged into tsx: https://tsx.is
+npm warn deprecated node-domexception@1.0.0: Use your platform's native DOMException instead
+
+added 634 packages, and audited 635 packages in 6s
+
+87 packages are looking for funding
+  run `npm fund` for details
+
+11 vulnerabilities (3 low, 8 moderate)
+
+To address issues that do not require attention, run:
+  npm audit fix
+
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+
+Run `npm audit` for details.
+[2025-08-26 18:56:16] ℹ️  dotenv já está disponível
+[2025-08-26 18:56:17] 🔧 Verificando e corrigindo configuração do servidor...
+[2025-08-26 18:56:17] ℹ️  Configuração dotenv já presente no servidor
+[2025-08-26 18:56:17] ✅ Aplicação instalada
+[2025-08-26 18:56:17] 🔧 Verificando e corrigindo configurações hardcoded...
+[2025-08-26 18:56:17] Procurando referências incorretas à porta 443...
+./node_modules/gtoken/node_modules/gaxios/build/cjs/src/common.d.ts
+./node_modules/gtoken/node_modules/gaxios/build/esm/src/common.d.ts
+./node_modules/gaxios/build/src/common.d.ts
+./node_modules/gcp-metadata/node_modules/gaxios/build/cjs/src/common.d.ts
+./node_modules/gcp-metadata/node_modules/gaxios/build/esm/src/common.d.ts
+./node_modules/google-auth-library/node_modules/gaxios/build/cjs/src/common.d.ts
+./node_modules/google-auth-library/node_modules/gaxios/build/esm/src/common.d.ts
+./node_modules/proxy-from-env/test.js
+[2025-08-26 18:56:17] Procurando URLs HTTPS incorretas...
+[2025-08-26 18:56:17] Procurando configurações IP:443 incorretas...
+[2025-08-26 18:56:17] ℹ️  Nenhuma configuração hardcoded incorreta encontrada
+[2025-08-26 18:56:17] 📝 Criando arquivo de configuração .env...
+[2025-08-26 18:56:17] Criando links simbólicos para .env...
+[2025-08-26 18:56:17] ✅ Link simbólico criado: /opt/samureye/SamurEye/.env -> /etc/samureye/.env
+[2025-08-26 18:56:17] ✅ Arquivo .env criado e linkado
+[2025-08-26 18:56:17] 🧪 Testando carregamento de variáveis de ambiente...
+[2025-08-26 18:56:17] Arquivo .env encontrado: lrwxrwxrwx 1 samureye samureye 18 Aug 26 18:56 /opt/samureye/SamurEye/.env -> /etc/samureye/.env
+[2025-08-26 18:56:17] Executando teste de carregamento de variáveis...
+file:///opt/samureye/SamurEye/test-env-loading.js:2
+require('dotenv').config();
+^
+
+ReferenceError: require is not defined in ES module scope, you can use import instead
+This file is being treated as an ES module because it has a '.js' file extension and '/opt/samureye/SamurEye/package.json' contains "type": "module". To treat it as a CommonJS script, rename it to use the '.cjs' file extension.
+    at file:///opt/samureye/SamurEye/test-env-loading.js:2:1
+    at ModuleJob.run (node:internal/modules/esm/module_job:263:25)
+    at async ModuleLoader.import (node:internal/modules/esm/loader:540:24)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+
+Node.js v20.19.4
+[2025-08-26 18:56:17] WARNING: Teste de carregamento: FALHA - Continuando instalação
+[2025-08-26 18:56:17] WARNING: Verificar manualmente: cat /opt/samureye/SamurEye/.env
+[2025-08-26 18:56:17] ⚙️ Configurando serviço systemd...
+[2025-08-26 18:56:17] ✅ Serviço systemd configurado
+[2025-08-26 18:56:17] ✅ VALIDAÇÃO FINAL DA INSTALAÇÃO
+🔍 Executando testes de validação...
+📁 Verificando estrutura de arquivos...
+  ✅ /opt/samureye/SamurEye
+  ✅ Permissões corretas: samureye
+  ✅ /etc/samureye
+📄 Verificando arquivos essenciais...
+  ✅ /opt/samureye/SamurEye/package.json
+  ✅ /opt/samureye/SamurEye/server/index.ts
+  ✅ /etc/samureye/.env
+  ✅ /etc/systemd/system/samureye-app.service
+🔗 Verificando links simbólicos...
+  ✅ /opt/samureye/.env -> /etc/samureye/.env
+  ✅ /opt/samureye/SamurEye/.env -> /etc/samureye/.env
+⚙️ Verificando configuração .env...
+  ✅ Configuração .env sem porta 443
+  ✅ Configuração .env contém porta correta (5432)
+📝 Verificando código fonte...
+  ✅ Código sem configurações hardcoded incorretas
+  ✅ Servidor configurado para carregar dotenv
+🌐 Testando conectividade...
+  ✅ PostgreSQL (172.24.1.153:5432)
+  ✅ Redis (172.24.1.153:6379)
+
+[2025-08-26 18:56:18] 🎉 VALIDAÇÃO CONCLUÍDA COM SUCESSO!
+[2025-08-26 18:56:18] ✅ Todos os testes passaram
+[2025-08-26 18:56:18] ✅ Instalação está pronta para uso
+[2025-08-26 18:56:18] 🚀 Iniciando serviço SamurEye...
+Created symlink /etc/systemd/system/multi-user.target.wants/samureye-app.service → /etc/systemd/system/samureye-app.service.
+[2025-08-26 18:56:28] ERROR: ❌ Falha ao iniciar serviço
+root@vlxsam02:/opt/samureye#

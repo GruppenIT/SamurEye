@@ -518,9 +518,10 @@ test_env_loading() {
     log "🧪 Testando carregamento de variáveis de ambiente..."
     
     # Criar script de teste no diretório do projeto
-    cat > "$WORKING_DIR/test-env-loading.js" << 'EOF'
-// Importar dotenv do node_modules local
-require('dotenv').config();
+    cat > "$WORKING_DIR/test-env-loading.mjs" << 'EOF'
+// Importar dotenv do node_modules local usando ES6 modules
+import dotenv from 'dotenv';
+dotenv.config();
 
 console.log('=== TESTE DE CARREGAMENTO DE VARIÁVEIS ===');
 console.log('NODE_ENV:', process.env.NODE_ENV || 'undefined');
@@ -564,14 +565,14 @@ EOF
     
     # Executar teste de carregamento
     log "Executando teste de carregamento de variáveis..."
-    if sudo -u $SERVICE_USER env NODE_ENV=development node test-env-loading.js; then
+    if sudo -u $SERVICE_USER env NODE_ENV=development node test-env-loading.mjs; then
         log "✅ Teste de carregamento: SUCESSO"
     else
         warn "Teste de carregamento: FALHA - Continuando instalação"
         warn "Verificar manualmente: cat $WORKING_DIR/.env"
     fi
     
-    rm -f "$WORKING_DIR/test-env-loading.js"
+    rm -f "$WORKING_DIR/test-env-loading.mjs"
 }
 
 # ============================================================================
