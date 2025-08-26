@@ -1,162 +1,206 @@
 #!/bin/bash
 
-# Script para diagnosticar problema de conexão porta 443 vs 5432
+# Script para diagnosticar problemas de conexão específicos
 
 set -e
 
 log() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1"; }
 
-log "🔍 DIAGNÓSTICO: Problema de conexão porta 443"
+echo "🔍 DIAGNÓSTICO DE CONEXÃO - SamurEye vlxsam02"
+echo "============================================="
 
-echo ""
-echo "=== VERIFICAÇÃO DO ARQUIVO .env ==="
-if [ -f "/etc/samureye/.env" ]; then
-    log "✅ Arquivo .env existe"
-    echo "DATABASE_URL configurada:"
-    grep "DATABASE_URL" /etc/samureye/.env
-    echo ""
-    echo "Variáveis de banco:"
-    grep -E "^PG" /etc/samureye/.env
-else
-    log "❌ Arquivo .env não encontrado"
-fi
+WORKING_DIR="/opt/samureye/SamurEye"
 
-echo ""
-echo "=== VERIFICAÇÃO DA APLICAÇÃO ==="
+# 1. Verificar se arquivo .env existe e está acessível
+log "1️⃣ Verificando arquivo .env..."
 
-# Encontrar diretório da aplicação
-APP_DIRS=("/opt/samureye/SamurEye" "/opt/samureye" "/home/samureye/SamurEye")
-FOUND_DIR=""
-
-for dir in "${APP_DIRS[@]}"; do
-    if [ -d "$dir" ]; then
-        FOUND_DIR="$dir"
-        break
-    fi
-done
-
-if [ -n "$FOUND_DIR" ]; then
-    log "✅ Aplicação encontrada em: $FOUND_DIR"
-    cd "$FOUND_DIR"
+if [ -f "$WORKING_DIR/.env" ]; then
+    log "✅ Arquivo .env existe: $WORKING_DIR/.env"
     
-    # Verificar se existe .env local
-    if [ -f ".env" ]; then
-        log "ℹ️ Arquivo .env local encontrado"
-        if [ -L ".env" ]; then
-            log "🔗 É um link simbólico para: $(readlink .env)"
+    # Verificar se é um link simbólico
+    if [ -L "$WORKING_DIR/.env" ]; then
+        LINK_TARGET=$(readlink "$WORKING_DIR/.env")
+        log "🔗 É um link simbólico para: $LINK_TARGET"
+        
+        if [ -f "$LINK_TARGET" ]; then
+            log "✅ Arquivo de destino existe"
         else
-            log "⚠️ É um arquivo separado (pode estar causando conflito)"
-            echo "DATABASE_URL no .env local:"
-            grep "DATABASE_URL" .env 2>/dev/null || echo "Não encontrado"
+            log "❌ Arquivo de destino não existe!"
         fi
     else
-        log "❌ Arquivo .env local não existe"
-        log "🔧 Criando link simbólico..."
-        ln -sf /etc/samureye/.env .env
-        log "✅ Link criado"
+        log "📄 É um arquivo regular"
     fi
     
-    # Verificar package.json
-    if [ -f "package.json" ]; then
-        log "📦 package.json encontrado"
-        if grep -q '"dotenv"' package.json; then
-            log "✅ dotenv está no package.json"
+    # Verificar conteúdo básico
+    if grep -q "DATABASE_URL" "$WORKING_DIR/.env"; then
+        DATABASE_URL=$(grep "DATABASE_URL" "$WORKING_DIR/.env" | cut -d'=' -f2- | tr -d '"'"'"' ')
+        log "📋 DATABASE_URL encontrada: ${DATABASE_URL:0:50}..."
+        
+        # Verificar se contém porta 443 (problema conhecido)
+        if echo "$DATABASE_URL" | grep -q ":443"; then
+            log "❌ PROBLEMA: DATABASE_URL contém porta 443!"
         else
-            log "❌ dotenv não encontrado no package.json"
+            log "✅ DATABASE_URL não contém porta 443"
         fi
-    fi
-    
-    # Verificar se há configuração hardcoded
-    log "🔍 Procurando configurações hardcoded..."
-    if find . -name "*.ts" -o -name "*.js" | xargs grep -l "172.24.1.153:443" 2>/dev/null; then
-        log "❌ ENCONTRADA configuração hardcoded para porta 443!"
-        echo "Arquivos com configuração incorreta:"
-        find . -name "*.ts" -o -name "*.js" | xargs grep -l "172.24.1.153:443" 2>/dev/null
+        
+        # Verificar se é PostgreSQL válida
+        if echo "$DATABASE_URL" | grep -q "postgresql://"; then
+            log "✅ Format PostgreSQL válido"
+        else
+            log "❌ Formato PostgreSQL inválido"
+        fi
     else
-        log "✅ Não há configuração hardcoded para porta 443"
+        log "❌ DATABASE_URL não encontrada no .env"
     fi
+else
+    log "❌ Arquivo .env não existe: $WORKING_DIR/.env"
+fi
+
+# 2. Verificar se processo Node.js consegue acessar variáveis de ambiente
+log ""
+log "2️⃣ Testando carregamento de variáveis de ambiente..."
+
+cd "$WORKING_DIR" 2>/dev/null || {
+    log "❌ Não foi possível acessar diretório: $WORKING_DIR"
+    exit 1
+}
+
+# Criar um script Node.js temporário para testar
+cat > /tmp/test-env.js << 'EOF'
+require('dotenv').config();
+console.log('DATABASE_URL loaded:', process.env.DATABASE_URL ? 'YES' : 'NO');
+if (process.env.DATABASE_URL) {
+    console.log('DATABASE_URL value:', process.env.DATABASE_URL.substring(0, 50) + '...');
+    if (process.env.DATABASE_URL.includes(':443')) {
+        console.log('ERROR: Contains port 443!');
+        process.exit(1);
+    }
+}
+EOF
+
+# Testar como usuário samureye
+if sudo -u samureye node /tmp/test-env.js 2>/dev/null; then
+    log "✅ Node.js carrega variáveis de ambiente corretamente"
+else
+    log "❌ Node.js não consegue carregar variáveis de ambiente"
     
-    # Verificar outras configurações de conexão
-    if find . -name "*.ts" -o -name "*.js" | xargs grep -l "DATABASE_URL\|ConnectionString" 2>/dev/null; then
-        log "ℹ️ Arquivos que usam DATABASE_URL:"
-        find . -name "*.ts" -o -name "*.js" | xargs grep -l "DATABASE_URL\|ConnectionString" 2>/dev/null | head -3
+    # Testar sem dotenv (variáveis do sistema)
+    if sudo -u samureye bash -c "cd $WORKING_DIR && DATABASE_URL=\$(grep DATABASE_URL .env 2>/dev/null | cut -d'=' -f2- | tr -d '\"') node -e \"console.log('Env var:', process.env.DATABASE_URL || 'NOT_FOUND')\""; then
+        log "ℹ️ Variável pode estar sendo carregada de outra forma"
     fi
-    
-else
-    log "❌ Aplicação não encontrada em nenhum diretório esperado"
-    echo "Diretórios verificados:"
-    for dir in "${APP_DIRS[@]}"; do
-        echo "  - $dir"
-    done
 fi
 
-echo ""
-echo "=== VERIFICAÇÃO DO SYSTEMD ==="
+rm -f /tmp/test-env.js
 
-SERVICE_FILE="/etc/systemd/system/samureye-app.service"
-if [ -f "$SERVICE_FILE" ]; then
-    log "✅ Arquivo systemd encontrado"
-    
-    echo "WorkingDirectory:"
-    grep "WorkingDirectory" "$SERVICE_FILE" 2>/dev/null || echo "Não configurado"
-    
-    echo "Environment:"
-    grep "Environment" "$SERVICE_FILE" 2>/dev/null || echo "Não configurado"
-    
-    echo "ExecStart:"
-    grep "ExecStart" "$SERVICE_FILE" 2>/dev/null || echo "Não encontrado"
-    
+# 3. Verificar logs do serviço para erros específicos
+log ""
+log "3️⃣ Verificando logs recentes do serviço..."
+
+if systemctl is-active --quiet samureye-app; then
+    log "✅ Serviço está ativo"
 else
-    log "❌ Arquivo systemd não encontrado"
+    log "❌ Serviço não está ativo"
 fi
 
-echo ""
-echo "=== TESTE DE CONECTIVIDADE ==="
+# Procurar por erros específicos
+log "🔍 Procurando por erros conhecidos nos logs:"
 
-log "🔗 Testando conectividade PostgreSQL (porta 5432)..."
-if nc -z 172.24.1.153 5432 2>/dev/null; then
-    log "✅ Porta 5432 acessível"
+# Erro de conexão porta 443
+if journalctl -u samureye-app --since "10 minutes ago" --no-pager -q | grep -q "ECONNREFUSED.*:443"; then
+    log "❌ ENCONTRADO: Tentativa de conexão na porta 443"
+    echo "Últimas ocorrências:"
+    journalctl -u samureye-app --since "10 minutes ago" --no-pager -q | grep "ECONNREFUSED.*:443" | tail -3 | sed 's/^/   /'
 else
-    log "❌ Porta 5432 não acessível"
+    log "✅ Não há erros de conexão porta 443"
 fi
 
-log "🔗 Testando conectividade porta 443..."
-if nc -z 172.24.1.153 443 2>/dev/null; then
-    log "✅ Porta 443 acessível (mas não deveria usar)"
+# Erro de arquivo .env não encontrado
+if journalctl -u samureye-app --since "10 minutes ago" --no-pager -q | grep -q "\.env.*not found\|ENOENT.*\.env"; then
+    log "❌ ENCONTRADO: Arquivo .env não encontrado"
 else
-    log "❌ Porta 443 não acessível (normal)"
+    log "✅ Não há erros de .env não encontrado"
 fi
 
-echo ""
-echo "=== LOGS RECENTES ==="
-log "📋 Últimos erros de conexão:"
-journalctl -u samureye-app --since "5 minutes ago" --no-pager -q 2>/dev/null | grep -E "(ECONNREFUSED|:443|:5432)" | tail -3
+# Erro de variável DATABASE_URL
+if journalctl -u samureye-app --since "10 minutes ago" --no-pager -q | grep -q "DATABASE_URL.*undefined\|DATABASE_URL.*not"; then
+    log "❌ ENCONTRADO: Problema com DATABASE_URL"
+else
+    log "✅ Não há erros com DATABASE_URL"
+fi
 
-echo ""
-echo "=== DIAGNÓSTICO COMPLETO ==="
+# 4. Testar conectividade com PostgreSQL
+log ""
+log "4️⃣ Testando conectividade PostgreSQL..."
 
-# Identificar causa mais provável
-if [ -f "/etc/samureye/.env" ]; then
-    if find "$FOUND_DIR" -name "*.ts" -o -name "*.js" 2>/dev/null | xargs grep -l "172.24.1.153:443" 2>/dev/null >/dev/null; then
-        echo "🎯 CAUSA PROVÁVEL: Configuração hardcoded no código"
-        echo "   Solução: Remover configuração hardcoded e usar variáveis de ambiente"
-    elif [ ! -f "$FOUND_DIR/.env" ]; then
-        echo "🎯 CAUSA PROVÁVEL: Aplicação não consegue ler .env"
-        echo "   Solução: Criar link simbólico para /etc/samureye/.env"
-    elif ! nc -z 172.24.1.153 5432 2>/dev/null; then
-        echo "🎯 CAUSA PROVÁVEL: vlxsam03 não acessível"
-        echo "   Solução: Verificar conectividade de rede e serviços no vlxsam03"
+if command -v psql >/dev/null 2>&1; then
+    export PGPASSWORD=SamurEye2024!
+    
+    if psql -h 172.24.1.153 -U samureye -d samureye_prod -c "SELECT 1;" >/dev/null 2>&1; then
+        log "✅ Conectividade PostgreSQL: OK"
     else
-        echo "🎯 CAUSA PROVÁVEL: Problema de carregamento das variáveis"
-        echo "   Solução: Verificar configuração do dotenv ou reiniciar aplicação"
+        log "❌ Conectividade PostgreSQL: FALHA"
+        log "⚠️ Verifique se vlxsam03 está funcionando"
     fi
 else
-    echo "🎯 CAUSA PROVÁVEL: Arquivo .env não existe"
-    echo "   Solução: Executar script de instalação completo"
+    log "⚠️ Cliente psql não instalado - não foi possível testar"
+fi
+
+# 5. Verificar configurações de rede
+log ""
+log "5️⃣ Verificando configuração de rede..."
+
+# Verificar resolução DNS
+if host 172.24.1.153 >/dev/null 2>&1; then
+    log "✅ Resolução de IP: OK"
+else
+    log "⚠️ Problema com resolução de IP"
+fi
+
+# Verificar conectividade na porta 5432
+if timeout 5 bash -c "echo >/dev/tcp/172.24.1.153/5432" 2>/dev/null; then
+    log "✅ Conectividade porta 5432: OK"
+else
+    log "❌ Conectividade porta 5432: FALHA"
+fi
+
+# Verificar se não está tentando conectar na porta 443
+if timeout 5 bash -c "echo >/dev/tcp/172.24.1.153/443" 2>/dev/null; then
+    log "⚠️ Porta 443 está aberta (pode estar causando confusão)"
+else
+    log "✅ Porta 443 não está acessível (correto para PostgreSQL)"
 fi
 
 echo ""
-log "🔧 Para corrigir, use:"
-echo "   1. bash fix-env-loading.sh    # Corrigir carregamento do .env"
-echo "   2. bash install.sh            # Reinstalação completa"
-echo "   3. journalctl -u samureye-app -f  # Monitorar logs"
+echo "=== RESUMO DO DIAGNÓSTICO ==="
+
+# Determinar problema principal
+PROBLEMA_PRINCIPAL=""
+
+if [ ! -f "$WORKING_DIR/.env" ]; then
+    PROBLEMA_PRINCIPAL="Arquivo .env não existe"
+elif journalctl -u samureye-app --since "10 minutes ago" --no-pager -q | grep -q "ECONNREFUSED.*:443"; then
+    PROBLEMA_PRINCIPAL="Tentativa de conexão na porta 443 em vez de 5432"
+elif ! systemctl is-active --quiet samureye-app; then
+    PROBLEMA_PRINCIPAL="Serviço não está executando"
+elif ! timeout 5 bash -c "echo >/dev/tcp/172.24.1.153/5432" 2>/dev/null; then
+    PROBLEMA_PRINCIPAL="Não consegue conectar com PostgreSQL na porta 5432"
+else
+    PROBLEMA_PRINCIPAL="Problema não identificado - verifique logs detalhados"
+fi
+
+echo "🎯 Problema Principal: $PROBLEMA_PRINCIPAL"
+echo ""
+
+if [ "$PROBLEMA_PRINCIPAL" = "Tentativa de conexão na porta 443 em vez de 5432" ]; then
+    echo "🔧 SOLUÇÃO RECOMENDADA:"
+    echo "   ./fix-port-443-issue.sh"
+elif [ "$PROBLEMA_PRINCIPAL" = "Arquivo .env não existe" ]; then
+    echo "🔧 SOLUÇÃO RECOMENDADA:"
+    echo "   ./fix-env-loading.sh"
+elif [ "$PROBLEMA_PRINCIPAL" = "Não consegue conectar com PostgreSQL na porta 5432" ]; then
+    echo "🔧 SOLUÇÃO RECOMENDADA:"
+    echo "   Verificar se vlxsam03 está funcionando"
+    echo "   ssh para vlxsam03 e executar: systemctl status postgresql"
+fi
+
+cd - >/dev/null

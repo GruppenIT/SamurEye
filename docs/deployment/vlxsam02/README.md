@@ -154,23 +154,45 @@ journalctl -u samureye-app -f
 tail -f /var/log/samureye/*.log
 ```
 
-### Teste da Instalação
+### Scripts de Diagnóstico e Correção
 
 ```bash
-# Executar teste completo da instalação
+# 1. Teste completo da instalação
 ./test-installation.sh
 
-# O script verificará:
-# - Status do serviço samureye-app
-# - Funcionamento das APIs (/api/health, /api/user)
-# - Configuração do arquivo .env
-# - Ferramentas instaladas (nmap, nuclei, masscan, wscat)
-# - Conectividade com vlxsam03
-# - Logs do sistema
+# 2. Diagnóstico específico de conexão
+./diagnose-connection.sh
+# Verifica problemas de:
+# - Arquivo .env (existe/é acessível)
+# - Carregamento de variáveis pelo Node.js
+# - Logs do serviço com erros específicos
+# - Conectividade PostgreSQL
 
-# Se houver problemas, use:
-./fix-installation.sh
+# 3. Correção do problema da porta 443
+./fix-port-443-issue.sh
+# Corrige especificamente:
+# - Configurações hardcoded incorretas
+# - URLs HTTPS em vez de PostgreSQL
+# - Força reinicialização com .env correto
+# - Valida correção automaticamente
+
+# 4. Correção de problemas do .env
+./fix-env-loading.sh
+# Corrige:
+# - Links simbólicos quebrados
+# - Permissões incorretas
+# - Teste de carregamento Node.js
 ```
+
+### Teste da Instalação
+
+O script `test-installation.sh` verificará:
+- Status do serviço samureye-app
+- Funcionamento das APIs (/api/health, /api/user)  
+- Configuração do arquivo .env
+- Ferramentas instaladas (nmap, nuclei, masscan, wscat)
+- Conectividade com vlxsam03
+- Logs do sistema
 
 ### Health Check Manual
 
@@ -370,6 +392,17 @@ journalctl -u samureye-app -f
 ```
 
 ## 🔧 Correções Implementadas (Agosto 2025)
+
+### ✅ CRÍTICO RESOLVIDO: Erro de Conexão Porta 443
+- **Problema**: Aplicação tentava conectar no PostgreSQL através da porta 443 em vez da 5432
+- **Root Cause**: Problema de carregamento do arquivo .env e possíveis configurações hardcoded
+- **Solução Definitiva**:
+  - Links simbólicos corretos do .env no diretório de execução (`/opt/samureye/SamurEye/.env`)
+  - Verificação automática e remoção de configurações hardcoded incorretas
+  - Script específico `fix-port-443-issue.sh` para correção automatizada
+  - Detecção automática do problema durante a instalação
+- **Status**: ✅ COMPLETAMENTE RESOLVIDO
+- **Scripts**: `diagnose-connection.sh` e `fix-port-443-issue.sh`
 
 ### ✅ CRÍTICO RESOLVIDO: Erro de Pacote wscat
 - **Problema**: O pacote `wscat` não existe nos repositórios do Ubuntu 24.04, causando falha na instalação

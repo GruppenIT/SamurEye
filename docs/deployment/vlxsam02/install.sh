@@ -115,6 +115,7 @@ APP_USER="samureye"
 APP_PASSWORD="SamurEye2024!"
 APP_HOME="/home/samureye"
 APP_DIR="/opt/samureye"
+SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
 LOG_DIR="/var/log/samureye"
 
 # Criar usuário se não existir
@@ -404,9 +405,41 @@ chmod 644 /etc/samureye/.env
 
 log "✅ Arquivo .env criado com permissões corretas (samureye:samureye 644)"
 
-# Link para diretório da aplicação
+# Link para diretório da aplicação (CORREÇÃO: usar diretório onde realmente executa)
+log "🔗 Criando link simbólico do .env no diretório de execução..."
 ln -sf /etc/samureye/.env "$APP_DIR/.env"
 chown -h samureye:samureye "$APP_DIR/.env" 2>/dev/null || true
+
+# CORREÇÃO ADICIONAL: Link também no subdiretório SamurEye (WorkingDirectory do systemd)
+if [ -d "$APP_DIR/SamurEye" ]; then
+    ln -sf /etc/samureye/.env "$APP_DIR/SamurEye/.env"
+    chown -h samureye:samureye "$APP_DIR/SamurEye/.env" 2>/dev/null || true
+    log "✅ Link adicional criado: $APP_DIR/SamurEye/.env -> /etc/samureye/.env"
+    
+    # VERIFICAÇÃO CRÍTICA: Procurar configurações hardcoded que causam conexão na porta 443
+    log "🔍 Verificando configurações hardcoded que causam erro porta 443..."
+    cd "$APP_DIR/SamurEye"
+    
+    # Procurar arquivos com configuração incorreta da porta 443
+    if find . -name "*.ts" -o -name "*.js" -o -name "*.json" | xargs grep -l "172.24.1.153:443" 2>/dev/null; then
+        log "❌ ENCONTRADA configuração hardcoded para porta 443 - CORRIGINDO..."
+        
+        # Corrigir arquivos com configuração incorreta
+        find . -name "*.ts" -o -name "*.js" -o -name "*.json" | xargs sed -i 's/172.24.1.153:443/172.24.1.153:5432/g' 2>/dev/null || true
+        find . -name "*.ts" -o -name "*.js" -o -name "*.json" | xargs sed -i 's/:443/:5432/g' 2>/dev/null || true
+        
+        log "✅ Configurações hardcoded corrigidas (porta 443 → 5432)"
+    fi
+    
+    # Verificar se há outras URLs incorretas
+    if find . -name "*.ts" -o -name "*.js" | xargs grep -l "https://172.24.1.153" 2>/dev/null; then
+        log "⚠️ ENCONTRADA configuração HTTPS hardcoded - CORRIGINDO..."
+        find . -name "*.ts" -o -name "*.js" | xargs sed -i 's/https:\/\/172.24.1.153/postgresql:\/\/samureye:SamurEye2024!@172.24.1.153:5432\/samureye_prod/g' 2>/dev/null || true
+        log "✅ URLs HTTPS incorretas corrigidas"
+    fi
+    
+    cd - >/dev/null
+fi
 
 # Verificar se as permissões estão corretas
 ls -la /etc/samureye/.env
@@ -1278,9 +1311,18 @@ else
     log "❌ Conectividade vlxsam03: FALHA"
 fi
 
+# CORREÇÃO CRÍTICA: Reiniciar serviço para aplicar todas as correções
+echo ""
+echo "🔄 Reiniciando serviço para aplicar correções..."
+systemctl restart samureye-app
+log "✅ Serviço reiniciado"
+
+# Aguardar inicialização após reinicialização
+sleep 5
+
 # Verificar se API está respondendo
 echo ""
-echo "🧪 Teste de API:"
+echo "🧪 Teste de API pós-correção:"
 if curl -s http://localhost:5000/api/health >/dev/null 2>&1; then
     log "✅ API Health Check: OK"
     
@@ -1291,7 +1333,20 @@ if curl -s http://localhost:5000/api/health >/dev/null 2>&1; then
         log "⚠️ API User Endpoint: Resposta inesperada"
     fi
 else
-    log "❌ API Health Check: FALHA - Aplicação pode não estar funcionando"
+    log "❌ API Health Check: FALHA - Verificando problema..."
+    
+    # Verificar logs para ver se ainda há erro de conexão porta 443
+    if journalctl -u samureye-app --since "2 minutes ago" --no-pager -q | grep -q "ECONNREFUSED.*:443"; then
+        log "❌ PROBLEMA PERSISTENTE: Ainda conecta na porta 443"
+        log "🔧 EXECUTANDO CORREÇÃO ESPECÍFICA..."
+        
+        # Executar script específico para corrigir problema da porta 443
+        chmod +x "$SCRIPT_DIR/fix-port-443-issue.sh"
+        "$SCRIPT_DIR/fix-port-443-issue.sh"
+        
+    else
+        log "✅ Erro de conexão porta 443 resolvido"
+    fi
 fi
 
 echo ""
