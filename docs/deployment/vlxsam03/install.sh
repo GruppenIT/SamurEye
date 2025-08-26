@@ -669,11 +669,16 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO samureye;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO samureye;
 EOF
 
-# Configurar PostgreSQL para aceitar conexões
-cat > /etc/postgresql/16/main/postgresql.conf << 'PGCONF_EOF'
-# SamurEye PostgreSQL Configuration
-listen_addresses = '*'
-port = 5432
+# DEBUG: As configurações TCP/IP já foram aplicadas anteriormente - não sobrescrever
+log "🗄️ DEBUG: Configurações TCP/IP já aplicadas anteriormente - mantendo configuração existente"
+
+# Aplicar apenas configurações de performance adicionais sem sobrescrever TCP/IP
+log "🗄️ DEBUG: Aplicando configurações de performance..."
+
+# Aplicar configurações de performance sem afetar listen_addresses
+cat >> /etc/postgresql/16/main/postgresql.conf << 'PGCONF_PERF_EOF'
+
+# SamurEye Performance Configuration (adicionado automaticamente)
 max_connections = 200
 shared_buffers = 256MB
 effective_cache_size = 1GB
@@ -703,38 +708,20 @@ log_lock_waits = on
 
 # Extensions
 shared_preload_libraries = 'pg_stat_statements'
-PGCONF_EOF
+PGCONF_PERF_EOF
 
-# Configurar autenticação
-cat > /etc/postgresql/16/main/pg_hba.conf << 'PGHBA_EOF'
-# SamurEye PostgreSQL Authentication Configuration
-# TYPE  DATABASE        USER            ADDRESS                 METHOD
+# Adicionar configurações adicionais de rede sem sobrescrever as existentes
+log "🗄️ DEBUG: Adicionando configurações de rede adicionais ao pg_hba.conf..."
+echo "" >> /etc/postgresql/16/main/pg_hba.conf
+echo "# SamurEye Network Configuration (adicionado automaticamente)" >> /etc/postgresql/16/main/pg_hba.conf  
+echo "# IPv4 internal network connections (for other vlxsam servers)" >> /etc/postgresql/16/main/pg_hba.conf
+echo "host    samureye_db     samureye        172.24.1.0/24           scram-sha-256" >> /etc/postgresql/16/main/pg_hba.conf
+echo "host    samureye_db     samureye        192.168.100.0/24        scram-sha-256" >> /etc/postgresql/16/main/pg_hba.conf
 
-# Local connections
-local   all             postgres                                md5
-local   all             samureye                                md5
-local   samureye_db     samureye                                md5
-
-# IPv4 local connections
-host    all             postgres        127.0.0.1/32            md5
-host    samureye_db     samureye        127.0.0.1/32            md5
-
-# IPv4 internal network connections (for other vlxsam servers)
-host    samureye_db     samureye        172.24.1.0/24           md5
-host    samureye_db     samureye        192.168.100.0/24        md5
-
-# IPv6 local connections
-host    all             all             ::1/128                 md5
-
-# Replication connections
-local   replication     postgres                                md5
-host    replication     postgres        127.0.0.1/32            md5
-host    replication     postgres        ::1/128                 md5
-PGHBA_EOF
-
-# Reiniciar PostgreSQL com nova configuração
-systemctl restart postgresql
-sleep 5
+# Recarregar configuração em vez de restart completo
+log "🗄️ DEBUG: Recarregando configurações PostgreSQL (sem restart)..."
+systemctl reload postgresql
+sleep 2
 
 # Verificar se PostgreSQL está rodando
 if systemctl is-active --quiet postgresql; then
