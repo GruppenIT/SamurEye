@@ -1,0 +1,326 @@
+root@vlxsam02:/opt/samureye/SamurEye# curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam02/install.sh | bash
+[2025-08-26 15:39:36] 🚀 Iniciando instalação do SamurEye Application Server (vlxsam02)...
+[2025-08-26 15:39:36] 🔍 Executando validação de segurança do script...
+[2025-08-26 15:39:36] Verificação de pacotes problemáticos: OK (wscat será instalado via npm)
+[2025-08-26 15:39:36] INFO: 📋 Configurando sistema base...
+[2025-08-26 15:39:36] Atualizando sistema Ubuntu...
+Hit:1 https://deb.nodesource.com/node_20.x nodistro InRelease
+Hit:2 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:3 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:4 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:5 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists... Done
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+Calculating upgrade... Done
+The following packages have been kept back:
+  sosreport
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[2025-08-26 15:39:38] Configurando timezone para America/Sao_Paulo...
+[2025-08-26 15:39:38] Instalando pacotes essenciais...
+[2025-08-26 15:39:38] Instalando pacotes básicos do sistema...
+[2025-08-26 15:39:38] Verificando disponibilidade: curl
+[2025-08-26 15:39:38] Instalando curl...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+curl is already the newest version (8.5.0-2ubuntu10.6).
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[2025-08-26 15:39:39] ✅ curl instalado com sucesso
+[2025-08-26 15:39:39] Verificando disponibilidade: wget
+[2025-08-26 15:39:39] Instalando wget...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+wget is already the newest version (1.21.4-1ubuntu4.1).
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[2025-08-26 15:39:39] ✅ wget instalado com sucesso
+[2025-08-26 15:39:39] Verificando disponibilidade: git
+[2025-08-26 15:39:39] Instalando git...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+git is already the newest version (1:2.43.0-1ubuntu7.3).
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[2025-08-26 15:39:40] ✅ git instalado com sucesso
+[2025-08-26 15:39:40] Verificando disponibilidade: build-essential
+[2025-08-26 15:39:40] Instalando build-essential...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+build-essential is already the newest version (12.10ubuntu1).
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[2025-08-26 15:39:40] ✅ build-essential instalado com sucesso
+[2025-08-26 15:39:40] Verificando disponibilidade: python3
+[2025-08-26 15:39:40] Instalando python3...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+python3 is already the newest version (3.12.3-0ubuntu2).
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[2025-08-26 15:39:41] ✅ python3 instalado com sucesso
+[2025-08-26 15:39:41] Verificando disponibilidade: python3-pip
+[2025-08-26 15:39:41] Instalando python3-pip...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+python3-pip is already the newest version (24.0+dfsg-1ubuntu1.2).
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[2025-08-26 15:39:41] ✅ python3-pip instalado com sucesso
+[2025-08-26 15:39:41] Verificando disponibilidade: htop
+[2025-08-26 15:39:41] Instalando htop...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+htop is already the newest version (3.3.0-4build1).
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[2025-08-26 15:39:41] ✅ htop instalado com sucesso
+[2025-08-26 15:39:41] Verificando disponibilidade: unzip
+[2025-08-26 15:39:41] Instalando unzip...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+unzip is already the newest version (6.0-28ubuntu4.1).
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[2025-08-26 15:39:42] ✅ unzip instalado com sucesso
+[2025-08-26 15:39:42] Verificando disponibilidade: software-properties-common
+[2025-08-26 15:39:42] Instalando software-properties-common...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+software-properties-common is already the newest version (0.99.49.3).
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[2025-08-26 15:39:42] ✅ software-properties-common instalado com sucesso
+[2025-08-26 15:39:42] Verificando disponibilidade: ufw
+[2025-08-26 15:39:42] Instalando ufw...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+ufw is already the newest version (0.36.2-6).
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[2025-08-26 15:39:43] ✅ ufw instalado com sucesso
+[2025-08-26 15:39:43] Verificando disponibilidade: fail2ban
+[2025-08-26 15:39:43] Instalando fail2ban...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+fail2ban is already the newest version (1.0.2-3ubuntu0.1).
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[2025-08-26 15:39:43] ✅ fail2ban instalado com sucesso
+[2025-08-26 15:39:43] Verificando disponibilidade: supervisor
+[2025-08-26 15:39:43] Instalando supervisor...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+supervisor is already the newest version (4.2.5-1ubuntu0.1).
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[2025-08-26 15:39:44] ✅ supervisor instalado com sucesso
+[2025-08-26 15:39:44] Verificando disponibilidade: sqlite3
+[2025-08-26 15:39:44] Instalando sqlite3...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+sqlite3 is already the newest version (3.45.1-1ubuntu2.4).
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[2025-08-26 15:39:44] ✅ sqlite3 instalado com sucesso
+[2025-08-26 15:39:44] Verificando disponibilidade: ca-certificates
+[2025-08-26 15:39:44] Instalando ca-certificates...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+ca-certificates is already the newest version (20240203).
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[2025-08-26 15:39:44] ✅ ca-certificates instalado com sucesso
+[2025-08-26 15:39:44] Verificando disponibilidade: gnupg
+[2025-08-26 15:39:44] Instalando gnupg...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+gnupg is already the newest version (2.4.4-2ubuntu17.3).
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[2025-08-26 15:39:45] ✅ gnupg instalado com sucesso
+[2025-08-26 15:39:45] Verificando disponibilidade: lsb-release
+[2025-08-26 15:39:45] Instalando lsb-release...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+lsb-release is already the newest version (12.0-2).
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[2025-08-26 15:39:45] ✅ lsb-release instalado com sucesso
+[2025-08-26 15:39:45] Instalando cliente PostgreSQL...
+[2025-08-26 15:39:45] 👤 Configurando usuário samureye...
+[2025-08-26 15:39:45] Usuário samureye já existe
+[2025-08-26 15:39:45] Senha definida para o usuário samureye
+[2025-08-26 15:39:45] 📦 Instalando Node.js 20.x LTS...
+2025-08-26 15:39:46 - Installing pre-requisites
+Hit:1 https://deb.nodesource.com/node_20.x nodistro InRelease
+Hit:2 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:3 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:4 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:5 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists... Done
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+apt-transport-https is already the newest version (2.8.3).
+ca-certificates is already the newest version (20240203).
+curl is already the newest version (8.5.0-2ubuntu10.6).
+gnupg is already the newest version (2.4.4-2ubuntu17.3).
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+Hit:1 https://deb.nodesource.com/node_20.x nodistro InRelease
+Hit:2 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:3 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:4 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:5 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists... Done
+2025-08-26 15:39:50 - Repository configured successfully.
+2025-08-26 15:39:50 - To install Node.js, run: apt-get install nodejs -y
+2025-08-26 15:39:50 - You can use N|solid Runtime as a node.js alternative
+2025-08-26 15:39:50 - To install N|solid Runtime, run: apt-get install nsolid -y
+
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+nodejs is already the newest version (20.19.4-1nodesource1).
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[2025-08-26 15:39:51] Node.js: v20.19.4, NPM: 10.8.2
+[2025-08-26 15:39:51] Configurando ambiente de desenvolvimento...
+
+changed 6 packages in 2s
+
+2 packages are looking for funding
+  run `npm fund` for details
+npm warn using --force Recommended protections disabled.
+[2025-08-26 15:39:53] PM2 substituído por systemd service
+[2025-08-26 15:39:53] 🔥 Configurando firewall UFW...
+Default incoming policy changed to 'deny'
+(be sure to update your rules accordingly)
+Default outgoing policy changed to 'allow'
+(be sure to update your rules accordingly)
+Skipping adding existing rule
+Skipping adding existing rule (v6)
+Skipping adding existing rule
+Skipping adding existing rule (v6)
+Firewall is active and enabled on system startup
+[2025-08-26 15:39:56] Firewall configurado: SSH (22), App (5000)
+[2025-08-26 15:39:56] 🔧 Instalando ferramentas de segurança e cliente PostgreSQL...
+[2025-08-26 15:39:56] Instalando ferramentas de rede e banco...
+[2025-08-26 15:39:56] Verificando disponibilidade: redis-tools
+[2025-08-26 15:39:56] Instalando redis-tools...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+redis-tools is already the newest version (5:7.0.15-1ubuntu0.24.04.1).
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[2025-08-26 15:39:57] ✅ redis-tools instalado com sucesso
+[2025-08-26 15:39:57] Verificando disponibilidade: dnsutils
+[2025-08-26 15:39:57] Instalando dnsutils...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+dnsutils is already the newest version (1:9.18.30-0ubuntu0.24.04.2).
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[2025-08-26 15:39:57] ✅ dnsutils instalado com sucesso
+[2025-08-26 15:39:57] Verificando disponibilidade: netcat-openbsd
+[2025-08-26 15:39:57] Instalando netcat-openbsd...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+netcat-openbsd is already the newest version (1.226-1ubuntu2).
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[2025-08-26 15:39:58] ✅ netcat-openbsd instalado com sucesso
+[2025-08-26 15:39:58] Instalando ferramentas de segurança...
+[2025-08-26 15:39:58] Verificando disponibilidade: nmap
+[2025-08-26 15:39:58] Instalando nmap...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+nmap is already the newest version (7.94+git20230807.3be01efb1+dfsg-3build2).
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[2025-08-26 15:39:58] ✅ nmap instalado com sucesso
+[2025-08-26 15:39:58] Verificando disponibilidade: masscan
+[2025-08-26 15:39:58] Instalando masscan...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following NEW packages will be installed:
+  masscan
+0 upgraded, 1 newly installed, 0 to remove and 1 not upgraded.
+Need to get 237 kB of archives.
+After this operation, 566 kB of additional disk space will be used.
+Get:1 http://archive.ubuntu.com/ubuntu noble/universe amd64 masscan amd64 2:1.3.2+ds1-1 [237 kB]
+Fetched 92 B in 0s (209 B/s)
+Selecting previously unselected package masscan.
+(Reading database ... 132776 files and directories currently installed.)
+Preparing to unpack .../masscan_2%3a1.3.2+ds1-1_amd64.deb ...
+Unpacking masscan (2:1.3.2+ds1-1) ...
+Setting up masscan (2:1.3.2+ds1-1) ...
+Processing triggers for man-db (2.12.0-4build2) ...
+Scanning processes...
+Scanning candidates...
+Scanning linux images...
+
+Pending kernel upgrade!
+Running kernel version:
+  6.8.0-41-generic
+Diagnostics:
+  The currently running kernel version is not the expected kernel version 6.8.0-78-generic.
+
+Restarting the system to load the new kernel will not be handled automatically, so you should consider rebooting.
+
+Restarting services...
+
+Service restarts being deferred:
+ /etc/needrestart/restart.d/dbus.service
+ systemctl restart getty@tty1.service
+ systemctl restart systemd-logind.service
+ systemctl restart unattended-upgrades.service
+
+No containers need to be restarted.
+
+User sessions running outdated binaries:
+ suporte @ session #169: sshd[41149]
+ suporte @ user manager service: systemd[39668]
+
+No VM guests are running outdated hypervisor (qemu) binaries on this host.
+[2025-08-26 15:40:02] ✅ masscan instalado com sucesso
+[2025-08-26 15:40:02] Instalando Nuclei...
+--2025-08-26 15:40:02--  https://github.com/projectdiscovery/nuclei/releases/download/v3.2.9/nuclei_3.2.9_linux_amd64.zip
+Resolving github.com (github.com)... 20.201.28.151
+Connecting to github.com (github.com)|20.201.28.151|:443... connected.
+HTTP request sent, awaiting response... 302 Found
+Location: https://release-assets.githubusercontent.com/github-production-release-asset/252813491/64a36799-b104-4c3b-9dc2-9484c3758367?sp=r&sv=2018-11-09&sr=b&spr=https&se=2025-08-26T19%3A36%3A27Z&rscd=attachment%3B+filename%3Dnuclei_3.2.9_linux_amd64.zip&rsct=application%2Foctet-stream&skoid=96c2d410-5711-43a1-aedd-ab1947aa7ab0&sktid=398a6654-997b-47e9-b12b-9515b896b4de&skt=2025-08-26T18%3A36%3A08Z&ske=2025-08-26T19%3A36%3A27Z&sks=b&skv=2018-11-09&sig=2p9Qx6UrYuqpV2puFwr2CVIFzNGM1cxTThs6Ixvd7pU%3D&jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmVsZWFzZS1hc3NldHMuZ2l0aHVidXNlcmNvbnRlbnQuY29tIiwia2V5Ijoia2V5MSIsImV4cCI6MTc1NjIzMzkwMiwibmJmIjoxNzU2MjMzNjAyLCJwYXRoIjoicmVsZWFzZWFzc2V0cHJvZHVjdGlvbi5ibG9iLmNvcmUud2luZG93cy5uZXQifQ.sfq9EMt5Z29fGBXETufakqWLkh1vMgUkOCFFvAXgQ04&response-content-disposition=attachment%3B%20filename%3Dnuclei_3.2.9_linux_amd64.zip&response-content-type=application%2Foctet-stream [following]
+--2025-08-26 15:40:02--  https://release-assets.githubusercontent.com/github-production-release-asset/252813491/64a36799-b104-4c3b-9dc2-9484c3758367?sp=r&sv=2018-11-09&sr=b&spr=https&se=2025-08-26T19%3A36%3A27Z&rscd=attachment%3B+filename%3Dnuclei_3.2.9_linux_amd64.zip&rsct=application%2Foctet-stream&skoid=96c2d410-5711-43a1-aedd-ab1947aa7ab0&sktid=398a6654-997b-47e9-b12b-9515b896b4de&skt=2025-08-26T18%3A36%3A08Z&ske=2025-08-26T19%3A36%3A27Z&sks=b&skv=2018-11-09&sig=2p9Qx6UrYuqpV2puFwr2CVIFzNGM1cxTThs6Ixvd7pU%3D&jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmVsZWFzZS1hc3NldHMuZ2l0aHVidXNlcmNvbnRlbnQuY29tIiwia2V5Ijoia2V5MSIsImV4cCI6MTc1NjIzMzkwMiwibmJmIjoxNzU2MjMzNjAyLCJwYXRoIjoicmVsZWFzZWFzc2V0cHJvZHVjdGlvbi5ibG9iLmNvcmUud2luZG93cy5uZXQifQ.sfq9EMt5Z29fGBXETufakqWLkh1vMgUkOCFFvAXgQ04&response-content-disposition=attachment%3B%20filename%3Dnuclei_3.2.9_linux_amd64.zip&response-content-type=application%2Foctet-stream
+Resolving release-assets.githubusercontent.com (release-assets.githubusercontent.com)... 185.199.111.133, 185.199.108.133, 185.199.109.133, ...
+Connecting to release-assets.githubusercontent.com (release-assets.githubusercontent.com)|185.199.111.133|:443... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 26820554 (26M) [application/octet-stream]
+Saving to: ‘nuclei_3.2.9_linux_amd64.zip.1’
+
+nuclei_3.2.9_linux_amd64.zip.1                       100%[======================================================================================================================>]  25.58M  61.3MB/s    in 0.4s
+
+2025-08-26 15:40:02 (61.3 MB/s) - ‘nuclei_3.2.9_linux_amd64.zip.1’ saved [26820554/26820554]
+
+Archive:  nuclei_3.2.9_linux_amd64.zip
+replace LICENSE.md? [y]es, [n]o, [A]ll, [N]one, [r]ename: error:  invalid response [{ENTER}]
+replace LICENSE.md? [y]es, [n]o, [A]ll, [N]one, [r]ename: error:  invalid response [# Instala]
+replace LICENSE.md? [y]es, [n]o, [A]ll, [N]one, [r]ename: new name:   inflating: ia npm (já que não está disponível via apt)
+replace README.md? [y]es, [n]o, [A]ll, [N]one, [r]ename: error:  invalid response [log "Inst]
+replace README.md? [y]es, [n]o, [A]ll, [N]one, [r]ename: error:  invalid response [alando ws]
+replace README.md? [y]es, [n]o, [A]ll, [N]one, [r]ename: error:  invalid response [cat via n]
+replace README.md? [y]es, [n]o, [A]ll, [N]one, [r]ename: error:  invalid response [pm..."]
+replace README.md? [y]es, [n]o, [A]ll, [N]one, [r]ename: replace README_CN.md? [y]es, [n]o, [A]ll, [N]one, [r]ename: error:  invalid response [ll -g wsc]
+replace README_CN.md? [y]es, [n]o, [A]ll, [N]one, [r]ename: error:  invalid response [at 2>/dev]
+replace README_CN.md? [y]es, [n]o, [A]ll, [N]one, [r]ename: error:  invalid response [/null || ]
+replace README_CN.md? [y]es, [n]o, [A]ll, [N]one, [r]ename: error:  invalid response [{]
+replace README_CN.md? [y]es, [n]o, [A]ll, [N]one, [r]ename: error:  invalid response [    log "]
+replace README_CN.md? [y]es, [n]o, [A]ll, [N]one, [r]ename:   inflating: README_CN.md
+  inflating: README_ES.md
+  inflating: README_ID.md
+  inflating: README_JP.md
+  inflating: README_KR.md
+  inflating: nuclei
+[2025-08-26 15:40:03] Nuclei instalado com sucesso
+bash: line 228: =============: command not found
+root@vlxsam02:/opt/samureye/SamurEye#
