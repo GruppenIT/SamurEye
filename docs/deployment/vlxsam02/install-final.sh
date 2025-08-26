@@ -108,14 +108,15 @@ chown -h $SERVICE_USER:$SERVICE_USER "$WORKING_DIR/.env" 2>/dev/null || true
 # 7. Teste definitivo no diretório correto
 log "Executando teste final de configuração..."
 
-cat > "final-test.js" << 'EOF'
+cat > "final-test.mjs" << 'EOF'
+import dotenv from 'dotenv';
+
 console.log('=== TESTE FINAL DE CONFIGURAÇÃO ===');
 console.log('Diretório:', process.cwd());
 console.log('Usuário:', process.env.USER || process.env.USERNAME || 'unknown');
 
 try {
     // Carregar dotenv
-    const dotenv = require('dotenv');
     const result = dotenv.config();
     
     if (result.error) {
@@ -164,7 +165,7 @@ EOF
 # Executar teste final
 echo ""
 echo "=== EXECUTANDO TESTE FINAL ==="
-if sudo -u $SERVICE_USER NODE_ENV=production node final-test.js; then
+if sudo -u $SERVICE_USER NODE_ENV=production node final-test.mjs; then
     log "✅ TESTE FINAL: SUCESSO TOTAL"
     SUCCESS=true
 else
@@ -173,7 +174,7 @@ else
 fi
 
 # Limpeza
-rm -f final-test.js
+rm -f final-test.mjs
 
 # 8. Verificar serviço systemd
 if [ ! -f "/etc/systemd/system/samureye-app.service" ]; then

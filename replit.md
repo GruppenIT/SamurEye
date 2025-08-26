@@ -64,7 +64,11 @@ Successfully identified and resolved critical port 443 connection issues affecti
 - Links simbólicos .env não funcionando corretamente
 - Carregamento de variáveis de ambiente falhando
 
-**Solução Final**: Scripts agora executam testes dentro do diretório `/opt/samureye/SamurEye` onde está o `node_modules`, garantindo acesso correto ao dotenv instalado.
+**Solução Final**: Scripts agora:
+1. Executam testes dentro do diretório `/opt/samureye/SamurEye` onde está o `node_modules`
+2. Usam sintaxe ES6 modules (import/export) em vez de CommonJS (require)
+3. Utilizam arquivos `.mjs` para compatibilidade com `"type": "module"` no package.json
+4. Garantem carregamento correto do dotenv com sintaxe ES6
 
 ## External Dependencies
 

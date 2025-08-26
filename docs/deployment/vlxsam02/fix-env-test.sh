@@ -41,12 +41,14 @@ fi
 
 # Criar teste específico no diretório correto
 log "Criando teste corrigido..."
-cat > "$WORKING_DIR/fix-test.js" << 'EOF'
+cat > "$WORKING_DIR/fix-test.mjs" << 'EOF'
+import dotenv from 'dotenv';
+
 try {
     console.log('Diretório atual:', process.cwd());
     console.log('Carregando dotenv...');
     
-    require('dotenv').config();
+    dotenv.config();
     
     const vars = ['DATABASE_URL', 'PGHOST', 'PGPORT', 'NODE_ENV'];
     let allOk = true;
@@ -95,13 +97,13 @@ echo ""
 
 # Teste como usuário correto
 log "Executando como usuário $SERVICE_USER..."
-if sudo -u $SERVICE_USER NODE_ENV=development node fix-test.js; then
+if sudo -u $SERVICE_USER NODE_ENV=development node fix-test.mjs; then
     log "✅ CORREÇÃO APLICADA COM SUCESSO"
 else
     log "❌ Teste ainda falhando - verificar logs acima"
 fi
 
 # Limpeza
-rm -f "$WORKING_DIR/fix-test.js"
+rm -f "$WORKING_DIR/fix-test.mjs"
 
 log "✅ Correção concluída"

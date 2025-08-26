@@ -1,0 +1,48 @@
+root@vlxsam02:/opt/samureye# curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam02/install-final.sh | sudo bash
+🚀 INSTALAÇÃO FINAL SAMUREYE - VLXSAM02
+========================================
+[2025-08-26 18:52:13] Iniciando instalação final corrigida...
+[2025-08-26 18:52:14] Criando configuração .env...
+[2025-08-26 18:52:14] Executando teste final de configuração...
+
+=== EXECUTANDO TESTE FINAL ===
+=== TESTE FINAL DE CONFIGURAÇÃO ===
+Diretório: /opt/samureye/SamurEye
+Usuário: samureye
+❌ ERRO CRÍTICO: require is not defined
+Stack trace: ReferenceError: require is not defined
+    at file:///opt/samureye/SamurEye/final-test.js:7:20
+    at ModuleJob.run (node:internal/modules/esm/module_job:263:25)
+    at async ModuleLoader.import (node:internal/modules/esm/loader:540:24)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+[2025-08-26 18:52:14] WARNING: TESTE FINAL: FALHOU
+
+=================== RESULTADO FINAL ===================
+[2025-08-26 18:52:14] WARNING: ⚠️  INSTALAÇÃO CONCLUÍDA COM PROBLEMAS
+[2025-08-26 18:52:14] WARNING: Arquivo .env criado mas teste de carregamento falhou
+[2025-08-26 18:52:14] WARNING: Verificar manualmente: cat /opt/samureye/SamurEye/.env
+=======================================================
+root@vlxsam02:/opt/samureye# curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam02/fix-env-test.sh | sudo bash
+[2025-08-26 18:52:29] 🔧 CORREÇÃO ESPECÍFICA - TESTE ENV
+[2025-08-26 18:52:29] Verificando instalação do dotenv...
+[2025-08-26 18:52:29] ✅ dotenv já está instalado
+[2025-08-26 18:52:29] Criando teste corrigido...
+[2025-08-26 18:52:29] Executando teste corrigido...
+=== DEBUG INFO ===
+Working directory: /opt/samureye/SamurEye
+User: root
+Node version: v20.19.4
+npm version: 10.8.2
+
+[2025-08-26 18:52:29] Executando como usuário samureye...
+Diretório atual: /opt/samureye/SamurEye
+Carregando dotenv...
+❌ ERRO JAVASCRIPT: require is not defined
+Stack: ReferenceError: require is not defined
+    at file:///opt/samureye/SamurEye/fix-test.js:5:5
+    at ModuleJob.run (node:internal/modules/esm/module_job:263:25)
+    at async ModuleLoader.import (node:internal/modules/esm/loader:540:24)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+[2025-08-26 18:52:30] ❌ Teste ainda falhando - verificar logs acima
+[2025-08-26 18:52:30] ✅ Correção concluída
+root@vlxsam02:/opt/samureye#

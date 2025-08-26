@@ -85,6 +85,38 @@ O script `install.sh` agora **resolve automaticamente** todos os problemas relac
 
 **Não é mais necessário executar comandos separados!**
 
+## ⚡ Atualização Crítica: ES6 Modules (Agosto 2025)
+
+### Problema Identificado
+```
+❌ ERRO CRÍTICO: require is not defined
+ReferenceError: require is not defined
+```
+
+### 🔧 Causa Raiz
+O projeto SamurEye está configurado com `"type": "module"` no `package.json`, fazendo o Node.js interpretar arquivos como ES6 modules em vez de CommonJS.
+
+### ✅ Solução Implementada
+Todos os scripts de instalação foram **corrigidos** para usar sintaxe ES6:
+
+**Antes (CommonJS - FALHA):**
+```javascript
+const dotenv = require('dotenv');
+dotenv.config();
+```
+
+**Depois (ES6 - FUNCIONA):**
+```javascript
+import dotenv from 'dotenv';
+dotenv.config();
+```
+
+### 📋 Scripts Corrigidos
+- ✅ **install-final.sh** - Usa arquivos `.mjs` com sintaxe ES6
+- ✅ **fix-env-test.sh** - Teste corrigido para módulos ES6
+- ✅ **install-simple.sh** - Versão simplificada com ES6
+- ✅ **install.sh** - Script original com correções ES6
+
 ## Estrutura de Arquivos
 
 ```

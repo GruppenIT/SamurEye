@@ -123,10 +123,12 @@ fi
 # 8. Teste de carregamento
 log "Testando carregamento de variáveis..."
 
-cat > "$WORKING_DIR/test-simple.js" << 'EOF'
+cat > "$WORKING_DIR/test-simple.mjs" << 'EOF'
+import dotenv from 'dotenv';
+
 try {
     console.log('Carregando .env do diretório atual');
-    require('dotenv').config();
+    dotenv.config();
     
     const required = ['DATABASE_URL', 'PGHOST', 'PGPORT'];
     let success = true;
@@ -158,13 +160,13 @@ try {
 EOF
 
 cd "$WORKING_DIR"
-if sudo -u $SERVICE_USER node test-simple.js; then
+if sudo -u $SERVICE_USER node test-simple.mjs; then
     log "✅ Configuração .env funcionando corretamente"
 else
     warn "Teste de carregamento falhou, mas arquivo foi criado"
 fi
 
-rm -f "$WORKING_DIR/test-simple.js"
+rm -f "$WORKING_DIR/test-simple.mjs"
 
 log "✅ INSTALAÇÃO SIMPLIFICADA CONCLUÍDA"
 log "Arquivo .env disponível em: $WORKING_DIR/.env"
