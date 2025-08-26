@@ -433,6 +433,29 @@ else
     systemctl status postgresql --no-pager || true
 fi
 
+# DEBUG: Verificar se as configurações foram aplicadas corretamente
+log "🗄️ DEBUG: Verificando configurações aplicadas..."
+log "🗄️ DEBUG: listen_addresses em postgresql.conf:"
+grep "listen_addresses" /etc/postgresql/16/main/postgresql.conf | head -3
+log "🗄️ DEBUG: port em postgresql.conf:"
+grep "port" /etc/postgresql/16/main/postgresql.conf | grep -v "#" | head -3
+log "🗄️ DEBUG: Últimas linhas do pg_hba.conf:"
+tail -5 /etc/postgresql/16/main/pg_hba.conf
+
+# DEBUG: Testar conexão TCP imediatamente após configuração
+log "🗄️ DEBUG: Testando conexão TCP imediatamente após configuração..."
+if PGPASSWORD="SamurEye2024DB!" psql -h 127.0.0.1 -U samureye -d samureye_db -c "SELECT 1;" >/dev/null 2>&1; then
+    log "🗄️ DEBUG: ✅ Conexão TCP funcionando imediatamente após configuração!"
+else
+    log "🗄️ DEBUG: ❌ Conexão TCP ainda não funciona após configuração - aguardando mais tempo..."
+    sleep 5
+    if PGPASSWORD="SamurEye2024DB!" psql -h 127.0.0.1 -U samureye -d samureye_db -c "SELECT 1;" >/dev/null 2>&1; then
+        log "🗄️ DEBUG: ✅ Conexão TCP funcionando após aguardar!"
+    else
+        log "🗄️ DEBUG: ❌ Conexão TCP ainda falha mesmo após aguardar"
+    fi
+fi
+
 log "✅ DEBUG: PostgreSQL configurado com sucesso (incluindo rede TCP/IP)"
 
 # Criar script SQL do schema
