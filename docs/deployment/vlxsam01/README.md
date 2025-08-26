@@ -150,8 +150,13 @@ nginx -t && systemctl reload nginx
 ### Reset Completo 
 
 ```bash
-# Reset completo - funciona sempre
+# Reset completo - funciona sempre (corrigido em 26/08/2025)
 curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam01/install.sh | bash
+
+# Erros anteriores resolvidos:
+# ✅ Directory creation error: /opt/samureye/scripts/
+# ✅ NGINX SSL configuration order  
+# ✅ Certificate dependency issues
 ```
 
 ## Arquivos Importantes

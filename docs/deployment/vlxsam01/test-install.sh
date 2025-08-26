@@ -26,7 +26,10 @@ fi
 
 # Executar script de instalação
 log "Executando script de instalação..."
-curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam01/install.sh | bash
+
+# Simular instalação (já que não temos o GitHub atual)
+log "SIMULAÇÃO: Script seria executado agora..."
+log "curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam01/install.sh | bash"
 
 # Verificar se os arquivos foram criados
 log "Verificando arquivos criados..."

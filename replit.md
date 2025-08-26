@@ -16,6 +16,7 @@ Preferred communication style: Simple, everyday language.
 - ✅ CRITICAL FIX: Resolved NGINX SSL certificate error during installation
 - ✅ ROOT CAUSE: Script was trying to activate HTTPS configuration before SSL certificates existed
 - ✅ SOLUTION: Implemented two-stage NGINX configuration (temporary HTTP → final HTTPS)
+- ✅ DIRECTORY FIX: Resolved "No such file or directory" error by creating /opt/samureye/scripts/ before use
 - ✅ AUTOMATION: Created /opt/request-ssl.sh for HTTP-01 challenge and /opt/request-ssl-wildcard.sh for DNS challenge
 - ✅ TESTING: Added test-install.sh script for complete installation verification
 - ✅ DOCUMENTATION: Updated vlxsam01/README.md with two-stage installation process

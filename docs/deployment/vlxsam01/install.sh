@@ -635,6 +635,9 @@ chmod +x /opt/request-ssl-wildcard.sh
 
 log "📊 Criando scripts de monitoramento..."
 
+# Criar diretório de scripts se não existir
+mkdir -p /opt/samureye/scripts
+
 # Script de health check
 cat > /opt/samureye/scripts/health-check.sh << 'EOF'
 #!/bin/bash
@@ -721,7 +724,6 @@ echo ""
 echo "=== FIM DO HEALTH CHECK ==="
 EOF
 
-mkdir -p /opt/samureye/scripts
 chmod +x /opt/samureye/scripts/health-check.sh
 
 # Script de verificação SSL
