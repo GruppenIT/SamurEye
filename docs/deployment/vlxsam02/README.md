@@ -222,7 +222,19 @@ O script agora detecta e corrige automaticamente problemas de permissões. Se ai
    curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam02/install.sh | sudo bash
    ```
 
-### 🎯 Instalação Simplificada (Recomendada se houver problemas)
+### 🎯 Instalação Final (Recomendada - Resolve problemas dotenv)
+```bash
+# Script final que resolve todos os problemas de carregamento .env
+curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam02/install-final.sh | sudo bash
+```
+
+### 🔧 Correção Específica do Teste .env
+```bash
+# Se ainda houver problemas com "Cannot find module 'dotenv'"
+curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam02/fix-env-test.sh | sudo bash
+```
+
+### 🎯 Instalação Simplificada (Alternativa)
 ```bash
 # Instalação simplificada focada na correção do .env
 curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam02/install-simple.sh | sudo bash

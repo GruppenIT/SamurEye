@@ -51,7 +51,20 @@ Successfully identified and resolved critical port 443 connection issues affecti
 3. **Streamlined approach** - Removed separate diagnostic scripts in favor of single automated installer
 4. **Documentation** - Updated README.md to reflect unified installation approach
 
-**Current Status**: Single `install.sh` script ready for deployment that automatically handles all known issues and provides complete reset functionality. Enhanced with permission handling for Git clone operations. Additional `quick-fix.sh` script available for permission issues. Development environment confirmed working with proper PostgreSQL configuration.
+**Current Status**: Multiple installation scripts available to handle different scenarios:
+
+1. **install-final.sh** - Script principal recomendado que resolve problemas de dotenv e execução no contexto correto
+2. **fix-env-test.sh** - Correção específica para erro "Cannot find module 'dotenv'"  
+3. **install-simple.sh** - Instalação simplificada focada em problemas .env
+4. **install.sh** - Script original completo (pode ter problemas de contexto)
+
+**Principais Problemas Resolvidos**:
+- Erro "Cannot find module 'dotenv'" - Scripts executavam fora do contexto do projeto
+- Erro "require is not defined" - Problemas de execução em diretórios temporários
+- Links simbólicos .env não funcionando corretamente
+- Carregamento de variáveis de ambiente falhando
+
+**Solução Final**: Scripts agora executam testes dentro do diretório `/opt/samureye/SamurEye` onde está o `node_modules`, garantindo acesso correto ao dotenv instalado.
 
 ## External Dependencies
 
