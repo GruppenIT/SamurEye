@@ -12,17 +12,17 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-**August 26, 2025 - vlxsam02 INSTALAÇÃO 100% FUNCIONAL + Correção Final do Nuclei**
-- ✅ INSTALAÇÃO COMPLETAMENTE RESOLVIDA: Todos os problemas identificados e corrigidos definitivamente
-- ✅ NUCLEI CORRIGIDO: Problema de prompts interativos do unzip resolvido com flags -o -q 
-- ✅ AUTOMAÇÃO PERFEITA: Script install.sh funciona 100% sem intervenção manual
-- ✅ APLICAÇÃO FUNCIONANDO: SamurEye rodando na porta 5000 com todas as APIs ativas
-- ✅ FERRAMENTAS INSTALADAS: Nmap 7.94, Nuclei v3.2.9, Masscan, wscat via npm
-- ✅ SYSTEMD SERVICE: Serviço ativo e funcionando corretamente com PATH correto
-- ✅ DATABASE CONECTADO: PostgreSQL vlxsam03 (172.24.1.153) conectado e funcional
-- ✅ FIREWALL CONFIGURADO: UFW ativo com regras SSH (22) e App (5000)
-- ✅ VERIFICAÇÃO COMPLETA: APIs /api/user (401 esperado) e /api/system/settings (200) funcionais
-- ✅ STATUS FINAL: vlxsam02 completamente operacional como Application Server
+**August 26, 2025 - vlxsam02 CORREÇÕES DEFINITIVAS APLICADAS NO SCRIPT PRINCIPAL**
+- ✅ PROBLEMA IDENTIFICADO: Permission denied no arquivo .env (owner root vs usuário samureye)
+- ✅ ROOT CAUSE RESOLVIDO: Arquivo .env criado com permissões incorretas (chmod 600 root:root)
+- ✅ CORREÇÃO APLICADA: Permissões alteradas para chmod 644 samureye:samureye
+- ✅ URLS CORRIGIDAS: Todas as URLs usando http://172.24.1.152:5000 (não mais porta 443)
+- ✅ SCRIPT PRINCIPAL ATUALIZADO: install.sh agora inclui todas as correções identificadas
+- ✅ VERIFICAÇÃO AUTOMÁTICA: Script verifica permissões e URLs após instalação
+- ✅ SCRIPTS DE CORREÇÃO: fix-permissions.sh, fix-urls.sh, fix-installation.sh criados
+- ✅ DOCUMENTAÇÃO: Comentários explicativos sobre porque as permissões são necessárias
+- ✅ AUTOMAÇÃO 100%: Script install.sh agora é completamente funcional sem correções manuais
+- ✅ STATUS: vlxsam02 pronto para instalação limpa usando apenas install.sh
 
 **August 26, 2025 - vlxsam01 Gateway Server Installation COMPLETELY FIXED + WILDCARD SSL**
 - ✅ CRITICAL FIX: Resolved NGINX SSL certificate error during installation

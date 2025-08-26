@@ -375,11 +375,18 @@ VITE_APP_NAME=SamurEye
 EOF
 
 # Configurar permissões do arquivo (usuário samureye precisa poder ler)
+# IMPORTANTE: O serviço roda como usuário 'samureye', então precisa ter permissão de leitura
 chown samureye:samureye /etc/samureye/.env
 chmod 644 /etc/samureye/.env
 
+log "✅ Arquivo .env criado com permissões corretas (samureye:samureye 644)"
+
 # Link para diretório da aplicação
 ln -sf /etc/samureye/.env "$APP_DIR/.env"
+chown -h samureye:samureye "$APP_DIR/.env" 2>/dev/null || true
+
+# Verificar se as permissões estão corretas
+ls -la /etc/samureye/.env
 
 # ============================================================================
 # 8. CONFIGURAÇÃO SYSTEMD SERVICE
@@ -1181,6 +1188,56 @@ if ss -tuln | grep -q ":5000"; then
     log "✅ Porta 5000: DISPONÍVEL PARA BIND"
 else
     log "✅ Porta 5000: LIVRE"
+fi
+
+# ============================================================================
+# VERIFICAÇÃO DAS CORREÇÕES APLICADAS
+# ============================================================================
+
+log "🔧 Verificando correções aplicadas..."
+
+# Verificar permissões do arquivo .env
+echo ""
+echo "📁 Verificação de Permissões do .env:"
+if [ -f "/etc/samureye/.env" ]; then
+    ENV_PERMS=$(ls -la /etc/samureye/.env | awk '{print $1, $3, $4}')
+    log "Permissões atuais: $ENV_PERMS"
+    
+    # Verificar se as permissões estão corretas
+    if [ "$(stat -c '%U:%G' /etc/samureye/.env)" = "samureye:samureye" ]; then
+        log "✅ Owner correto: samureye:samureye"
+    else
+        log "⚠️ Owner incorreto - deveria ser samureye:samureye"
+    fi
+    
+    if [ "$(stat -c '%a' /etc/samureye/.env)" = "644" ]; then
+        log "✅ Permissões corretas: 644 (rw-r--r--)"
+    else
+        log "⚠️ Permissões incorretas - deveriam ser 644"
+    fi
+else
+    log "❌ Arquivo .env não encontrado!"
+fi
+
+# Verificar URLs corretas no .env
+echo ""
+echo "🌐 Verificação de URLs no .env:"
+if grep -q "FRONTEND_URL=http://172.24.1.152:5000" /etc/samureye/.env 2>/dev/null; then
+    log "✅ FRONTEND_URL: Correta (http://172.24.1.152:5000)"
+else
+    log "❌ FRONTEND_URL: Incorreta ou não encontrada"
+fi
+
+if grep -q "VITE_API_BASE_URL=http://172.24.1.152:5000" /etc/samureye/.env 2>/dev/null; then
+    log "✅ VITE_API_BASE_URL: Correta (http://172.24.1.152:5000)"
+else
+    log "❌ VITE_API_BASE_URL: Incorreta ou não encontrada"
+fi
+
+if grep -q "CORS_ORIGINS=http://172.24.1.152:5000" /etc/samureye/.env 2>/dev/null; then
+    log "✅ CORS_ORIGINS: Correta (http://172.24.1.152:5000)"
+else
+    log "❌ CORS_ORIGINS: Incorreta ou não encontrada"
 fi
 
 # Verificar conectividade básica
