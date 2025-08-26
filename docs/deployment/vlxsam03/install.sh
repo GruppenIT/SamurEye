@@ -197,44 +197,40 @@ log "Redis configurado e iniciado"
 
 log "🐘 Instalando PostgreSQL 16..."
 
-# Verificar status do cluster ANTES de tentar instalar/iniciar
-cluster_has_issues() {
-    # Verificar se há erro de data directory no status
-    if systemctl status postgresql 2>&1 | grep -q "Invalid data directory"; then
-        return 0
-    fi
-    
-    # Verificar se consegue conectar como postgres user (se o serviço está ativo)
-    if systemctl is-active --quiet postgresql; then
-        if ! sudo -u postgres psql -c "SELECT version();" >/dev/null 2>&1; then
-            return 0
-        fi
-    fi
-    
-    return 1
-}
+# LIMPEZA PREVENTIVA TOTAL - remover qualquer vestígio de PostgreSQL existente
+warn "🧹 Executando limpeza preventiva completa do PostgreSQL..."
 
-# Verificar se já existe cluster com problemas ANTES de instalar
-if cluster_has_issues; then
-    warn "⚠️ Detectado cluster PostgreSQL corrompido - executando limpeza prévia..."
-    
-    # Limpeza completa ANTES da instalação
-    systemctl stop postgresql 2>/dev/null || true
-    systemctl disable postgresql 2>/dev/null || true
-    
-    # Purgar completamente PostgreSQL (não-interativo)
-    apt-get purge postgresql-16 postgresql-common postgresql-client-16 postgresql-client-common -y
-    apt-get autoremove --purge -y
-    
-    # Remover todos os diretórios e usuários
-    rm -rf /var/lib/postgresql/ /etc/postgresql/ /var/log/postgresql/ /run/postgresql/
-    userdel postgres 2>/dev/null || true
-    groupdel postgres 2>/dev/null || true
-    
-    log "🔄 Cluster corrompido removido - prosseguindo com instalação limpa..."
-fi
+# Parar todos os serviços PostgreSQL
+systemctl stop postgresql 2>/dev/null || true
+systemctl stop postgresql@16-main 2>/dev/null || true
+systemctl disable postgresql 2>/dev/null || true
+systemctl disable postgresql@16-main 2>/dev/null || true
 
-# Instalar PostgreSQL 16 (agora com ambiente limpo)
+# Purgar TODOS os pacotes PostgreSQL existentes
+apt-get purge postgresql* -y 2>/dev/null || true
+apt-get autoremove --purge -y
+
+# Remover TODOS os diretórios e configurações PostgreSQL
+rm -rf /var/lib/postgresql/
+rm -rf /etc/postgresql/
+rm -rf /var/log/postgresql/
+rm -rf /run/postgresql/
+rm -rf /var/cache/postgresql/
+
+# Remover usuário e grupo postgres se existirem
+userdel postgres 2>/dev/null || true
+groupdel postgres 2>/dev/null || true
+
+# Limpar configurações debconf que podem estar corrompidas
+echo PURGE | debconf-communicate postgresql-common 2>/dev/null || true
+rm -f /var/cache/debconf/templates.dat-old
+rm -f /var/cache/debconf/config.dat-old
+
+log "✅ Limpeza preventiva concluída - ambiente limpo para instalação"
+
+# Instalar PostgreSQL 16 em ambiente completamente limpo
+log "📦 Instalando PostgreSQL 16 em ambiente limpo..."
+apt-get update
 apt install -y postgresql-16 postgresql-contrib
 
 # Iniciar e habilitar PostgreSQL
@@ -247,29 +243,9 @@ if ! systemctl is-active --quiet postgresql; then
     error "❌ Falha ao iniciar PostgreSQL após instalação"
 fi
 
-# Verificar se consegue conectar - se falhar, executar reset completo
+# Verificar conexão PostgreSQL
 if ! sudo -u postgres psql -c "SELECT version();" >/dev/null 2>&1; then
-    warn "⚠️ Falha de conexão - executando reset emergencial..."
-    
-    # Reset emergencial (não-interativo)
-    systemctl stop postgresql 2>/dev/null || true
-    apt-get purge postgresql-16 postgresql-common postgresql-client-16 postgresql-client-common -y
-    apt-get autoremove --purge -y
-    rm -rf /var/lib/postgresql/ /etc/postgresql/ /var/log/postgresql/ /run/postgresql/
-    userdel postgres 2>/dev/null || true
-    groupdel postgres 2>/dev/null || true
-    
-    # Reinstalar
-    apt-get update
-    apt-get install -y postgresql-16 postgresql-contrib
-    systemctl start postgresql
-    systemctl enable postgresql
-    sleep 5
-    
-    # Verificar novamente
-    if ! systemctl is-active --quiet postgresql || ! sudo -u postgres psql -c "SELECT version();" >/dev/null 2>&1; then
-        error "❌ Falha crítica na reinstalação PostgreSQL"
-    fi
+    error "❌ Falha de conexão PostgreSQL - instalação corrompida"
 fi
 
 log "✅ PostgreSQL configurado e iniciado com sucesso"
