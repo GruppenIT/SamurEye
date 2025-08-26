@@ -403,7 +403,37 @@ else
     log "🗄️ DEBUG: ERRO CRÍTICO - Conexão PostgreSQL falhou após configuração"
 fi
 
-log "✅ DEBUG: PostgreSQL configurado com sucesso"
+# Configurar PostgreSQL para aceitar conexões TCP/IP
+log "🗄️ DEBUG: Configurando PostgreSQL para aceitar conexões TCP/IP..."
+
+# Backup da configuração original
+cp /etc/postgresql/16/main/postgresql.conf /etc/postgresql/16/main/postgresql.conf.backup
+cp /etc/postgresql/16/main/pg_hba.conf /etc/postgresql/16/main/pg_hba.conf.backup
+
+# Configurar postgresql.conf para aceitar conexões TCP/IP
+sed -i "s/#listen_addresses = 'localhost'/listen_addresses = '*'/" /etc/postgresql/16/main/postgresql.conf
+sed -i "s/#port = 5432/port = 5432/" /etc/postgresql/16/main/postgresql.conf
+
+# Configurar pg_hba.conf para permitir conexões com senha
+echo "# Configurações SamurEye para conexões TCP/IP" >> /etc/postgresql/16/main/pg_hba.conf
+echo "host    samureye_db     samureye        127.0.0.1/32            scram-sha-256" >> /etc/postgresql/16/main/pg_hba.conf
+echo "host    samureye_db     samureye        172.24.1.153/32         scram-sha-256" >> /etc/postgresql/16/main/pg_hba.conf
+echo "host    samureye_db     samureye        0.0.0.0/0               scram-sha-256" >> /etc/postgresql/16/main/pg_hba.conf
+
+# Reiniciar PostgreSQL para aplicar as configurações
+log "🗄️ DEBUG: Reiniciando PostgreSQL para aplicar configurações de rede..."
+systemctl restart postgresql
+sleep 3
+
+# Verificar se ainda está funcionando após restart
+if systemctl is-active --quiet postgresql; then
+    log "🗄️ DEBUG: PostgreSQL ainda ativo após configuração de rede"
+else
+    log "🗄️ DEBUG: ERRO CRÍTICO - PostgreSQL falhou após configuração de rede"
+    systemctl status postgresql --no-pager || true
+fi
+
+log "✅ DEBUG: PostgreSQL configurado com sucesso (incluindo rede TCP/IP)"
 
 # Criar script SQL do schema
 cat > /tmp/samureye_schema.sql << 'SCHEMA_EOF'
