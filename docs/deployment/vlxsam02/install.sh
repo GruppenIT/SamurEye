@@ -380,15 +380,16 @@ Wants=network.target
 # Usuário e diretório
 User=samureye
 Group=samureye
-WorkingDirectory=/opt/samureye
+WorkingDirectory=/opt/samureye/SamurEye
 
-# Comando de execução (Vite dev server)
+# Comando de execução (usar caminho completo do npm)
 ExecStart=/usr/bin/npm run dev
 
 # Environment
 EnvironmentFile=/etc/samureye/.env
 Environment=NODE_ENV=development
 Environment=PORT=5000
+Environment=PATH=/usr/local/bin:/usr/bin:/bin
 
 # Restart policy
 Restart=always
@@ -964,31 +965,66 @@ chown "$APP_USER:$APP_USER" "$APP_DIR/CREDENTIALS.txt"
 chown -R "$APP_USER:$APP_USER" "$APP_DIR"
 chown -R "$APP_USER:$APP_USER" "$LOG_DIR"
 
-log "✅ Instalação do vlxsam02 concluída com sucesso!"
+# ============================================================================
+# AUTOMAÇÃO COMPLETA DA INSTALAÇÃO
+# ============================================================================
+
+log "🚀 Executando automação completa da instalação..."
+
+# Clonar código da aplicação
+log "📂 Clonando código da aplicação..."
+if [ -d "$APP_DIR/SamurEye" ]; then
+    log "Removendo instalação anterior..."
+    rm -rf "$APP_DIR/SamurEye"
+fi
+
+git clone https://github.com/GruppenIT/SamurEye.git "$APP_DIR/SamurEye" || {
+    error "Falha ao clonar repositório"
+}
+
+chown -R "$APP_USER:$APP_USER" "$APP_DIR/SamurEye"
+
+# Instalar dependências da aplicação
+log "📦 Instalando dependências da aplicação..."
+cd "$APP_DIR/SamurEye"
+sudo -u "$APP_USER" "$APP_DIR/scripts/install-dependencies.sh" || {
+    log "AVISO: Falha na instalação de dependências automatizada"
+}
+
+# Configurar variáveis de ambiente no contexto correto
+log "🔧 Configurando variáveis de ambiente para db:push..."
+export $(grep -v '^#' /etc/samureye/.env | xargs)
+
+# Executar migrações do banco
+log "🗄️ Executando migrações do banco de dados..."
+sudo -u "$APP_USER" bash -c "cd $APP_DIR/SamurEye && source /etc/samureye/.env && npm run db:push" || {
+    log "AVISO: Falha na migração do banco - configure manualmente"
+}
+
+# Iniciar aplicação automaticamente
+log "🚀 Iniciando aplicação..."
+systemctl start samureye-app
+
+# Aguardar alguns segundos para o serviço inicializar
+sleep 5
+
+# Verificar status do serviço
+if systemctl is-active --quiet samureye-app; then
+    log "✅ Serviço samureye-app: INICIADO COM SUCESSO"
+else
+    log "⚠️  Serviço samureye-app: Falha ao iniciar - verifique logs"
+fi
+
+log "✅ Instalação automatizada do vlxsam02 concluída com sucesso!"
 
 echo ""
-echo "📋 PRÓXIMOS PASSOS:"
-echo "=================="
+echo "📋 VERIFICAÇÃO FINAL:"
+echo "==================="
 echo ""
-echo "1. Configurar variáveis de ambiente:"
-echo "   sudo nano /etc/samureye/.env"
+echo "Status da aplicação:"
+systemctl status samureye-app --no-pager -l
 echo ""
-echo "2. Copiar código da aplicação:"
-echo "   git clone https://github.com/GruppenIT/SamurEye.git $APP_DIR/SamurEye"
-echo "   chown -R $APP_USER:$APP_USER $APP_DIR/SamurEye"
-echo ""
-echo "3. Instalar dependências da aplicação:"
-echo "   cd $APP_DIR/SamurEye"
-echo "   sudo -u $APP_USER $APP_DIR/scripts/install-dependencies.sh"
-echo ""
-echo "4. Executar migrações do banco:"
-echo "   sudo -u $APP_USER npm run db:push"
-echo ""
-echo "5. Iniciar aplicação:"
-echo "   systemctl start samureye-app"
-echo "   systemctl status samureye-app"
-echo ""
-echo "6. Verificar instalação:"
+echo "Verificar instalação:"
 echo "   $APP_DIR/scripts/health-check.sh"
 echo "   $APP_DIR/scripts/test-connectivity.sh"
 echo ""

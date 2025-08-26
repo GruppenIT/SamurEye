@@ -1,0 +1,1279 @@
+root@vlxsam02:~# curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam02/install.sh | bash
+[2025-08-26 15:27:39] 🚀 Iniciando instalação do SamurEye Application Server (vlxsam02)...
+[2025-08-26 15:27:39] 🔍 Executando validação de segurança do script...
+[2025-08-26 15:27:39] Verificação de pacotes problemáticos: OK (wscat será instalado via npm)
+[2025-08-26 15:27:39] INFO: 📋 Configurando sistema base...
+[2025-08-26 15:27:39] Atualizando sistema Ubuntu...
+Hit:1 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:2 http://archive.ubuntu.com/ubuntu noble InRelease
+Get:3 http://archive.ubuntu.com/ubuntu noble-updates InRelease [126 kB]
+Hit:4 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Get:5 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 Packages [1,353 kB]
+Get:6 http://archive.ubuntu.com/ubuntu noble-updates/universe amd64 Packages [1,124 kB]
+Fetched 2,603 kB in 3s (888 kB/s)
+Reading package lists... Done
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+Calculating upgrade... Done
+The following packages have been kept back:
+  sosreport
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[2025-08-26 15:27:43] Configurando timezone para America/Sao_Paulo...
+[2025-08-26 15:27:43] Instalando pacotes essenciais...
+[2025-08-26 15:27:43] Instalando pacotes básicos do sistema...
+[2025-08-26 15:27:43] Verificando disponibilidade: curl
+[2025-08-26 15:27:43] Instalando curl...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+curl is already the newest version (8.5.0-2ubuntu10.6).
+curl set to manually installed.
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[2025-08-26 15:27:44] ✅ curl instalado com sucesso
+[2025-08-26 15:27:44] Verificando disponibilidade: wget
+[2025-08-26 15:27:44] Instalando wget...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+wget is already the newest version (1.21.4-1ubuntu4.1).
+wget set to manually installed.
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[2025-08-26 15:27:44] ✅ wget instalado com sucesso
+[2025-08-26 15:27:44] Verificando disponibilidade: git
+[2025-08-26 15:27:44] Instalando git...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+git is already the newest version (1:2.43.0-1ubuntu7.3).
+git set to manually installed.
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[2025-08-26 15:27:44] ✅ git instalado com sucesso
+[2025-08-26 15:27:44] Verificando disponibilidade: build-essential
+[2025-08-26 15:27:44] Instalando build-essential...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following additional packages will be installed:
+  binutils binutils-common binutils-x86-64-linux-gnu bzip2 cpp cpp-13 cpp-13-x86-64-linux-gnu cpp-x86-64-linux-gnu dpkg-dev fakeroot g++ g++-13 g++-13-x86-64-linux-gnu g++-x86-64-linux-gnu gcc gcc-13
+  gcc-13-base gcc-13-x86-64-linux-gnu gcc-x86-64-linux-gnu libalgorithm-diff-perl libalgorithm-diff-xs-perl libalgorithm-merge-perl libasan8 libbinutils libcc1-0 libctf-nobfd0 libctf0 libdpkg-perl libfakeroot
+  libfile-fcntllock-perl libgcc-13-dev libgomp1 libgprofng0 libhwasan0 libisl23 libitm1 liblsan0 libmpc3 libquadmath0 libsframe1 libstdc++-13-dev libtsan2 libubsan1 lto-disabled-list make
+Suggested packages:
+  binutils-doc gprofng-gui bzip2-doc cpp-doc gcc-13-locales cpp-13-doc debian-keyring g++-multilib g++-13-multilib gcc-13-doc gcc-multilib autoconf automake libtool flex bison gdb gcc-doc gcc-13-multilib
+  gdb-x86-64-linux-gnu bzr libstdc++-13-doc make-doc
+The following NEW packages will be installed:
+  binutils binutils-common binutils-x86-64-linux-gnu build-essential bzip2 cpp cpp-13 cpp-13-x86-64-linux-gnu cpp-x86-64-linux-gnu dpkg-dev fakeroot g++ g++-13 g++-13-x86-64-linux-gnu g++-x86-64-linux-gnu gcc
+  gcc-13 gcc-13-base gcc-13-x86-64-linux-gnu gcc-x86-64-linux-gnu libalgorithm-diff-perl libalgorithm-diff-xs-perl libalgorithm-merge-perl libasan8 libbinutils libcc1-0 libctf-nobfd0 libctf0 libdpkg-perl
+  libfakeroot libfile-fcntllock-perl libgcc-13-dev libgomp1 libgprofng0 libhwasan0 libisl23 libitm1 liblsan0 libmpc3 libquadmath0 libsframe1 libstdc++-13-dev libtsan2 libubsan1 lto-disabled-list make
+0 upgraded, 46 newly installed, 0 to remove and 1 not upgraded.
+Need to get 66.9 MB of archives.
+After this operation, 228 MB of additional disk space will be used.
+Get:1 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 binutils-common amd64 2.42-4ubuntu2.5 [240 kB]
+Get:2 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libsframe1 amd64 2.42-4ubuntu2.5 [15.5 kB]
+Get:3 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libbinutils amd64 2.42-4ubuntu2.5 [577 kB]
+Get:4 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libctf-nobfd0 amd64 2.42-4ubuntu2.5 [97.7 kB]
+Get:5 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libctf0 amd64 2.42-4ubuntu2.5 [94.5 kB]
+Get:6 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libgprofng0 amd64 2.42-4ubuntu2.5 [849 kB]
+Get:7 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 binutils-x86-64-linux-gnu amd64 2.42-4ubuntu2.5 [2,462 kB]
+Get:8 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 binutils amd64 2.42-4ubuntu2.5 [18.1 kB]
+Get:9 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 gcc-13-base amd64 13.3.0-6ubuntu2~24.04 [51.5 kB]
+Get:10 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libisl23 amd64 0.26-3build1.1 [680 kB]
+Get:11 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libmpc3 amd64 1.3.1-1build1.1 [54.6 kB]
+Get:12 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 cpp-13-x86-64-linux-gnu amd64 13.3.0-6ubuntu2~24.04 [10.7 MB]
+Get:13 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 cpp-13 amd64 13.3.0-6ubuntu2~24.04 [1,038 B]
+Get:14 http://archive.ubuntu.com/ubuntu noble/main amd64 cpp-x86-64-linux-gnu amd64 4:13.2.0-7ubuntu1 [5,326 B]
+Get:15 http://archive.ubuntu.com/ubuntu noble/main amd64 cpp amd64 4:13.2.0-7ubuntu1 [22.4 kB]
+Get:16 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libcc1-0 amd64 14.2.0-4ubuntu2~24.04 [48.0 kB]
+Get:17 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libgomp1 amd64 14.2.0-4ubuntu2~24.04 [148 kB]
+Get:18 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libitm1 amd64 14.2.0-4ubuntu2~24.04 [29.7 kB]
+Get:19 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libasan8 amd64 14.2.0-4ubuntu2~24.04 [3,031 kB]
+Get:20 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 liblsan0 amd64 14.2.0-4ubuntu2~24.04 [1,322 kB]
+Get:21 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libtsan2 amd64 14.2.0-4ubuntu2~24.04 [2,772 kB]
+Get:22 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libubsan1 amd64 14.2.0-4ubuntu2~24.04 [1,184 kB]
+Get:23 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libhwasan0 amd64 14.2.0-4ubuntu2~24.04 [1,641 kB]
+Get:24 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libquadmath0 amd64 14.2.0-4ubuntu2~24.04 [153 kB]
+Get:25 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libgcc-13-dev amd64 13.3.0-6ubuntu2~24.04 [2,681 kB]
+Get:26 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 gcc-13-x86-64-linux-gnu amd64 13.3.0-6ubuntu2~24.04 [21.1 MB]
+Get:27 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 gcc-13 amd64 13.3.0-6ubuntu2~24.04 [494 kB]
+Get:28 http://archive.ubuntu.com/ubuntu noble/main amd64 gcc-x86-64-linux-gnu amd64 4:13.2.0-7ubuntu1 [1,212 B]
+Get:29 http://archive.ubuntu.com/ubuntu noble/main amd64 gcc amd64 4:13.2.0-7ubuntu1 [5,018 B]
+Get:30 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libstdc++-13-dev amd64 13.3.0-6ubuntu2~24.04 [2,420 kB]
+Get:31 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 g++-13-x86-64-linux-gnu amd64 13.3.0-6ubuntu2~24.04 [12.2 MB]
+Get:32 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 g++-13 amd64 13.3.0-6ubuntu2~24.04 [16.1 kB]
+Get:33 http://archive.ubuntu.com/ubuntu noble/main amd64 g++-x86-64-linux-gnu amd64 4:13.2.0-7ubuntu1 [964 B]
+Get:34 http://archive.ubuntu.com/ubuntu noble/main amd64 g++ amd64 4:13.2.0-7ubuntu1 [1,100 B]
+Get:35 http://archive.ubuntu.com/ubuntu noble/main amd64 make amd64 4.3-4.1build2 [180 kB]
+Get:36 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libdpkg-perl all 1.22.6ubuntu6.1 [269 kB]
+Get:37 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 bzip2 amd64 1.0.8-5.1build0.1 [34.5 kB]
+Get:38 http://archive.ubuntu.com/ubuntu noble/main amd64 lto-disabled-list all 47 [12.4 kB]
+Get:39 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 dpkg-dev all 1.22.6ubuntu6.1 [1,074 kB]
+Get:40 http://archive.ubuntu.com/ubuntu noble/main amd64 build-essential amd64 12.10ubuntu1 [4,928 B]
+Get:41 http://archive.ubuntu.com/ubuntu noble/main amd64 libfakeroot amd64 1.33-1 [32.4 kB]
+Get:42 http://archive.ubuntu.com/ubuntu noble/main amd64 fakeroot amd64 1.33-1 [67.2 kB]
+Get:43 http://archive.ubuntu.com/ubuntu noble/main amd64 libalgorithm-diff-perl all 1.201-1 [41.8 kB]
+Get:44 http://archive.ubuntu.com/ubuntu noble/main amd64 libalgorithm-diff-xs-perl amd64 0.04-8build3 [11.2 kB]
+Get:45 http://archive.ubuntu.com/ubuntu noble/main amd64 libalgorithm-merge-perl all 0.08-5 [11.4 kB]
+Get:46 http://archive.ubuntu.com/ubuntu noble/main amd64 libfile-fcntllock-perl amd64 0.22-4ubuntu5 [30.7 kB]
+Fetched 66.9 MB in 4s (16.7 MB/s)
+Extracting templates from packages: 100%
+Selecting previously unselected package binutils-common:amd64.
+(Reading database ... 122565 files and directories currently installed.)
+Preparing to unpack .../00-binutils-common_2.42-4ubuntu2.5_amd64.deb ...
+Unpacking binutils-common:amd64 (2.42-4ubuntu2.5) ...
+Selecting previously unselected package libsframe1:amd64.
+Preparing to unpack .../01-libsframe1_2.42-4ubuntu2.5_amd64.deb ...
+Unpacking libsframe1:amd64 (2.42-4ubuntu2.5) ...
+Selecting previously unselected package libbinutils:amd64.
+Preparing to unpack .../02-libbinutils_2.42-4ubuntu2.5_amd64.deb ...
+Unpacking libbinutils:amd64 (2.42-4ubuntu2.5) ...
+Selecting previously unselected package libctf-nobfd0:amd64.
+Preparing to unpack .../03-libctf-nobfd0_2.42-4ubuntu2.5_amd64.deb ...
+Unpacking libctf-nobfd0:amd64 (2.42-4ubuntu2.5) ...
+Selecting previously unselected package libctf0:amd64.
+Preparing to unpack .../04-libctf0_2.42-4ubuntu2.5_amd64.deb ...
+Unpacking libctf0:amd64 (2.42-4ubuntu2.5) ...
+Selecting previously unselected package libgprofng0:amd64.
+Preparing to unpack .../05-libgprofng0_2.42-4ubuntu2.5_amd64.deb ...
+Unpacking libgprofng0:amd64 (2.42-4ubuntu2.5) ...
+Selecting previously unselected package binutils-x86-64-linux-gnu.
+Preparing to unpack .../06-binutils-x86-64-linux-gnu_2.42-4ubuntu2.5_amd64.deb ...
+Unpacking binutils-x86-64-linux-gnu (2.42-4ubuntu2.5) ...
+Selecting previously unselected package binutils.
+Preparing to unpack .../07-binutils_2.42-4ubuntu2.5_amd64.deb ...
+Unpacking binutils (2.42-4ubuntu2.5) ...
+Selecting previously unselected package gcc-13-base:amd64.
+Preparing to unpack .../08-gcc-13-base_13.3.0-6ubuntu2~24.04_amd64.deb ...
+Unpacking gcc-13-base:amd64 (13.3.0-6ubuntu2~24.04) ...
+Selecting previously unselected package libisl23:amd64.
+Preparing to unpack .../09-libisl23_0.26-3build1.1_amd64.deb ...
+Unpacking libisl23:amd64 (0.26-3build1.1) ...
+Selecting previously unselected package libmpc3:amd64.
+Preparing to unpack .../10-libmpc3_1.3.1-1build1.1_amd64.deb ...
+Unpacking libmpc3:amd64 (1.3.1-1build1.1) ...
+Selecting previously unselected package cpp-13-x86-64-linux-gnu.
+Preparing to unpack .../11-cpp-13-x86-64-linux-gnu_13.3.0-6ubuntu2~24.04_amd64.deb ...
+Unpacking cpp-13-x86-64-linux-gnu (13.3.0-6ubuntu2~24.04) ...
+Selecting previously unselected package cpp-13.
+Preparing to unpack .../12-cpp-13_13.3.0-6ubuntu2~24.04_amd64.deb ...
+Unpacking cpp-13 (13.3.0-6ubuntu2~24.04) ...
+Selecting previously unselected package cpp-x86-64-linux-gnu.
+Preparing to unpack .../13-cpp-x86-64-linux-gnu_4%3a13.2.0-7ubuntu1_amd64.deb ...
+Unpacking cpp-x86-64-linux-gnu (4:13.2.0-7ubuntu1) ...
+Selecting previously unselected package cpp.
+Preparing to unpack .../14-cpp_4%3a13.2.0-7ubuntu1_amd64.deb ...
+Unpacking cpp (4:13.2.0-7ubuntu1) ...
+Selecting previously unselected package libcc1-0:amd64.
+Preparing to unpack .../15-libcc1-0_14.2.0-4ubuntu2~24.04_amd64.deb ...
+Unpacking libcc1-0:amd64 (14.2.0-4ubuntu2~24.04) ...
+Selecting previously unselected package libgomp1:amd64.
+Preparing to unpack .../16-libgomp1_14.2.0-4ubuntu2~24.04_amd64.deb ...
+Unpacking libgomp1:amd64 (14.2.0-4ubuntu2~24.04) ...
+Selecting previously unselected package libitm1:amd64.
+Preparing to unpack .../17-libitm1_14.2.0-4ubuntu2~24.04_amd64.deb ...
+Unpacking libitm1:amd64 (14.2.0-4ubuntu2~24.04) ...
+Selecting previously unselected package libasan8:amd64.
+Preparing to unpack .../18-libasan8_14.2.0-4ubuntu2~24.04_amd64.deb ...
+Unpacking libasan8:amd64 (14.2.0-4ubuntu2~24.04) ...
+Selecting previously unselected package liblsan0:amd64.
+Preparing to unpack .../19-liblsan0_14.2.0-4ubuntu2~24.04_amd64.deb ...
+Unpacking liblsan0:amd64 (14.2.0-4ubuntu2~24.04) ...
+Selecting previously unselected package libtsan2:amd64.
+Preparing to unpack .../20-libtsan2_14.2.0-4ubuntu2~24.04_amd64.deb ...
+Unpacking libtsan2:amd64 (14.2.0-4ubuntu2~24.04) ...
+Selecting previously unselected package libubsan1:amd64.
+Preparing to unpack .../21-libubsan1_14.2.0-4ubuntu2~24.04_amd64.deb ...
+Unpacking libubsan1:amd64 (14.2.0-4ubuntu2~24.04) ...
+Selecting previously unselected package libhwasan0:amd64.
+Preparing to unpack .../22-libhwasan0_14.2.0-4ubuntu2~24.04_amd64.deb ...
+Unpacking libhwasan0:amd64 (14.2.0-4ubuntu2~24.04) ...
+Selecting previously unselected package libquadmath0:amd64.
+Preparing to unpack .../23-libquadmath0_14.2.0-4ubuntu2~24.04_amd64.deb ...
+Unpacking libquadmath0:amd64 (14.2.0-4ubuntu2~24.04) ...
+Selecting previously unselected package libgcc-13-dev:amd64.
+Preparing to unpack .../24-libgcc-13-dev_13.3.0-6ubuntu2~24.04_amd64.deb ...
+Unpacking libgcc-13-dev:amd64 (13.3.0-6ubuntu2~24.04) ...
+Selecting previously unselected package gcc-13-x86-64-linux-gnu.
+Preparing to unpack .../25-gcc-13-x86-64-linux-gnu_13.3.0-6ubuntu2~24.04_amd64.deb ...
+Unpacking gcc-13-x86-64-linux-gnu (13.3.0-6ubuntu2~24.04) ...
+Selecting previously unselected package gcc-13.
+Preparing to unpack .../26-gcc-13_13.3.0-6ubuntu2~24.04_amd64.deb ...
+Unpacking gcc-13 (13.3.0-6ubuntu2~24.04) ...
+Selecting previously unselected package gcc-x86-64-linux-gnu.
+Preparing to unpack .../27-gcc-x86-64-linux-gnu_4%3a13.2.0-7ubuntu1_amd64.deb ...
+Unpacking gcc-x86-64-linux-gnu (4:13.2.0-7ubuntu1) ...
+Selecting previously unselected package gcc.
+Preparing to unpack .../28-gcc_4%3a13.2.0-7ubuntu1_amd64.deb ...
+Unpacking gcc (4:13.2.0-7ubuntu1) ...
+Selecting previously unselected package libstdc++-13-dev:amd64.
+Preparing to unpack .../29-libstdc++-13-dev_13.3.0-6ubuntu2~24.04_amd64.deb ...
+Unpacking libstdc++-13-dev:amd64 (13.3.0-6ubuntu2~24.04) ...
+Selecting previously unselected package g++-13-x86-64-linux-gnu.
+Preparing to unpack .../30-g++-13-x86-64-linux-gnu_13.3.0-6ubuntu2~24.04_amd64.deb ...
+Unpacking g++-13-x86-64-linux-gnu (13.3.0-6ubuntu2~24.04) ...
+Selecting previously unselected package g++-13.
+Preparing to unpack .../31-g++-13_13.3.0-6ubuntu2~24.04_amd64.deb ...
+Unpacking g++-13 (13.3.0-6ubuntu2~24.04) ...
+Selecting previously unselected package g++-x86-64-linux-gnu.
+Preparing to unpack .../32-g++-x86-64-linux-gnu_4%3a13.2.0-7ubuntu1_amd64.deb ...
+Unpacking g++-x86-64-linux-gnu (4:13.2.0-7ubuntu1) ...
+Selecting previously unselected package g++.
+Preparing to unpack .../33-g++_4%3a13.2.0-7ubuntu1_amd64.deb ...
+Unpacking g++ (4:13.2.0-7ubuntu1) ...
+Selecting previously unselected package make.
+Preparing to unpack .../34-make_4.3-4.1build2_amd64.deb ...
+Unpacking make (4.3-4.1build2) ...
+Selecting previously unselected package libdpkg-perl.
+Preparing to unpack .../35-libdpkg-perl_1.22.6ubuntu6.1_all.deb ...
+Unpacking libdpkg-perl (1.22.6ubuntu6.1) ...
+Selecting previously unselected package bzip2.
+Preparing to unpack .../36-bzip2_1.0.8-5.1build0.1_amd64.deb ...
+Unpacking bzip2 (1.0.8-5.1build0.1) ...
+Selecting previously unselected package lto-disabled-list.
+Preparing to unpack .../37-lto-disabled-list_47_all.deb ...
+Unpacking lto-disabled-list (47) ...
+Selecting previously unselected package dpkg-dev.
+Preparing to unpack .../38-dpkg-dev_1.22.6ubuntu6.1_all.deb ...
+Unpacking dpkg-dev (1.22.6ubuntu6.1) ...
+Selecting previously unselected package build-essential.
+Preparing to unpack .../39-build-essential_12.10ubuntu1_amd64.deb ...
+Unpacking build-essential (12.10ubuntu1) ...
+Selecting previously unselected package libfakeroot:amd64.
+Preparing to unpack .../40-libfakeroot_1.33-1_amd64.deb ...
+Unpacking libfakeroot:amd64 (1.33-1) ...
+Selecting previously unselected package fakeroot.
+Preparing to unpack .../41-fakeroot_1.33-1_amd64.deb ...
+Unpacking fakeroot (1.33-1) ...
+Selecting previously unselected package libalgorithm-diff-perl.
+Preparing to unpack .../42-libalgorithm-diff-perl_1.201-1_all.deb ...
+Unpacking libalgorithm-diff-perl (1.201-1) ...
+Selecting previously unselected package libalgorithm-diff-xs-perl:amd64.
+Preparing to unpack .../43-libalgorithm-diff-xs-perl_0.04-8build3_amd64.deb ...
+Unpacking libalgorithm-diff-xs-perl:amd64 (0.04-8build3) ...
+Selecting previously unselected package libalgorithm-merge-perl.
+Preparing to unpack .../44-libalgorithm-merge-perl_0.08-5_all.deb ...
+Unpacking libalgorithm-merge-perl (0.08-5) ...
+Selecting previously unselected package libfile-fcntllock-perl.
+Preparing to unpack .../45-libfile-fcntllock-perl_0.22-4ubuntu5_amd64.deb ...
+Unpacking libfile-fcntllock-perl (0.22-4ubuntu5) ...
+Setting up lto-disabled-list (47) ...
+Setting up libfile-fcntllock-perl (0.22-4ubuntu5) ...
+Setting up libalgorithm-diff-perl (1.201-1) ...
+Setting up binutils-common:amd64 (2.42-4ubuntu2.5) ...
+Setting up libctf-nobfd0:amd64 (2.42-4ubuntu2.5) ...
+Setting up libgomp1:amd64 (14.2.0-4ubuntu2~24.04) ...
+Setting up bzip2 (1.0.8-5.1build0.1) ...
+Setting up libsframe1:amd64 (2.42-4ubuntu2.5) ...
+Setting up libfakeroot:amd64 (1.33-1) ...
+Setting up fakeroot (1.33-1) ...
+update-alternatives: using /usr/bin/fakeroot-sysv to provide /usr/bin/fakeroot (fakeroot) in auto mode
+Setting up gcc-13-base:amd64 (13.3.0-6ubuntu2~24.04) ...
+Setting up make (4.3-4.1build2) ...
+Setting up libquadmath0:amd64 (14.2.0-4ubuntu2~24.04) ...
+Setting up libmpc3:amd64 (1.3.1-1build1.1) ...
+Setting up libdpkg-perl (1.22.6ubuntu6.1) ...
+Setting up libubsan1:amd64 (14.2.0-4ubuntu2~24.04) ...
+Setting up libhwasan0:amd64 (14.2.0-4ubuntu2~24.04) ...
+Setting up libasan8:amd64 (14.2.0-4ubuntu2~24.04) ...
+Setting up libtsan2:amd64 (14.2.0-4ubuntu2~24.04) ...
+Setting up libbinutils:amd64 (2.42-4ubuntu2.5) ...
+Setting up libisl23:amd64 (0.26-3build1.1) ...
+Setting up libalgorithm-diff-xs-perl:amd64 (0.04-8build3) ...
+Setting up libcc1-0:amd64 (14.2.0-4ubuntu2~24.04) ...
+Setting up liblsan0:amd64 (14.2.0-4ubuntu2~24.04) ...
+Setting up libitm1:amd64 (14.2.0-4ubuntu2~24.04) ...
+Setting up libalgorithm-merge-perl (0.08-5) ...
+Setting up libctf0:amd64 (2.42-4ubuntu2.5) ...
+Setting up cpp-13-x86-64-linux-gnu (13.3.0-6ubuntu2~24.04) ...
+Setting up libgprofng0:amd64 (2.42-4ubuntu2.5) ...
+Setting up libgcc-13-dev:amd64 (13.3.0-6ubuntu2~24.04) ...
+Setting up libstdc++-13-dev:amd64 (13.3.0-6ubuntu2~24.04) ...
+Setting up binutils-x86-64-linux-gnu (2.42-4ubuntu2.5) ...
+Setting up cpp-x86-64-linux-gnu (4:13.2.0-7ubuntu1) ...
+Setting up cpp-13 (13.3.0-6ubuntu2~24.04) ...
+Setting up gcc-13-x86-64-linux-gnu (13.3.0-6ubuntu2~24.04) ...
+Setting up binutils (2.42-4ubuntu2.5) ...
+Setting up dpkg-dev (1.22.6ubuntu6.1) ...
+Setting up gcc-13 (13.3.0-6ubuntu2~24.04) ...
+Setting up cpp (4:13.2.0-7ubuntu1) ...
+Setting up g++-13-x86-64-linux-gnu (13.3.0-6ubuntu2~24.04) ...
+Setting up gcc-x86-64-linux-gnu (4:13.2.0-7ubuntu1) ...
+Setting up gcc (4:13.2.0-7ubuntu1) ...
+Setting up g++-x86-64-linux-gnu (4:13.2.0-7ubuntu1) ...
+Setting up g++-13 (13.3.0-6ubuntu2~24.04) ...
+Setting up g++ (4:13.2.0-7ubuntu1) ...
+update-alternatives: using /usr/bin/g++ to provide /usr/bin/c++ (c++) in auto mode
+Setting up build-essential (12.10ubuntu1) ...
+Processing triggers for man-db (2.12.0-4build2) ...
+Processing triggers for libc-bin (2.39-0ubuntu8.5) ...
+Scanning processes...
+Scanning candidates...
+Scanning linux images...
+
+Pending kernel upgrade!
+Running kernel version:
+  6.8.0-41-generic
+Diagnostics:
+  The currently running kernel version is not the expected kernel version 6.8.0-78-generic.
+
+Restarting the system to load the new kernel will not be handled automatically, so you should consider rebooting.
+
+Restarting services...
+
+Service restarts being deferred:
+ /etc/needrestart/restart.d/dbus.service
+ systemctl restart getty@tty1.service
+ systemctl restart systemd-logind.service
+ systemctl restart unattended-upgrades.service
+
+No containers need to be restarted.
+
+User sessions running outdated binaries:
+ suporte @ session #154: sshd[39663]
+ suporte @ session #169: sshd[41149]
+ suporte @ user manager service: systemd[39668]
+
+No VM guests are running outdated hypervisor (qemu) binaries on this host.
+[2025-08-26 15:27:55] ✅ build-essential instalado com sucesso
+[2025-08-26 15:27:55] Verificando disponibilidade: python3
+[2025-08-26 15:27:55] Instalando python3...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+python3 is already the newest version (3.12.3-0ubuntu2).
+python3 set to manually installed.
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[2025-08-26 15:27:55] ✅ python3 instalado com sucesso
+[2025-08-26 15:27:55] Verificando disponibilidade: python3-pip
+[2025-08-26 15:27:55] Instalando python3-pip...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following additional packages will be installed:
+  javascript-common libexpat1-dev libjs-jquery libjs-sphinxdoc libjs-underscore libpython3-dev libpython3.12-dev python3-dev python3-wheel python3.12-dev zlib1g-dev
+Suggested packages:
+  apache2 | lighttpd | httpd
+The following NEW packages will be installed:
+  javascript-common libexpat1-dev libjs-jquery libjs-sphinxdoc libjs-underscore libpython3-dev libpython3.12-dev python3-dev python3-pip python3-wheel python3.12-dev zlib1g-dev
+0 upgraded, 12 newly installed, 0 to remove and 1 not upgraded.
+Need to get 9,217 kB of archives.
+After this operation, 41.2 MB of additional disk space will be used.
+Get:1 http://archive.ubuntu.com/ubuntu noble/main amd64 javascript-common all 11+nmu1 [5,936 B]
+Get:2 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libexpat1-dev amd64 2.6.1-2ubuntu0.3 [140 kB]
+Get:3 http://archive.ubuntu.com/ubuntu noble/main amd64 libjs-jquery all 3.6.1+dfsg+~3.5.14-1 [328 kB]
+Get:4 http://archive.ubuntu.com/ubuntu noble/main amd64 libjs-underscore all 1.13.4~dfsg+~1.11.4-3 [118 kB]
+Get:5 http://archive.ubuntu.com/ubuntu noble/main amd64 libjs-sphinxdoc all 7.2.6-6 [149 kB]
+Get:6 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 zlib1g-dev amd64 1:1.3.dfsg-3.1ubuntu2.1 [894 kB]
+Get:7 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libpython3.12-dev amd64 3.12.3-1ubuntu0.8 [5,677 kB]
+Get:8 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libpython3-dev amd64 3.12.3-0ubuntu2 [10.3 kB]
+Get:9 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 python3.12-dev amd64 3.12.3-1ubuntu0.8 [498 kB]
+Get:10 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 python3-dev amd64 3.12.3-0ubuntu2 [26.7 kB]
+Get:11 http://archive.ubuntu.com/ubuntu noble/universe amd64 python3-wheel all 0.42.0-2 [53.1 kB]
+Get:12 http://archive.ubuntu.com/ubuntu noble-updates/universe amd64 python3-pip all 24.0+dfsg-1ubuntu1.2 [1,317 kB]
+Fetched 9,217 kB in 2s (5,233 kB/s)
+Selecting previously unselected package javascript-common.
+(Reading database ... 124754 files and directories currently installed.)
+Preparing to unpack .../00-javascript-common_11+nmu1_all.deb ...
+Unpacking javascript-common (11+nmu1) ...
+Selecting previously unselected package libexpat1-dev:amd64.
+Preparing to unpack .../01-libexpat1-dev_2.6.1-2ubuntu0.3_amd64.deb ...
+Unpacking libexpat1-dev:amd64 (2.6.1-2ubuntu0.3) ...
+Selecting previously unselected package libjs-jquery.
+Preparing to unpack .../02-libjs-jquery_3.6.1+dfsg+~3.5.14-1_all.deb ...
+Unpacking libjs-jquery (3.6.1+dfsg+~3.5.14-1) ...
+Selecting previously unselected package libjs-underscore.
+Preparing to unpack .../03-libjs-underscore_1.13.4~dfsg+~1.11.4-3_all.deb ...
+Unpacking libjs-underscore (1.13.4~dfsg+~1.11.4-3) ...
+Selecting previously unselected package libjs-sphinxdoc.
+Preparing to unpack .../04-libjs-sphinxdoc_7.2.6-6_all.deb ...
+Unpacking libjs-sphinxdoc (7.2.6-6) ...
+Selecting previously unselected package zlib1g-dev:amd64.
+Preparing to unpack .../05-zlib1g-dev_1%3a1.3.dfsg-3.1ubuntu2.1_amd64.deb ...
+Unpacking zlib1g-dev:amd64 (1:1.3.dfsg-3.1ubuntu2.1) ...
+Selecting previously unselected package libpython3.12-dev:amd64.
+Preparing to unpack .../06-libpython3.12-dev_3.12.3-1ubuntu0.8_amd64.deb ...
+Unpacking libpython3.12-dev:amd64 (3.12.3-1ubuntu0.8) ...
+Selecting previously unselected package libpython3-dev:amd64.
+Preparing to unpack .../07-libpython3-dev_3.12.3-0ubuntu2_amd64.deb ...
+Unpacking libpython3-dev:amd64 (3.12.3-0ubuntu2) ...
+Selecting previously unselected package python3.12-dev.
+Preparing to unpack .../08-python3.12-dev_3.12.3-1ubuntu0.8_amd64.deb ...
+Unpacking python3.12-dev (3.12.3-1ubuntu0.8) ...
+Selecting previously unselected package python3-dev.
+Preparing to unpack .../09-python3-dev_3.12.3-0ubuntu2_amd64.deb ...
+Unpacking python3-dev (3.12.3-0ubuntu2) ...
+Selecting previously unselected package python3-wheel.
+Preparing to unpack .../10-python3-wheel_0.42.0-2_all.deb ...
+Unpacking python3-wheel (0.42.0-2) ...
+Selecting previously unselected package python3-pip.
+Preparing to unpack .../11-python3-pip_24.0+dfsg-1ubuntu1.2_all.deb ...
+Unpacking python3-pip (24.0+dfsg-1ubuntu1.2) ...
+Setting up javascript-common (11+nmu1) ...
+Setting up python3-wheel (0.42.0-2) ...
+Setting up libexpat1-dev:amd64 (2.6.1-2ubuntu0.3) ...
+Setting up python3-pip (24.0+dfsg-1ubuntu1.2) ...
+Setting up zlib1g-dev:amd64 (1:1.3.dfsg-3.1ubuntu2.1) ...
+Setting up libjs-jquery (3.6.1+dfsg+~3.5.14-1) ...
+Setting up libjs-underscore (1.13.4~dfsg+~1.11.4-3) ...
+Setting up libpython3.12-dev:amd64 (3.12.3-1ubuntu0.8) ...
+Setting up python3.12-dev (3.12.3-1ubuntu0.8) ...
+Setting up libjs-sphinxdoc (7.2.6-6) ...
+Setting up libpython3-dev:amd64 (3.12.3-0ubuntu2) ...
+Setting up python3-dev (3.12.3-0ubuntu2) ...
+Processing triggers for man-db (2.12.0-4build2) ...
+Scanning processes...
+Scanning candidates...
+Scanning linux images...
+
+Pending kernel upgrade!
+Running kernel version:
+  6.8.0-41-generic
+Diagnostics:
+  The currently running kernel version is not the expected kernel version 6.8.0-78-generic.
+
+Restarting the system to load the new kernel will not be handled automatically, so you should consider rebooting.
+
+Restarting services...
+
+Service restarts being deferred:
+ /etc/needrestart/restart.d/dbus.service
+ systemctl restart getty@tty1.service
+ systemctl restart systemd-logind.service
+ systemctl restart unattended-upgrades.service
+
+No containers need to be restarted.
+
+User sessions running outdated binaries:
+ suporte @ session #154: sshd[39663]
+ suporte @ session #169: sshd[41149]
+ suporte @ user manager service: systemd[39668]
+
+No VM guests are running outdated hypervisor (qemu) binaries on this host.
+[2025-08-26 15:28:02] ✅ python3-pip instalado com sucesso
+[2025-08-26 15:28:02] Verificando disponibilidade: htop
+[2025-08-26 15:28:02] Instalando htop...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+htop is already the newest version (3.3.0-4build1).
+htop set to manually installed.
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[2025-08-26 15:28:03] ✅ htop instalado com sucesso
+[2025-08-26 15:28:03] Verificando disponibilidade: unzip
+[2025-08-26 15:28:03] Instalando unzip...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+Suggested packages:
+  zip
+The following NEW packages will be installed:
+  unzip
+0 upgraded, 1 newly installed, 0 to remove and 1 not upgraded.
+Need to get 174 kB of archives.
+After this operation, 384 kB of additional disk space will be used.
+Get:1 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 unzip amd64 6.0-28ubuntu4.1 [174 kB]
+Fetched 174 kB in 1s (140 kB/s)
+Selecting previously unselected package unzip.
+(Reading database ... 125866 files and directories currently installed.)
+Preparing to unpack .../unzip_6.0-28ubuntu4.1_amd64.deb ...
+Unpacking unzip (6.0-28ubuntu4.1) ...
+Setting up unzip (6.0-28ubuntu4.1) ...
+Processing triggers for man-db (2.12.0-4build2) ...
+Scanning processes...
+Scanning candidates...
+Scanning linux images...
+
+Pending kernel upgrade!
+Running kernel version:
+  6.8.0-41-generic
+Diagnostics:
+  The currently running kernel version is not the expected kernel version 6.8.0-78-generic.
+
+Restarting the system to load the new kernel will not be handled automatically, so you should consider rebooting.
+
+Restarting services...
+
+Service restarts being deferred:
+ /etc/needrestart/restart.d/dbus.service
+ systemctl restart getty@tty1.service
+ systemctl restart systemd-logind.service
+ systemctl restart unattended-upgrades.service
+
+No containers need to be restarted.
+
+User sessions running outdated binaries:
+ suporte @ session #154: sshd[39663]
+ suporte @ session #169: sshd[41149]
+ suporte @ user manager service: systemd[39668]
+
+No VM guests are running outdated hypervisor (qemu) binaries on this host.
+[2025-08-26 15:28:06] ✅ unzip instalado com sucesso
+[2025-08-26 15:28:06] Verificando disponibilidade: software-properties-common
+[2025-08-26 15:28:06] Instalando software-properties-common...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+software-properties-common is already the newest version (0.99.49.3).
+software-properties-common set to manually installed.
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[2025-08-26 15:28:07] ✅ software-properties-common instalado com sucesso
+[2025-08-26 15:28:07] Verificando disponibilidade: ufw
+[2025-08-26 15:28:07] Instalando ufw...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+ufw is already the newest version (0.36.2-6).
+ufw set to manually installed.
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[2025-08-26 15:28:07] ✅ ufw instalado com sucesso
+[2025-08-26 15:28:07] Verificando disponibilidade: fail2ban
+[2025-08-26 15:28:07] Instalando fail2ban...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following additional packages will be installed:
+  python3-pyasyncore python3-pyinotify whois
+Suggested packages:
+  mailx monit sqlite3 python-pyinotify-doc
+The following NEW packages will be installed:
+  fail2ban python3-pyasyncore python3-pyinotify whois
+0 upgraded, 4 newly installed, 0 to remove and 1 not upgraded.
+Need to get 496 kB of archives.
+After this operation, 2,572 kB of additional disk space will be used.
+Get:1 http://archive.ubuntu.com/ubuntu noble/main amd64 python3-pyasyncore all 1.0.2-2 [10.1 kB]
+Get:2 http://archive.ubuntu.com/ubuntu noble-updates/universe amd64 fail2ban all 1.0.2-3ubuntu0.1 [409 kB]
+Get:3 http://archive.ubuntu.com/ubuntu noble/main amd64 python3-pyinotify all 0.9.6-2ubuntu1 [25.0 kB]
+Get:4 http://archive.ubuntu.com/ubuntu noble/main amd64 whois amd64 5.5.22 [51.7 kB]
+Fetched 496 kB in 1s (439 kB/s)
+Selecting previously unselected package python3-pyasyncore.
+(Reading database ... 125884 files and directories currently installed.)
+Preparing to unpack .../python3-pyasyncore_1.0.2-2_all.deb ...
+Unpacking python3-pyasyncore (1.0.2-2) ...
+Selecting previously unselected package fail2ban.
+Preparing to unpack .../fail2ban_1.0.2-3ubuntu0.1_all.deb ...
+Unpacking fail2ban (1.0.2-3ubuntu0.1) ...
+Selecting previously unselected package python3-pyinotify.
+Preparing to unpack .../python3-pyinotify_0.9.6-2ubuntu1_all.deb ...
+Unpacking python3-pyinotify (0.9.6-2ubuntu1) ...
+Selecting previously unselected package whois.
+Preparing to unpack .../whois_5.5.22_amd64.deb ...
+Unpacking whois (5.5.22) ...
+Setting up whois (5.5.22) ...
+Setting up python3-pyasyncore (1.0.2-2) ...
+Setting up fail2ban (1.0.2-3ubuntu0.1) ...
+/usr/lib/python3/dist-packages/fail2ban/tests/fail2banregextestcase.py:224: SyntaxWarning: invalid escape sequence '\s'
+  "1490349000 test failed.dns.ch", "^\s*test <F-ID>\S+</F-ID>"
+/usr/lib/python3/dist-packages/fail2ban/tests/fail2banregextestcase.py:435: SyntaxWarning: invalid escape sequence '\S'
+  '^'+prefix+'<F-ID>User <F-USER>\S+</F-USER></F-ID> not allowed\n'
+/usr/lib/python3/dist-packages/fail2ban/tests/fail2banregextestcase.py:443: SyntaxWarning: invalid escape sequence '\S'
+  '^'+prefix+'User <F-USER>\S+</F-USER> not allowed\n'
+/usr/lib/python3/dist-packages/fail2ban/tests/fail2banregextestcase.py:444: SyntaxWarning: invalid escape sequence '\d'
+  '^'+prefix+'Received disconnect from <F-ID><ADDR> port \d+</F-ID>'
+/usr/lib/python3/dist-packages/fail2ban/tests/fail2banregextestcase.py:451: SyntaxWarning: invalid escape sequence '\s'
+  _test_variants('common', prefix="\s*\S+ sshd\[<F-MLFID>\d+</F-MLFID>\]:\s+")
+/usr/lib/python3/dist-packages/fail2ban/tests/fail2banregextestcase.py:537: SyntaxWarning: invalid escape sequence '\['
+  'common[prefregex="^svc\[<F-MLFID>\d+</F-MLFID>\] connect <F-CONTENT>.+</F-CONTENT>$"'
+/usr/lib/python3/dist-packages/fail2ban/tests/servertestcase.py:1375: SyntaxWarning: invalid escape sequence '\s'
+  "`{ nft -a list chain inet f2b-table f2b-chain | grep -oP '@addr-set-j-w-nft-mp\s+.*\s+\Khandle\s+(\d+)$'; } | while read -r hdl; do`",
+/usr/lib/python3/dist-packages/fail2ban/tests/servertestcase.py:1378: SyntaxWarning: invalid escape sequence '\s'
+  "`{ nft -a list chain inet f2b-table f2b-chain | grep -oP '@addr6-set-j-w-nft-mp\s+.*\s+\Khandle\s+(\d+)$'; } | while read -r hdl; do`",
+/usr/lib/python3/dist-packages/fail2ban/tests/servertestcase.py:1421: SyntaxWarning: invalid escape sequence '\s'
+  "`{ nft -a list chain inet f2b-table f2b-chain | grep -oP '@addr-set-j-w-nft-ap\s+.*\s+\Khandle\s+(\d+)$'; } | while read -r hdl; do`",
+/usr/lib/python3/dist-packages/fail2ban/tests/servertestcase.py:1424: SyntaxWarning: invalid escape sequence '\s'
+  "`{ nft -a list chain inet f2b-table f2b-chain | grep -oP '@addr6-set-j-w-nft-ap\s+.*\s+\Khandle\s+(\d+)$'; } | while read -r hdl; do`",
+Created symlink /etc/systemd/system/multi-user.target.wants/fail2ban.service → /usr/lib/systemd/system/fail2ban.service.
+Setting up python3-pyinotify (0.9.6-2ubuntu1) ...
+Processing triggers for man-db (2.12.0-4build2) ...
+Scanning processes...
+Scanning candidates...
+Scanning linux images...
+
+Pending kernel upgrade!
+Running kernel version:
+  6.8.0-41-generic
+Diagnostics:
+  The currently running kernel version is not the expected kernel version 6.8.0-78-generic.
+
+Restarting the system to load the new kernel will not be handled automatically, so you should consider rebooting.
+
+Restarting services...
+
+Service restarts being deferred:
+ /etc/needrestart/restart.d/dbus.service
+ systemctl restart getty@tty1.service
+ systemctl restart systemd-logind.service
+ systemctl restart unattended-upgrades.service
+
+No containers need to be restarted.
+
+User sessions running outdated binaries:
+ suporte @ session #154: sshd[39663]
+ suporte @ session #169: sshd[41149]
+ suporte @ user manager service: systemd[39668]
+
+No VM guests are running outdated hypervisor (qemu) binaries on this host.
+[2025-08-26 15:28:13] ✅ fail2ban instalado com sucesso
+[2025-08-26 15:28:13] Verificando disponibilidade: supervisor
+[2025-08-26 15:28:13] Instalando supervisor...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+Suggested packages:
+  supervisor-doc
+The following NEW packages will be installed:
+  supervisor
+0 upgraded, 1 newly installed, 0 to remove and 1 not upgraded.
+Need to get 286 kB of archives.
+After this operation, 1,718 kB of additional disk space will be used.
+Get:1 http://archive.ubuntu.com/ubuntu noble-updates/universe amd64 supervisor all 4.2.5-1ubuntu0.1 [286 kB]
+Fetched 286 kB in 1s (194 kB/s)
+Selecting previously unselected package supervisor.
+(Reading database ... 126372 files and directories currently installed.)
+Preparing to unpack .../supervisor_4.2.5-1ubuntu0.1_all.deb ...
+Unpacking supervisor (4.2.5-1ubuntu0.1) ...
+Setting up supervisor (4.2.5-1ubuntu0.1) ...
+Created symlink /etc/systemd/system/multi-user.target.wants/supervisor.service → /usr/lib/systemd/system/supervisor.service.
+Processing triggers for man-db (2.12.0-4build2) ...
+Scanning processes...
+Scanning candidates...
+Scanning linux images...
+
+Pending kernel upgrade!
+Running kernel version:
+  6.8.0-41-generic
+Diagnostics:
+  The currently running kernel version is not the expected kernel version 6.8.0-78-generic.
+
+Restarting the system to load the new kernel will not be handled automatically, so you should consider rebooting.
+
+Restarting services...
+
+Service restarts being deferred:
+ /etc/needrestart/restart.d/dbus.service
+ systemctl restart getty@tty1.service
+ systemctl restart systemd-logind.service
+ systemctl restart unattended-upgrades.service
+
+No containers need to be restarted.
+
+User sessions running outdated binaries:
+ suporte @ session #154: sshd[39663]
+ suporte @ session #169: sshd[41149]
+ suporte @ user manager service: systemd[39668]
+
+No VM guests are running outdated hypervisor (qemu) binaries on this host.
+[2025-08-26 15:28:17] ✅ supervisor instalado com sucesso
+[2025-08-26 15:28:17] Verificando disponibilidade: sqlite3
+[2025-08-26 15:28:17] Instalando sqlite3...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+Suggested packages:
+  sqlite3-doc
+The following NEW packages will be installed:
+  sqlite3
+0 upgraded, 1 newly installed, 0 to remove and 1 not upgraded.
+Need to get 144 kB of archives.
+After this operation, 584 kB of additional disk space will be used.
+Get:1 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 sqlite3 amd64 3.45.1-1ubuntu2.4 [144 kB]
+Fetched 144 kB in 1s (116 kB/s)
+Selecting previously unselected package sqlite3.
+(Reading database ... 126521 files and directories currently installed.)
+Preparing to unpack .../sqlite3_3.45.1-1ubuntu2.4_amd64.deb ...
+Unpacking sqlite3 (3.45.1-1ubuntu2.4) ...
+Setting up sqlite3 (3.45.1-1ubuntu2.4) ...
+Processing triggers for man-db (2.12.0-4build2) ...
+Scanning processes...
+Scanning candidates...
+Scanning linux images...
+
+Pending kernel upgrade!
+Running kernel version:
+  6.8.0-41-generic
+Diagnostics:
+  The currently running kernel version is not the expected kernel version 6.8.0-78-generic.
+
+Restarting the system to load the new kernel will not be handled automatically, so you should consider rebooting.
+
+Restarting services...
+
+Service restarts being deferred:
+ /etc/needrestart/restart.d/dbus.service
+ systemctl restart getty@tty1.service
+ systemctl restart systemd-logind.service
+ systemctl restart unattended-upgrades.service
+
+No containers need to be restarted.
+
+User sessions running outdated binaries:
+ suporte @ session #154: sshd[39663]
+ suporte @ session #169: sshd[41149]
+ suporte @ user manager service: systemd[39668]
+
+No VM guests are running outdated hypervisor (qemu) binaries on this host.
+[2025-08-26 15:28:20] ✅ sqlite3 instalado com sucesso
+[2025-08-26 15:28:20] Verificando disponibilidade: ca-certificates
+[2025-08-26 15:28:20] Instalando ca-certificates...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+ca-certificates is already the newest version (20240203).
+ca-certificates set to manually installed.
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[2025-08-26 15:28:21] ✅ ca-certificates instalado com sucesso
+[2025-08-26 15:28:21] Verificando disponibilidade: gnupg
+[2025-08-26 15:28:21] Instalando gnupg...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+gnupg is already the newest version (2.4.4-2ubuntu17.3).
+gnupg set to manually installed.
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[2025-08-26 15:28:21] ✅ gnupg instalado com sucesso
+[2025-08-26 15:28:21] Verificando disponibilidade: lsb-release
+[2025-08-26 15:28:21] Instalando lsb-release...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+lsb-release is already the newest version (12.0-2).
+lsb-release set to manually installed.
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[2025-08-26 15:28:22] ✅ lsb-release instalado com sucesso
+[2025-08-26 15:28:22] Instalando cliente PostgreSQL...
+[2025-08-26 15:28:22] 👤 Configurando usuário samureye...
+[2025-08-26 15:28:22] Usuário samureye criado
+[2025-08-26 15:28:22] Senha definida para o usuário samureye
+[2025-08-26 15:28:22] Configurado sudo sem senha para samureye
+[2025-08-26 15:28:22] 📦 Instalando Node.js 20.x LTS...
+2025-08-26 15:28:22 - Installing pre-requisites
+Hit:1 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:2 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:3 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:4 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists... Done
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+ca-certificates is already the newest version (20240203).
+curl is already the newest version (8.5.0-2ubuntu10.6).
+gnupg is already the newest version (2.4.4-2ubuntu17.3).
+The following NEW packages will be installed:
+  apt-transport-https
+0 upgraded, 1 newly installed, 0 to remove and 1 not upgraded.
+Need to get 3,970 B of archives.
+After this operation, 36.9 kB of additional disk space will be used.
+Get:1 http://archive.ubuntu.com/ubuntu noble-updates/universe amd64 apt-transport-https all 2.8.3 [3,970 B]
+Fetched 3,970 B in 0s (12.3 kB/s)
+Selecting previously unselected package apt-transport-https.
+(Reading database ... 126527 files and directories currently installed.)
+Preparing to unpack .../apt-transport-https_2.8.3_all.deb ...
+Unpacking apt-transport-https (2.8.3) ...
+Setting up apt-transport-https (2.8.3) ...
+Scanning processes...
+Scanning candidates...
+Scanning linux images...
+
+Pending kernel upgrade!
+Running kernel version:
+  6.8.0-41-generic
+Diagnostics:
+  The currently running kernel version is not the expected kernel version 6.8.0-78-generic.
+
+Restarting the system to load the new kernel will not be handled automatically, so you should consider rebooting.
+
+Restarting services...
+
+Service restarts being deferred:
+ /etc/needrestart/restart.d/dbus.service
+ systemctl restart getty@tty1.service
+ systemctl restart systemd-logind.service
+ systemctl restart unattended-upgrades.service
+
+No containers need to be restarted.
+
+User sessions running outdated binaries:
+ suporte @ session #154: sshd[39663]
+ suporte @ session #169: sshd[41149]
+ suporte @ user manager service: systemd[39668]
+
+No VM guests are running outdated hypervisor (qemu) binaries on this host.
+Get:1 https://deb.nodesource.com/node_20.x nodistro InRelease [12.1 kB]
+Get:2 https://deb.nodesource.com/node_20.x nodistro/main amd64 Packages [12.2 kB]
+Hit:3 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:4 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:5 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:6 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Fetched 24.4 kB in 1s (41.3 kB/s)
+Reading package lists... Done
+2025-08-26 15:28:28 - Repository configured successfully.
+2025-08-26 15:28:28 - To install Node.js, run: apt-get install nodejs -y
+2025-08-26 15:28:28 - You can use N|solid Runtime as a node.js alternative
+2025-08-26 15:28:28 - To install N|solid Runtime, run: apt-get install nsolid -y
+
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following NEW packages will be installed:
+  nodejs
+0 upgraded, 1 newly installed, 0 to remove and 1 not upgraded.
+Need to get 32.0 MB of archives.
+After this operation, 199 MB of additional disk space will be used.
+Get:1 https://deb.nodesource.com/node_20.x nodistro/main amd64 nodejs amd64 20.19.4-1nodesource1 [32.0 MB]
+Fetched 32.0 MB in 4s (8,193 kB/s)
+Selecting previously unselected package nodejs.
+(Reading database ... 126531 files and directories currently installed.)
+Preparing to unpack .../nodejs_20.19.4-1nodesource1_amd64.deb ...
+Unpacking nodejs (20.19.4-1nodesource1) ...
+Setting up nodejs (20.19.4-1nodesource1) ...
+Processing triggers for man-db (2.12.0-4build2) ...
+Scanning processes...
+Scanning candidates...
+Scanning linux images...
+
+Pending kernel upgrade!
+Running kernel version:
+  6.8.0-41-generic
+Diagnostics:
+  The currently running kernel version is not the expected kernel version 6.8.0-78-generic.
+
+Restarting the system to load the new kernel will not be handled automatically, so you should consider rebooting.
+
+Restarting services...
+
+Service restarts being deferred:
+ /etc/needrestart/restart.d/dbus.service
+ systemctl restart getty@tty1.service
+ systemctl restart systemd-logind.service
+ systemctl restart unattended-upgrades.service
+
+No containers need to be restarted.
+
+User sessions running outdated binaries:
+ suporte @ session #154: sshd[39663]
+ suporte @ session #169: sshd[41149]
+ suporte @ user manager service: systemd[39668]
+
+No VM guests are running outdated hypervisor (qemu) binaries on this host.
+[2025-08-26 15:28:36] Node.js: v20.19.4, NPM: 10.8.2
+[2025-08-26 15:28:36] Configurando ambiente de desenvolvimento...
+
+added 6 packages in 3s
+
+2 packages are looking for funding
+  run `npm fund` for details
+npm notice
+npm notice New major version of npm available! 10.8.2 -> 11.5.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.5.2
+npm notice To update run: npm install -g npm@11.5.2
+npm notice
+npm warn using --force Recommended protections disabled.
+[2025-08-26 15:28:39] PM2 substituído por systemd service
+[2025-08-26 15:28:39] 🔥 Configurando firewall UFW...
+Default incoming policy changed to 'deny'
+(be sure to update your rules accordingly)
+Default outgoing policy changed to 'allow'
+(be sure to update your rules accordingly)
+Rules updated
+Rules updated (v6)
+Rules updated
+Rules updated (v6)
+Firewall is active and enabled on system startup
+[2025-08-26 15:28:40] Firewall configurado: SSH (22), App (5000)
+[2025-08-26 15:28:40] 🔧 Instalando ferramentas de segurança e cliente PostgreSQL...
+[2025-08-26 15:28:40] Instalando ferramentas de rede e banco...
+[2025-08-26 15:28:40] Verificando disponibilidade: redis-tools
+[2025-08-26 15:28:40] Instalando redis-tools...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+redis-tools is already the newest version (5:7.0.15-1ubuntu0.24.04.1).
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[2025-08-26 15:28:40] ✅ redis-tools instalado com sucesso
+[2025-08-26 15:28:40] Verificando disponibilidade: dnsutils
+[2025-08-26 15:28:40] Instalando dnsutils...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following NEW packages will be installed:
+  dnsutils
+0 upgraded, 1 newly installed, 0 to remove and 1 not upgraded.
+Need to get 3,682 B of archives.
+After this operation, 30.7 kB of additional disk space will be used.
+Get:1 http://archive.ubuntu.com/ubuntu noble-updates/universe amd64 dnsutils all 1:9.18.30-0ubuntu0.24.04.2 [3,682 B]
+Fetched 3,682 B in 0s (10.7 kB/s)
+Selecting previously unselected package dnsutils.
+(Reading database ... 131894 files and directories currently installed.)
+Preparing to unpack .../dnsutils_1%3a9.18.30-0ubuntu0.24.04.2_all.deb ...
+Unpacking dnsutils (1:9.18.30-0ubuntu0.24.04.2) ...
+Setting up dnsutils (1:9.18.30-0ubuntu0.24.04.2) ...
+Scanning processes...
+Scanning candidates...
+Scanning linux images...
+
+Pending kernel upgrade!
+Running kernel version:
+  6.8.0-41-generic
+Diagnostics:
+  The currently running kernel version is not the expected kernel version 6.8.0-78-generic.
+
+Restarting the system to load the new kernel will not be handled automatically, so you should consider rebooting.
+
+Restarting services...
+
+Service restarts being deferred:
+ /etc/needrestart/restart.d/dbus.service
+ systemctl restart getty@tty1.service
+ systemctl restart systemd-logind.service
+ systemctl restart unattended-upgrades.service
+
+No containers need to be restarted.
+
+User sessions running outdated binaries:
+ suporte @ session #154: sshd[39663]
+ suporte @ session #169: sshd[41149]
+ suporte @ user manager service: systemd[39668]
+
+No VM guests are running outdated hypervisor (qemu) binaries on this host.
+[2025-08-26 15:28:42] ✅ dnsutils instalado com sucesso
+[2025-08-26 15:28:42] Verificando disponibilidade: netcat-openbsd
+[2025-08-26 15:28:42] Instalando netcat-openbsd...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+netcat-openbsd is already the newest version (1.226-1ubuntu2).
+netcat-openbsd set to manually installed.
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[2025-08-26 15:28:42] ✅ netcat-openbsd instalado com sucesso
+[2025-08-26 15:28:42] Instalando ferramentas de segurança...
+[2025-08-26 15:28:42] Verificando disponibilidade: nmap
+[2025-08-26 15:28:42] Instalando nmap...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following additional packages will be installed:
+  libblas3 liblinear4 liblua5.4-0 libssh2-1t64 nmap-common
+Suggested packages:
+  liblinear-tools liblinear-dev ncat ndiff zenmap
+The following NEW packages will be installed:
+  libblas3 liblinear4 liblua5.4-0 libssh2-1t64 nmap nmap-common
+0 upgraded, 6 newly installed, 0 to remove and 1 not upgraded.
+Need to get 6,452 kB of archives.
+After this operation, 28.0 MB of additional disk space will be used.
+Get:1 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libblas3 amd64 3.12.0-3build1.1 [238 kB]
+Get:2 http://archive.ubuntu.com/ubuntu noble/universe amd64 liblinear4 amd64 2.3.0+dfsg-5build1 [42.3 kB]
+Get:3 http://archive.ubuntu.com/ubuntu noble/main amd64 liblua5.4-0 amd64 5.4.6-3build2 [166 kB]
+Get:4 http://archive.ubuntu.com/ubuntu noble/main amd64 libssh2-1t64 amd64 1.11.0-4.1build2 [120 kB]
+Get:5 http://archive.ubuntu.com/ubuntu noble/universe amd64 nmap-common all 7.94+git20230807.3be01efb1+dfsg-3build2 [4,192 kB]
+Get:6 http://archive.ubuntu.com/ubuntu noble/universe amd64 nmap amd64 7.94+git20230807.3be01efb1+dfsg-3build2 [1,694 kB]
+Fetched 6,452 kB in 3s (2,360 kB/s)
+Selecting previously unselected package libblas3:amd64.
+(Reading database ... 131898 files and directories currently installed.)
+Preparing to unpack .../0-libblas3_3.12.0-3build1.1_amd64.deb ...
+Unpacking libblas3:amd64 (3.12.0-3build1.1) ...
+Selecting previously unselected package liblinear4:amd64.
+Preparing to unpack .../1-liblinear4_2.3.0+dfsg-5build1_amd64.deb ...
+Unpacking liblinear4:amd64 (2.3.0+dfsg-5build1) ...
+Selecting previously unselected package liblua5.4-0:amd64.
+Preparing to unpack .../2-liblua5.4-0_5.4.6-3build2_amd64.deb ...
+Unpacking liblua5.4-0:amd64 (5.4.6-3build2) ...
+Selecting previously unselected package libssh2-1t64:amd64.
+Preparing to unpack .../3-libssh2-1t64_1.11.0-4.1build2_amd64.deb ...
+Unpacking libssh2-1t64:amd64 (1.11.0-4.1build2) ...
+Selecting previously unselected package nmap-common.
+Preparing to unpack .../4-nmap-common_7.94+git20230807.3be01efb1+dfsg-3build2_all.deb ...
+Unpacking nmap-common (7.94+git20230807.3be01efb1+dfsg-3build2) ...
+Selecting previously unselected package nmap.
+Preparing to unpack .../5-nmap_7.94+git20230807.3be01efb1+dfsg-3build2_amd64.deb ...
+Unpacking nmap (7.94+git20230807.3be01efb1+dfsg-3build2) ...
+Setting up libblas3:amd64 (3.12.0-3build1.1) ...
+update-alternatives: using /usr/lib/x86_64-linux-gnu/blas/libblas.so.3 to provide /usr/lib/x86_64-linux-gnu/libblas.so.3 (libblas.so.3-x86_64-linux-gnu) in auto mode
+Setting up nmap-common (7.94+git20230807.3be01efb1+dfsg-3build2) ...
+Setting up liblua5.4-0:amd64 (5.4.6-3build2) ...
+Setting up libssh2-1t64:amd64 (1.11.0-4.1build2) ...
+Setting up liblinear4:amd64 (2.3.0+dfsg-5build1) ...
+Setting up nmap (7.94+git20230807.3be01efb1+dfsg-3build2) ...
+Processing triggers for man-db (2.12.0-4build2) ...
+Processing triggers for libc-bin (2.39-0ubuntu8.5) ...
+Scanning processes...
+Scanning candidates...
+Scanning linux images...
+
+Pending kernel upgrade!
+Running kernel version:
+  6.8.0-41-generic
+Diagnostics:
+  The currently running kernel version is not the expected kernel version 6.8.0-78-generic.
+
+Restarting the system to load the new kernel will not be handled automatically, so you should consider rebooting.
+
+Restarting services...
+
+Service restarts being deferred:
+ /etc/needrestart/restart.d/dbus.service
+ systemctl restart getty@tty1.service
+ systemctl restart systemd-logind.service
+ systemctl restart unattended-upgrades.service
+
+No containers need to be restarted.
+
+User sessions running outdated binaries:
+ suporte @ session #154: sshd[39663]
+ suporte @ session #169: sshd[41149]
+ suporte @ user manager service: systemd[39668]
+
+No VM guests are running outdated hypervisor (qemu) binaries on this host.
+[2025-08-26 15:28:48] ✅ nmap instalado com sucesso
+[2025-08-26 15:28:48] Verificando disponibilidade: masscan
+[2025-08-26 15:28:48] Instalando masscan...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following NEW packages will be installed:
+  masscan
+0 upgraded, 1 newly installed, 0 to remove and 1 not upgraded.
+Need to get 237 kB of archives.
+After this operation, 566 kB of additional disk space will be used.
+Get:1 http://archive.ubuntu.com/ubuntu noble/universe amd64 masscan amd64 2:1.3.2+ds1-1 [237 kB]
+Ign:1 http://archive.ubuntu.com/ubuntu noble/universe amd64 masscan amd64 2:1.3.2+ds1-1
+Err:1 http://archive.ubuntu.com/ubuntu noble/universe amd64 masscan amd64 2:1.3.2+ds1-1
+  Error reading from server - read (104: Connection reset by peer) [IP: 185.125.190.83 80]
+E: Failed to fetch http://archive.ubuntu.com/ubuntu/pool/universe/m/masscan/masscan_1.3.2%2bds1-1_amd64.deb  Error reading from server - read (104: Connection reset by peer) [IP: 185.125.190.83 80]
+E: Unable to fetch some archives, maybe run apt-get update or try with --fix-missing?
+[2025-08-26 15:28:51] ❌ Falha ao instalar masscan, continuando...
+[2025-08-26 15:28:51] Instalando Nuclei...
+--2025-08-26 15:28:51--  https://github.com/projectdiscovery/nuclei/releases/download/v3.2.9/nuclei_3.2.9_linux_amd64.zip
+Resolving github.com (github.com)... 20.201.28.151
+Connecting to github.com (github.com)|20.201.28.151|:443... connected.
+HTTP request sent, awaiting response... 302 Found
+Location: https://release-assets.githubusercontent.com/github-production-release-asset/252813491/64a36799-b104-4c3b-9dc2-9484c3758367?sp=r&sv=2018-11-09&sr=b&spr=https&se=2025-08-26T19%3A14%3A03Z&rscd=attachment%3B+filename%3Dnuclei_3.2.9_linux_amd64.zip&rsct=application%2Foctet-stream&skoid=96c2d410-5711-43a1-aedd-ab1947aa7ab0&sktid=398a6654-997b-47e9-b12b-9515b896b4de&skt=2025-08-26T18%3A13%3A51Z&ske=2025-08-26T19%3A14%3A03Z&sks=b&skv=2018-11-09&sig=o6RH%2Fqn2sGEpY5HbghQHDkINTIINp9JwuZQOe8ffhc8%3D&jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmVsZWFzZS1hc3NldHMuZ2l0aHVidXNlcmNvbnRlbnQuY29tIiwia2V5Ijoia2V5MSIsImV4cCI6MTc1NjIzMzIzMSwibmJmIjoxNzU2MjMyOTMxLCJwYXRoIjoicmVsZWFzZWFzc2V0cHJvZHVjdGlvbi5ibG9iLmNvcmUud2luZG93cy5uZXQifQ.yhNfGhtnKoAPN-W9__cs0wIrCpkxL8ZhHEStg6LQ3h0&response-content-disposition=attachment%3B%20filename%3Dnuclei_3.2.9_linux_amd64.zip&response-content-type=application%2Foctet-stream [following]
+--2025-08-26 15:28:51--  https://release-assets.githubusercontent.com/github-production-release-asset/252813491/64a36799-b104-4c3b-9dc2-9484c3758367?sp=r&sv=2018-11-09&sr=b&spr=https&se=2025-08-26T19%3A14%3A03Z&rscd=attachment%3B+filename%3Dnuclei_3.2.9_linux_amd64.zip&rsct=application%2Foctet-stream&skoid=96c2d410-5711-43a1-aedd-ab1947aa7ab0&sktid=398a6654-997b-47e9-b12b-9515b896b4de&skt=2025-08-26T18%3A13%3A51Z&ske=2025-08-26T19%3A14%3A03Z&sks=b&skv=2018-11-09&sig=o6RH%2Fqn2sGEpY5HbghQHDkINTIINp9JwuZQOe8ffhc8%3D&jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmVsZWFzZS1hc3NldHMuZ2l0aHVidXNlcmNvbnRlbnQuY29tIiwia2V5Ijoia2V5MSIsImV4cCI6MTc1NjIzMzIzMSwibmJmIjoxNzU2MjMyOTMxLCJwYXRoIjoicmVsZWFzZWFzc2V0cHJvZHVjdGlvbi5ibG9iLmNvcmUud2luZG93cy5uZXQifQ.yhNfGhtnKoAPN-W9__cs0wIrCpkxL8ZhHEStg6LQ3h0&response-content-disposition=attachment%3B%20filename%3Dnuclei_3.2.9_linux_amd64.zip&response-content-type=application%2Foctet-stream
+Resolving release-assets.githubusercontent.com (release-assets.githubusercontent.com)... 185.199.110.133, 185.199.111.133, 185.199.108.133, ...
+Connecting to release-assets.githubusercontent.com (release-assets.githubusercontent.com)|185.199.110.133|:443... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 26820554 (26M) [application/octet-stream]
+Saving to: ‘nuclei_3.2.9_linux_amd64.zip’
+
+nuclei_3.2.9_linux_amd64.zip                         100%[======================================================================================================================>]  25.58M  18.6MB/s    in 1.4s
+
+2025-08-26 15:28:53 (18.6 MB/s) - ‘nuclei_3.2.9_linux_amd64.zip’ saved [26820554/26820554]
+
+Archive:  nuclei_3.2.9_linux_amd64.zip
+  inflating: LICENSE.md
+  inflating: README.md
+  inflating: README_CN.md
+  inflating: README_ES.md
+  inflating: README_ID.md
+  inflating: README_JP.md
+  inflating: README_KR.md
+  inflating: nuclei
+[2025-08-26 15:28:53] Nuclei instalado com sucesso
+[2025-08-26 15:28:53] Instalando wscat via npm...
+
+added 9 packages in 2s
+[2025-08-26 15:28:56] Verificando ferramentas instaladas...
+Nmap version 7.94SVN ( https://nmap.org )
+[INF] Nuclei Engine Version: v3.2.9
+[INF] Nuclei Config Directory: /root/.config/nuclei
+[INF] Nuclei Cache Directory: /root/.cache/nuclei
+[INF] PDCP Directory: /root/.pdcp
+[2025-08-26 15:28:56] Masscan não instalado
+[2025-08-26 15:28:56] wscat instalado
+[INF] Nuclei Engine Version: v3.2.9
+[INF] Nuclei Config Directory: /root/.config/nuclei
+[INF] Nuclei Cache Directory: /root/.cache/nuclei
+[INF] PDCP Directory: /root/.pdcp
+bash: line 242: masscan: command not found
+
+                     __     _
+   ____  __  _______/ /__  (_)
+  / __ \/ / / / ___/ / _ \/ /
+ / / / / /_/ / /__/ /  __/ /
+/_/ /_/\__,_/\___/_/\___/_/   v3.2.9
+
+                projectdiscovery.io
+
+[INF] nuclei-templates are not installed, installing...
+[INF] Successfully installed nuclei-templates at /home/samureye/nuclei-templates
+[INF] No new updates found for nuclei templates
+[2025-08-26 15:29:03] 📁 Configurando código da aplicação...
+[2025-08-26 15:29:03] Diretório da aplicação criado. Código será copiado posteriormente.
+[2025-08-26 15:29:03] ⚙️ Configurando variáveis de ambiente...
+[2025-08-26 15:29:03] ⚡ Configurando systemd service...
+Created symlink /etc/systemd/system/multi-user.target.wants/samureye-app.service → /etc/systemd/system/samureye-app.service.
+[2025-08-26 15:29:04] Systemd service configurado e habilitado
+[2025-08-26 15:29:04] 📦 Configurando aplicação SamurEye...
+[2025-08-26 15:29:04] Nota: dependências serão instaladas após clonagem do código fonte
+[2025-08-26 15:29:04] 📊 Criando scripts de monitoramento...
+[2025-08-26 15:29:04] ⚙️ Finalizando instalação...
+[2025-08-26 15:29:04] Systemd service configurado
+[2025-08-26 15:29:04] 📝 Configurando logrotate...
+[2025-08-26 15:29:04] ⏰ Configurando cron jobs...
+[2025-08-26 15:29:04] 🛡️ Configurando Fail2Ban...
+Synchronizing state of fail2ban.service with SysV service script with /usr/lib/systemd/systemd-sysv-install.
+Executing: /usr/lib/systemd/systemd-sysv-install enable fail2ban
+[2025-08-26 15:29:04] 📋 Criando arquivo de credenciais...
+[2025-08-26 15:29:04] ✅ Instalação do vlxsam02 concluída com sucesso!
+
+📋 PRÓXIMOS PASSOS:
+==================
+
+1. Configurar variáveis de ambiente:
+   sudo nano /etc/samureye/.env
+
+2. Copiar código da aplicação:
+   git clone https://github.com/GruppenIT/SamurEye.git /opt/samureye/SamurEye
+   chown -R samureye:samureye /opt/samureye/SamurEye
+
+3. Instalar dependências da aplicação:
+   cd /opt/samureye/SamurEye
+   sudo -u samureye /opt/samureye/scripts/install-dependencies.sh
+
+4. Executar migrações do banco:
+   sudo -u samureye npm run db:push
+
+5. Iniciar aplicação:
+   systemctl start samureye-app
+   systemctl status samureye-app
+
+6. Verificar instalação:
+   /opt/samureye/scripts/health-check.sh
+   /opt/samureye/scripts/test-connectivity.sh
+
+🎯 CREDENCIAIS:
+   Usuário: samureye
+   Senha: SamurEye2024!
+   Detalhes: /opt/samureye/CREDENTIALS.txt
+
+🌐 ENDPOINTS LOCAIS:
+   App Unificado: http://localhost:5000
+   API: http://localhost:5000/api
+   Health: http://localhost:5000/api/health
+
+⚠️  IMPORTANTE:
+   - Configure /etc/samureye/.env com dados reais
+   - Instale o código da aplicação
+   - Teste conectividade com vlxsam03 (database)
+
+[2025-08-26 15:29:04] 🔍 Executando validação final da instalação...
+
+=== RELATÓRIO DE VALIDAÇÃO ===
+
+🔧 Comandos e Ferramentas:
+[2025-08-26 15:29:04] ✅ Node.js: OK
+[2025-08-26 15:29:04] ✅ NPM: OK
+[2025-08-26 15:29:04] ✅ TSX: OK
+[2025-08-26 15:29:04] ✅ Git: OK
+[2025-08-26 15:29:04] ✅ PostgreSQL Client: OK
+[2025-08-26 15:29:04] ✅ Redis Client: OK
+[2025-08-26 15:29:04] ✅ Nmap: OK
+[2025-08-26 15:29:04] ✅ Nuclei: OK
+[2025-08-26 15:29:04] ❌ Masscan: NÃO ENCONTRADO
+root@vlxsam02:~# sudo nano /etc/samureye/.env
+root@vlxsam02:~# ls -l /opt/samureye/SamurEye
+total 0
+root@vlxsam02:~# ls -l /opt/samureye/scripts/install-dependencies.sh
+-rwxr-xr-x 1 samureye samureye 959 Aug 26 15:29 /opt/samureye/scripts/install-dependencies.sh
+root@vlxsam02:~# git clone https://github.com/GruppenIT/SamurEye.git /opt/samureye/SamurEye
+Cloning into '/opt/samureye/SamurEye'...
+remote: Enumerating objects: 1042, done.
+remote: Counting objects: 100% (8/8), done.
+remote: Compressing objects: 100% (7/7), done.
+remote: Total 1042 (delta 0), reused 3 (delta 0), pack-reused 1034 (from 1)
+Receiving objects: 100% (1042/1042), 857.59 KiB | 6.17 MiB/s, done.
+Resolving deltas: 100% (674/674), done.
+root@vlxsam02:~# chown -R samureye:samureye /opt/samureye/SamurEye
+root@vlxsam02:~# cd /opt/samureye/SamurEye
+root@vlxsam02:/opt/samureye/SamurEye# sudo -u samureye /opt/samureye/scripts/install-dependencies.sh
+[15:30:35] 📦 Instalando dependências Node.js...
+npm warn using --force Recommended protections disabled.
+[15:30:36] Executando npm install...
+npm warn deprecated node-domexception@1.0.0: Use your platform's native DOMException instead
+npm warn deprecated @esbuild-kit/esm-loader@2.6.5: Merged into tsx: https://tsx.is
+npm warn deprecated @esbuild-kit/core-utils@3.3.2: Merged into tsx: https://tsx.is
+
+added 644 packages, and audited 645 packages in 1m
+
+90 packages are looking for funding
+  run `npm fund` for details
+
+5 moderate severity vulnerabilities
+
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+
+Run `npm audit` for details.
+[15:31:59] Verificando TypeScript...
+[15:31:59] ✅ TypeScript funciona
+[15:31:59] ✅ Dependências instaladas com sucesso!
+[15:31:59] Execute 'npm run dev' para iniciar a aplicação
+root@vlxsam02:/opt/samureye/SamurEye# sudo -u samureye npm run db:push
+
+> rest-express@1.0.0 db:push
+> drizzle-kit push
+
+No config path provided, using default 'drizzle.config.ts'
+Reading config file '/opt/samureye/SamurEye/drizzle.config.ts'
+DATABASE_URL, ensure the database is provisioned
+root@vlxsam02:/opt/samureye/SamurEye# sudo nano /etc/samureye/.env
+root@vlxsam02:/opt/samureye/SamurEye# systemctl start samureye-app
+root@vlxsam02:/opt/samureye/SamurEye# systemctl status samureye-app
+● samureye-app.service - SamurEye Application (React 18 + Vite + Node.js)
+     Loaded: loaded (/etc/systemd/system/samureye-app.service; enabled; preset: enabled)
+     Active: activating (auto-restart) (Result: exit-code) since Tue 2025-08-26 15:32:52 -03; 5s ago
+    Process: 68017 ExecStart=/usr/bin/npm run dev (code=exited, status=127)
+   Main PID: 68017 (code=exited, status=127)
+        CPU: 338ms
+root@vlxsam02:/opt/samureye/SamurEye# /opt/samureye/scripts/health-check.sh
+=== SAMUREYE APPLICATION HEALTH CHECK ===
+Data: Tue Aug 26 03:33:09 PM -03 2025
+Servidor: vlxsam02 (172.24.1.152)
+
+⚡ SYSTEMD SERVICES:
+❌ samureye-app: activating
+
+🌐 ENDPOINTS:
+❌ App (5000): Não responde
+❌ System API (5000): Não responde
+
+🗄️ DATABASE CONNECTIVITY:
+✅ PostgreSQL (vlxsam03:5432): Acessível
+✅ Redis (vlxsam03:6379): Acessível
+
+🔧 SECURITY TOOLS:
+✅ Nmap: Nmap version 7.94SVN ( https://nmap.org )
+✅ Nuclei:
+
+💻 RECURSOS:
+CPU: 0.0%
+Memória: 8.0%
+Disco: 10%
+
+📝 LOGS RECENTES (últimas 5 linhas):
+❌ Log da aplicação não encontrado
+
+=== FIM DO HEALTH CHECK ===
+root@vlxsam02:/opt/samureye/SamurEye# /opt/samureye/scripts/test-connectivity.sh
+=== TESTE DE CONECTIVIDADE VLXSAM03 ===
+Data: Tue Aug 26 03:33:18 PM -03 2025
+
+🔗 Testando PostgreSQL (172.24.1.153:5432)... ✅ Conectado
+🔗 Testando Redis (172.24.1.153:6379)... ✅ Conectado
+🔗 Testando MinIO (172.24.1.153:9000)... ✅ Conectado
+
+🌐 Testando Gateway (vlxsam01):
+🔗 Testando HTTP (172.24.1.151:80)... ✅ Conectado
+🔗 Testando HTTPS (172.24.1.151:443)... ✅ Conectado
+
+🗄️ Teste PostgreSQL avançado:
+❌ Falha na autenticação PostgreSQL
+
+🔍 Teste DNS:
+✅ Resolução DNS: OK
+
+
+🌐 Informações de rede local:
+IP do servidor: 172.24.1.152
+Gateway: 172.24.1.254
+DNS: 127.0.0.53
+
+=== FIM DO TESTE ===
+root@vlxsam02:/opt/samureye/SamurEye#

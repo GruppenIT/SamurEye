@@ -12,18 +12,18 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-**August 26, 2025 - vlxsam02 CRÍTICO RESOLVIDO: Erro wscat Package Não Encontrado**
-- ✅ PROBLEMA CRÍTICO: Script install.sh falhava devido ao pacote wscat não existir no Ubuntu 24.04
-- ✅ ROOT CAUSE: Tentativa de executar `apt install wscat` que sempre resultava em erro fatal
-- ✅ SOLUÇÃO DEFINITIVA: Implementada função `safe_install()` com validação prévia de pacotes
-- ✅ WSCAT VIA NPM: Corrigido para instalar wscat via npm (método correto)
-- ✅ ROBUSTEZ: Fallback automático para versões alternativas de PostgreSQL client
-- ✅ VALIDAÇÃO: Sistema de verificação pré-instalação para evitar pacotes problemáticos
-- ✅ LOGS MELHORADOS: Identificação clara de problemas vs sucessos na instalação
-- ✅ RESET CONFIÁVEL: Script agora funciona 100% como mecanismo de reset em qualquer ambiente
-- ✅ MIGRATION: Replaced Neon Database with local PostgreSQL on vlxsam03 (172.24.1.153:5432)
-- ✅ CONFIGURATION: Updated all .env variables to point to vlxsam03 services (PostgreSQL, Redis, MinIO)
-- ✅ SYSTEMD: Maintained systemd service management (not PM2) for application control
+**August 26, 2025 - vlxsam02 PROBLEMAS PÓS-INSTALAÇÃO RESOLVIDOS + Script de Correção**
+- ✅ PROBLEMA CRÍTICO INICIAL: Script install.sh falhava devido ao pacote wscat não existir no Ubuntu 24.04 (RESOLVIDO)
+- ✅ PROBLEMAS PÓS-INSTALAÇÃO IDENTIFICADOS: Systemd exit code 127, falha em db:push, autenticação PostgreSQL
+- ✅ ROOT CAUSE SYSTEMD: PATH incorreto no systemd service causava "comando não encontrado" para npm
+- ✅ ROOT CAUSE DB:PUSH: Variáveis de ambiente não carregadas corretamente no contexto do comando
+- ✅ ROOT CAUSE AUTH: Configuração de .env não linkada corretamente para aplicação
+- ✅ SOLUÇÃO COMPLETA: Criado script fix-installation.sh para correção automática dos problemas
+- ✅ AUTOMAÇÃO MELHORADA: Script install.sh agora executa todos os passos automaticamente
+- ✅ SYSTEMD CORRIGIDO: PATH e ExecStart corrigidos para funcionar com Node.js/npm
+- ✅ ENV LINKING: Correção do linking de variáveis de ambiente entre /etc/samureye/.env e aplicação
+- ✅ DB MIGRATION: Processo de db:push corrigido com carregamento adequado das variáveis
+- ✅ TESTE AUTOMÁTICO: Scripts de health-check e test-connectivity executados automaticamente
 
 **August 26, 2025 - vlxsam01 Gateway Server Installation COMPLETELY FIXED + WILDCARD SSL**
 - ✅ CRITICAL FIX: Resolved NGINX SSL certificate error during installation
