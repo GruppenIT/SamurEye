@@ -188,33 +188,28 @@ log "Redis configurado e iniciado"
 
 log "🐘 Instalando PostgreSQL 16..."
 
-# Instalar PostgreSQL 16
-apt install -y postgresql-16 postgresql-contrib
-
-# Iniciar e habilitar PostgreSQL
-systemctl start postgresql
-systemctl enable postgresql
-sleep 3
-
-# Verificar se PostgreSQL iniciou corretamente OU tem problemas de cluster
-cluster_status_check() {
-    # Verificar se há erro de data directory
+# Verificar status do cluster ANTES de tentar instalar/iniciar
+cluster_has_issues() {
+    # Verificar se há erro de data directory no status
     if systemctl status postgresql 2>&1 | grep -q "Invalid data directory"; then
-        return 1
+        return 0
     fi
     
-    # Verificar se consegue conectar como postgres user
-    if ! sudo -u postgres psql -c "SELECT version();" >/dev/null 2>&1; then
-        return 1
+    # Verificar se consegue conectar como postgres user (se o serviço está ativo)
+    if systemctl is-active --quiet postgresql; then
+        if ! sudo -u postgres psql -c "SELECT version();" >/dev/null 2>&1; then
+            return 0
+        fi
     fi
     
-    return 0
+    return 1
 }
 
-if ! systemctl is-active --quiet postgresql || ! cluster_status_check; then
-    warn "⚠️ Detectados problemas no cluster PostgreSQL - executando reset completo..."
+# Verificar se já existe cluster com problemas ANTES de instalar
+if cluster_has_issues; then
+    warn "⚠️ Detectado cluster PostgreSQL corrompido - executando limpeza prévia..."
     
-    # Limpeza completa em caso de problemas
+    # Limpeza completa ANTES da instalação
     systemctl stop postgresql 2>/dev/null || true
     systemctl disable postgresql 2>/dev/null || true
     
@@ -227,24 +222,48 @@ if ! systemctl is-active --quiet postgresql || ! cluster_status_check; then
     userdel postgres 2>/dev/null || true
     groupdel postgres 2>/dev/null || true
     
-    log "🔄 Executando reinstalação limpa do PostgreSQL..."
+    log "🔄 Cluster corrompido removido - prosseguindo com instalação limpa..."
+fi
+
+# Instalar PostgreSQL 16 (agora com ambiente limpo)
+apt install -y postgresql-16 postgresql-contrib
+
+# Iniciar e habilitar PostgreSQL
+systemctl start postgresql
+systemctl enable postgresql
+sleep 5
+
+# Verificar se PostgreSQL iniciou corretamente
+if ! systemctl is-active --quiet postgresql; then
+    error "❌ Falha ao iniciar PostgreSQL após instalação"
+fi
+
+# Verificar se consegue conectar - se falhar, executar reset completo
+if ! sudo -u postgres psql -c "SELECT version();" >/dev/null 2>&1; then
+    warn "⚠️ Falha de conexão - executando reset emergencial..."
     
-    # Reinstalação completamente limpa
+    # Reset emergencial
+    systemctl stop postgresql 2>/dev/null || true
+    apt-get purge postgresql-16 postgresql-common postgresql-client-16 postgresql-client-common -y
+    apt-get autoremove --purge -y
+    rm -rf /var/lib/postgresql/ /etc/postgresql/ /var/log/postgresql/ /run/postgresql/
+    userdel postgres 2>/dev/null || true
+    groupdel postgres 2>/dev/null || true
+    
+    # Reinstalar
     apt-get update
     apt-get install -y postgresql-16 postgresql-contrib
-    
-    # Iniciar PostgreSQL
     systemctl start postgresql
     systemctl enable postgresql
     sleep 5
     
-    # Verificar novamente se funcionou
-    if ! systemctl is-active --quiet postgresql; then
+    # Verificar novamente
+    if ! systemctl is-active --quiet postgresql || ! sudo -u postgres psql -c "SELECT version();" >/dev/null 2>&1; then
         error "❌ Falha crítica na reinstalação PostgreSQL"
     fi
-    
-    log "✅ PostgreSQL reinstalado com sucesso"
 fi
+
+log "✅ PostgreSQL configurado e iniciado com sucesso"
 
 # Criar usuário samureye e banco de dados (com reset automático)
 log "🗄️ Configurando usuário e banco de dados..."
