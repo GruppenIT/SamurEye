@@ -276,7 +276,7 @@ export type User = typeof users.$inferSelect;
 
 export type Tenant = typeof tenants.$inferSelect;
 export type InsertTenant = typeof tenants.$inferInsert;
-export const insertTenantSchema = createInsertSchema(tenants).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertTenantSchema = createInsertSchema(tenants).omit({ id: true, slug: true, createdAt: true, updatedAt: true });
 
 export type SystemSettings = typeof systemSettings.$inferSelect;
 export type InsertSystemSettings = typeof systemSettings.$inferInsert;

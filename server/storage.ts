@@ -46,7 +46,7 @@ export interface IStorage {
   getTenant(id: string): Promise<Tenant | undefined>;
   getAllTenants(): Promise<Tenant[]>;
   getUserTenants(userId: string): Promise<(TenantUser & { tenant: Tenant })[]>;
-  createTenant(tenant: InsertTenant): Promise<Tenant>;
+  createTenant(tenant: Omit<InsertTenant, 'slug'>): Promise<Tenant>;
   updateTenant(id: string, updates: Partial<Tenant>): Promise<void>;
   addUserToTenant(userId: string, tenantId: string, role: string): Promise<TenantUser>;
   removeAllUserTenants(userId: string): Promise<void>;
@@ -129,7 +129,6 @@ export class DatabaseStorage implements IStorage {
     // Create default tenant for new user
     const defaultTenant = await this.createTenant({
       name: `${userData.firstName || userData.email || 'User'}'s Organization`,
-      slug: `org-${user.id.slice(0, 8)}`,
       description: 'Default organization'
     });
     
@@ -166,8 +165,21 @@ export class DatabaseStorage implements IStorage {
       .where(eq(tenantUsers.userId, userId));
   }
 
-  async createTenant(tenant: InsertTenant): Promise<Tenant> {
-    const [newTenant] = await db.insert(tenants).values(tenant).returning();
+  async createTenant(tenant: Omit<InsertTenant, 'slug'>): Promise<Tenant> {
+    // Generate slug from name
+    const slug = tenant.name
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
+      .replace(/\s+/g, '-') // Replace spaces with hyphens
+      .replace(/-+/g, '-') // Replace multiple hyphens with single
+      .trim();
+    
+    const tenantWithSlug = {
+      ...tenant,
+      slug: slug
+    };
+    
+    const [newTenant] = await db.insert(tenants).values(tenantWithSlug).returning();
     return newTenant;
   }
 
