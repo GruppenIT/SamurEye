@@ -1,0 +1,57 @@
+-rw-rw-r-- 1 samureye samureye 244 Aug 27 10:20 health-check.log
+root@vlxsam02:/var/log/samureye# journalctl -u samureye-app -f
+Aug 27 10:22:12 vlxsam02 samureye-app[332245]:       at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16) {
+Aug 27 10:22:12 vlxsam02 samureye-app[332245]:     errno: -111,
+Aug 27 10:22:12 vlxsam02 samureye-app[332245]:     code: 'ECONNREFUSED',
+Aug 27 10:22:12 vlxsam02 samureye-app[332245]:     syscall: 'connect',
+Aug 27 10:22:12 vlxsam02 samureye-app[332245]:     address: '172.24.1.153',
+Aug 27 10:22:12 vlxsam02 samureye-app[332245]:     port: 443
+Aug 27 10:22:12 vlxsam02 samureye-app[332245]:   },
+Aug 27 10:22:12 vlxsam02 samureye-app[332245]:   [Symbol(kMessage)]: 'connect ECONNREFUSED 172.24.1.153:443'
+Aug 27 10:22:12 vlxsam02 samureye-app[332245]: }
+Aug 27 10:22:12 vlxsam02 samureye-app[332245]: 10:22:12 AM [express] POST /api/admin/tenants 500 in 3ms :: {"message":"Failed to create tenant"}
+Aug 27 10:23:02 vlxsam02 samureye-app[332245]: Error creating tenant: ErrorEvent {
+Aug 27 10:23:02 vlxsam02 samureye-app[332245]:   [Symbol(kTarget)]: WebSocket {
+Aug 27 10:23:02 vlxsam02 samureye-app[332245]:     _events: [Object: null prototype] {
+Aug 27 10:23:02 vlxsam02 samureye-app[332245]:       error: [Function],
+Aug 27 10:23:02 vlxsam02 samureye-app[332245]:       message: [Function],
+Aug 27 10:23:02 vlxsam02 samureye-app[332245]:       close: [Function],
+Aug 27 10:23:02 vlxsam02 samureye-app[332245]:       open: [Function]
+Aug 27 10:23:02 vlxsam02 samureye-app[332245]:     },
+Aug 27 10:23:02 vlxsam02 samureye-app[332245]:     _eventsCount: 4,
+Aug 27 10:23:02 vlxsam02 samureye-app[332245]:     _maxListeners: undefined,
+Aug 27 10:23:02 vlxsam02 samureye-app[332245]:     _binaryType: 'arraybuffer',
+Aug 27 10:23:02 vlxsam02 samureye-app[332245]:     _closeCode: 1006,
+Aug 27 10:23:02 vlxsam02 samureye-app[332245]:     _closeFrameReceived: false,
+Aug 27 10:23:02 vlxsam02 samureye-app[332245]:     _closeFrameSent: false,
+Aug 27 10:23:02 vlxsam02 samureye-app[332245]:     _closeMessage: <Buffer >,
+Aug 27 10:23:02 vlxsam02 samureye-app[332245]:     _closeTimer: null,
+Aug 27 10:23:02 vlxsam02 samureye-app[332245]:     _errorEmitted: true,
+Aug 27 10:23:02 vlxsam02 samureye-app[332245]:     _extensions: {},
+Aug 27 10:23:02 vlxsam02 samureye-app[332245]:     _paused: false,
+Aug 27 10:23:02 vlxsam02 samureye-app[332245]:     _protocol: '',
+Aug 27 10:23:02 vlxsam02 samureye-app[332245]:     _readyState: 3,
+Aug 27 10:23:02 vlxsam02 samureye-app[332245]:     _receiver: null,
+Aug 27 10:23:02 vlxsam02 samureye-app[332245]:     _sender: null,
+Aug 27 10:23:02 vlxsam02 samureye-app[332245]:     _socket: null,
+Aug 27 10:23:02 vlxsam02 samureye-app[332245]:     _bufferedAmount: 0,
+Aug 27 10:23:02 vlxsam02 samureye-app[332245]:     _isServer: false,
+Aug 27 10:23:02 vlxsam02 samureye-app[332245]:     _redirects: 0,
+Aug 27 10:23:02 vlxsam02 samureye-app[332245]:     _autoPong: true,
+Aug 27 10:23:02 vlxsam02 samureye-app[332245]:     _url: 'wss://172.24.1.153/v2',
+Aug 27 10:23:02 vlxsam02 samureye-app[332245]:     _req: null,
+Aug 27 10:23:02 vlxsam02 samureye-app[332245]:     [Symbol(shapeMode)]: false,
+Aug 27 10:23:02 vlxsam02 samureye-app[332245]:     [Symbol(kCapture)]: false
+Aug 27 10:23:02 vlxsam02 samureye-app[332245]:   },
+Aug 27 10:23:02 vlxsam02 samureye-app[332245]:   [Symbol(kType)]: 'error',
+Aug 27 10:23:02 vlxsam02 samureye-app[332245]:   [Symbol(kError)]: Error: connect ECONNREFUSED 172.24.1.153:443
+Aug 27 10:23:02 vlxsam02 samureye-app[332245]:       at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16) {
+Aug 27 10:23:02 vlxsam02 samureye-app[332245]:     errno: -111,
+Aug 27 10:23:02 vlxsam02 samureye-app[332245]:     code: 'ECONNREFUSED',
+Aug 27 10:23:02 vlxsam02 samureye-app[332245]:     syscall: 'connect',
+Aug 27 10:23:02 vlxsam02 samureye-app[332245]:     address: '172.24.1.153',
+Aug 27 10:23:02 vlxsam02 samureye-app[332245]:     port: 443
+Aug 27 10:23:02 vlxsam02 samureye-app[332245]:   },
+Aug 27 10:23:02 vlxsam02 samureye-app[332245]:   [Symbol(kMessage)]: 'connect ECONNREFUSED 172.24.1.153:443'
+Aug 27 10:23:02 vlxsam02 samureye-app[332245]: }
+Aug 27 10:23:02 vlxsam02 samureye-app[332245]: 10:23:02 AM [express] POST /api/admin/tenants 500 in 3ms :: {"message":"Failed to create tenant"}
