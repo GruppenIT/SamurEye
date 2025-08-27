@@ -1,0 +1,80 @@
+root@vlxsam02:/var/log/samureye# curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam02/test-pg-connection.sh | sudo bash
+=== Teste de Conectividade PostgreSQL vlxsam02 -> vlxsam03 ===
+📊 Testando com credenciais:
+   Host: 172.24.1.153:5432
+   Banco: samureye_prod
+   Usuário: samureye
+   Senha: [OMITIDA]
+
+ℹ️  TESTE 1: Conectividade de rede...
+✅ Porta PostgreSQL acessível
+ℹ️  TESTE 2: Autenticação PostgreSQL...
+✅ Conectividade PostgreSQL funcionando!
+
+ℹ️  Informações da conexão:
+ current_user | current_database |                                                               version
+ samureye     | samureye_prod    | PostgreSQL 16.9 (Ubuntu 16.9-0ubuntu0.24.04.1) on x86_64-pc-linux-gnu, compiled by gcc (Ubuntu 13.3.0-6ubuntu2~24.04) 13.3.0, 64-bit
+
+ℹ️  TESTE 3: Verificando permissões...
+✅ Permissões de escrita funcionando
+ℹ️  TESTE 4: Verificando configuração local...
+✅ Arquivo .env encontrado: /etc/samureye/.env
+✅ DATABASE_URL configurada corretamente
+ℹ️  DATABASE_URL: postgresql://samureye:SamurEye2024!@172.24.1.153:5432/samureye_prod
+✅ URL aponta para o servidor correto
+ℹ️  TESTE 5: Verificando aplicação SamurEye...
+✅ Serviço samureye-app ativo
+⚠️  Endpoint retorna 401 - problema de autenticação da aplicação
+
+ℹ️  RESUMO DAS RECOMENDAÇÕES:
+
+ℹ️  Para corrigir problemas PostgreSQL (mais comum):
+   # No vlxsam03:
+   curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam03/fix-pg-user.sh | sudo bash
+
+ℹ️  Para diagnóstico completo:
+   # No vlxsam02:
+   curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam02/diagnose-pg-connection.sh | sudo bash
+
+ℹ️  Teste concluído
+root@vlxsam02:/var/log/samureye# curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam02/diagnose-pg-connection.sh | sudo bash
+=== Diagnóstico de Conectividade PostgreSQL vlxsam02 -> vlxsam03 ===
+🚀 Iniciando diagnóstico de conectividade PostgreSQL
+📅 Wed Aug 27 11:03:22 AM -03 2025
+🖥️  vlxsam02 -> vlxsam03 (172.24.1.153:5432)
+
+🌐 TESTE 1: Conectividade de Rede
+================================
+✅ Ping para vlxsam03 (172.24.1.153) funcionando
+✅ Porta PostgreSQL (5432) acessível
+
+🐘 TESTE 2: Conectividade PostgreSQL
+===================================
+ℹ️  Testando conexão PostgreSQL com psql...
+✅ Conexão PostgreSQL funcionando
+
+🔧 TESTE 3: Variáveis de Ambiente
+================================
+✅ Arquivo .env encontrado
+✅ DATABASE_URL configurada
+ℹ️  DATABASE_URL: postgresql://samureye:SamurEye2024!@172.24.1.153:5432/samureye_prod
+✅ DATABASE_URL aponta para vlxsam03
+
+🔧 TESTE 4: Status do Serviço SamurEye
+=====================================
+✅ Serviço samureye-app ativo
+ℹ️  Últimos logs do serviço:
+✅ Nenhum erro recente nos logs
+
+🌐 TESTE 5: Conectividade HTTP da Aplicação
+===========================================
+✅ Endpoint /api/health respondendo
+⚠️  Endpoint /api/admin/stats retornou código: 401
+
+📊 RESUMO DOS TESTES
+===================
+Testes aprovados: 5/5
+✅ Todos os testes passaram - sistema funcionando!
+
+ℹ️  Diagnóstico concluído
+root@vlxsam02:/var/log/samureye#
