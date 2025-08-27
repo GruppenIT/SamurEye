@@ -8,7 +8,6 @@
 set -euo pipefail
 
 # Variáveis globais
-readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly LOG_FILE="/var/log/samureye-install.log"
 readonly WORKING_DIR="/opt/samureye/SamurEye"
 readonly ETC_DIR="/etc/samureye"
@@ -85,7 +84,7 @@ fi
 log "📥 Baixando aplicação SamurEye..."
 mkdir -p /opt/samureye
 cd /opt/samureye
-git clone https://github.com/GruppenIT/SamurEye.git .
+git clone https://github.com/GruppenIT/SamurEye.git SamurEye
 chown -R $SERVICE_USER:$SERVICE_USER /opt/samureye
 
 # 7. Instalar dependências
