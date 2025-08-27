@@ -257,61 +257,112 @@ EOF
 
 # Configuração HTTPS final (será aplicada após obter certificados)
 cat > /etc/nginx/sites-available/samureye << 'EOF'
-# SamurEye - Configuração NGINX Gateway
+# SamurEye - Configuração NGINX Gateway (ATUALIZADA - 27/08/2025)
 # Domínio: *.samureye.com.br
 # Servidor: vlxsam01 (172.24.1.151)
+# CORREÇÃO: Resolvido problema de página em branco no HTTPS
 
-# Redirecionamento HTTP para HTTPS
+# Rate limiting
+limit_req_zone $binary_remote_addr zone=api:10m rate=10r/s;
+limit_req_zone $binary_remote_addr zone=app:10m rate=30r/s;
+
+# Upstream backend
+upstream samureye_backend {
+    server 172.24.1.152:5000 max_fails=3 fail_timeout=30s;
+    keepalive 32;
+}
+
+# HTTP -> HTTPS redirect
 server {
     listen 80;
     listen [::]:80;
-    server_name samureye.com.br *.samureye.com.br;
+    server_name app.samureye.com.br api.samureye.com.br ca.samureye.com.br;
     
-    # Permitir validação Let's Encrypt
+    # Let's Encrypt ACME challenge
     location /.well-known/acme-challenge/ {
         root /var/www/html;
-        allow all;
     }
     
-    # Redirecionamento permanente para HTTPS (exceto acme-challenge)
+    # Redirect everything else to HTTPS
     location / {
         return 301 https://$server_name$request_uri;
     }
 }
 
-# Configuração HTTPS principal
+# HTTPS - Aplicação Principal
 server {
     listen 443 ssl http2;
     listen [::]:443 ssl http2;
     server_name app.samureye.com.br;
-
-    # Certificados SSL
-    ssl_certificate /etc/letsencrypt/live/samureye.com.br/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/samureye.com.br/privkey.pem;
     
     # SSL Configuration
+    ssl_certificate /etc/letsencrypt/live/app.samureye.com.br/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/app.samureye.com.br/privkey.pem;
+    ssl_trusted_certificate /etc/letsencrypt/live/app.samureye.com.br/chain.pem;
+    
+    # SSL Security
     ssl_protocols TLSv1.2 TLSv1.3;
     ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384;
     ssl_prefer_server_ciphers off;
     ssl_session_cache shared:SSL:10m;
-    ssl_session_timeout 10m;
-    ssl_stapling on;
-    ssl_stapling_verify on;
+    ssl_session_timeout 1d;
+    ssl_session_tickets off;
     
     # HSTS
-    add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" always;
-
-    # Logs específicos
-    access_log /var/log/nginx/samureye-access.log main;
-    error_log /var/log/nginx/samureye-error.log;
-
+    add_header Strict-Transport-Security "max-age=63072000" always;
+    
+    # Security Headers
+    add_header X-Frame-Options DENY always;
+    add_header X-Content-Type-Options nosniff always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    
+    # Timeouts
+    proxy_connect_timeout 60s;
+    proxy_send_timeout 60s;
+    proxy_read_timeout 60s;
+    
+    # Buffer sizes
+    proxy_buffering on;
+    proxy_buffer_size 128k;
+    proxy_buffers 4 256k;
+    proxy_busy_buffers_size 256k;
+    
     # Rate limiting
-    limit_req zone=general burst=20 nodelay;
-    limit_conn conn_limit_per_ip 20;
+    limit_req zone=app burst=50 nodelay;
+    
+    # Proxy headers
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header X-Forwarded-Host $host;
+    proxy_set_header X-Forwarded-Port $server_port;
 
-    # WebSocket upgrade
+    # WebSocket support
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
+    
+    # Main application
+    location / {
+        proxy_pass http://samureye_backend;
+        
+        # Error handling
+        proxy_next_upstream error timeout invalid_header http_500 http_502 http_503 http_504;
+        proxy_next_upstream_tries 3;
+        proxy_next_upstream_timeout 60s;
+    }
+    
+    # API routes
+    location /api/ {
+        limit_req zone=api burst=20 nodelay;
+        proxy_pass http://samureye_backend;
+    }
+    
+    # WebSocket
     location /ws {
-        proxy_pass http://samureye_ws;
+        proxy_pass http://samureye_backend;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection "upgrade";
@@ -319,207 +370,84 @@ server {
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_read_timeout 86400;
-    }
-
-    # API endpoints com rate limiting específico
-    location /api/ {
-        limit_req zone=api burst=50 nodelay;
-        
-        proxy_pass http://samureye_app;
-        proxy_http_version 1.1;
-        proxy_set_header Connection "";
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        
-        # Timeouts
-        proxy_connect_timeout 60s;
-        proxy_send_timeout 60s;
-        proxy_read_timeout 60s;
-    }
-
-    # Admin endpoints com rate limiting especial
-    location /api/admin/login {
-        limit_req zone=admin_login burst=5 nodelay;
-        
-        proxy_pass http://samureye_app;
-        proxy_http_version 1.1;
-        proxy_set_header Connection "";
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
     }
     
-    location /api/admin/ {
-        limit_req zone=admin burst=20 nodelay;
-        
-        proxy_pass http://samureye_app;
-        proxy_http_version 1.1;
-        proxy_set_header Connection "";
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
+    # Static assets caching
+    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {
+        proxy_pass http://samureye_backend;
+        expires 1y;
+        add_header Cache-Control "public, immutable";
     }
     
-    # Dashboard endpoints com rate limiting específico
-    location /api/dashboard/ {
-        limit_req zone=dashboard burst=100 nodelay;
-        
-        proxy_pass http://samureye_app;
-        proxy_http_version 1.1;
-        proxy_set_header Connection "";
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-    
-    # Endpoints de autenticação Replit com rate limiting restritivo
-    location ~ ^/(auth|login|register) {
-        limit_req zone=auth burst=10 nodelay;
-        
-        proxy_pass http://samureye_app;
-        proxy_http_version 1.1;
-        proxy_set_header Connection "";
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-
-    # Object Storage endpoints
-    location /api/objects/upload {
-        limit_req zone=upload burst=5 nodelay;
-        client_max_body_size 100M;
-        
-        proxy_pass http://samureye_app;
-        proxy_http_version 1.1;
-        proxy_set_header Connection "";
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        
-        # Timeouts maiores para uploads
-        proxy_connect_timeout 300s;
-        proxy_send_timeout 300s;
-        proxy_read_timeout 300s;
-    }
-    
-    # Object Storage serving (public assets)
-    location /public-objects/ {
-        limit_req zone=object_storage burst=50 nodelay;
-        
-        proxy_pass http://samureye_app;
-        proxy_http_version 1.1;
-        proxy_set_header Connection "";
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        
-        # Cache para object storage
-        expires 1h;
-        add_header Cache-Control "public";
-    }
-    
-    # Protected object access
-    location /objects/ {
-        limit_req zone=upload burst=20 nodelay;
-        
-        proxy_pass http://samureye_app;
-        proxy_http_version 1.1;
-        proxy_set_header Connection "";
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-    
-    # Upload endpoints
-    location ~ ^/api/(upload|files) {
-        limit_req zone=upload burst=5 nodelay;
-        client_max_body_size 50M;
-        
-        proxy_pass http://samureye_app;
-        proxy_http_version 1.1;
-        proxy_set_header Connection "";
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        
-        # Timeouts maiores para uploads
-        proxy_connect_timeout 300s;
-        proxy_send_timeout 300s;
-        proxy_read_timeout 300s;
-    }
-
-    # Frontend (SPA)
-    location / {
-        proxy_pass http://samureye_app;
-        proxy_http_version 1.1;
-        proxy_set_header Connection "";
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        
-        # Cache para recursos estáticos
-        location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {
-            proxy_pass http://samureye_app;
-            proxy_http_version 1.1;
-            proxy_set_header Connection "";
-            expires 1M;
-            add_header Cache-Control "public, immutable";
-        }
-    }
-
     # Health check
-    location /nginx-health {
+    location /health {
         access_log off;
-        return 200 "healthy\n";
-        add_header Content-Type text/plain;
+        proxy_pass http://samureye_backend;
     }
 }
 
-# API subdomain
+# HTTPS - API
 server {
     listen 443 ssl http2;
     listen [::]:443 ssl http2;
     server_name api.samureye.com.br;
-
-    # Certificados SSL (mesmo wildcard)
-    ssl_certificate /etc/letsencrypt/live/samureye.com.br/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/samureye.com.br/privkey.pem;
     
-    # SSL Configuration (mesma do app)
+    # SSL Configuration
+    ssl_certificate /etc/letsencrypt/live/app.samureye.com.br/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/app.samureye.com.br/privkey.pem;
+    ssl_trusted_certificate /etc/letsencrypt/live/app.samureye.com.br/chain.pem;
+    
+    # SSL Security (same as app)
     ssl_protocols TLSv1.2 TLSv1.3;
     ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384;
     ssl_prefer_server_ciphers off;
     ssl_session_cache shared:SSL:10m;
-    ssl_session_timeout 10m;
+    ssl_session_timeout 1d;
+    ssl_session_tickets off;
     
-    # HSTS
-    add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" always;
-
-    # Logs específicos da API
-    access_log /var/log/nginx/api-access.log main;
-    error_log /var/log/nginx/api-error.log;
-
-    # Rate limiting para API
-    limit_req zone=api burst=100 nodelay;
-    limit_conn conn_limit_per_ip 50;
-
-    # Redirecionar tudo para /api/
+    # Headers
+    add_header Strict-Transport-Security "max-age=63072000" always;
+    add_header X-Frame-Options DENY always;
+    add_header X-Content-Type-Options nosniff always;
+    
+    # Rate limiting for API
+    limit_req zone=api burst=10 nodelay;
+    
+    # API only
     location / {
-        proxy_pass http://samureye_app/api$request_uri;
-        proxy_http_version 1.1;
-        proxy_set_header Connection "";
+        proxy_pass http://samureye_backend;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+
+# HTTPS - Certificate Authority
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name ca.samureye.com.br;
+    
+    # SSL Configuration
+    ssl_certificate /etc/letsencrypt/live/app.samureye.com.br/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/app.samureye.com.br/privkey.pem;
+    ssl_trusted_certificate /etc/letsencrypt/live/app.samureye.com.br/chain.pem;
+    
+    # SSL Security (same as app)
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384;
+    ssl_prefer_server_ciphers off;
+    ssl_session_cache shared:SSL:10m;
+    ssl_session_timeout 1d;
+    ssl_session_tickets off;
+    
+    # Headers
+    add_header Strict-Transport-Security "max-age=63072000" always;
+    
+    # CA endpoints (step-ca ou similar)
+    location / {
+        proxy_pass http://samureye_backend;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
