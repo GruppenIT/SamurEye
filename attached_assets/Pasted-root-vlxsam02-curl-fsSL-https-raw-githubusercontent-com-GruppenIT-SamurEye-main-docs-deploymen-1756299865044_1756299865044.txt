@@ -1,0 +1,114 @@
+root@vlxsam02:~# curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam02/install-quick-fix.sh | sudo bash
+🔧 CORREÇÃO RÁPIDA - DIRETÓRIO SAMUREYE
+=====================================
+[2025-08-27 10:03:58] 🎯 Recriando diretório /opt/samureye/SamurEye...
+[2025-08-27 10:03:58] 📁 Criando estrutura de diretórios...
+[2025-08-27 10:03:58] 🔐 Configurando permissões...
+[2025-08-27 10:03:58] 🔗 Criando links simbólicos...
+[2025-08-27 10:03:58] 📥 Baixando aplicação SamurEye...
+[2025-08-27 10:03:58] ℹ️ Aplicação já existe, atualizando...
+remote: Enumerating objects: 10, done.
+remote: Counting objects: 100% (10/10), done.
+remote: Compressing objects: 100% (2/2), done.
+remote: Total 6 (delta 3), reused 6 (delta 3), pack-reused 0 (from 0)
+Unpacking objects: 100% (6/6), 3.17 KiB | 3.17 MiB/s, done.
+From https://github.com/GruppenIT/SamurEye
+ * branch            main       -> FETCH_HEAD
+   0086a69..b69089d  main       -> origin/main
+Updating 0086a69..b69089d
+Fast-forward
+ docs/deployment/vlxsam02/install-quick-fix.sh | 249 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 249 insertions(+)
+ create mode 100644 docs/deployment/vlxsam02/install-quick-fix.sh
+[2025-08-27 10:03:59] 📦 Instalando dependências...
+
+up to date, audited 635 packages in 1s
+
+87 packages are looking for funding
+  run `npm fund` for details
+
+11 vulnerabilities (3 low, 8 moderate)
+
+To address issues that do not require attention, run:
+  npm audit fix
+
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+
+Run `npm audit` for details.
+✅ Dependências instaladas
+[2025-08-27 10:04:00] 🔧 Verificando server/index.ts...
+✅ server/index.ts configurado
+[2025-08-27 10:04:00] ⚙️ Configurando serviço systemd...
+[2025-08-27 10:04:00] 🚀 Ativando serviço...
+[2025-08-27 10:04:01] 🧪 Testando estrutura final...
+
+=== VERIFICAÇÃO FINAL ===
+✅ Diretório: /opt/samureye/SamurEye
+✅ Arquivo: package.json
+✅ Arquivo: .env (/etc/samureye/.env)
+✅ Arquivo: server/index.ts
+✅ Proprietário: samureye
+
+[2025-08-27 10:04:01] ✅ CORREÇÃO RÁPIDA CONCLUÍDA!
+[2025-08-27 10:04:01] 🎯 Diretório /opt/samureye/SamurEye recriado
+[2025-08-27 10:04:01] 📁 Estrutura de arquivos restaurada
+[2025-08-27 10:04:01] 🔧 Para iniciar: systemctl start samureye-app
+[2025-08-27 10:04:01] 📋 Para logs: journalctl -u samureye-app -f
+
+================== PRÓXIMOS PASSOS ==================
+1. systemctl start samureye-app    # Iniciar serviço
+2. systemctl status samureye-app   # Verificar status
+3. journalctl -u samureye-app -f   # Ver logs
+==================================================
+root@vlxsam02:~# systemctl start samureye-app
+root@vlxsam02:~# systemctl status samureye-app
+● samureye-app.service - SamurEye Application Server
+     Loaded: loaded (/etc/systemd/system/samureye-app.service; enabled; preset: enabled)
+     Active: activating (auto-restart) (Result: exit-code) since Wed 2025-08-27 10:04:27 -03; 3s ago
+    Process: 329738 ExecStart=/usr/bin/npm run dev (code=exited, status=1/FAILURE)
+   Main PID: 329738 (code=exited, status=1/FAILURE)
+        CPU: 2.010s
+root@vlxsam02:~# journalctl -u samureye-app -f
+Aug 27 10:04:27 vlxsam02 samureye-app[329761]:         ^
+Aug 27 10:04:27 vlxsam02 samureye-app[329761]: Error: Environment variable REPLIT_DOMAINS not provided
+Aug 27 10:04:27 vlxsam02 samureye-app[329761]:     at <anonymous> (/opt/samureye/SamurEye/server/replitAuth.ts:12:9)
+Aug 27 10:04:27 vlxsam02 samureye-app[329761]:     at ModuleJob.run (node:internal/modules/esm/module_job:263:25)
+Aug 27 10:04:27 vlxsam02 samureye-app[329761]:     at async ModuleLoader.import (node:internal/modules/esm/loader:540:24)
+Aug 27 10:04:27 vlxsam02 samureye-app[329761]:     at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+Aug 27 10:04:27 vlxsam02 samureye-app[329761]: Node.js v20.19.4
+Aug 27 10:04:27 vlxsam02 systemd[1]: samureye-app.service: Main process exited, code=exited, status=1/FAILURE
+Aug 27 10:04:27 vlxsam02 systemd[1]: samureye-app.service: Failed with result 'exit-code'.
+Aug 27 10:04:27 vlxsam02 systemd[1]: samureye-app.service: Consumed 2.010s CPU time.
+Aug 27 10:04:37 vlxsam02 systemd[1]: samureye-app.service: Scheduled restart job, restart counter is at 9.
+Aug 27 10:04:37 vlxsam02 systemd[1]: Started samureye-app.service - SamurEye Application Server.
+Aug 27 10:04:37 vlxsam02 samureye-app[329777]: > rest-express@1.0.0 dev
+Aug 27 10:04:37 vlxsam02 samureye-app[329777]: > NODE_ENV=development tsx server/index.ts
+Aug 27 10:04:39 vlxsam02 samureye-app[329800]: /opt/samureye/SamurEye/server/replitAuth.ts:12
+Aug 27 10:04:39 vlxsam02 samureye-app[329800]:   throw new Error("Environment variable REPLIT_DOMAINS not provided");
+Aug 27 10:04:39 vlxsam02 samureye-app[329800]:         ^
+Aug 27 10:04:39 vlxsam02 samureye-app[329800]: Error: Environment variable REPLIT_DOMAINS not provided
+Aug 27 10:04:39 vlxsam02 samureye-app[329800]:     at <anonymous> (/opt/samureye/SamurEye/server/replitAuth.ts:12:9)
+Aug 27 10:04:39 vlxsam02 samureye-app[329800]:     at ModuleJob.run (node:internal/modules/esm/module_job:263:25)
+Aug 27 10:04:39 vlxsam02 samureye-app[329800]:     at async ModuleLoader.import (node:internal/modules/esm/loader:540:24)
+Aug 27 10:04:39 vlxsam02 samureye-app[329800]:     at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+Aug 27 10:04:39 vlxsam02 samureye-app[329800]: Node.js v20.19.4
+Aug 27 10:04:39 vlxsam02 systemd[1]: samureye-app.service: Main process exited, code=exited, status=1/FAILURE
+Aug 27 10:04:39 vlxsam02 systemd[1]: samureye-app.service: Failed with result 'exit-code'.
+Aug 27 10:04:39 vlxsam02 systemd[1]: samureye-app.service: Consumed 2.552s CPU time.
+Aug 27 10:04:49 vlxsam02 systemd[1]: samureye-app.service: Scheduled restart job, restart counter is at 10.
+Aug 27 10:04:49 vlxsam02 systemd[1]: Started samureye-app.service - SamurEye Application Server.
+Aug 27 10:04:49 vlxsam02 samureye-app[329813]: > rest-express@1.0.0 dev
+Aug 27 10:04:49 vlxsam02 samureye-app[329813]: > NODE_ENV=development tsx server/index.ts
+Aug 27 10:04:50 vlxsam02 samureye-app[329836]: /opt/samureye/SamurEye/server/replitAuth.ts:12
+Aug 27 10:04:50 vlxsam02 samureye-app[329836]:   throw new Error("Environment variable REPLIT_DOMAINS not provided");
+Aug 27 10:04:50 vlxsam02 samureye-app[329836]:         ^
+Aug 27 10:04:50 vlxsam02 samureye-app[329836]: Error: Environment variable REPLIT_DOMAINS not provided
+Aug 27 10:04:50 vlxsam02 samureye-app[329836]:     at <anonymous> (/opt/samureye/SamurEye/server/replitAuth.ts:12:9)
+Aug 27 10:04:50 vlxsam02 samureye-app[329836]:     at ModuleJob.run (node:internal/modules/esm/module_job:263:25)
+Aug 27 10:04:50 vlxsam02 samureye-app[329836]:     at async ModuleLoader.import (node:internal/modules/esm/loader:540:24)
+Aug 27 10:04:50 vlxsam02 samureye-app[329836]:     at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+Aug 27 10:04:50 vlxsam02 samureye-app[329836]: Node.js v20.19.4
+Aug 27 10:04:50 vlxsam02 systemd[1]: samureye-app.service: Main process exited, code=exited, status=1/FAILURE
+Aug 27 10:04:50 vlxsam02 systemd[1]: samureye-app.service: Failed with result 'exit-code'.
+Aug 27 10:04:50 vlxsam02 systemd[1]: samureye-app.service: Consumed 2.257s CPU time.
