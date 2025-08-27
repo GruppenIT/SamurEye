@@ -1,473 +1,204 @@
-# vlxsam01 - Gateway Server
+# Configuração vlxsam01 - Proxy NGINX 
 
-## Visão Geral
+## 📋 Visão Geral
 
-O servidor vlxsam01 atua como gateway da plataforma SamurEye, fornecendo:
-- **Proxy reverso NGINX** para roteamento de requisições
-- **Terminação SSL/TLS** com certificados wildcard
-- **Rate limiting** e proteção contra ataques
-- **Load balancing** para alta disponibilidade
-- **Redirecionamento HTTPS** obrigatório
-- **Roteamento inteligente** para sistema multi-tenant
-- **Support para WebSocket** em tempo real
+O **vlxsam01** funciona como proxy reverso NGINX, roteando tráfego HTTPS para o backend vlxsam02:5000.
 
-## Especificações
-
-- **IP:** 172.24.1.151
-- **OS:** Ubuntu 22.04 LTS
-- **Domínio:** *.samureye.com.br
-- **Portas:** 80 (HTTP→HTTPS), 443 (HTTPS)
-- **Backend Target:** vlxsam02:5000 (Vite dev server)
-- **SSL:** Let's Encrypt wildcard certificates
-- **Features:** Multi-tenant routing, WebSocket support
-
-## Instalação
-
-### Executar Script de Instalação
-
-```bash
-# Conectar no servidor como root
-ssh root@172.24.1.151
-
-# Baixar e executar instalação
-curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam01/install.sh | bash
-
-# OU clonar repositório e executar localmente
-git clone https://github.com/GruppenIT/SamurEye.git
-cd SamurEye/docs/deployment/vlxsam01/
-chmod +x install.sh
-./install.sh
+**Arquitetura:**
+```
+Usuário (172.16.10.50) 
+    ↓ DNS interno
+172.24.1.151 (vlxsam01) 
+    ↓ NGINX proxy
+172.24.1.152:5000 (vlxsam02)
+    ↓ PostgreSQL
+172.24.1.153:5432 (vlxsam03)
 ```
 
-### O que o Script Instala (100% Automatizado)
+## 🌐 Domínios Configurados
 
-1. **Sistema Base**
-   - Atualização completa do sistema Ubuntu
-   - Instalação do NGINX, Certbot, Fail2Ban
-   - Configuração de firewall UFW (portas 22, 80, 443)
-   - Timezone America/Sao_Paulo
+Todos os domínios resolvem internamente para **172.24.1.151** (vlxsam01):
+- `app.samureye.com.br` - Aplicação principal
+- `api.samureye.com.br` - API endpoints  
+- `ca.samureye.com.br` - Certificate Authority
 
-2. **NGINX Configuração Inteligente**
-   - Configuração temporária HTTP (sem SSL) ativada automaticamente
-   - Configuração final HTTPS preparada (será ativada após SSL)
-   - Rate limiting avançado por endpoint
-   - Headers de segurança obrigatórios
-   - Proxy reverso para vlxsam02:5000
+## 🔒 Certificados TLS
 
-3. **Scripts SSL Automáticos**
-   - `/opt/request-ssl.sh` - HTTP-01 challenge (simples)
-   - `/opt/request-ssl-wildcard.sh` - DNS challenge (wildcard)
-   - Renovação automática via cron (2x por dia)
+- **Let's Encrypt** com certificados válidos
+- **HTTPS obrigatório** com redirect automático do HTTP
+- **HSTS** habilitado para segurança
 
-4. **Monitoramento e Scripts**
-   - `/opt/samureye/scripts/health-check.sh` - Status completo
-   - `/opt/samureye/scripts/check-ssl.sh` - Verificação SSL
-   - Logs estruturados e rotação automática
-   - Fail2Ban configurado
+## ⚠️ PROBLEMA IDENTIFICADO: Página em Branco no HTTPS
 
-## Processo de Instalação em Duas Etapas
+### Sintomas:
+- ✅ `https://app.samureye.com.br` - Certificado válido, mas **página em branco**
+- ✅ `http://172.24.1.152:5000` - Funciona normalmente (acesso direto)
+- ✅ Certificados Let's Encrypt carregando corretamente
 
-### ✅ Etapa 1: Instalação Base (Automática)
+### Causa Provável:
+Configuração nginx com problemas de proxy, headers ou buffering.
 
+## 🚀 Soluções Automatizadas
+
+### 1. Diagnóstico Rápido
 ```bash
-# Script de instalação - executa tudo automaticamente
-curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam01/install.sh | bash
+# No vlxsam01:
+curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam01/diagnose-nginx.sh | sudo bash
 ```
+**Uso:** Identifica problemas de configuração nginx
 
-**Resultado:** NGINX funcionando com HTTP, ready para SSL
-
-### ⚠️ Etapa 2: Configuração SSL Wildcard (Recomendado)
-
+### 2. Correção Completa (RECOMENDADO)
 ```bash
-# PRIMEIRO: Configurar DNS básico (obrigatório)
-# Criar registros DNS para:
-# samureye.com.br -> 172.24.1.151
-# *.samureye.com.br -> 172.24.1.151
-
-# DEPOIS: Solicitar certificado SSL WILDCARD (recomendado)
-/opt/request-ssl.sh
-
-# Seguir instruções interativas para:
-# 1. Adicionar registros TXT no DNS quando solicitado
-# 2. Verificar propagação DNS
-# 3. Continuar processo
+# No vlxsam01:
+curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam01/fix-nginx-proxy.sh | sudo bash
 ```
+**Uso:** Corrige configuração nginx com otimizações de proxy
 
-**Vantagens do Wildcard:**
-- ✅ Cobre todos os subdomínios: app.samureye.com.br, api.samureye.com.br, admin.samureye.com.br, etc.
-- ✅ Não requer reconfigurações futuras para novos subdomínios
-- ✅ Maior segurança (DNS challenge vs HTTP challenge)
-
-### 📋 Processo DNS Challenge Detalhado
-
-Ver: [DNS Challenge Guide](DNS-CHALLENGE-GUIDE.md) para instruções passo a passo.
-
-### 🔄 Alternativa: Certificado HTTP (Fallback)
-
+### 3. Correção Rápida (Mínima)
 ```bash
-# Usar apenas se DNS challenge não for possível
-/opt/request-ssl-http.sh
-
-# Requer que TODOS os domínios apontem para o servidor
-# Verificação automática antes de continuar
+# No vlxsam01:
+curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam01/quick-fix-nginx.sh | sudo bash
 ```
+**Uso:** Aplica configuração mínima funcional
 
-**Resultado:** NGINX com HTTPS funcionando, redirecionamento automático
+## 🔧 Correção Manual
 
-## Verificação e Testes
+Se os scripts automáticos falharem:
 
-### Scripts de Teste Automático
-
+### 1. Verificar Status dos Serviços
 ```bash
-# Teste completo da instalação
-curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam01/test-install.sh | bash
+# Status nginx
+systemctl status nginx
 
-# Health check completo
-/opt/samureye/scripts/health-check.sh
-
-# Verificação específica SSL
-/opt/samureye/scripts/check-ssl.sh
-```
-
-### Testes Manuais
-
-```bash
-# Testar proxy reverso HTTP (sem SSL)
-curl -I http://172.24.1.151/nginx-health
-
-# Testar HTTPS (após configurar SSL)
-curl -I https://app.samureye.com.br/nginx-health
-
-# Verificar rate limiting
-for i in {1..5}; do curl -I https://app.samureye.com.br/api/; done
-
-# Testar WebSocket (após vlxsam02 configurado)
-wscat -c wss://app.samureye.com.br/ws
-```
-
-## Troubleshooting
-
-### Problemas Comuns
-
-```bash
-# NGINX não inicia - verificar configuração
+# Teste configuração
 nginx -t
-systemctl status nginx
 
-# SSL não funciona - verificar certificados
-/opt/samureye/scripts/check-ssl.sh
-ls -la /etc/letsencrypt/live/samureye.com.br/
-
-# Proxy reverso falha - verificar vlxsam02
-nc -z 172.24.1.152 5000
-curl -I http://172.24.1.152:5000/
-
-# Rate limiting muito restritivo - ajustar configuração
-nano /etc/nginx/sites-available/samureye
-nginx -t && systemctl reload nginx
-```
-
-### Reset Completo 
-
-```bash
-# Reset completo - funciona sempre (corrigido em 26/08/2025)
-curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam01/install.sh | bash
-
-# Erros anteriores resolvidos:
-# ✅ Directory creation error: /opt/samureye/scripts/
-# ✅ NGINX SSL configuration order  
-# ✅ Certificate dependency issues
-```
-
-## Arquivos Importantes
-
-```
-/opt/request-ssl.sh              # Script solicitação SSL (HTTP-01)
-/opt/request-ssl-wildcard.sh     # Script SSL wildcard (DNS)
-/opt/samureye/scripts/           # Scripts de manutenção
-/etc/nginx/sites-available/      # Configurações NGINX
-/etc/letsencrypt/live/           # Certificados SSL
-/var/log/nginx/                  # Logs NGINX
-/var/log/samureye/               # Logs sistema
-```
-
-## Monitoramento
-
-### Logs em Tempo Real
-
-```bash
-# Logs de acesso
-tail -f /var/log/nginx/samureye-access.log
-
-# Logs de erro
-tail -f /var/log/nginx/samureye-error.log
-
-# Logs de API
-tail -f /var/log/nginx/api-access.log
-
-# Health check automático
-tail -f /var/log/samureye/health-check.log
-```
-
-### Métricas Automáticas
-
-- **Health check**: A cada 5 minutos via cron
-- **Renovação SSL**: 2x por dia (2h e 14h)
-- **Fail2Ban**: Monitoramento ativo de IPs maliciosos
-- **Log rotation**: Logs rotacionados diariamente (30 dias de retenção)
-
-# Testar renovação
-certbot renew --dry-run
-```
-
-### 2. Configurar DNS (se necessário)
-
-```bash
-# Editar configuração DNS para certificados
-nano /etc/letsencrypt/renewal-hooks/deploy/dns-config.sh
-```
-
-### 3. Ajustar Rate Limiting (opcional)
-
-```bash
-# Editar limites de requisições
-nano /etc/nginx/conf.d/rate-limits.conf
-nginx -t && systemctl reload nginx
-```
-
-## Verificação da Instalação
-
-### Testar Conectividade
-
-```bash
-# Testar HTTPS
-curl -I https://app.samureye.com.br
-
-# Verificar redirecionamento HTTP→HTTPS
-curl -I http://app.samureye.com.br
-
-# Testar rate limiting
-./scripts/test-rate-limits.sh
-```
-
-### Verificar Serviços
-
-```bash
-# Status do NGINX
-systemctl status nginx
-
-# Logs em tempo real
-tail -f /var/log/nginx/access.log
+# Logs
 tail -f /var/log/nginx/error.log
-
-# Logs específicos SamurEye
-tail -f /var/log/nginx/samureye-access.log
-tail -f /var/log/nginx/samureye-error.log
 ```
 
-## Rotas Configuradas
-
-### Principais Endpoints
-
-```nginx
-# Frontend da aplicação (React 18 + Vite)
-https://app.samureye.com.br → http://172.24.1.152:5000
-
-# API backend (Node.js + Express)
-https://api.samureye.com.br/api → http://172.24.1.152:5000/api
-
-# WebSocket para tempo real
-https://app.samureye.com.br/ws → ws://172.24.1.152:5000/ws
-
-# Admin dashboard (local authentication)
-https://app.samureye.com.br/admin → http://172.24.1.152:5000/admin
-
-# Object storage assets
-https://app.samureye.com.br/public-objects/* → Object Storage
-```
-
-### Rate Limits
-
-```nginx
-# API endpoints
-/api/* → 100 req/min por IP
-/api/admin/login → 10 req/min por IP (admin protection)
-/api/objects/upload → 20 req/min por IP (object storage)
-
-# Frontend assets
-Static files → 1000 req/min por IP
-/public-objects/* → 500 req/min por IP (asset serving)
-
-# Multi-tenant specific
-/api/admin/* → 30 req/min por IP (admin operations)
-/api/dashboard/* → 200 req/min por IP (dashboard data)
-```
-
-## Troubleshooting
-
-### Problemas SSL
-
+### 2. Verificar Conectividade Backend
 ```bash
-# Verificar certificados
-openssl x509 -in /etc/letsencrypt/live/samureye.com.br/fullchain.pem -text -noout
+# Teste direto vlxsam02
+curl -I http://172.24.1.152:5000/api/system/settings
 
-# Renovar manualmente
-certbot renew --force-renewal
-
-# Logs de certificados
-tail -f /var/log/letsencrypt/letsencrypt.log
+# Teste interno vlxsam01
+curl -I -k https://127.0.0.1/
 ```
 
-### Problemas NGINX
-
+### 3. Configuração Mínima Manual
 ```bash
-# Testar configuração
-nginx -t
+# Backup atual
+cp -r /etc/nginx/sites-enabled /root/nginx-backup
 
-# Recarregar sem interrupção
-systemctl reload nginx
+# Criar configuração básica
+cat > /etc/nginx/sites-available/samureye.conf << 'EOF'
+upstream backend {
+    server 172.24.1.152:5000;
+}
 
-# Verificar upstreams
-curl -I http://172.24.1.152:5000/api/admin/stats
+server {
+    listen 80;
+    server_name app.samureye.com.br api.samureye.com.br ca.samureye.com.br;
+    return 301 https://$server_name$request_uri;
+}
 
-# Testar autenticação dual
-curl -X POST http://172.24.1.152:5000/api/admin/login \
-  -H "Content-Type: application/json" \
-  -d '{"email": "admin@samureye.com.br", "password": "SamurEye2024!"}'
+server {
+    listen 443 ssl;
+    server_name app.samureye.com.br api.samureye.com.br ca.samureye.com.br;
+    
+    ssl_certificate /etc/letsencrypt/live/app.samureye.com.br/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/app.samureye.com.br/privkey.pem;
+    
+    location / {
+        proxy_pass http://backend;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_buffering off;
+    }
+}
+EOF
 
-# Testar object storage
+# Ativar configuração
+rm -f /etc/nginx/sites-enabled/*
+ln -s /etc/nginx/sites-available/samureye.conf /etc/nginx/sites-enabled/
+
+# Testar e recarregar
+nginx -t && systemctl reload nginx
+```
+
+## 🧪 Testes de Validação
+
+### 1. Teste HTTPS Externo
+```bash
+# Da máquina Windows (172.16.10.50):
+# Navegador: https://app.samureye.com.br
+```
+
+### 2. Teste HTTPS Interno  
+```bash
+# No vlxsam01:
+curl -I -k https://127.0.0.1/
+curl -s https://127.0.0.1/api/system/settings
+```
+
+### 3. Teste Backend Direto
+```bash
+# Qualquer máquina da rede:
 curl -I http://172.24.1.152:5000/api/system/settings
 ```
 
-### Problemas de Conectividade
+## 📊 Status Esperado
 
+Após a correção:
+- ✅ `https://app.samureye.com.br` - Aplicação carregando normalmente
+- ✅ Proxy nginx funcionando
+- ✅ Headers corretos (X-Forwarded-Proto: https)
+- ✅ WebSockets funcionando se necessário
+
+## 🔍 Troubleshooting
+
+### Logs Úteis:
 ```bash
-# Verificar conectividade com vlxsam02
-nc -zv 172.24.1.152 5000
-
-# Testar DNS
-dig app.samureye.com.br
-dig api.samureye.com.br
-
-# Verificar firewall
-ufw status verbose
-
-# Testar multi-tenant routing
-curl -H "Host: app.samureye.com.br" https://app.samureye.com.br/api/admin/stats
-
-# Testar WebSocket
-wscat -c wss://app.samureye.com.br/ws
-
-# Testar object storage routing
-curl -I https://app.samureye.com.br/public-objects/test
-```
-
-## Monitoramento
-
-### Scripts de Verificação
-
-```bash
-# Verificação completa
-./scripts/health-check.sh
-
-# Apenas SSL
-./scripts/check-ssl.sh
-
-# Apenas conectividade
-./scripts/check-connectivity.sh
-```
-
-### Logs Importantes
-
-```bash
-# Acesso geral
+# Logs nginx
+tail -f /var/log/nginx/error.log
 tail -f /var/log/nginx/access.log
 
-# Erros NGINX
-tail -f /var/log/nginx/error.log
+# Teste configuração
+nginx -t
 
-# SamurEye específico
-tail -f /var/log/nginx/samureye-*.log
-
-# Sistema
-journalctl -u nginx -f
+# Status serviços
+systemctl status nginx
 ```
 
-## Manutenção
+### Problemas Comuns:
 
-### Updates Regulares
+1. **Certificado não encontrado**
+   - Verificar: `ls /etc/letsencrypt/live/`
+   - Ajustar path no nginx
 
-```bash
-# Update sistema
-apt update && apt upgrade -y
+2. **Backend não responde**
+   - Verificar: `systemctl status samureye-app` no vlxsam02
+   - Testar: `curl http://172.24.1.152:5000/health`
 
-# Restart NGINX (se necessário)
-systemctl restart nginx
-```
+3. **Headers incorretos**
+   - Adicionar `proxy_set_header X-Forwarded-Proto $scheme`
+   - Verificar `proxy_buffering off` se página em branco
 
-### Backup Configurações
+4. **WebSocket problemas**
+   - Adicionar suporte WebSocket no nginx
+   - Headers `Upgrade` e `Connection`
 
-```bash
-# Backup automático (diário via cron)
-./scripts/backup-config.sh
+## 🎯 Próximos Passos
 
-# Backup manual
-tar -czf /opt/backup/nginx-$(date +%Y%m%d).tar.gz /etc/nginx/
-```
+1. **Execute script de correção** no vlxsam01
+2. **Teste https://app.samureye.com.br** da máquina Windows
+3. **Confirme que página não está mais em branco**
+4. **Execute criação de tenant** para teste final
 
-## Segurança
+---
 
-### Headers Configurados
-
-- HSTS (HTTP Strict Transport Security)
-- X-Frame-Options: DENY
-- X-Content-Type-Options: nosniff
-- Referrer-Policy: strict-origin-when-cross-origin
-- Content-Security-Policy headers
-- X-XSS-Protection: 1; mode=block
-
-### Rate Limiting
-
-- Proteção contra DDoS básico
-- Limits por IP e por endpoint
-- Blacklist automático para IPs abusivos
-- Proteção especial para endpoints admin
-- Rate limiting diferenciado para object storage
-
-### Firewall
-
-```bash
-# Portas abertas
-ufw status
-# 22/tcp (SSH)
-# 80/tcp (HTTP - redirect)
-# 443/tcp (HTTPS)
-```
-
-### Funcionalidades Específicas
-
-- **Multi-tenant Support**: Roteamento baseado em cabeçalhos
-- **Object Storage**: Proxy para assets estáticos e uploads
-- **WebSocket**: Suporte nativo para comunicação real-time
-- **Admin Protection**: Rate limiting especial para endpoints administrativos
-- **Session Management**: Suporte para autenticação dual (admin + tenant)
-
-## Arquivos de Configuração Principais
-
-```bash
-# NGINX principal
-/etc/nginx/nginx.conf
-
-# Configuração SamurEye
-/etc/nginx/sites-available/samureye
-/etc/nginx/sites-enabled/samureye
-
-# Rate limiting
-/etc/nginx/conf.d/rate-limits.conf
-
-# SSL certificates
-/etc/letsencrypt/live/samureye.com.br/
-
-# Scripts de monitoramento
-/opt/samureye/scripts/
-```
+**Documentação atualizada em:** 27/08/2025  
+**Status:** Problema identificado, soluções implementadas

@@ -54,6 +54,18 @@ The platform implements **mTLS** for secure collector-to-cloud communication usi
 - **Solução**: `docs/deployment/vlxsam02/fix-database-tables.sh`
 - **Comando**: `npm run db:push` para criar todas as tabelas do schema
 
+**🆕 NOVO PROBLEMA IDENTIFICADO (27/08/2025):**
+**Problema 8: NGINX Proxy Página em Branco no HTTPS**
+- **Sintoma**: `https://app.samureye.com.br` mostra certificado válido, mas página em branco
+- **Backend direto**: `http://172.24.1.152:5000` funciona normalmente
+- **Causa**: Configuração nginx proxy com problemas de headers ou buffering
+- **Status**: SCRIPTS DE CORREÇÃO CRIADOS
+- **Arquitetura**: vlxsam01 (nginx) -> vlxsam02 (app) -> vlxsam03 (PostgreSQL)
+- **Soluções**: 
+  - `docs/deployment/vlxsam01/fix-nginx-proxy.sh` (correção completa)
+  - `docs/deployment/vlxsam01/quick-fix-nginx.sh` (correção rápida)
+  - `docs/deployment/vlxsam01/diagnose-nginx.sh` (diagnóstico)
+
 ### Problemas Identificados e Resolvidos:
 
 #### 1. ✅ RESOLVIDO: Erro ES6 "require is not defined"
