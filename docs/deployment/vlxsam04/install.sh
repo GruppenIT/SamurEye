@@ -1269,3 +1269,153 @@ echo ""
 echo "============================================================================"
 
 log "✅ Instalação vlxsam04 concluída com sucesso!"
+
+# ============================================================================
+# 14. COMANDOS AUTOMÁTICOS PARA PRÓXIMOS PASSOS
+# ============================================================================
+
+log "🤖 Automatizando configurações iniciais..."
+
+# Criar script de configuração automática
+cat > "/opt/samureye-collector/scripts/auto-configure.sh" << 'EOF'
+#!/bin/bash
+
+# Script de configuração automática pós-instalação
+# Execute este script para configurar automaticamente o collector
+
+set -e
+
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m'
+
+log() { echo -e "${GREEN}[$(date '+%H:%M:%S')] $1${NC}"; }
+warn() { echo -e "${YELLOW}[$(date '+%H:%M:%S')] $1${NC}"; }
+
+log "🤖 Iniciando configuração automática vlxsam04..."
+
+# 1. Verificar conectividade com CA
+log "🔐 Testando conectividade com Certificate Authority..."
+if curl -k --connect-timeout 10 https://ca.samureye.com.br/health &>/dev/null; then
+    log "✅ CA acessível em https://ca.samureye.com.br"
+    STEP_CA_URL="https://ca.samureye.com.br"
+else
+    warn "⚠️  CA não acessível. Configure manualmente STEP_CA_URL"
+    STEP_CA_URL="https://ca.samureye.com.br"
+fi
+
+# 2. Atualizar configuração .env automaticamente
+log "📝 Atualizando configuração .env..."
+cat > /etc/samureye-collector/.env << EOL
+# Configuração automática vlxsam04 - $(date)
+
+# Collector Identity
+COLLECTOR_ID=vlxsam04
+COLLECTOR_HOST=192.168.100.151
+COLLECTOR_NAME="vlxsam04 Security Collector"
+
+# step-ca Configuration
+STEP_CA_URL=$STEP_CA_URL
+STEP_CA_FINGERPRINT=
+# TODO: Execute 'step ca fingerprint' no servidor CA para obter fingerprint
+
+# SamurEye Platform
+SAMUREYE_API_URL=https://api.samureye.com.br
+SAMUREYE_WS_URL=wss://api.samureye.com.br/ws
+REGISTRATION_TOKEN=
+# TODO: Obtenha token de registro na interface web
+
+# Logging
+LOG_LEVEL=INFO
+LOG_MAX_SIZE=100MB
+LOG_RETENTION_DAYS=30
+
+# Multi-tenant
+MAX_CONCURRENT_TENANTS=10
+TENANT_TIMEOUT=300
+
+# Security Tools
+NMAP_PARALLEL_LIMIT=5
+NUCLEI_RATE_LIMIT=150
+MASSCAN_RATE_LIMIT=1000
+
+# Generated: $(date)
+EOL
+
+chown samureye-collector:samureye-collector /etc/samureye-collector/.env
+chmod 600 /etc/samureye-collector/.env
+
+log "✅ Configuração .env atualizada"
+
+# 3. Testar configuração Python
+log "🐍 Testando configuração Python..."
+if sudo -u samureye-collector python3 -c "
+import aiohttp, websockets, cryptography
+import requests, psutil, asyncio
+print('✅ Python dependencies OK')
+"; then
+    log "✅ Python configurado corretamente"
+else
+    warn "⚠️  Problema com dependências Python"
+fi
+
+# 4. Testar ferramentas de segurança
+log "🔧 Testando ferramentas de segurança..."
+sudo -u samureye-collector nmap --version > /dev/null && log "✅ Nmap funcionando"
+sudo -u samureye-collector nuclei -version > /dev/null && log "✅ Nuclei funcionando" 
+sudo -u samureye-collector masscan --version > /dev/null && log "✅ Masscan funcionando"
+
+log "🎉 Configuração automática concluída!"
+log ""
+log "📋 PRÓXIMOS PASSOS MANUAIS:"
+log "  1. Obter CA fingerprint: step ca fingerprint (no servidor CA)"
+log "  2. Atualizar STEP_CA_FINGERPRINT em /etc/samureye-collector/.env"
+log "  3. Registrar collector na interface web e obter token"
+log "  4. Atualizar REGISTRATION_TOKEN em /etc/samureye-collector/.env"
+log "  5. Executar: /opt/samureye-collector/scripts/setup-step-ca.sh"
+log "  6. Iniciar serviços: systemctl start samureye-collector"
+
+EOF
+
+chmod +x "/opt/samureye-collector/scripts/auto-configure.sh"
+log "✅ Script de configuração automática criado"
+
+# Executar configuração automática imediatamente
+log "🚀 Executando configuração automática..."
+bash "/opt/samureye-collector/scripts/auto-configure.sh"
+
+echo ""
+echo "============================================================================"
+echo "🎯 PRÓXIMOS PASSOS OBRIGATÓRIOS (AUTOMATIZADOS)"
+echo "============================================================================"
+echo ""
+echo "1️⃣ OBTER CA FINGERPRINT:"
+echo "   # No servidor vlxsam01 (CA):"
+echo "   step ca fingerprint https://ca.samureye.com.br"
+echo ""
+echo "2️⃣ ATUALIZAR CONFIGURAÇÃO:"
+echo "   sudo nano /etc/samureye-collector/.env"
+echo "   # Adicionar fingerprint na linha STEP_CA_FINGERPRINT="
+echo ""
+echo "3️⃣ REGISTRAR COLLECTOR:"
+echo "   # Acessar: https://app.samureye.com.br/admin"
+echo "   # Login admin → Collectors → Add Collector"
+echo "   # Copiar token de registro"
+echo ""
+echo "4️⃣ FINALIZAR CONFIGURAÇÃO:"
+echo "   # Atualizar token no .env:"
+echo "   sudo nano /etc/samureye-collector/.env"
+echo "   # Linha: REGISTRATION_TOKEN=<seu_token>"
+echo ""
+echo "5️⃣ ATIVAR COLLECTOR:"
+echo "   sudo /opt/samureye-collector/scripts/setup-step-ca.sh"
+echo "   sudo systemctl enable samureye-collector samureye-telemetry"
+echo "   sudo systemctl start samureye-collector samureye-telemetry"
+echo ""
+echo "6️⃣ VERIFICAR STATUS:"
+echo "   sudo systemctl status samureye-collector"
+echo "   sudo /opt/samureye-collector/scripts/health-check.sh"
+echo ""
+echo "============================================================================"
+
+log "✅ Instalação COMPLETA! Execute os próximos passos acima."
