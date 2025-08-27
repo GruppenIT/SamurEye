@@ -56,38 +56,71 @@ curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deploy
 ```
 **Uso:** Para diagnosticar problemas de conectividade com vlxsam03 (pg_hba.conf, rede, etc.)
 
-#### 🆕 Correção pg_hba.conf (vlxsam03)
+#### 🆕 Teste Específico PostgreSQL
+```bash
+curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam02/test-pg-connection.sh | sudo bash
+```
+**Uso:** Para teste detalhado de autenticação e credenciais PostgreSQL
+
+#### 🆕 Correção Completa PostgreSQL (vlxsam03)
+```bash
+# No vlxsam03:
+curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam03/fix-pg-user.sh | sudo bash
+```
+**Uso:** Para corrigir usuário, permissões e pg_hba.conf no vlxsam03
+
+#### 🆕 Correção pg_hba.conf apenas (vlxsam03)
 ```bash
 # No vlxsam03:
 curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam03/fix-pg-hba.sh | sudo bash
 ```
-**Uso:** Para corrigir problemas de pg_hba.conf no vlxsam03
+**Uso:** Para corrigir apenas problemas de pg_hba.conf no vlxsam03
 
 ## ⚠️ Problemas Conhecidos - MAIORIA RESOLVIDOS
 
-### 🆕 PROBLEMA IDENTIFICADO: pg_hba.conf (vlxsam03)
-**Sintoma:** 
+### 🆕 PROBLEMA IDENTIFICADO: Autenticação PostgreSQL (vlxsam03)
+**Sintoma Principal:** 
+```
+FATAL: password authentication failed for user "samureye"
+```
+**Erro Anterior:** 
 ```
 no pg_hba.conf entry for host "172.24.1.152", user "samureye", database "samureye_prod", no encryption
 ```
 **Quando acontece:** F5 (refresh) na página `/admin` causa erro 500
 
-**Causa:** PostgreSQL no vlxsam03 não permite conexões do vlxsam02 (172.24.1.152)
+**Causa:** Problema de configuração do usuário PostgreSQL no vlxsam03:
+- Usuário `samureye` pode não existir
+- Senha pode estar incorreta
+- Permissões podem estar faltando
+- pg_hba.conf pode não permitir conexões
 
-**⚡ SOLUÇÃO AUTOMÁTICA IMPLEMENTADA:**
-- Detecção automática no script `install.sh`
-- Correção via SSH se disponível
-- Script dedicado para vlxsam03: `docs/deployment/vlxsam03/fix-pg-hba.sh`
-- Script de diagnóstico: `docs/deployment/vlxsam02/diagnose-pg-connection.sh`
+**⚡ SOLUÇÕES DISPONÍVEIS:**
 
-**📋 CORREÇÃO MANUAL (se automática falhar):**
+**1. Correção Completa (RECOMENDADA):**
 ```bash
-# No vlxsam03, execute:
-bash docs/deployment/vlxsam03/fix-pg-hba.sh
+# No vlxsam03:
+curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam03/fix-pg-user.sh | sudo bash
+```
 
-# Ou adicione manualmente ao /etc/postgresql/16/main/pg_hba.conf:
+**2. Diagnóstico Detalhado:**
+```bash
+# No vlxsam02:
+curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam02/test-pg-connection.sh | sudo bash
+```
+
+**3. Correção Manual (se automática falhar):**
+```bash
+# No vlxsam03, como usuário postgres:
+sudo -u postgres psql
+CREATE USER samureye WITH PASSWORD 'SamurEye2024!';
+CREATE DATABASE samureye_prod;
+GRANT ALL PRIVILEGES ON DATABASE samureye_prod TO samureye;
+\q
+
+# Adicionar ao /etc/postgresql/16/main/pg_hba.conf:
 host    samureye_prod    samureye        172.24.1.152/32         md5
-# Depois recarregue: systemctl reload postgresql
+# Recarregar: systemctl reload postgresql
 ```
 
 ---

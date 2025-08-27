@@ -32,14 +32,18 @@ The platform implements **mTLS** for secure collector-to-cloud communication usi
 
 ⚠️ **Status Atual**: Sistema funcional com 1 problema de configuração identificado e soluções implementadas.
 
-**🆕 NOVO PROBLEMA IDENTIFICADO (27/08/2025):**
-**Problema 6: pg_hba.conf no vlxsam03**
-- **Sintoma**: F5 na página /admin causa erro 500 com "no pg_hba.conf entry for host 172.24.1.152"
-- **Causa**: PostgreSQL no vlxsam03 não permite conexões do vlxsam02
-- **Status**: CORREÇÃO AUTOMÁTICA IMPLEMENTADA
+**🆕 PROBLEMA IDENTIFICADO E EVOLUINDO (27/08/2025):**
+**Problema 6: Autenticação PostgreSQL no vlxsam03**
+- **Sintoma Atual**: "password authentication failed for user 'samureye'"
+- **Sintoma Anterior**: "no pg_hba.conf entry for host 172.24.1.152"
+- **Evolução**: O problema inicial de pg_hba.conf evoluiu para problema de usuário/credenciais
+- **Causa**: Configuração incompleta do usuário PostgreSQL no vlxsam03
+- **Status**: SOLUÇÕES AUTOMÁTICAS IMPLEMENTADAS
 - **Scripts criados**: 
-  - `docs/deployment/vlxsam03/fix-pg-hba.sh` (correção)
-  - `docs/deployment/vlxsam02/diagnose-pg-connection.sh` (diagnóstico)
+  - `docs/deployment/vlxsam03/fix-pg-user.sh` (correção completa usuário + permissões + pg_hba.conf)
+  - `docs/deployment/vlxsam03/fix-pg-hba.sh` (correção apenas pg_hba.conf)
+  - `docs/deployment/vlxsam02/test-pg-connection.sh` (teste específico autenticação)
+  - `docs/deployment/vlxsam02/diagnose-pg-connection.sh` (diagnóstico geral)
   - Detecção automática integrada no `install.sh`
 
 ### Problemas Identificados e Resolvidos:
