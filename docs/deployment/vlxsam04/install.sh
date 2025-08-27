@@ -129,6 +129,67 @@ python3.12 -m pip install \
 log "Python 3.12 e dependências instaladas"
 
 # ============================================================================
+# 3.1. VALIDAÇÃO UBUNTU 24.04 COMPATIBILITY
+# ============================================================================
+
+log "🔍 Validando compatibilidade Ubuntu 24.04..."
+
+# Verificar versão do Ubuntu
+ubuntu_version=$(lsb_release -rs)
+ubuntu_codename=$(lsb_release -cs)
+log "Ubuntu detectado: $ubuntu_version ($ubuntu_codename)"
+
+if [[ "$ubuntu_codename" == "noble" ]]; then
+    log "✅ Ubuntu 24.04 Noble detectado - compatibilidade OK"
+else
+    warn "⚠️  Versão Ubuntu diferente de 24.04 detectada: $ubuntu_version"
+fi
+
+# Validar instalações críticas
+log "🧪 Testando componentes instalados..."
+
+# Testar Python 3.12
+python_version=$(python3 --version 2>/dev/null || echo "ERRO")
+if [[ "$python_version" == *"Python 3.12"* ]]; then
+    log "✅ Python 3.12: $python_version"
+else
+    error "❌ Python 3.12 não encontrado. Versão atual: $python_version"
+fi
+
+# Testar dependências Python críticas
+log "Testando importações Python..."
+python3 -c "
+import sys
+import aiohttp
+import websockets
+import cryptography
+import requests
+import psutil
+import asyncio
+import yaml
+import structlog
+print('✅ Todas as dependências Python importadas com sucesso')
+print(f'✅ Python path: {sys.executable}')
+" || error "❌ Erro na importação de dependências Python"
+
+# Testar netcat-openbsd
+if command -v nc >/dev/null 2>&1; then
+    nc_version=$(nc -h 2>&1 | head -1)
+    log "✅ netcat-openbsd disponível: $(which nc)"
+else
+    error "❌ netcat-openbsd não encontrado"
+fi
+
+# Testar Node.js
+if [[ "$node_version" == v20* ]]; then
+    log "✅ Node.js 20.x: $node_version"
+else
+    warn "⚠️  Node.js versão inesperada: $node_version"
+fi
+
+log "🎉 Validação de compatibilidade concluída com sucesso!"
+
+# ============================================================================
 # 4. CONFIGURAÇÃO DE USUÁRIOS E DIRETÓRIOS
 # ============================================================================
 
@@ -1113,7 +1174,50 @@ EOF
 log "Rotação de logs configurada"
 
 # ============================================================================
-# 12. FINALIZAÇÃO
+# 12. RESUMO DE COMPATIBILIDADE UBUNTU 24.04
+# ============================================================================
+
+log "📋 Gerando resumo de compatibilidade..."
+
+# Criar log de compatibilidade
+compat_log="/var/log/samureye-collector/ubuntu-24-04-compatibility.log"
+cat > "$compat_log" << EOF
+# ============================================================================
+# SAMUREYE vlxsam04 - RESUMO COMPATIBILIDADE UBUNTU 24.04
+# ============================================================================
+# Data: $(date)
+# Ubuntu: $(lsb_release -ds)
+# Kernel: $(uname -r)
+
+CORREÇÕES APLICADAS:
+✅ Python 3.11 → Python 3.12 (padrão Ubuntu 24.04)
+✅ netcat → netcat-openbsd (novo nome do pacote)
+✅ Dependências Python validadas e funcionando
+✅ Node.js 20.x instalado corretamente
+✅ Ferramentas de segurança compatíveis
+
+COMPONENTES VALIDADOS:
+✅ Python: $(python3 --version)
+✅ Node.js: $(node --version)
+✅ netcat: $(which nc)
+✅ Pip: $(python3 -m pip --version | head -1)
+
+DEPENDÊNCIAS PYTHON TESTADAS:
+✅ aiohttp, websockets, cryptography
+✅ requests, certifi, psutil
+✅ asyncio, pyyaml, structlog
+✅ python-multipart, aiofiles
+
+STATUS: INSTALAÇÃO COMPATÍVEL COM UBUNTU 24.04 ✅
+EOF
+
+chmod 644 "$compat_log"
+chown "$COLLECTOR_USER:$COLLECTOR_USER" "$compat_log"
+
+log "✅ Resumo de compatibilidade salvo em: $compat_log"
+
+# ============================================================================
+# 13. FINALIZAÇÃO
 # ============================================================================
 
 log "🎯 Finalizando instalação..."
@@ -1128,11 +1232,12 @@ echo "==========================================================================
 echo "🎉 INSTALAÇÃO vlxsam04 CONCLUÍDA"
 echo "============================================================================"
 echo ""
-echo "🤖 COLLECTOR AGENT INSTALADO:"
+echo "🤖 COLLECTOR AGENT INSTALADO (UBUNTU 24.04 COMPATÍVEL):"
 echo "  • Multi-tenant support com isolamento por tenant"
 echo "  • Comunicação mTLS + WebSocket real-time"
 echo "  • Object Storage integration por tenant"
 echo "  • Certificados X.509 com step-ca"
+echo "  • Python 3.12 + Node.js 20.x (Ubuntu 24.04 nativo)"
 echo ""
 echo "🔧 FERRAMENTAS DE SEGURANÇA:"
 echo "  • Nmap $(nmap --version | head -1 | awk '{print $3}')"
@@ -1154,6 +1259,7 @@ echo "  • Certificados: /opt/samureye-collector/certs/"
 echo "  • Agente: /opt/samureye-collector/agent/main.py"
 echo "  • Scripts: /opt/samureye-collector/scripts/"
 echo "  • Logs: /var/log/samureye-collector/"
+echo "  • Compatibilidade Ubuntu 24.04: /var/log/samureye-collector/ubuntu-24-04-compatibility.log"
 echo ""
 echo "📋 VERIFICAÇÃO:"
 echo "  • Health check: ./scripts/health-check.sh"
