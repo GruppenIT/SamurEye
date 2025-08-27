@@ -28,9 +28,19 @@ The platform implements **mTLS** for secure collector-to-cloud communication usi
 
 ## Recent Progress and Fixes
 
-### vlxsam02 Deployment Issues Resolution (August 2025) - COMPLETAMENTE RESOLVIDO
+### vlxsam02 Deployment Issues Resolution (August 2025) - MAJORITARIAMENTE RESOLVIDO
 
-✅ **Status Final**: Sistema totalmente funcional e operacional após resolução completa de todos os problemas conhecidos.
+⚠️ **Status Atual**: Sistema funcional com 1 problema de configuração identificado e soluções implementadas.
+
+**🆕 NOVO PROBLEMA IDENTIFICADO (27/08/2025):**
+**Problema 6: pg_hba.conf no vlxsam03**
+- **Sintoma**: F5 na página /admin causa erro 500 com "no pg_hba.conf entry for host 172.24.1.152"
+- **Causa**: PostgreSQL no vlxsam03 não permite conexões do vlxsam02
+- **Status**: CORREÇÃO AUTOMÁTICA IMPLEMENTADA
+- **Scripts criados**: 
+  - `docs/deployment/vlxsam03/fix-pg-hba.sh` (correção)
+  - `docs/deployment/vlxsam02/diagnose-pg-connection.sh` (diagnóstico)
+  - Detecção automática integrada no `install.sh`
 
 ### Problemas Identificados e Resolvidos:
 

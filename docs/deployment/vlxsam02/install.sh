@@ -67,7 +67,67 @@ diagnostic_check() {
         if PGPASSWORD=SamurEye2024! psql -h $POSTGRES_HOST -p $POSTGRES_PORT -U samureye -d samureye_prod -c "SELECT 1;" >/dev/null 2>&1; then
             log "✅ Autenticação PostgreSQL: OK"
         else
-            warn "Problemas de autenticação PostgreSQL detectados"
+            warn "⚠️  Problemas de autenticação PostgreSQL detectados"
+            warn "Verificando se é problema de pg_hba.conf..."
+            
+            # Capturar erro específico
+            local pg_error=$(PGPASSWORD=SamurEye2024! psql -h $POSTGRES_HOST -p $POSTGRES_PORT -U samureye -d samureye_prod -c "SELECT 1;" 2>&1 || true)
+            
+            if echo "$pg_error" | grep -q "no pg_hba.conf entry"; then
+                warn "🔍 PROBLEMA IDENTIFICADO: pg_hba.conf no vlxsam03 não permite conexões do vlxsam02"
+                warn "📋 SOLUÇÃO: Execute no vlxsam03: bash docs/deployment/vlxsam03/fix-pg-hba.sh"
+                warn "⚡ AUTOMÁTICO: Tentando aplicar correção remotamente..."
+                
+                # Tentar corrigir automaticamente se temos acesso SSH
+                if command -v ssh >/dev/null 2>&1; then
+                    if ssh -o ConnectTimeout=5 -o BatchMode=yes root@$POSTGRES_HOST "echo 'SSH OK'" 2>/dev/null; then
+                        warn "Aplicando correção pg_hba.conf no vlxsam03..."
+                        ssh root@$POSTGRES_HOST "bash -s" << 'REMOTE_SCRIPT'
+                            # Script remoto para corrigir pg_hba.conf
+                            PG_HBA_FILE="/etc/postgresql/16/main/pg_hba.conf"
+                            if [ -f "$PG_HBA_FILE" ]; then
+                                # Backup
+                                cp "$PG_HBA_FILE" "${PG_HBA_FILE}.backup.$(date +%Y%m%d%H%M)"
+                                
+                                # Adicionar regra se não existir
+                                if ! grep -q "host.*samureye_prod.*samureye.*172.24.1.152" "$PG_HBA_FILE"; then
+                                    sed -i '/# IPv4 local connections:/a\
+# Allow vlxsam02 to connect to samureye_prod\
+host    samureye_prod    samureye        172.24.1.152/32         md5' "$PG_HBA_FILE"
+                                    
+                                    # Recarregar PostgreSQL
+                                    systemctl reload postgresql
+                                    echo "pg_hba.conf atualizado e PostgreSQL recarregado"
+                                else
+                                    echo "Regra já existe no pg_hba.conf"
+                                fi
+                            else
+                                echo "Arquivo pg_hba.conf não encontrado"
+                            fi
+REMOTE_SCRIPT
+                        log "✅ Correção pg_hba.conf aplicada via SSH"
+                        
+                        # Testar novamente
+                        sleep 2
+                        if PGPASSWORD=SamurEye2024! psql -h $POSTGRES_HOST -p $POSTGRES_PORT -U samureye -d samureye_prod -c "SELECT 1;" >/dev/null 2>&1; then
+                            log "✅ Autenticação PostgreSQL: CORRIGIDA e funcionando!"
+                        else
+                            warn "⚠️  Correção aplicada mas ainda há problemas. Verificar manualmente."
+                        fi
+                    else
+                        warn "SSH não disponível. Execute manualmente no vlxsam03:"
+                        warn "   bash docs/deployment/vlxsam03/fix-pg-hba.sh"
+                        issues_found=true
+                    fi
+                else
+                    warn "SSH não encontrado. Execute manualmente no vlxsam03:"
+                    warn "   bash docs/deployment/vlxsam03/fix-pg-hba.sh"
+                    issues_found=true
+                fi
+            else
+                warn "Erro PostgreSQL não identificado: $pg_error"
+                issues_found=true
+            fi
         fi
     else
         error "Não foi possível conectar ao PostgreSQL em $POSTGRES_HOST:$POSTGRES_PORT"

@@ -50,7 +50,47 @@ curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deploy
 ```
 **Uso:** Para diagnosticar problemas do systemd
 
-## ✅ Problemas Conhecidos - TODOS RESOLVIDOS
+#### 🆕 Diagnóstico de Conectividade PostgreSQL
+```bash
+curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam02/diagnose-pg-connection.sh | sudo bash
+```
+**Uso:** Para diagnosticar problemas de conectividade com vlxsam03 (pg_hba.conf, rede, etc.)
+
+#### 🆕 Correção pg_hba.conf (vlxsam03)
+```bash
+# No vlxsam03:
+curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam03/fix-pg-hba.sh | sudo bash
+```
+**Uso:** Para corrigir problemas de pg_hba.conf no vlxsam03
+
+## ⚠️ Problemas Conhecidos - MAIORIA RESOLVIDOS
+
+### 🆕 PROBLEMA IDENTIFICADO: pg_hba.conf (vlxsam03)
+**Sintoma:** 
+```
+no pg_hba.conf entry for host "172.24.1.152", user "samureye", database "samureye_prod", no encryption
+```
+**Quando acontece:** F5 (refresh) na página `/admin` causa erro 500
+
+**Causa:** PostgreSQL no vlxsam03 não permite conexões do vlxsam02 (172.24.1.152)
+
+**⚡ SOLUÇÃO AUTOMÁTICA IMPLEMENTADA:**
+- Detecção automática no script `install.sh`
+- Correção via SSH se disponível
+- Script dedicado para vlxsam03: `docs/deployment/vlxsam03/fix-pg-hba.sh`
+- Script de diagnóstico: `docs/deployment/vlxsam02/diagnose-pg-connection.sh`
+
+**📋 CORREÇÃO MANUAL (se automática falhar):**
+```bash
+# No vlxsam03, execute:
+bash docs/deployment/vlxsam03/fix-pg-hba.sh
+
+# Ou adicione manualmente ao /etc/postgresql/16/main/pg_hba.conf:
+host    samureye_prod    samureye        172.24.1.152/32         md5
+# Depois recarregue: systemctl reload postgresql
+```
+
+---
 
 ### 1. ✅ RESOLVIDO: Erro "require is not defined"
 **Sintoma:** 

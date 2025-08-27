@@ -1,0 +1,26 @@
+Aug 27 10:49:16 vlxsam02 samureye-app[335856]: 10:49:16 AM [express] GET /api/admin/tenants 500 in 4ms :: {"message":"Failed to fetch tenants"}
+Aug 27 10:49:16 vlxsam02 samureye-app[335856]: Error fetching admin stats: error: no pg_hba.conf entry for host "172.24.1.152", user "samureye", database "samureye_prod", no encryption
+Aug 27 10:49:16 vlxsam02 samureye-app[335856]:     at /opt/samureye/SamurEye/node_modules/pg-pool/index.js:45:11
+Aug 27 10:49:16 vlxsam02 samureye-app[335856]:     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Aug 27 10:49:16 vlxsam02 samureye-app[335856]:     at async file:///opt/samureye/SamurEye/node_modules/drizzle-orm/node-postgres/session.js:83:22
+Aug 27 10:49:16 vlxsam02 samureye-app[335856]:     at async DatabaseStorage.getAdminStats (file:///opt/samureye/SamurEye/dist/index.js:421:38)
+Aug 27 10:49:16 vlxsam02 samureye-app[335856]:     at async file:///opt/samureye/SamurEye/dist/index.js:1530:21 {
+Aug 27 10:49:16 vlxsam02 samureye-app[335856]:   length: 165,
+Aug 27 10:49:16 vlxsam02 samureye-app[335856]:   severity: 'FATAL',
+Aug 27 10:49:16 vlxsam02 samureye-app[335856]:   code: '28000',
+Aug 27 10:49:16 vlxsam02 samureye-app[335856]:   detail: undefined,
+Aug 27 10:49:16 vlxsam02 samureye-app[335856]:   hint: undefined,
+Aug 27 10:49:16 vlxsam02 samureye-app[335856]:   position: undefined,
+Aug 27 10:49:16 vlxsam02 samureye-app[335856]:   internalPosition: undefined,
+Aug 27 10:49:16 vlxsam02 samureye-app[335856]:   internalQuery: undefined,
+Aug 27 10:49:16 vlxsam02 samureye-app[335856]:   where: undefined,
+Aug 27 10:49:16 vlxsam02 samureye-app[335856]:   schema: undefined,
+Aug 27 10:49:16 vlxsam02 samureye-app[335856]:   table: undefined,
+Aug 27 10:49:16 vlxsam02 samureye-app[335856]:   column: undefined,
+Aug 27 10:49:16 vlxsam02 samureye-app[335856]:   dataType: undefined,
+Aug 27 10:49:16 vlxsam02 samureye-app[335856]:   constraint: undefined,
+Aug 27 10:49:16 vlxsam02 samureye-app[335856]:   file: 'auth.c',
+Aug 27 10:49:16 vlxsam02 samureye-app[335856]:   line: '535',
+Aug 27 10:49:16 vlxsam02 samureye-app[335856]:   routine: 'ClientAuthentication'
+Aug 27 10:49:16 vlxsam02 samureye-app[335856]: }
+Aug 27 10:49:16 vlxsam02 samureye-app[335856]: 10:49:16 AM [express] GET /api/admin/stats 500 in 3ms :: {"message":"Failed to fetch stats"}
