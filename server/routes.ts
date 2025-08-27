@@ -170,6 +170,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let settings = await storage.getSystemSettings();
       if (!settings) {
         settings = await storage.createSystemSettings({
+          key: 'system_configuration',
+          value: 'System wide configuration settings',
+          description: 'Global system configuration',
           systemName: 'SamurEye',
           systemDescription: 'Plataforma de Simulação de Ataques e Análise de Segurança',
           supportEmail: 'suporte@samureye.com.br',

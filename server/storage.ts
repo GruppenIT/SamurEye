@@ -491,7 +491,7 @@ export class DatabaseStorage implements IStorage {
     return settings;
   }
 
-  async createSystemSettings(settings: { systemName: string; systemDescription: string; supportEmail: string; logoUrl?: string | null }): Promise<SystemSettings> {
+  async createSystemSettings(settings: InsertSystemSettings): Promise<SystemSettings> {
     const [newSettings] = await db.insert(systemSettings).values({
       key: 'system_configuration',
       value: 'System wide configuration settings',
@@ -509,6 +509,9 @@ export class DatabaseStorage implements IStorage {
     let existing = await this.getSystemSettings();
     if (!existing) {
       existing = await this.createSystemSettings({
+        key: 'system_configuration',
+        value: 'System wide configuration settings',
+        description: 'Global system configuration',
         systemName: 'SamurEye',
         systemDescription: 'Plataforma de Simulação de Ataques e Análise de Segurança',
         supportEmail: 'suporte@samureye.com.br',
