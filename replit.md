@@ -101,6 +101,10 @@ The platform implements **mTLS** for secure collector-to-cloud communication usi
 4. **install-quick-fix.sh** - Restauração rápida de diretório deletado
 5. **fix-service.sh** - Diagnóstico systemd
 
+#### Scripts vlxsam04:
+6. **vlxsam04/install.sh** - Script principal vlxsam04 (CORRIGIDO para Ubuntu 24.04)
+7. **vlxsam04/fix-ubuntu-24-compatibility.sh** - Correção independente Python 3.12
+
 ### Configuração Final (.env) - Todas Variáveis Incluídas:
 ```bash
 # Environment básico
@@ -139,6 +143,17 @@ SESSION_SECRET=samureye_secret_2024_vlxsam02_production
 - Implementação de geração automática de slug para tenants
 - Correção de tipos TypeScript para validação de schema
 - **Resultado**: Criação de tenants funcionando 100% (teste confirmado)
+
+#### 6. ✅ RESOLVIDO: Incompatibilidade vlxsam04 com Ubuntu 24.04 (27/08/2025)
+**Problema**: Pacotes Python 3.11 não encontrados no Ubuntu 24.04
+**Sintoma**: `E: Unable to locate package python3.11`, `E: Package 'netcat' has no installation candidate`
+**Causa**: Ubuntu 24.04 usa Python 3.12 por padrão, netcat foi renomeado para netcat-openbsd
+**Solução Implementada**:
+- Script principal `install.sh` corrigido para usar Python 3.12
+- Substituição `netcat` → `netcat-openbsd`  
+- Script de correção independente: `fix-ubuntu-24-compatibility.sh`
+- Validação de importações Python para garantir funcionamento
+- **Resultado**: vlxsam04 compatível com Ubuntu 24.04
 
 ### Documentação Atualizada:
 - **README.md**: Documentação completa com todos os scripts e soluções

@@ -6,7 +6,7 @@
 # 
 # Servidor: vlxsam04 (192.168.100.151)
 # Função: Agente coletor multi-tenant com mTLS
-# Stack: Python 3.11 + Node.js 20 + Security Tools + step-ca
+# Stack: Python 3.12 + Node.js 20 + Security Tools + step-ca
 # 
 # Características:
 # - Comunicação outbound-only com mTLS
@@ -68,13 +68,13 @@ apt install -y \
     jq \
     htop \
     iotop \
-    netcat \
+    netcat-openbsd \
     net-tools \
     dnsutils \
     tcpdump \
-    python3.11 \
-    python3.11-venv \
-    python3.11-dev \
+    python3.12 \
+    python3.12-venv \
+    python3.12-dev \
     python3-pip \
     build-essential \
     git \
@@ -102,18 +102,18 @@ log "npm instalado: $npm_version"
 # 3. INSTALAÇÃO PYTHON E DEPENDÊNCIAS
 # ============================================================================
 
-log "🐍 Configurando Python 3.11..."
+log "🐍 Configurando Python 3.12..."
 
-# Definir Python 3.11 como padrão
-update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 100
-update-alternatives --install /usr/bin/python python /usr/bin/python3.11 100
+# Definir Python 3.12 como padrão
+update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.12 100
+update-alternatives --install /usr/bin/python python /usr/bin/python3.12 100
 
-# Instalar pip para Python 3.11
-python3.11 -m ensurepip --upgrade
-python3.11 -m pip install --upgrade pip setuptools wheel
+# Instalar pip para Python 3.12
+python3.12 -m ensurepip --upgrade
+python3.12 -m pip install --upgrade pip setuptools wheel
 
 # Dependências Python para o agente
-python3.11 -m pip install \
+python3.12 -m pip install \
     aiohttp \
     websockets \
     cryptography \
@@ -126,7 +126,7 @@ python3.11 -m pip install \
     python-multipart \
     aiofiles
 
-log "Python 3.11 e dependências instaladas"
+log "Python 3.12 e dependências instaladas"
 
 # ============================================================================
 # 4. CONFIGURAÇÃO DE USUÁRIOS E DIRETÓRIOS
