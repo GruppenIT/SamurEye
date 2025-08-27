@@ -71,6 +71,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware (for Replit Auth - disabled for now to avoid conflicts)
   // await setupAuth(app);
 
+  // Health check endpoint
+  app.get('/api/health', (req, res) => {
+    res.json({ 
+      status: 'ok', 
+      timestamp: new Date().toISOString(),
+      service: 'samureye',
+      version: '1.0.0'
+    });
+  });
+
   // Admin authentication routes
   app.post('/api/admin/login', async (req, res) => {
     try {
