@@ -457,6 +457,12 @@ SESSION_SECRET=samureye_secret_2024_vlxsam02_production
 # Application URLs
 API_BASE_URL=http://localhost:5000
 WEB_BASE_URL=http://localhost:5000
+FRONTEND_URL=https://samureye.com.br
+
+# Configuração Replit Auth (NECESSÁRIAS)
+REPLIT_DOMAINS=samureye.com.br,app.samureye.com.br,api.samureye.com.br,vlxsam02.samureye.com.br
+REPL_ID=samureye-production-vlxsam02
+ISSUER_URL=https://replit.com/oidc
 
 # Security
 JWT_SECRET=samureye_jwt_secret_2024
@@ -529,7 +535,10 @@ console.log('PORT:', process.env.PORT || 'undefined');
 console.log('PGHOST:', process.env.PGHOST || 'undefined');
 console.log('PGPORT:', process.env.PGPORT || 'undefined');
 console.log('DATABASE_URL existe:', process.env.DATABASE_URL ? 'SIM' : 'NÃO');
+console.log('REPLIT_DOMAINS:', process.env.REPLIT_DOMAINS || 'undefined');
+console.log('REPL_ID:', process.env.REPL_ID || 'undefined');
 
+// Verificar DATABASE_URL
 if (process.env.DATABASE_URL) {
     const url = process.env.DATABASE_URL;
     console.log('DATABASE_URL (primeiros 60 chars):', url.substring(0, 60) + '...');
@@ -545,6 +554,24 @@ if (process.env.DATABASE_URL) {
 } else {
     console.log('❌ DATABASE_URL não foi carregada');
     process.exit(1);
+}
+
+// Verificar variáveis Replit Auth
+const requiredReplitVars = ['REPLIT_DOMAINS', 'REPL_ID', 'ISSUER_URL'];
+let missingVars = [];
+
+for (const varName of requiredReplitVars) {
+    if (!process.env[varName]) {
+        missingVars.push(varName);
+    }
+}
+
+if (missingVars.length > 0) {
+    console.log('❌ ERRO: Variáveis Replit Auth faltando:', missingVars.join(', '));
+    console.log('Execute: curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam02/fix-env-vars.sh | sudo bash');
+    process.exit(1);
+} else {
+    console.log('✅ Todas as variáveis Replit Auth presentes');
 }
 
 console.log('✅ Teste concluído com sucesso');
