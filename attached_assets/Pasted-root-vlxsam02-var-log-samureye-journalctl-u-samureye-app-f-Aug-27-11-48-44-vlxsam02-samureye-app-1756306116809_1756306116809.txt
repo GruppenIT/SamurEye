@@ -1,0 +1,36 @@
+root@vlxsam02:/var/log/samureye# journalctl -u samureye-app -f
+Aug 27 11:48:44 vlxsam02 samureye-app[337743]:   schema: undefined,
+Aug 27 11:48:44 vlxsam02 samureye-app[337743]:   table: undefined,
+Aug 27 11:48:44 vlxsam02 samureye-app[337743]:   column: undefined,
+Aug 27 11:48:44 vlxsam02 samureye-app[337743]:   dataType: undefined,
+Aug 27 11:48:44 vlxsam02 samureye-app[337743]:   constraint: undefined,
+Aug 27 11:48:44 vlxsam02 samureye-app[337743]:   file: 'parse_relation.c',
+Aug 27 11:48:44 vlxsam02 samureye-app[337743]:   line: '1449',
+Aug 27 11:48:44 vlxsam02 samureye-app[337743]:   routine: 'parserOpenTable'
+Aug 27 11:48:44 vlxsam02 samureye-app[337743]: }
+Aug 27 11:48:44 vlxsam02 samureye-app[337743]: 11:48:44 AM [express] POST /api/admin/tenants 500 in 12ms :: {"message":"Failed to create tenant"}
+Aug 27 11:48:59 vlxsam02 samureye-app[337743]: Error creating tenant: error: relation "tenants" does not exist
+Aug 27 11:48:59 vlxsam02 samureye-app[337743]:     at /opt/samureye/SamurEye/node_modules/pg-pool/index.js:45:11
+Aug 27 11:48:59 vlxsam02 samureye-app[337743]:     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Aug 27 11:48:59 vlxsam02 samureye-app[337743]:     at async file:///opt/samureye/SamurEye/node_modules/drizzle-orm/node-postgres/session.js:83:22
+Aug 27 11:48:59 vlxsam02 samureye-app[337743]:     at async DatabaseStorage.createTenant (file:///opt/samureye/SamurEye/dist/index.js:407:29)
+Aug 27 11:48:59 vlxsam02 samureye-app[337743]:     at async file:///opt/samureye/SamurEye/dist/index.js:1360:22 {
+Aug 27 11:48:59 vlxsam02 samureye-app[337743]:   length: 106,
+Aug 27 11:48:59 vlxsam02 samureye-app[337743]:   severity: 'ERROR',
+Aug 27 11:48:59 vlxsam02 samureye-app[337743]:   code: '42P01',
+Aug 27 11:48:59 vlxsam02 samureye-app[337743]:   detail: undefined,
+Aug 27 11:48:59 vlxsam02 samureye-app[337743]:   hint: undefined,
+Aug 27 11:48:59 vlxsam02 samureye-app[337743]:   position: '13',
+Aug 27 11:48:59 vlxsam02 samureye-app[337743]:   internalPosition: undefined,
+Aug 27 11:48:59 vlxsam02 samureye-app[337743]:   internalQuery: undefined,
+Aug 27 11:48:59 vlxsam02 samureye-app[337743]:   where: undefined,
+Aug 27 11:48:59 vlxsam02 samureye-app[337743]:   schema: undefined,
+Aug 27 11:48:59 vlxsam02 samureye-app[337743]:   table: undefined,
+Aug 27 11:48:59 vlxsam02 samureye-app[337743]:   column: undefined,
+Aug 27 11:48:59 vlxsam02 samureye-app[337743]:   dataType: undefined,
+Aug 27 11:48:59 vlxsam02 samureye-app[337743]:   constraint: undefined,
+Aug 27 11:48:59 vlxsam02 samureye-app[337743]:   file: 'parse_relation.c',
+Aug 27 11:48:59 vlxsam02 samureye-app[337743]:   line: '1449',
+Aug 27 11:48:59 vlxsam02 samureye-app[337743]:   routine: 'parserOpenTable'
+Aug 27 11:48:59 vlxsam02 samureye-app[337743]: }
+Aug 27 11:48:59 vlxsam02 samureye-app[337743]: 11:48:59 AM [express] POST /api/admin/tenants 500 in 11ms :: {"message":"Failed to create tenant"}

@@ -30,7 +30,7 @@ The platform implements **mTLS** for secure collector-to-cloud communication usi
 
 ### vlxsam02 Deployment Issues Resolution (August 2025) - MAJORITARIAMENTE RESOLVIDO
 
-⚠️ **Status Atual**: Sistema funcional com 1 problema de configuração identificado e soluções implementadas.
+⚠️ **Status Atual**: Sistema com conectividade PostgreSQL resolvida, mas problema de migração de banco identificado.
 
 **🆕 PROBLEMA IDENTIFICADO E EVOLUINDO (27/08/2025):**
 **Problema 6: Autenticação PostgreSQL no vlxsam03**
@@ -45,6 +45,14 @@ The platform implements **mTLS** for secure collector-to-cloud communication usi
   - `docs/deployment/vlxsam02/test-pg-connection.sh` (teste específico autenticação)
   - `docs/deployment/vlxsam02/diagnose-pg-connection.sh` (diagnóstico geral)
   - Detecção automática integrada no `install.sh`
+
+**🆕 NOVO PROBLEMA IDENTIFICADO (27/08/2025):**
+**Problema 7: Tabelas do Banco Não Existem**
+- **Sintoma**: "relation 'tenants' does not exist" ao criar tenant
+- **Causa**: Conectividade PostgreSQL funcionando, mas migração Drizzle não executada
+- **Status**: SCRIPT DE CORREÇÃO CRIADO
+- **Solução**: `docs/deployment/vlxsam02/fix-database-tables.sh`
+- **Comando**: `npm run db:push` para criar todas as tabelas do schema
 
 ### Problemas Identificados e Resolvidos:
 

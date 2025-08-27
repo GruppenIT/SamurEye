@@ -76,6 +76,12 @@ curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deploy
 ```
 **Uso:** Para corrigir apenas problemas de pg_hba.conf no vlxsam03
 
+#### 🆕 Criação de Tabelas do Banco
+```bash
+curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam02/fix-database-tables.sh | sudo bash
+```
+**Uso:** Para criar/atualizar tabelas quando erro "relation 'tenants' does not exist"
+
 ## ⚠️ Problemas Conhecidos - MAIORIA RESOLVIDOS
 
 ### 🆕 PROBLEMA IDENTIFICADO: Autenticação PostgreSQL (vlxsam03)
@@ -121,6 +127,30 @@ GRANT ALL PRIVILEGES ON DATABASE samureye_prod TO samureye;
 # Adicionar ao /etc/postgresql/16/main/pg_hba.conf:
 host    samureye_prod    samureye        172.24.1.152/32         md5
 # Recarregar: systemctl reload postgresql
+```
+
+### 🆕 NOVO PROBLEMA IDENTIFICADO: Tabelas do Banco Não Existem
+**Sintoma:** 
+```
+Error creating tenant: error: relation "tenants" does not exist
+```
+**Quando acontece:** Tentativa de criar tenant retorna erro 500
+
+**Causa:** Banco `samureye_prod` existe e conectividade funciona, mas as tabelas não foram criadas via migração Drizzle
+
+**⚡ SOLUÇÃO AUTOMÁTICA:**
+```bash
+# No vlxsam02:
+curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam02/fix-database-tables.sh | sudo bash
+```
+
+**📋 CORREÇÃO MANUAL (se automática falhar):**
+```bash
+# No vlxsam02, localizar projeto e executar:
+cd /opt/samureye/SamurEye  # ou localização correta
+npm run db:push
+# Ou forçar se necessário:
+npm run db:push -- --force
 ```
 
 ---
