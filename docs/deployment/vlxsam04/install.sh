@@ -265,14 +265,14 @@ else
 fi
 
 # Gobuster
-wget -O /tmp/gobuster.tar.gz "https://github.com/OJ/gobuster/releases/download/v3.6.0/gobuster_Linux_x86_64.tar.gz"
-tar -xzf /tmp/gobuster.tar.gz -C /tmp/
+wget -q -O /tmp/gobuster.tar.gz "https://github.com/OJ/gobuster/releases/download/v3.6.0/gobuster_Linux_x86_64.tar.gz"
+tar -xzf /tmp/gobuster.tar.gz -C /tmp/ 2>/dev/null
 mv /tmp/gobuster /usr/local/bin/gobuster
 chmod +x /usr/local/bin/gobuster
 
 # Nuclei 3.x
 wget -O /tmp/nuclei.zip "https://github.com/projectdiscovery/nuclei/releases/download/v3.1.0/nuclei_3.1.0_linux_amd64.zip"
-unzip /tmp/nuclei.zip -d /tmp/
+unzip -q -o /tmp/nuclei.zip -d /tmp/
 mv /tmp/nuclei /usr/local/bin/nuclei
 chmod +x /usr/local/bin/nuclei
 
@@ -289,8 +289,8 @@ log "Ferramentas de segurança instaladas"
 log "🔐 Instalando step-ca client..."
 
 # Download step CLI
-wget -O /tmp/step-cli.tar.gz "https://github.com/smallstep/cli/releases/download/v0.25.2/step_linux_0.25.2_amd64.tar.gz"
-tar -xzf /tmp/step-cli.tar.gz -C /tmp/
+wget -q -O /tmp/step-cli.tar.gz "https://github.com/smallstep/cli/releases/download/v0.25.2/step_linux_0.25.2_amd64.tar.gz"
+tar -xzf /tmp/step-cli.tar.gz -C /tmp/ 2>/dev/null
 mv /tmp/step_0.25.2/bin/step /usr/local/bin/step
 chmod +x /usr/local/bin/step
 
