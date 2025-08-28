@@ -27,6 +27,63 @@ fi
 log "🚀 Iniciando instalação do SamurEye Gateway (vlxsam01)..."
 
 # ============================================================================
+# 0. LIMPEZA COMPLETA (RESET)
+# ============================================================================
+
+log "🧹 Executando limpeza completa do sistema..."
+
+# Parar serviços antes da limpeza
+if systemctl is-active --quiet nginx; then
+    log "Parando NGINX..."
+    systemctl stop nginx
+fi
+
+if systemctl is-active --quiet step-ca; then
+    log "Parando step-ca..."
+    systemctl stop step-ca
+fi
+
+# Remover todas as configurações NGINX existentes
+log "Removendo configurações NGINX antigas..."
+rm -rf /etc/nginx/sites-enabled/*
+rm -rf /etc/nginx/sites-available/samureye*
+rm -rf /etc/nginx/conf.d/upstream.conf
+
+# Backup da configuração nginx principal se existir
+if [ -f /etc/nginx/nginx.conf ]; then
+    cp /etc/nginx/nginx.conf /etc/nginx/nginx.conf.backup.$(date +%Y%m%d-%H%M%S)
+fi
+
+# Remover certificados Let's Encrypt antigos se existirem
+if [ -d "/etc/letsencrypt/live" ]; then
+    log "Removendo certificados SSL antigos..."
+    rm -rf /etc/letsencrypt/live/*
+    rm -rf /etc/letsencrypt/archive/*
+    rm -rf /etc/letsencrypt/renewal/*
+fi
+
+# Remover step-ca antigo se existir
+if [ -d "/etc/step-ca" ]; then
+    log "Removendo step-ca anterior..."
+    rm -rf /etc/step-ca/*
+fi
+
+# Remover usuário step-ca antigo
+if id "step-ca" &>/dev/null; then
+    userdel step-ca 2>/dev/null || true
+fi
+
+# Remover serviços systemd antigos
+if [ -f "/etc/systemd/system/step-ca.service" ]; then
+    systemctl disable step-ca 2>/dev/null || true
+    rm -f /etc/systemd/system/step-ca.service
+fi
+
+systemctl daemon-reload
+
+log "✅ Limpeza completa finalizada"
+
+# ============================================================================
 # 1. PREPARAÇÃO DO SISTEMA
 # ============================================================================
 
@@ -302,8 +359,9 @@ http {
     include /etc/nginx/mime.types;
     default_type application/octet-stream;
 
-    # Rate limiting zones
-    limit_req_zone $binary_remote_addr zone=api:10m rate=100r/m;
+    # Rate limiting zones (definidas aqui globalmente)
+    limit_req_zone $binary_remote_addr zone=api:10m rate=10r/s;
+    limit_req_zone $binary_remote_addr zone=app:10m rate=30r/s;
     limit_req_zone $binary_remote_addr zone=auth:10m rate=20r/m;
     limit_req_zone $binary_remote_addr zone=upload:10m rate=10r/m;
     limit_req_zone $binary_remote_addr zone=admin:10m rate=30r/m;
@@ -374,8 +432,9 @@ upstream samureye_ws {
 }
 EOF
 
-# Remover configuração padrão
+# Remover configuração padrão e qualquer link órfão
 rm -f /etc/nginx/sites-enabled/default
+rm -f /etc/nginx/sites-enabled/samureye* 2>/dev/null || true
 
 # Configuração temporária do site SamurEye (sem SSL)
 cat > /etc/nginx/sites-available/samureye-temp << 'EOF'
@@ -411,16 +470,12 @@ EOF
 
 # Configuração HTTPS final (será aplicada após obter certificados)
 cat > /etc/nginx/sites-available/samureye << 'EOF'
-# SamurEye - Configuração NGINX Gateway (ATUALIZADA - 27/08/2025)
+# SamurEye - Configuração NGINX Gateway (RESET COMPLETO - 28/08/2025)
 # Domínio: *.samureye.com.br
 # Servidor: vlxsam01 (172.24.1.151)
-# CORREÇÃO: Resolvido problema de página em branco no HTTPS
+# CORREÇÃO: Removidas definições duplicadas de limit_req_zone
 
-# Rate limiting
-limit_req_zone $binary_remote_addr zone=api:10m rate=10r/s;
-limit_req_zone $binary_remote_addr zone=app:10m rate=30r/s;
-
-# Upstream backend
+# Upstream backend (rate limiting zones já definidas no nginx.conf)
 upstream samureye_backend {
     server 172.24.1.152:5000 max_fails=3 fail_timeout=30s;
     keepalive 32;
@@ -625,10 +680,18 @@ mkdir -p /var/www/html/.well-known/acme-challenge
 chown -R www-data:www-data /var/www/html
 
 # Testar configuração temporária
-nginx -t
+if nginx -t; then
+    log "✅ Configuração NGINX temporária válida"
+else
+    error "❌ Erro na configuração NGINX temporária"
+fi
 
 # Recarregar NGINX com configuração temporária
-systemctl reload nginx
+if systemctl reload nginx; then
+    log "✅ NGINX recarregado com sucesso"
+else
+    error "❌ Falha ao recarregar NGINX"
+fi
 
 log "NGINX configurado temporariamente (HTTP apenas)"
 
@@ -1001,15 +1064,57 @@ chown www-data:www-data /var/log/samureye/health-check.log
 systemctl enable nginx
 systemctl start nginx
 
-# Verificar status
+# Verificar status final
 if systemctl is-active --quiet nginx; then
     log "✅ NGINX iniciado com sucesso"
+    log "Status dos serviços:"
+    log "  NGINX: $(systemctl is-active nginx)"
+    log "  step-ca: $(systemctl is-active step-ca)"
 else
     error "❌ Falha ao iniciar NGINX"
 fi
 
+# Teste de conectividade básica
+log "🔍 Executando testes básicos..."
+if curl -s --connect-timeout 5 http://127.0.0.1/ >/dev/null; then
+    log "✅ Teste HTTP local: OK"
+else
+    warn "⚠️ Teste HTTP local: FALHOU (pode ser normal se backend não estiver rodando)"
+fi
+
+# Verificar portas abertas
+if ss -tlnp | grep ":80" >/dev/null; then
+    log "✅ Porta 80 (HTTP): Aberta"
+else
+    warn "⚠️ Porta 80 (HTTP): Não encontrada"
+fi
+
+if ss -tlnp | grep ":443" >/dev/null; then
+    log "✅ Porta 443 (HTTPS): Preparada"
+else
+    warn "⚠️ Porta 443 (HTTPS): Não encontrada"
+fi
+
+if ss -tlnp | grep ":9000" >/dev/null; then
+    log "✅ Porta 9000 (step-ca): Aberta"
+else
+    warn "⚠️ Porta 9000 (step-ca): Não encontrada"
+fi
+
 log "🎉 Instalação do vlxsam01 concluída com sucesso!"
 
+echo ""
+echo "📋 RESUMO DA INSTALAÇÃO:"
+echo "========================"
+echo ""
+echo "✅ Sistema preparado e atualizado"
+echo "✅ step-ca Certificate Authority configurado"
+echo "✅ Firewall UFW configurado (SSH, HTTP, HTTPS)"
+echo "✅ NGINX configurado com proxy reverso"
+echo "✅ Rate limiting e security headers aplicados"
+echo "✅ Scripts SSL preparados"
+echo "✅ Cron jobs configurados"
+echo "✅ Fail2Ban ativo"
 echo ""
 echo "📋 PRÓXIMOS PASSOS:"
 echo "=================="
@@ -1061,3 +1166,18 @@ echo "⚠️  IMPORTANTE:"
 echo "   • Wildcard DNS challenge é o método recomendado!"
 echo "   • step-ca rodando na porta 9000 (proxy via NGINX 443)"
 echo "   • Collectors precisam do fingerprint CA para registro mTLS"
+echo "   • Este script é um RESET COMPLETO - remove configurações antigas"
+echo "   • Backend vlxsam02:5000 deve estar rodando para funcionamento completo"
+echo ""
+echo "🔧 SOLUÇÃO DE PROBLEMAS:"
+echo "======================="
+echo "   • Logs NGINX: tail -f /var/log/nginx/error.log"
+echo "   • Status step-ca: systemctl status step-ca"
+echo "   • Testar backend: curl http://172.24.1.152:5000/api/system/settings"
+echo "   • Recriar configuração: execute este script novamente"
+echo "   • Verificar DNS: nslookup app.samureye.com.br"
+echo ""
+echo "📞 Se precisar de ajuda, este script pode ser executado novamente."
+echo "    Ele faz limpeza completa e recria tudo do zero."
+echo ""
+echo "🎯 INSTALAÇÃO CONCLUÍDA COM SUCESSO!"

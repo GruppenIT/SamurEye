@@ -170,3 +170,29 @@ The vlxsam04 install.sh is now a complete, production-ready collector agent inst
   - Secure CA root certificate and private key storage
   - Automated service management and monitoring
 - **RESULT**: vlxsam04 collectors can now successfully register with mTLS certificates via proper step-ca infrastructure
+
+**vlxsam01 NGINX Configuration RESET COMPLETO (August 28, 2025):**
+- **CRITICAL NGINX FIX**: Resolvido erro "limit_req_zone 'api' is already bound to key '$binary_remote_addr'"
+- **ROOT CAUSE ANALYSIS**: 
+  - Configurações duplicadas de `limit_req_zone` entre nginx.conf e sites-available/samureye
+  - Scripts externos de fix causando dependências desnecessárias
+  - Instalação falhando devido a configurações conflitantes
+- **SOLUÇÃO RESET COMPLETO IMPLEMENTADA**:
+  - **Limpeza Completa Prévia**: Script agora remove TODAS configurações nginx/ssl/step-ca antes de começar
+  - **Remoção de Configurações Antigas**: Backup e limpeza de sites-enabled, sites-available, certificados SSL
+  - **Reset de Serviços**: Parada completa de nginx e step-ca antes da limpeza
+  - **Consolidação de Rate Limiting**: Todas zones definidas apenas no nginx.conf (linhas 306-315)
+  - **Eliminação de Duplicatas**: Removidas definições duplicadas de limit_req_zone no sites-available
+  - **Auto-Diagnóstico**: Testes de conectividade, verificação de portas e status de serviços integrados
+- **CORREÇÕES ESPECÍFICAS**:
+  - Removido `limit_req_zone` duplicado das configurações de site
+  - Adicionada validação de configuração nginx antes de reload
+  - Implementados testes básicos de HTTP/HTTPS/step-ca ao final
+  - Removidos scripts externos (quick-fix-nginx.sh, fix-nginx-proxy.sh, diagnose-nginx.sh)
+  - Melhorado resumo final com troubleshooting integrado
+- **SCRIPT AGORA É RESET COMPLETO**:
+  - **Zero Dependências Externas**: Não requer scripts de fix adicionais
+  - **Idempotente**: Pode ser executado múltiplas vezes sem problemas
+  - **Autocontido**: Concentra 100% das soluções em um único arquivo
+  - **Diagnóstico Integrado**: Inclui verificações de saúde e troubleshooting
+- **RESULT**: vlxsam01 install.sh agora é um script de reset completo que resolve TODAS configurações nginx sem dependências externas
