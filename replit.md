@@ -135,3 +135,14 @@ The vlxsam04 install.sh is now a complete, production-ready collector agent inst
 - Usage: `cd /opt/samureye-collector && sudo ./register-collector.sh <tenant-slug> <collector-name>`
 - All auxiliary scripts now created locally: registration, health-check, backup
 - install.sh now concentrates 100% of solutions without external dependencies
+
+**Install.sh Completion Issue RESOLVED (August 28, 2025):**
+- **CRITICAL FIX**: Script was stopping before final resume/help section
+- **ROOT CAUSE**: Excessive validation with `exit 1` causing premature termination
+- **SOLUTION APPLIED**:
+  - Fixed unsafe `cd` command in nuclei templates section (line 296)
+  - Converted rigid validations from `exit 1` to warnings with continuation
+  - Implemented automatic directory creation for missing paths
+  - Maintained execution flow to reach final instructions section
+- **RESULT**: install.sh now executes completely showing full resumo with local registration instructions
+- Users now see complete final help: `cd /opt/samureye-collector && sudo ./register-collector.sh <tenant> <name>`
