@@ -330,31 +330,41 @@ log "CA Name: $CA_NAME"
 log "DNS: $DNS_NAME"
 log "Address: $ADDRESS"
 log "Password saved to: $STEP_CA_DIR/password.txt"
-
-# Obter e salvar fingerprint se o certificado foi criado
-if [ -f "$STEP_CA_DIR/certs/root_ca.crt" ]; then
-    FINGERPRINT=$(step certificate fingerprint "$STEP_CA_DIR/certs/root_ca.crt")
-    log "CA Fingerprint: $FINGERPRINT"
-    echo "$FINGERPRINT" > "$STEP_CA_DIR/fingerprint.txt"
-    chown step-ca:step-ca "$STEP_CA_DIR/fingerprint.txt"
-    chmod 644 "$STEP_CA_DIR/fingerprint.txt"
-else
-    warn "Certificado root não encontrado, verificar configuração"
-fi
-
-# Ajustar permissões finais
-chown -R step-ca:step-ca "$STEP_CA_DIR"
-chmod -R 700 "$STEP_CA_DIR"
-chmod 644 "$STEP_CA_DIR"/certs/*.crt 2>/dev/null || true
+log "CA Fingerprint: $FINGERPRINT"
 
 log "step-ca inicializado e configurado com sucesso"
 
-# Criar serviço systemd para step-ca
+# Verificar configuração antes de iniciar serviço
+log "Verificando configuração step-ca..."
+
+# Testar se a configuração está válida
+if sudo -u step-ca step-ca version > /dev/null 2>&1; then
+    log "✅ step-ca binary funcional"
+else
+    error "❌ step-ca binary não está funcionando"
+fi
+
+# Verificar se o arquivo de configuração existe e é válido
+if [ -f "$STEP_CA_DIR/config/ca.json" ]; then
+    log "✅ Arquivo de configuração encontrado"
+    # Validar JSON
+    if jq empty "$STEP_CA_DIR/config/ca.json" 2>/dev/null; then
+        log "✅ Configuração JSON válida"
+    else
+        error "❌ Configuração JSON inválida"
+    fi
+else
+    error "❌ Arquivo de configuração não encontrado"
+fi
+
+# Atualizar configuração do serviço systemd
+log "Atualizando configuração do serviço systemd..."
+
+# Recriar serviço com configuração corrigida
 cat > /etc/systemd/system/step-ca.service << 'EOF'
 [Unit]
 Description=Step-CA Certificate Authority
 Documentation=https://smallstep.com/docs/step-ca
-Documentation=https://smallstep.com/docs/step-ca/certificate-authority-server-production
 After=network.target
 Wants=network.target
 
@@ -364,7 +374,7 @@ User=step-ca
 Group=step-ca
 Environment=STEPPATH=/etc/step-ca
 WorkingDirectory=/etc/step-ca
-ExecStart=/usr/local/bin/step-ca config/ca.json --password-file password.txt
+ExecStart=/usr/local/bin/step-ca config/ca.json --password-file=password.txt
 ExecReload=/bin/kill -HUP $MAINPID
 Restart=on-failure
 RestartSec=5
@@ -378,29 +388,47 @@ ProtectHome=true
 ProtectSystem=strict
 ReadWritePaths=/etc/step-ca
 PrivateTmp=true
-ProtectControlGroups=true
-ProtectKernelModules=true
-ProtectKernelTunables=true
-RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
-RestrictNamespaces=true
-RestrictRealtime=true
-RestrictSUIDSGID=true
 
 [Install]
 WantedBy=multi-user.target
 EOF
 
-# Habilitar e iniciar step-ca
+# Recarregar daemon e habilitar serviço
 systemctl daemon-reload
 systemctl enable step-ca
-systemctl start step-ca
 
-# Aguardar inicialização
-sleep 3
+# Testar inicialização manual primeiro
+log "Testando step-ca manualmente..."
+sudo -u step-ca bash -c "cd /etc/step-ca && timeout 5 /usr/local/bin/step-ca config/ca.json --password-file=password.txt" &
+MANUAL_PID=$!
+sleep 2
 
-# Verificar status
-if systemctl is-active step-ca >/dev/null 2>&1; then
-    log "✅ step-ca service iniciado com sucesso"
+# Verificar se o processo manual funcionou
+if kill -0 $MANUAL_PID 2>/dev/null; then
+    log "✅ step-ca funciona manualmente"
+    kill $MANUAL_PID 2>/dev/null || true
+    wait $MANUAL_PID 2>/dev/null || true
+    
+    # Agora tentar iniciar o serviço
+    log "Iniciando serviço step-ca..."
+    systemctl start step-ca
+    
+    # Aguardar inicialização
+    sleep 3
+    
+    # Verificar status
+    if systemctl is-active step-ca >/dev/null 2>&1; then
+        log "✅ step-ca service iniciado com sucesso"
+    else
+        warn "❌ Falha ao iniciar step-ca service"
+        log "Status do serviço:"
+        systemctl status step-ca --no-pager || true
+        log "Logs do serviço:"
+        journalctl -u step-ca --no-pager -n 20 || true
+    fi
+else
+    error "❌ step-ca não funciona manualmente - verificar configuração"
+fi
     
     # Mostrar informações
     FINGERPRINT=$(cat /etc/step-ca/fingerprint.txt 2>/dev/null || echo "N/A")

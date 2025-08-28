@@ -1,0 +1,32 @@
+0 upgraded, 0 newly installed, 0 to remove and 4 not upgraded.
+[2025-08-28 16:41:18] 🔐 Instalando step-ca Certificate Authority...
+[2025-08-28 16:41:18] Baixando step CLI v0.25.2...
+[2025-08-28 16:41:19] Baixando step-ca v0.25.2...
+[2025-08-28 16:41:19] URL: https://github.com/smallstep/certificates/releases/download/v0.25.2/step-ca_linux_0.25.2_amd64.tar.gz
+[2025-08-28 16:41:20] Conteúdo extraído em /tmp:
+-rwxr-xr-x 1 1001  127 39594177 Nov 29  2023 /tmp/step-ca
+-rw-r--r-- 1 root root 12491373 Nov 29  2023 /tmp/step-ca.tar.gz
+[2025-08-28 16:41:20] ✅ step-ca encontrado em: /tmp/step-ca
+[2025-08-28 16:41:20] step-ca instalado em /usr/local/bin/step-ca
+[2025-08-28 16:41:20] Verificando instalação do step e step-ca...
+[2025-08-28 16:41:20] ✅ step CLI instalado corretamente: Smallstep CLI/0.25.2 (linux/amd64)
+[2025-08-28 16:41:20] ✅ step-ca instalado corretamente: Smallstep CA/0.25.2 (linux/amd64)
+[2025-08-28 16:41:20] step-ca Certificate Authority CLI instalado com sucesso
+[2025-08-28 16:41:20] Configurando step-ca Certificate Authority...
+[2025-08-28 16:41:20] Diretório /etc/step-ca configurado com permissões corretas
+[2025-08-28 16:41:20] Inicializando Certificate Authority...
+[2025-08-28 16:41:20] Criando certificados e configuração step-ca manualmente...
+Certificate request self-signature ok
+subject=C = BR, ST = SP, L = Sao Paulo, O = SamurEye, OU = Certificate Authority, CN = SamurEye Internal Intermediate CA
+[2025-08-28 16:41:26] Certificados e configuração step-ca criados com sucesso
+[2025-08-28 16:41:26] CA Fingerprint: 9c80d2f548a9787feaa60c61d081862486992ab4965cfbc0b50ad3ae77169c72
+[2025-08-28 16:41:26] step-ca inicializado com sucesso
+[2025-08-28 16:41:26] CA Name: SamurEye Internal CA
+[2025-08-28 16:41:26] DNS: ca.samureye.com.br
+[2025-08-28 16:41:26] Address: :9000
+[2025-08-28 16:41:26] Password saved to: /etc/step-ca/password.txt
+[2025-08-28 16:41:26] CA Fingerprint: 9c80d2f548a9787feaa60c61d081862486992ab4965cfbc0b50ad3ae77169c72
+[2025-08-28 16:41:26] step-ca inicializado e configurado com sucesso
+Created symlink /etc/systemd/system/multi-user.target.wants/step-ca.service → /etc/systemd/system/step-ca.service.
+[2025-08-28 16:41:29] ERROR: Falha ao iniciar step-ca service
+root@vlxsam01:~#
