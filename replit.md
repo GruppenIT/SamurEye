@@ -100,3 +100,10 @@ The vlxsam04 install.sh is now a complete, production-ready collector agent inst
 - Fixed .env ownership: samureye-collector:samureye-collector instead of root:samureye-collector
 - Added comprehensive final permission validation ensuring collector user can access all required files
 - Integrated permission test verification before service startup to prevent PermissionError failures
+
+**Script Duplication Bug Fixed (August 28, 2025):**
+- **CRITICAL FIX**: Removed complete script duplication in vlxsam04 install.sh causing double execution
+- Eliminated duplicate sections 13.1, 13.2, 13.3 causing chown errors with undefined variables
+- Reduced script from 1,807 to 1,185 lines (622 duplicate lines removed)
+- Fixed double execution of configuration steps preventing installation errors
+- Script now has clean single execution path with proper exit handling
