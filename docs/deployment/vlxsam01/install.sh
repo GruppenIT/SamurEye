@@ -266,8 +266,14 @@ EXT
 # Limpar CSR temporário
 rm "$STEP_CA_DIR/intermediate_ca.csr"
 
-# Criar configuração step-ca
-cat > "$STEP_CA_DIR/config/ca.json" << 'JSON_CONFIG'
+# Gerar chave provisioner EC P-256
+openssl ecparam -genkey -name prime256v1 -noout -out "$STEP_CA_DIR/secrets/provisioner_key.pem"
+
+# Converter chave para formato JWK e extrair componentes
+PROVISIONER_JWK=$(openssl pkey -in "$STEP_CA_DIR/secrets/provisioner_key.pem" -pubout -outform DER | base64 -w 0)
+
+# Criar configuração step-ca com configuração mínima válida
+cat > "$STEP_CA_DIR/config/ca.json" << JSON_CONFIG
 {
   "root": "/etc/step-ca/certs/root_ca.crt",
   "federatedRoots": null,
@@ -285,18 +291,8 @@ cat > "$STEP_CA_DIR/config/ca.json" << 'JSON_CONFIG'
   "authority": {
     "provisioners": [
       {
-        "type": "JWK",
-        "name": "admin@samureye.com.br",
-        "key": {
-          "use": "sig",
-          "kty": "EC",
-          "kid": "admin-key",
-          "crv": "P-256",
-          "alg": "ES256",
-          "x": "placeholder-x",
-          "y": "placeholder-y"
-        },
-        "encryptedKey": "placeholder-encrypted-key"
+        "type": "ACME",
+        "name": "acme"
       }
     ]
   },
@@ -311,6 +307,9 @@ cat > "$STEP_CA_DIR/config/ca.json" << 'JSON_CONFIG'
   }
 }
 JSON_CONFIG
+
+# Ajustar permissões da chave provisioner
+chmod 600 "$STEP_CA_DIR/secrets/provisioner_key.pem"
 
 # Gerar fingerprint do certificado root
 FINGERPRINT=$(openssl x509 -noout -fingerprint -sha256 -in "$STEP_CA_DIR/certs/root_ca.crt" | cut -d'=' -f2 | tr -d ':' | tr '[:upper:]' '[:lower:]')

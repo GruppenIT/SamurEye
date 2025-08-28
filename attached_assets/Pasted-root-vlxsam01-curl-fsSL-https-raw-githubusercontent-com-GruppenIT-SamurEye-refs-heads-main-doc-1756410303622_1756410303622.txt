@@ -1,0 +1,84 @@
+root@vlxsam01:~# curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/vlxsam01/install.sh | bash
+[2025-08-28 16:44:33] 🚀 Iniciando instalação do SamurEye Gateway (vlxsam01)...
+[2025-08-28 16:44:33] 🧹 Executando limpeza completa do sistema...
+[2025-08-28 16:44:33] Removendo configurações NGINX antigas...
+[2025-08-28 16:44:33] Removendo certificados SSL antigos...
+[2025-08-28 16:44:33] Removendo step-ca anterior...
+[2025-08-28 16:44:33] Limpando arquivos temporários...
+[2025-08-28 16:44:33] ✅ Limpeza completa finalizada
+[2025-08-28 16:44:33] INFO: 📋 Configurando sistema base...
+[2025-08-28 16:44:33] Atualizando sistema Ubuntu...
+Hit:1 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:2 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:3 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:4 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists... Done
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+Calculating upgrade... Done
+The following packages have been kept back:
+  linux-generic linux-headers-generic linux-image-generic sosreport
+0 upgraded, 0 newly installed, 0 to remove and 4 not upgraded.
+[2025-08-28 16:44:37] Configurando timezone para America/Sao_Paulo...
+[2025-08-28 16:44:37] Instalando pacotes essenciais...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+nginx is already the newest version (1.24.0-2ubuntu7.5).
+certbot is already the newest version (2.9.0-1).
+python3-certbot-nginx is already the newest version (2.9.0-1).
+python3-certbot-dns-cloudflare is already the newest version (2.0.0-1).
+ufw is already the newest version (0.36.2-6).
+curl is already the newest version (8.5.0-2ubuntu10.6).
+wget is already the newest version (1.21.4-1ubuntu4.1).
+git is already the newest version (1:2.43.0-1ubuntu7.3).
+htop is already the newest version (3.3.0-4build1).
+unzip is already the newest version (6.0-28ubuntu4.1).
+jq is already the newest version (1.7.1-3ubuntu0.24.04.1).
+fail2ban is already the newest version (1.0.2-3ubuntu0.1).
+openssl is already the newest version (3.0.13-0ubuntu3.5).
+0 upgraded, 0 newly installed, 0 to remove and 4 not upgraded.
+[2025-08-28 16:44:38] 🔐 Instalando step-ca Certificate Authority...
+[2025-08-28 16:44:38] Baixando step CLI v0.25.2...
+[2025-08-28 16:44:39] Baixando step-ca v0.25.2...
+[2025-08-28 16:44:39] URL: https://github.com/smallstep/certificates/releases/download/v0.25.2/step-ca_linux_0.25.2_amd64.tar.gz
+[2025-08-28 16:44:40] Conteúdo extraído em /tmp:
+-rwxr-xr-x 1 1001  127 39594177 Nov 29  2023 /tmp/step-ca
+-rw-r--r-- 1 root root 12491373 Nov 29  2023 /tmp/step-ca.tar.gz
+[2025-08-28 16:44:40] ✅ step-ca encontrado em: /tmp/step-ca
+[2025-08-28 16:44:40] step-ca instalado em /usr/local/bin/step-ca
+[2025-08-28 16:44:40] Verificando instalação do step e step-ca...
+[2025-08-28 16:44:40] ✅ step CLI instalado corretamente: Smallstep CLI/0.25.2 (linux/amd64)
+[2025-08-28 16:44:40] ✅ step-ca instalado corretamente: Smallstep CA/0.25.2 (linux/amd64)
+[2025-08-28 16:44:40] step-ca Certificate Authority CLI instalado com sucesso
+[2025-08-28 16:44:40] Configurando step-ca Certificate Authority...
+[2025-08-28 16:44:40] Diretório /etc/step-ca configurado com permissões corretas
+[2025-08-28 16:44:40] Inicializando Certificate Authority...
+[2025-08-28 16:44:40] Criando certificados e configuração step-ca manualmente...
+Certificate request self-signature ok
+subject=C = BR, ST = SP, L = Sao Paulo, O = SamurEye, OU = Certificate Authority, CN = SamurEye Internal Intermediate CA
+[2025-08-28 16:44:44] Certificados e configuração step-ca criados com sucesso
+[2025-08-28 16:44:44] CA Fingerprint: a52a60bd736333700bb7ae460f7e9880ad27b1fd2e63c8fd0a3dbe0d9f8cb698
+[2025-08-28 16:44:44] step-ca inicializado com sucesso
+[2025-08-28 16:44:44] CA Name: SamurEye Internal CA
+[2025-08-28 16:44:44] DNS: ca.samureye.com.br
+[2025-08-28 16:44:44] Address: :9000
+[2025-08-28 16:44:44] Password saved to: /etc/step-ca/password.txt
+[2025-08-28 16:44:44] CA Fingerprint: a52a60bd736333700bb7ae460f7e9880ad27b1fd2e63c8fd0a3dbe0d9f8cb698
+[2025-08-28 16:44:44] step-ca inicializado e configurado com sucesso
+Created symlink /etc/systemd/system/multi-user.target.wants/step-ca.service → /etc/systemd/system/step-ca.service.
+[2025-08-28 16:44:47] ERROR: Falha ao iniciar step-ca service
+root@vlxsam01:~# journalctl -f -u step-ca.service
+Aug 28 16:44:49 vlxsam01 systemd[1]: step-ca.service: Failed with result 'exit-code'.
+Aug 28 16:44:55 vlxsam01 systemd[1]: step-ca.service: Scheduled restart job, restart counter is at 2.
+Aug 28 16:44:55 vlxsam01 systemd[1]: Started step-ca.service - Step-CA Certificate Authority.
+Aug 28 16:44:55 vlxsam01 step-ca[132072]: error parsing config/ca.json: error unmarshaling provisioner: illegal base64 data at input byte 12
+Aug 28 16:44:55 vlxsam01 systemd[1]: step-ca.service: Main process exited, code=exited, status=2/INVALIDARGUMENT
+Aug 28 16:44:55 vlxsam01 systemd[1]: step-ca.service: Failed with result 'exit-code'.
+Aug 28 16:45:00 vlxsam01 systemd[1]: step-ca.service: Scheduled restart job, restart counter is at 3.
+Aug 28 16:45:00 vlxsam01 systemd[1]: step-ca.service: Start request repeated too quickly.
+Aug 28 16:45:00 vlxsam01 systemd[1]: step-ca.service: Failed with result 'exit-code'.
+Aug 28 16:45:00 vlxsam01 systemd[1]: Failed to start step-ca.service - Step-CA Certificate Authority.
+^C
+root@vlxsam01:~#
