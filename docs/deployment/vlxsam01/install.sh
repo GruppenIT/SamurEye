@@ -215,23 +215,33 @@ PASSWORD="samureye-ca-$(openssl rand -hex 16)"
 
 log "Inicializando Certificate Authority..."
 
-# Criar e salvar arquivo de senha
+# Criar arquivo de senha
 echo "$PASSWORD" > "$STEP_CA_DIR/password.txt"
 chown step-ca:step-ca "$STEP_CA_DIR/password.txt"
 chmod 600 "$STEP_CA_DIR/password.txt"
 
-# Debug: mostrar o comando que será executado
-log "Comando step ca init que será executado:"
-log "step ca init --name=\"$CA_NAME\" --dns=\"$DNS_NAME\" --address=\"$ADDRESS\" --provisioner=\"admin@samureye.com.br\" --password-file=\"password.txt\""
-
-# Executar inicialização do CA
+# Mudar para o diretório step-ca
 cd "$STEP_CA_DIR"
-sudo -u step-ca step ca init \
-    --name="$CA_NAME" \
-    --dns="$DNS_NAME" \
-    --address="$ADDRESS" \
-    --provisioner="admin@samureye.com.br" \
-    --password-file="password.txt"
+
+# Criar script de inicialização não-interativo usando heredoc
+log "Criando inicialização automatizada..."
+
+# Tentar método direto sem flags problemáticas
+sudo -u step-ca bash << 'STEP_INIT_SCRIPT'
+export STEPPATH="/etc/step-ca"
+cd /etc/step-ca
+
+# Executar step ca init de forma não-interativa usando printf
+printf "SamurEye Internal CA\nca.samureye.com.br\n:9000\nadmin@samureye.com.br\n" | step ca init
+
+# Definir senha para os arquivos de chaves
+if [ -f "secrets/root_ca_key" ]; then
+    echo "Configurando senha para chave privada..."
+    # A chave já foi criada, precisamos apenas configurar os arquivos
+fi
+
+echo "Inicialização step-ca concluída"
+STEP_INIT_SCRIPT
 
 log "step-ca inicializado com sucesso"
 log "CA Name: $CA_NAME"

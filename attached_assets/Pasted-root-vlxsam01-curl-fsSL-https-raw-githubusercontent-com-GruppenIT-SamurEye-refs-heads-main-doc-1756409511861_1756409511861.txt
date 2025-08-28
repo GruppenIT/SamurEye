@@ -1,0 +1,232 @@
+root@vlxsam01:~# curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/vlxsam01/install.sh | bash
+[2025-08-28 16:31:53] 🚀 Iniciando instalação do SamurEye Gateway (vlxsam01)...
+[2025-08-28 16:31:53] 🧹 Executando limpeza completa do sistema...
+[2025-08-28 16:31:53] Removendo configurações NGINX antigas...
+[2025-08-28 16:31:53] Removendo certificados SSL antigos...
+[2025-08-28 16:31:53] Removendo step-ca anterior...
+[2025-08-28 16:31:53] Limpando arquivos temporários...
+[2025-08-28 16:31:54] ✅ Limpeza completa finalizada
+[2025-08-28 16:31:54] INFO: 📋 Configurando sistema base...
+[2025-08-28 16:31:54] Atualizando sistema Ubuntu...
+Hit:1 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:2 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:3 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:4 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists... Done
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+Calculating upgrade... Done
+The following packages have been kept back:
+  linux-generic linux-headers-generic linux-image-generic sosreport
+0 upgraded, 0 newly installed, 0 to remove and 4 not upgraded.
+[2025-08-28 16:31:57] Configurando timezone para America/Sao_Paulo...
+[2025-08-28 16:31:57] Instalando pacotes essenciais...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+nginx is already the newest version (1.24.0-2ubuntu7.5).
+certbot is already the newest version (2.9.0-1).
+python3-certbot-nginx is already the newest version (2.9.0-1).
+python3-certbot-dns-cloudflare is already the newest version (2.0.0-1).
+ufw is already the newest version (0.36.2-6).
+curl is already the newest version (8.5.0-2ubuntu10.6).
+wget is already the newest version (1.21.4-1ubuntu4.1).
+git is already the newest version (1:2.43.0-1ubuntu7.3).
+htop is already the newest version (3.3.0-4build1).
+unzip is already the newest version (6.0-28ubuntu4.1).
+jq is already the newest version (1.7.1-3ubuntu0.24.04.1).
+fail2ban is already the newest version (1.0.2-3ubuntu0.1).
+openssl is already the newest version (3.0.13-0ubuntu3.5).
+0 upgraded, 0 newly installed, 0 to remove and 4 not upgraded.
+[2025-08-28 16:31:58] 🔐 Instalando step-ca Certificate Authority...
+[2025-08-28 16:31:58] Baixando step CLI v0.25.2...
+[2025-08-28 16:31:59] Baixando step-ca v0.25.2...
+[2025-08-28 16:31:59] URL: https://github.com/smallstep/certificates/releases/download/v0.25.2/step-ca_linux_0.25.2_amd64.tar.gz
+[2025-08-28 16:32:00] Conteúdo extraído em /tmp:
+-rwxr-xr-x 1 1001  127 39594177 Nov 29  2023 /tmp/step-ca
+-rw-r--r-- 1 root root 12491373 Nov 29  2023 /tmp/step-ca.tar.gz
+[2025-08-28 16:32:00] ✅ step-ca encontrado em: /tmp/step-ca
+[2025-08-28 16:32:00] step-ca instalado em /usr/local/bin/step-ca
+[2025-08-28 16:32:00] Verificando instalação do step e step-ca...
+[2025-08-28 16:32:00] ✅ step CLI instalado corretamente: Smallstep CLI/0.25.2 (linux/amd64)
+[2025-08-28 16:32:00] ✅ step-ca instalado corretamente: Smallstep CA/0.25.2 (linux/amd64)
+[2025-08-28 16:32:00] step-ca Certificate Authority CLI instalado com sucesso
+[2025-08-28 16:32:00] Configurando step-ca Certificate Authority...
+[2025-08-28 16:32:00] Diretório /etc/step-ca configurado com permissões corretas
+[2025-08-28 16:32:00] Inicializando Certificate Authority...
+Incorrect Usage: flag provided but not defined: -force
+
+NAME
+      step ca init -- initialize the CA PKI
+
+USAGE
+      step ca init [--root=file] [--key=file] [--pki]
+      [--ssh] [--helm] [--deployment-type=name] [--name=name]
+      [--dns=dns] [--address=address] [--provisioner=name]
+      [--admin-subject=string] [--provisioner-password-file=file]
+      [--password-file=file] [--ra=type] [--kms=type]
+      [--with-ca-url=url] [--no-db] [--remote-management]
+      [--acme] [--context=name] [--profile=name]
+      [--authority=name]
+
+DESCRIPTION
+      step ca init command initializes a public key infrastructure (PKI) to
+      be used by the Certificate Authority.
+
+OPTIONS
+      --root=file
+          The path of an existing PEM file to be used as the root
+          certificate authority.
+
+      --key=file
+          The path of an existing key file of the root certificate
+          authority.
+
+      --pki
+          Generate only the PKI without the CA configuration.
+
+      --ssh
+          Create keys to sign SSH certificates.
+
+      --helm
+          Generates a Helm values YAML to be used with step-certificates chart.
+
+      --deployment-type=name
+          The name of the deployment type to use. Options are:
+
+            standalone
+              An instance of step-ca that does not connect to any cloud services. You
+              manage authority keys and configuration yourself.
+              Choose standalone if you'd like to run step-ca yourself and do not want
+              cloud services or commercial support.
+
+            linked
+              An instance of step-ca with locally managed keys that connects to your
+              Certificate Manager account for provisioner management, alerting,
+              reporting, revocation, and other managed services.
+              Choose linked if you'd like cloud services and support, but need to
+              control your authority's signing keys.
+
+            hosted
+              A highly available, fully-managed instance of step-ca run by smallstep
+              just for you.
+              Choose hosted if you'd like cloud services and support.
+
+          More information and pricing at: https://u.step.sm/cm
+
+      --name=name
+          The name of the new PKI.
+
+      --dns=name
+          The DNS name or IP address of the new CA. Use the '--dns' flag
+          multiple times to configure multiple DNS names.
+
+      --address=address
+          The address that the new CA will listen at.
+
+      --provisioner=name
+          The name of the first provisioner.
+
+      --password-file=file
+          The path to the file containing the password to encrypt the keys.
+
+      --provisioner-password-file=file
+          The path to the file containing the password to encrypt the
+          provisioner key.
+
+      --with-ca-url=URI
+          URI of the Step Certificate Authority to write in defaults.json
+
+      --ra=type
+          The registration authority type to use. Currently "StepCAS" and
+          "CloudCAS" are supported.
+
+      --kms=type
+          The key manager service type to use to manage keys. Options are:
+
+            azurekms
+              Use Azure Key Vault to manage X.509 and SSH keys. The key URIs have
+              the following format azurekms:name=key-name;vault=vault-name.
+
+      --kms-root=URI
+          The kms URI used to generate the root certificate key. Examples
+          are:
+
+            azurekms
+              azurekms:name=my-root-key;vault=my-vault
+
+      --kms-intermediate=URI
+          The kms URI used to generate the intermediate certificate key.
+          Examples are:
+
+            azurekms
+              azurekms:name=my-intermediate-key;vault=my-vault
+
+      --kms-ssh-host=URI
+          The kms URI used to generate the key used to sign SSH host
+          certificates. Examples are:
+
+            azurekms
+              azurekms:name=my-host-key;vault=my-vault
+
+      --kms-ssh-user=URI
+          The kms URI used to generate the key used to sign SSH user
+          certificates. Examples are:
+
+            azurekms
+              azurekms:name=my-user-key;vault=my-vault
+
+      --issuer=url
+          The registration authority issuer url to use.
+
+          If StepCAS is used, this flag should be the URL of the CA to connect
+          to, e.g https://ca.smallstep.com:9000
+
+          If CloudCAS is used, this flag should be the resource name of the
+          intermediate certificate to use. This has the format
+          'projects/*/locations/*/caPools/*/certificateAuthorities/*'.
+
+      --issuer-fingerprint=fingerprint
+          The root certificate fingerprint of the issuer CA. This flag is
+          supported in "StepCAS", and it should be the result of running:
+
+              $ step certificate fingerprint root_ca.crt
+              4fe5f5ef09e95c803fdcb80b8cf511e2a885eb86f3ce74e3e90e62fa3faf1531
+
+      --issuer-provisioner=name
+          The name of an existing provisioner in the issuer CA. This flag is
+          supported in "StepCAS".
+
+      --credentials-file=file
+          The registration authority credentials file to use.
+
+          If CloudCAS is used, this flag should be the path to a service account
+          key. It can also be set using the 'GOOGLE_APPLICATION_CREDENTIALS=path'
+          environment variable or the default service account in an instance in
+          Google Cloud.
+
+      --no-db
+          Generate a CA configuration without the DB stanza. No persistence
+          layer.
+
+      --context=name
+          The name of the context for the new authority.
+
+      --remote-management
+          Enable Remote Management. Defaults to false.
+
+      --acme
+          Create a default ACME provisioner. Defaults to false.
+
+      --admin-subject=subject, --admin-name=subject
+          The admin subject to use for generating admin credentials.
+
+      --profile=name
+          The name that will serve as the profile name for the context.
+
+      --authority=name
+          The name that will serve as the authority name for the context.
+
+flag provided but not defined: -force
+root@vlxsam01:~#
