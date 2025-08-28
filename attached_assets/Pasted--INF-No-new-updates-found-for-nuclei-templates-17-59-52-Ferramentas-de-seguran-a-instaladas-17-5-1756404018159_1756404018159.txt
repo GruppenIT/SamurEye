@@ -1,0 +1,55 @@
+[INF] No new updates found for nuclei templates
+[17:59:52] Ferramentas de segurança instaladas
+[17:59:52] 🔐 Instalando step-ca client...
+[17:59:55] step-ca client instalado: Smallstep CLI/0.25.2 (linux/amd64)
+Release Date: 2024-01-19T21:15:39Z
+[17:59:55] step-ca client configurado
+[17:59:55] 🤖 Configurando agente collector...
+[17:59:55] Agente collector configurado
+[17:59:55] 🔧 Configurando variáveis de ambiente...
+[17:59:55] Variáveis de ambiente configuradas
+[17:59:55] ⚙️ Configurando serviços systemd...
+Created symlink /etc/systemd/system/multi-user.target.wants/samureye-collector.service → /etc/systemd/system/samureye-collector.service.
+[17:59:58] ✅ Serviço samureye-collector iniciado com sucesso
+[17:59:58] Serviços systemd configurados
+[17:59:58] 📝 Criando scripts auxiliares...
+[17:59:58] Scripts auxiliares criados
+[17:59:58] 📊 Configurando sistema de logs...
+[17:59:58] Sistema de logs configurado
+[17:59:58] ✅ Executando validação final...
+[17:59:58] 🔍 Verificando masscan...
+[17:59:58] ✅ Masscan encontrado em /usr/bin/masscan
+[17:59:59] 🎉 Validação final concluída com sucesso!
+[17:59:59] 📋 Instalação concluída - Resumo:
+[17:59:59] Collector ID será gerado automaticamente no primeiro boot
+[17:59:59] Usuário: samureye-collector
+[17:59:59] Diretório base: /opt/samureye-collector
+[17:59:59] Logs: /var/log/samureye-collector/
+[17:59:59]
+[17:59:59] 🔧 Comandos úteis:
+[17:59:59]   systemctl start samureye-collector    # Iniciar collector
+[17:59:59]   systemctl status samureye-collector   # Ver status
+[17:59:59]   journalctl -f -u samureye-collector   # Ver logs em tempo real
+[17:59:59]
+[17:59:59] ⚠️  PRÓXIMOS PASSOS MANUAIS:
+[17:59:59] 1. Executar script de registro do collector:
+[17:59:59]    curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/scripts/register-collector.sh | bash -s <tenant-slug> <collector-name>
+[17:59:59]
+[17:59:59] 2. O script de registro irá:
+[17:59:59]    - Gerar certificados mTLS via step-ca
+[17:59:59]    - Registrar collector na plataforma
+[17:59:59]    - Iniciar serviços automaticamente
+[17:59:59]
+[17:59:59] 🚀 vlxsam04 Collector Agent pronto para registro!
+root@vlxsam04:~# journalctl -f -u samureye-collector
+Aug 28 17:59:52 vlxsam04 systemd[1]: samureye-collector.service: Scheduled restart job, restart counter is at 1496.
+Aug 28 17:59:52 vlxsam04 systemd[1]: samureye-collector.service: Failed to load environment files: No such file or directory
+Aug 28 17:59:52 vlxsam04 systemd[1]: samureye-collector.service: Failed to spawn 'start' task: No such file or directory
+Aug 28 17:59:52 vlxsam04 systemd[1]: samureye-collector.service: Failed with result 'resources'.
+Aug 28 17:59:52 vlxsam04 systemd[1]: Failed to start samureye-collector.service - SamurEye Collector Agent - Multi-Tenant.
+Aug 28 17:59:55 vlxsam04 systemd[1]: Stopped samureye-collector.service - SamurEye Collector Agent - Multi-Tenant.
+Aug 28 17:59:58 vlxsam04 systemd[1]: Started samureye-collector.service - SamurEye Collector Agent - vlxsam04.
+Aug 28 17:59:59 vlxsam04 samureye-collector[94111]: 2025-08-28 17:59:59,202 - samureye-collector - INFO - Starting SamurEye Collector Agent c0355198-b952-4630-a00c-2934344bc2ba
+Aug 28 17:59:59 vlxsam04 samureye-collector[94111]: /opt/samureye-collector/collector_agent.py:147: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+Aug 28 17:59:59 vlxsam04 samureye-collector[94111]:   'timestamp': datetime.utcnow().isoformat(),
+Aug 28 18:00:29 vlxsam04 samureye-collector[94111]: 2025-08-28 18:00:29,444 - samureye-collector - WARNING - Heartbeat error:
