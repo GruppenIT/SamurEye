@@ -862,7 +862,7 @@ NUCLEI_TEMPLATES_DIR=/opt/samureye-collector/tools/nuclei/templates
 EOF
 
 # Permissões do arquivo de configuração
-chmod 600 "$CONFIG_DIR/.env"
+chmod 644 "$CONFIG_DIR/.env"
 chown "$COLLECTOR_USER:$COLLECTOR_USER" "$CONFIG_DIR/.env"
 
 log "Variáveis de ambiente configuradas"
@@ -1665,8 +1665,8 @@ COLLECTOR_ID=auto-generated
 HEARTBEAT_INTERVAL=30
 LOG_LEVEL=INFO
 ENVEOF
-    chown root:samureye-collector /etc/samureye-collector/.env
-    chmod 640 /etc/samureye-collector/.env
+    chown samureye-collector:samureye-collector /etc/samureye-collector/.env
+    chmod 644 /etc/samureye-collector/.env
 fi
 
 # Verificar agente Python
@@ -1744,6 +1744,33 @@ elif [[ -f "/usr/local/bin/masscan" ]]; then
 else
     warn "⚠️ Masscan não encontrado nos caminhos esperados"
 fi
+
+# ============================================================================
+# CORREÇÃO FINAL DE PERMISSÕES
+# ============================================================================
+
+log "🔒 Aplicando correção final de permissões..."
+
+# Garantir que todos os arquivos/diretórios têm as permissões corretas
+chown -R "$COLLECTOR_USER:$COLLECTOR_USER" "$COLLECTOR_DIR"
+chown -R "$COLLECTOR_USER:$COLLECTOR_USER" "$LOG_DIR"
+chown -R "$COLLECTOR_USER:$COLLECTOR_USER" "$CONFIG_DIR"
+
+# Garantir permissões específicas do arquivo .env
+chmod 644 "$CONFIG_DIR/.env"
+chown "$COLLECTOR_USER:$COLLECTOR_USER" "$CONFIG_DIR/.env"
+
+# Verificar se o usuário consegue acessar o arquivo .env
+if sudo -u "$COLLECTOR_USER" test -r "$CONFIG_DIR/.env"; then
+    log "✅ Arquivo .env acessível pelo usuário $COLLECTOR_USER"
+else
+    error "❌ Erro: Usuário $COLLECTOR_USER não consegue acessar $CONFIG_DIR/.env"
+fi
+
+# Garantir permissões de execução nos scripts
+find "$COLLECTOR_DIR/scripts" -name "*.sh" -type f -exec chmod +x {} \; 2>/dev/null || true
+
+log "✅ Permissões finais aplicadas com sucesso"
 
 # Teste Python básico
 log "🧪 Testando agente Python..."

@@ -93,4 +93,10 @@ Successfully completed full collector agent installation with all required compo
 - Comprehensive validation and error handling
 - Fixed auxiliary scripts creation with proper directory structure
 
-The vlxsam04 install.sh is now a complete, production-ready collector agent installer that concentrates ALL solutions in a single file without external dependencies. Directory creation bug fixed - ready for manual collector registration process.
+The vlxsam04 install.sh is now a complete, production-ready collector agent installer that concentrates ALL solutions in a single file without external dependencies. Directory creation bug fixed, permission issues resolved with integrated final permission correction - ready for manual collector registration process.
+
+**Critical Permission Fix Integrated (August 28, 2025):**
+- Fixed .env file permissions: 644 instead of 640/600 (readable by samureye-collector user)
+- Fixed .env ownership: samureye-collector:samureye-collector instead of root:samureye-collector
+- Added comprehensive final permission validation ensuring collector user can access all required files
+- Integrated permission test verification before service startup to prevent PermissionError failures
