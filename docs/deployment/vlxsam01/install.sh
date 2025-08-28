@@ -226,21 +226,15 @@ cd "$STEP_CA_DIR"
 # Criar script de inicialização não-interativo usando heredoc
 log "Criando inicialização automatizada..."
 
-# Tentar método direto sem flags problemáticas
+# Criar inicialização standalone (não hosted)
 sudo -u step-ca bash << 'STEP_INIT_SCRIPT'
 export STEPPATH="/etc/step-ca"
 cd /etc/step-ca
 
-# Executar step ca init de forma não-interativa usando printf
-printf "SamurEye Internal CA\nca.samureye.com.br\n:9000\nadmin@samureye.com.br\n" | step ca init
+# Executar step ca init especificando deployment standalone
+printf "standalone\nSamurEye Internal CA\nca.samureye.com.br\n:9000\nadmin@samureye.com.br\n$(cat password.txt)\n$(cat password.txt)\n" | step ca init --deployment-type=standalone
 
-# Definir senha para os arquivos de chaves
-if [ -f "secrets/root_ca_key" ]; then
-    echo "Configurando senha para chave privada..."
-    # A chave já foi criada, precisamos apenas configurar os arquivos
-fi
-
-echo "Inicialização step-ca concluída"
+echo "Inicialização step-ca standalone concluída"
 STEP_INIT_SCRIPT
 
 log "step-ca inicializado com sucesso"
