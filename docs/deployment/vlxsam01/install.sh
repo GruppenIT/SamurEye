@@ -194,54 +194,61 @@ log "Configurando step-ca Certificate Authority..."
 
 # Diretório de configuração
 STEP_CA_DIR="/etc/step-ca"
-mkdir -p "$STEP_CA_DIR"
+mkdir -p "$STEP_CA_DIR"/{certs,secrets,config}
+chown -R step-ca:step-ca "$STEP_CA_DIR"
+chmod -R 755 "$STEP_CA_DIR"
 
-# Gerar configuração step-ca
-cat > /tmp/step-ca-init.sh << 'STEP_INIT'
-#!/bin/bash
-# Inicializar step-ca de forma não-interativa
+log "Diretório $STEP_CA_DIR configurado com permissões corretas"
 
-cd /etc/step-ca
-
-# Definir variáveis
+# Definir variáveis para inicialização
 CA_NAME="SamurEye Internal CA"
 DNS_NAME="ca.samureye.com.br"
 ADDRESS=":9000"
 PASSWORD="samureye-ca-$(openssl rand -hex 16)"
 
+log "Inicializando Certificate Authority..."
+
+# Executar inicialização diretamente como usuário step-ca
+sudo -u step-ca bash -c "
+set -e
+cd /etc/step-ca
+
 # Salvar senha em arquivo seguro
-echo "$PASSWORD" > /etc/step-ca/password.txt
-chmod 600 /etc/step-ca/password.txt
+echo '$PASSWORD' > password.txt
+chmod 600 password.txt
 
 # Inicializar CA
 step ca init \
-    --name="$CA_NAME" \
-    --dns="$DNS_NAME" \
-    --address="$ADDRESS" \
-    --provisioner="admin@samureye.com.br" \
-    --password-file="/etc/step-ca/password.txt" \
-    --root="/etc/step-ca/certs/root_ca.crt" \
-    --key="/etc/step-ca/secrets/root_ca_key" \
-    --with-ca-url="https://$DNS_NAME"
+    --name='$CA_NAME' \
+    --dns='$DNS_NAME' \
+    --address='$ADDRESS' \
+    --provisioner='admin@samureye.com.br' \
+    --password-file='password.txt' \
+    --force
 
-echo "step-ca inicializado com sucesso"
-echo "CA Name: $CA_NAME"
-echo "DNS: $DNS_NAME"
-echo "Address: $ADDRESS"
-echo "Password saved to: /etc/step-ca/password.txt"
+echo 'step-ca inicializado com sucesso'
+echo 'CA Name: $CA_NAME'
+echo 'DNS: $DNS_NAME'
+echo 'Address: $ADDRESS'
+echo 'Password saved to: /etc/step-ca/password.txt'
 
-# Obter fingerprint
-FINGERPRINT=$(step certificate fingerprint /etc/step-ca/certs/root_ca.crt)
-echo "CA Fingerprint: $FINGERPRINT"
-echo "$FINGERPRINT" > /etc/step-ca/fingerprint.txt
-STEP_INIT
+# Obter e salvar fingerprint
+if [ -f 'certs/root_ca.crt' ]; then
+    FINGERPRINT=\$(step certificate fingerprint certs/root_ca.crt)
+    echo 'CA Fingerprint: \$FINGERPRINT'
+    echo \"\$FINGERPRINT\" > fingerprint.txt
+    chmod 644 fingerprint.txt
+else
+    echo 'Certificado root não encontrado, verificar configuração'
+fi
+"
 
-chmod +x /tmp/step-ca-init.sh
-sudo -u step-ca /tmp/step-ca-init.sh
-
-# Ajustar propriedades
+# Ajustar permissões finais
 chown -R step-ca:step-ca "$STEP_CA_DIR"
 chmod -R 700 "$STEP_CA_DIR"
+chmod 644 "$STEP_CA_DIR"/certs/*.crt 2>/dev/null || true
+
+log "step-ca inicializado e configurado com sucesso"
 
 # Criar serviço systemd para step-ca
 cat > /etc/systemd/system/step-ca.service << 'EOF'
