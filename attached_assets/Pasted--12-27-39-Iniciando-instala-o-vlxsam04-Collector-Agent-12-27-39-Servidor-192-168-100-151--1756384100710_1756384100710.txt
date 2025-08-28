@@ -1,0 +1,309 @@
+[12:27:39] 🚀 Iniciando instalação vlxsam04 - Collector Agent
+[12:27:39] Servidor: 192.168.100.151 (rede interna isolada)
+[12:27:39] Collector Directory: /opt/samureye-collector
+[12:27:39] 📦 Atualizando sistema base...
+Hit:1 https://deb.nodesource.com/node_20.x nodistro InRelease
+Hit:2 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:3 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:4 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:5 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+All packages are up to date.
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+Calculating upgrade... Done
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+curl is already the newest version (8.5.0-2ubuntu10.6).
+wget is already the newest version (1.21.4-1ubuntu4.1).
+gnupg is already the newest version (2.4.4-2ubuntu17.3).
+software-properties-common is already the newest version (0.99.49.3).
+apt-transport-https is already the newest version (2.8.3).
+ca-certificates is already the newest version (20240203).
+lsb-release is already the newest version (12.0-2).
+jq is already the newest version (1.7.1-3ubuntu0.24.04.1).
+htop is already the newest version (3.3.0-4build1).
+iotop is already the newest version (0.6-42-ga14256a-0.2build1).
+netcat-openbsd is already the newest version (1.226-1ubuntu2).
+net-tools is already the newest version (2.10-0.1ubuntu4.4).
+dnsutils is already the newest version (1:9.18.30-0ubuntu0.24.04.2).
+tcpdump is already the newest version (4.99.4-3ubuntu4).
+python3.12 is already the newest version (3.12.3-1ubuntu0.8).
+python3.12-venv is already the newest version (3.12.3-1ubuntu0.8).
+python3.12-dev is already the newest version (3.12.3-1ubuntu0.8).
+python3-pip is already the newest version (24.0+dfsg-1ubuntu1.2).
+build-essential is already the newest version (12.10ubuntu1).
+git is already the newest version (1:2.43.0-1ubuntu7.3).
+unzip is already the newest version (6.0-28ubuntu4.1).
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+[12:27:43] Sistema base atualizado
+[12:27:43] 🟢 Instalando Node.js 20.x...
+2025-08-28 12:27:44 - Installing pre-requisites
+Hit:1 https://deb.nodesource.com/node_20.x nodistro InRelease
+Hit:2 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:3 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:4 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:5 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists... Done
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+apt-transport-https is already the newest version (2.8.3).
+ca-certificates is already the newest version (20240203).
+curl is already the newest version (8.5.0-2ubuntu10.6).
+gnupg is already the newest version (2.4.4-2ubuntu17.3).
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+Hit:1 https://deb.nodesource.com/node_20.x nodistro InRelease
+Hit:2 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:3 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:4 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:5 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists... Done
+2025-08-28 12:27:49 - Repository configured successfully.
+2025-08-28 12:27:49 - To install Node.js, run: apt-get install nodejs -y
+2025-08-28 12:27:49 - You can use N|solid Runtime as a node.js alternative
+2025-08-28 12:27:49 - To install N|solid Runtime, run: apt-get install nsolid -y
+
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+nodejs is already the newest version (20.19.4-1nodesource1).
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+[12:27:50] Node.js instalado: v20.19.4
+[12:27:50] npm instalado: 10.8.2
+[12:27:50] 🐍 Configurando Python 3.12...
+[12:27:50] Configurando pip para Python 3.12...
+[12:27:51] ✅ pip funcionando, atualizando com --break-system-packages (Ubuntu 24.04)...
+Requirement already satisfied: pip in /usr/lib/python3/dist-packages (24.0)
+Collecting pip
+  Using cached pip-25.2-py3-none-any.whl.metadata (4.7 kB)
+Requirement already satisfied: setuptools in /usr/lib/python3/dist-packages (68.1.2)
+Collecting setuptools
+  Using cached setuptools-80.9.0-py3-none-any.whl.metadata (6.6 kB)
+Requirement already satisfied: wheel in /usr/lib/python3/dist-packages (0.42.0)
+Collecting wheel
+  Using cached wheel-0.45.1-py3-none-any.whl.metadata (2.3 kB)
+Using cached pip-25.2-py3-none-any.whl (1.8 MB)
+Using cached setuptools-80.9.0-py3-none-any.whl (1.2 MB)
+Using cached wheel-0.45.1-py3-none-any.whl (72 kB)
+Installing collected packages: wheel, setuptools, pip
+  Attempting uninstall: wheel
+    Found existing installation: wheel 0.42.0
+[12:27:52] ⚠️ Pip upgrade falhou, usando versão do sistema...
+[12:27:52] 📦 Instalando dependências Python...
+Requirement already satisfied: aiohttp in /usr/local/lib/python3.12/dist-packages (3.12.15)
+Requirement already satisfied: websockets in /usr/local/lib/python3.12/dist-packages (15.0.1)
+Requirement already satisfied: cryptography in /usr/lib/python3/dist-packages (41.0.7)
+Requirement already satisfied: requests in /usr/lib/python3/dist-packages (2.31.0)
+Requirement already satisfied: certifi in /usr/lib/python3/dist-packages (2023.11.17)
+Requirement already satisfied: psutil in /usr/local/lib/python3.12/dist-packages (7.0.0)
+Requirement already satisfied: pyyaml in /usr/lib/python3/dist-packages (6.0.1)
+Requirement already satisfied: structlog in /usr/local/lib/python3.12/dist-packages (25.4.0)
+Requirement already satisfied: python-multipart in /usr/local/lib/python3.12/dist-packages (0.0.20)
+Requirement already satisfied: aiofiles in /usr/local/lib/python3.12/dist-packages (24.1.0)
+Requirement already satisfied: aiohappyeyeballs>=2.5.0 in /usr/local/lib/python3.12/dist-packages (from aiohttp) (2.6.1)
+Requirement already satisfied: aiosignal>=1.4.0 in /usr/local/lib/python3.12/dist-packages (from aiohttp) (1.4.0)
+Requirement already satisfied: attrs>=17.3.0 in /usr/lib/python3/dist-packages (from aiohttp) (23.2.0)
+Requirement already satisfied: frozenlist>=1.1.1 in /usr/local/lib/python3.12/dist-packages (from aiohttp) (1.7.0)
+Requirement already satisfied: multidict<7.0,>=4.5 in /usr/local/lib/python3.12/dist-packages (from aiohttp) (6.6.4)
+Requirement already satisfied: propcache>=0.2.0 in /usr/local/lib/python3.12/dist-packages (from aiohttp) (0.3.2)
+Requirement already satisfied: yarl<2.0,>=1.17.0 in /usr/local/lib/python3.12/dist-packages (from aiohttp) (1.20.1)
+Requirement already satisfied: typing-extensions>=4.2 in /usr/local/lib/python3.12/dist-packages (from aiosignal>=1.4.0->aiohttp) (4.15.0)
+Requirement already satisfied: idna>=2.0 in /usr/lib/python3/dist-packages (from yarl<2.0,>=1.17.0->aiohttp) (3.6)
+WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv
+[12:27:54] Python 3.12 e dependências instaladas
+[12:27:54] 🔍 Validando compatibilidade Ubuntu 24.04...
+[12:27:54] Ubuntu detectado: 24.04 (noble)
+[12:27:54] ✅ Ubuntu 24.04 Noble detectado - compatibilidade OK
+[12:27:54] 🧪 Testando componentes instalados...
+[12:27:54] ✅ Python 3.12: Python 3.12.3
+[12:27:54] Testando importações Python...
+✅ Todas as dependências Python importadas com sucesso
+✅ Python path: /usr/bin/python3
+[12:27:54] ✅ netcat-openbsd disponível: /usr/bin/nc
+[12:27:54] ✅ Node.js 20.x: v20.19.4
+[12:27:54] 🎉 Validação de compatibilidade concluída com sucesso!
+[12:27:54] 👤 Configurando usuário collector...
+[12:27:54] Usuário e diretórios configurados
+[12:27:54] 🔧 Instalando ferramentas de segurança...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+nmap is already the newest version (7.94+git20230807.3be01efb1+dfsg-3build2).
+nmap-common is already the newest version (7.94+git20230807.3be01efb1+dfsg-3build2).
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following NEW packages will be installed:
+  masscan
+0 upgraded, 1 newly installed, 0 to remove and 0 not upgraded.
+Need to get 237 kB of archives.
+After this operation, 566 kB of additional disk space will be used.
+Err:1 http://archive.ubuntu.com/ubuntu noble/universe amd64 masscan amd64 2:1.3.2+ds1-1
+  403  Forbidden [IP: 91.189.91.83 80]
+[12:27:57] ⚠️ Masscan via apt falhou, compilando do source...
+Cloning into 'masscan'...
+remote: Enumerating objects: 6349, done.
+remote: Total 6349 (delta 0), reused 0 (delta 0), pack-reused 6349 (from 1)
+Receiving objects: 100% (6349/6349), 3.56 MiB | 11.46 MiB/s, done.
+Resolving deltas: 100% (4616/4616), done.
+cc -g -ggdb    -Wall -O2 -c src/crypto-base64.c -o tmp/crypto-base64.o
+cc -g -ggdb    -Wall -O2 -c src/crypto-blackrock.c -o tmp/crypto-blackrock.o
+cc -g -ggdb    -Wall -O2 -c src/crypto-blackrock2.c -o tmp/crypto-blackrock2.o
+cc -g -ggdb    -Wall -O2 -c src/crypto-lcg.c -o tmp/crypto-lcg.o
+cc -g -ggdb    -Wall -O2 -c src/crypto-primegen.c -o tmp/crypto-primegen.o
+cc -g -ggdb    -Wall -O2 -c src/crypto-siphash24.c -o tmp/crypto-siphash24.o
+cc -g -ggdb    -Wall -O2 -c src/event-timeout.c -o tmp/event-timeout.o
+cc -g -ggdb    -Wall -O2 -c src/in-binary.c -o tmp/in-binary.o
+cc -g -ggdb    -Wall -O2 -c src/in-filter.c -o tmp/in-filter.o
+cc -g -ggdb    -Wall -O2 -c src/in-report.c -o tmp/in-report.o
+cc -g -ggdb    -Wall -O2 -c src/main-conf.c -o tmp/main-conf.o -DGIT=\"1.3.2-213-gb99d433\"
+cc -g -ggdb    -Wall -O2 -c src/main-dedup.c -o tmp/main-dedup.o
+cc -g -ggdb    -Wall -O2 -c src/main-initadapter.c -o tmp/main-initadapter.o
+cc -g -ggdb    -Wall -O2 -c src/main-listscan.c -o tmp/main-listscan.o
+cc -g -ggdb    -Wall -O2 -c src/main-ptrace.c -o tmp/main-ptrace.o
+cc -g -ggdb    -Wall -O2 -c src/main-readrange.c -o tmp/main-readrange.o
+cc -g -ggdb    -Wall -O2 -c src/main-status.c -o tmp/main-status.o
+cc -g -ggdb    -Wall -O2 -c src/main-throttle.c -o tmp/main-throttle.o
+cc -g -ggdb    -Wall -O2 -c src/main.c -o tmp/main.o
+cc -g -ggdb    -Wall -O2 -c src/masscan-app.c -o tmp/masscan-app.o
+cc -g -ggdb    -Wall -O2 -c src/massip-addr.c -o tmp/massip-addr.o
+src/massip-addr.c: In function ‘ipv6address_selftest’:
+src/massip-addr.c:292:19: warning: excess elements in union initializer
+  292 |       {NULL, {{0, 0}, 0}}
+      |                   ^
+src/massip-addr.c:292:19: note: (near initialization for ‘tests[8].ip_addr.<anonymous>’)
+src/massip-addr.c:296:13: warning: unused variable ‘ip’ [-Wunused-variable]
+  296 |   ipaddress ip;
+      |             ^~
+cc -g -ggdb    -Wall -O2 -c src/massip-parse.c -o tmp/massip-parse.o
+cc -g -ggdb    -Wall -O2 -c src/massip-rangesv4.c -o tmp/massip-rangesv4.o
+cc -g -ggdb    -Wall -O2 -c src/massip-rangesv6.c -o tmp/massip-rangesv6.o
+cc -g -ggdb    -Wall -O2 -c src/massip.c -o tmp/massip.o
+cc -g -ggdb    -Wall -O2 -c src/misc-rstfilter.c -o tmp/misc-rstfilter.o
+cc -g -ggdb    -Wall -O2 -c src/out-binary.c -o tmp/out-binary.o
+In function ‘_put_byte’,
+    inlined from ‘binary_out_status_ipv6’ at src/out-binary.c:135:5,
+    inlined from ‘binary_out_status’ at src/out-binary.c:162:9:
+src/out-binary.c:58:23: warning: array subscript 257 is outside array bounds of ‘unsigned char[257]’ [-Warray-bounds=]
+   58 |         buf[offset++] = (unsigned char)(num>>0);
+      |         ~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~
+src/out-binary.c: In function ‘binary_out_status’:
+src/out-binary.c:106:19: note: at offset 257 into object ‘buf’ of size 257
+  106 |     unsigned char buf[256+1];
+      |                   ^~~
+cc -g -ggdb    -Wall -O2 -c src/out-certs.c -o tmp/out-certs.o
+cc -g -ggdb    -Wall -O2 -c src/out-grepable.c -o tmp/out-grepable.o
+cc -g -ggdb    -Wall -O2 -c src/out-hostonly.c -o tmp/out-hostonly.o
+cc -g -ggdb    -Wall -O2 -c src/out-json.c -o tmp/out-json.o
+cc -g -ggdb    -Wall -O2 -c src/out-ndjson.c -o tmp/out-ndjson.o
+cc -g -ggdb    -Wall -O2 -c src/out-null.c -o tmp/out-null.o
+cc -g -ggdb    -Wall -O2 -c src/out-redis.c -o tmp/out-redis.o
+cc -g -ggdb    -Wall -O2 -c src/out-tcp-services.c -o tmp/out-tcp-services.o
+cc -g -ggdb    -Wall -O2 -c src/out-text.c -o tmp/out-text.o
+cc -g -ggdb    -Wall -O2 -c src/out-unicornscan.c -o tmp/out-unicornscan.o
+cc -g -ggdb    -Wall -O2 -c src/out-xml.c -o tmp/out-xml.o
+cc -g -ggdb    -Wall -O2 -c src/output.c -o tmp/output.o
+cc -g -ggdb    -Wall -O2 -c src/pixie-backtrace.c -o tmp/pixie-backtrace.o
+cc -g -ggdb    -Wall -O2 -c src/pixie-file.c -o tmp/pixie-file.o
+cc -g -ggdb    -Wall -O2 -c src/pixie-threads.c -o tmp/pixie-threads.o
+cc -g -ggdb    -Wall -O2 -c src/pixie-timer.c -o tmp/pixie-timer.o
+cc -g -ggdb    -Wall -O2 -c src/proto-arp.c -o tmp/proto-arp.o
+cc -g -ggdb    -Wall -O2 -c src/proto-banner1.c -o tmp/proto-banner1.o
+cc -g -ggdb    -Wall -O2 -c src/proto-banout.c -o tmp/proto-banout.o
+cc -g -ggdb    -Wall -O2 -c src/proto-coap.c -o tmp/proto-coap.o
+cc -g -ggdb    -Wall -O2 -c src/proto-dns.c -o tmp/proto-dns.o
+cc -g -ggdb    -Wall -O2 -c src/proto-ftp.c -o tmp/proto-ftp.o
+cc -g -ggdb    -Wall -O2 -c src/proto-http.c -o tmp/proto-http.o
+cc -g -ggdb    -Wall -O2 -c src/proto-icmp.c -o tmp/proto-icmp.o
+cc -g -ggdb    -Wall -O2 -c src/proto-imap4.c -o tmp/proto-imap4.o
+cc -g -ggdb    -Wall -O2 -c src/proto-isakmp.c -o tmp/proto-isakmp.o
+cc -g -ggdb    -Wall -O2 -c src/proto-mc.c -o tmp/proto-mc.o
+cc -g -ggdb    -Wall -O2 -c src/proto-memcached.c -o tmp/proto-memcached.o
+cc -g -ggdb    -Wall -O2 -c src/proto-netbios.c -o tmp/proto-netbios.o
+cc -g -ggdb    -Wall -O2 -c src/proto-ntlmssp.c -o tmp/proto-ntlmssp.o
+cc -g -ggdb    -Wall -O2 -c src/proto-ntp.c -o tmp/proto-ntp.o
+cc -g -ggdb    -Wall -O2 -c src/proto-oproto.c -o tmp/proto-oproto.o
+cc -g -ggdb    -Wall -O2 -c src/proto-pop3.c -o tmp/proto-pop3.o
+cc -g -ggdb    -Wall -O2 -c src/proto-preprocess.c -o tmp/proto-preprocess.o
+cc -g -ggdb    -Wall -O2 -c src/proto-sctp.c -o tmp/proto-sctp.o
+cc -g -ggdb    -Wall -O2 -c src/proto-smb.c -o tmp/proto-smb.o
+cc -g -ggdb    -Wall -O2 -c src/proto-smtp.c -o tmp/proto-smtp.o
+cc -g -ggdb    -Wall -O2 -c src/proto-snmp.c -o tmp/proto-snmp.o
+cc -g -ggdb    -Wall -O2 -c src/proto-ssh.c -o tmp/proto-ssh.o
+cc -g -ggdb    -Wall -O2 -c src/proto-ssl-test.c -o tmp/proto-ssl-test.o
+cc -g -ggdb    -Wall -O2 -c src/proto-ssl.c -o tmp/proto-ssl.o
+cc -g -ggdb    -Wall -O2 -c src/proto-tcp-rdp.c -o tmp/proto-tcp-rdp.o
+cc -g -ggdb    -Wall -O2 -c src/proto-tcp-telnet.c -o tmp/proto-tcp-telnet.o
+cc -g -ggdb    -Wall -O2 -c src/proto-udp.c -o tmp/proto-udp.o
+cc -g -ggdb    -Wall -O2 -c src/proto-versioning.c -o tmp/proto-versioning.o
+cc -g -ggdb    -Wall -O2 -c src/proto-vnc.c -o tmp/proto-vnc.o
+cc -g -ggdb    -Wall -O2 -c src/proto-x509.c -o tmp/proto-x509.o
+cc -g -ggdb    -Wall -O2 -c src/proto-zeroaccess.c -o tmp/proto-zeroaccess.o
+cc -g -ggdb    -Wall -O2 -c src/rawsock-getif.c -o tmp/rawsock-getif.o
+cc -g -ggdb    -Wall -O2 -c src/rawsock-getip.c -o tmp/rawsock-getip.o
+cc -g -ggdb    -Wall -O2 -c src/rawsock-getip6.c -o tmp/rawsock-getip6.o
+cc -g -ggdb    -Wall -O2 -c src/rawsock-getmac.c -o tmp/rawsock-getmac.o
+cc -g -ggdb    -Wall -O2 -c src/rawsock-getroute.c -o tmp/rawsock-getroute.o
+cc -g -ggdb    -Wall -O2 -c src/rawsock-pcapfile.c -o tmp/rawsock-pcapfile.o
+cc -g -ggdb    -Wall -O2 -c src/rawsock.c -o tmp/rawsock.o
+cc -g -ggdb    -Wall -O2 -c src/read-service-probes.c -o tmp/read-service-probes.o
+cc -g -ggdb    -Wall -O2 -c src/rte-ring.c -o tmp/rte-ring.o
+cc -g -ggdb    -Wall -O2 -c src/scripting-banner.c -o tmp/scripting-banner.o
+cc -g -ggdb    -Wall -O2 -c src/scripting-masscan.c -o tmp/scripting-masscan.o
+cc -g -ggdb    -Wall -O2 -c src/scripting.c -o tmp/scripting.o
+cc -g -ggdb    -Wall -O2 -c src/smack1.c -o tmp/smack1.o
+cc -g -ggdb    -Wall -O2 -c src/smackqueue.c -o tmp/smackqueue.o
+cc -g -ggdb    -Wall -O2 -c src/stack-arpv4.c -o tmp/stack-arpv4.o
+cc -g -ggdb    -Wall -O2 -c src/stack-if.c -o tmp/stack-if.o
+cc -g -ggdb    -Wall -O2 -c src/stack-ndpv6.c -o tmp/stack-ndpv6.o
+cc -g -ggdb    -Wall -O2 -c src/stack-queue.c -o tmp/stack-queue.o
+cc -g -ggdb    -Wall -O2 -c src/stack-src.c -o tmp/stack-src.o
+cc -g -ggdb    -Wall -O2 -c src/stack-tcp-app.c -o tmp/stack-tcp-app.o
+cc -g -ggdb    -Wall -O2 -c src/stack-tcp-core.c -o tmp/stack-tcp-core.o
+cc -g -ggdb    -Wall -O2 -c src/stub-lua.c -o tmp/stub-lua.o
+cc -g -ggdb    -Wall -O2 -c src/stub-pcap.c -o tmp/stub-pcap.o
+cc -g -ggdb    -Wall -O2 -c src/stub-pfring.c -o tmp/stub-pfring.o
+cc -g -ggdb    -Wall -O2 -c src/syn-cookie.c -o tmp/syn-cookie.o
+cc -g -ggdb    -Wall -O2 -c src/templ-nmap-payloads.c -o tmp/templ-nmap-payloads.o
+cc -g -ggdb    -Wall -O2 -c src/templ-payloads.c -o tmp/templ-payloads.o
+cc -g -ggdb    -Wall -O2 -c src/templ-pkt.c -o tmp/templ-pkt.o
+cc -g -ggdb    -Wall -O2 -c src/templ-tcp-hdr.c -o tmp/templ-tcp-hdr.o
+cc -g -ggdb    -Wall -O2 -c src/util-checksum.c -o tmp/util-checksum.o
+cc -g -ggdb    -Wall -O2 -c src/util-errormsg.c -o tmp/util-errormsg.o
+cc -g -ggdb    -Wall -O2 -c src/util-extract.c -o tmp/util-extract.o
+cc -g -ggdb    -Wall -O2 -c src/util-logger.c -o tmp/util-logger.o
+cc -g -ggdb    -Wall -O2 -c src/util-malloc.c -o tmp/util-malloc.o
+cc -g -ggdb    -Wall -O2 -c src/util-safefunc.c -o tmp/util-safefunc.o
+cc -g -ggdb    -Wall -O2 -c src/vulncheck-heartbleed.c -o tmp/vulncheck-heartbleed.o
+cc -g -ggdb    -Wall -O2 -c src/vulncheck-ntp-monlist.c -o tmp/vulncheck-ntp-monlist.o
+cc -g -ggdb    -Wall -O2 -c src/vulncheck-sslv3.c -o tmp/vulncheck-sslv3.o
+cc -g -ggdb    -Wall -O2 -c src/vulncheck.c -o tmp/vulncheck.o
+cc -g -ggdb    -Wall -O2 -c src/xring.c -o tmp/xring.o
+cc -g -ggdb    -Wall -O2 -o bin/masscan tmp/crypto-base64.o tmp/crypto-blackrock.o tmp/crypto-blackrock2.o tmp/crypto-lcg.o tmp/crypto-primegen.o tmp/crypto-siphash24.o tmp/event-timeout.o tmp/in-binary.o tmp/in-filter.o tmp/in-report.o tmp/main-conf.o tmp/main-dedup.o tmp/main-initadapter.o tmp/main-listscan.o tmp/main-ptrace.o tmp/main-readrange.o tmp/main-status.o tmp/main-throttle.o tmp/main.o tmp/masscan-app.o tmp/massip-addr.o tmp/massip-parse.o tmp/massip-rangesv4.o tmp/massip-rangesv6.o tmp/massip.o tmp/misc-rstfilter.o tmp/out-binary.o tmp/out-certs.o tmp/out-grepable.o tmp/out-hostonly.o tmp/out-json.o tmp/out-ndjson.o tmp/out-null.o tmp/out-redis.o tmp/out-tcp-services.o tmp/out-text.o tmp/out-unicornscan.o tmp/out-xml.o tmp/output.o tmp/pixie-backtrace.o tmp/pixie-file.o tmp/pixie-threads.o tmp/pixie-timer.o tmp/proto-arp.o tmp/proto-banner1.o tmp/proto-banout.o tmp/proto-coap.o tmp/proto-dns.o tmp/proto-ftp.o tmp/proto-http.o tmp/proto-icmp.o tmp/proto-imap4.o tmp/proto-isakmp.o tmp/proto-mc.o tmp/proto-memcached.o tmp/proto-netbios.o tmp/proto-ntlmssp.o tmp/proto-ntp.o tmp/proto-oproto.o tmp/proto-pop3.o tmp/proto-preprocess.o tmp/proto-sctp.o tmp/proto-smb.o tmp/proto-smtp.o tmp/proto-snmp.o tmp/proto-ssh.o tmp/proto-ssl-test.o tmp/proto-ssl.o tmp/proto-tcp-rdp.o tmp/proto-tcp-telnet.o tmp/proto-udp.o tmp/proto-versioning.o tmp/proto-vnc.o tmp/proto-x509.o tmp/proto-zeroaccess.o tmp/rawsock-getif.o tmp/rawsock-getip.o tmp/rawsock-getip6.o tmp/rawsock-getmac.o tmp/rawsock-getroute.o tmp/rawsock-pcapfile.o tmp/rawsock.o tmp/read-service-probes.o tmp/rte-ring.o tmp/scripting-banner.o tmp/scripting-masscan.o tmp/scripting.o tmp/smack1.o tmp/smackqueue.o tmp/stack-arpv4.o tmp/stack-if.o tmp/stack-ndpv6.o tmp/stack-queue.o tmp/stack-src.o tmp/stack-tcp-app.o tmp/stack-tcp-core.o tmp/stub-lua.o tmp/stub-pcap.o tmp/stub-pfring.o tmp/syn-cookie.o tmp/templ-nmap-payloads.o tmp/templ-payloads.o tmp/templ-pkt.o tmp/templ-tcp-hdr.o tmp/util-checksum.o tmp/util-errormsg.o tmp/util-extract.o tmp/util-logger.o tmp/util-malloc.o tmp/util-safefunc.o tmp/vulncheck-heartbleed.o tmp/vulncheck-ntp-monlist.o tmp/vulncheck-sslv3.o tmp/vulncheck.o tmp/xring.o   -lm -lrt -ldl -lpthread
+install -pDm755 bin/masscan /usr/bin/masscan
+[12:28:15] ✅ Masscan compilado e instalado
+--2025-08-28 12:28:16--  https://github.com/projectdiscovery/nuclei/releases/download/v3.1.0/nuclei_3.1.0_linux_amd64.zip
+Resolving github.com (github.com)... 20.201.28.151
+Connecting to github.com (github.com)|20.201.28.151|:443... connected.
+HTTP request sent, awaiting response... 302 Found
+Location: https://release-assets.githubusercontent.com/github-production-release-asset/252813491/eca174ce-2642-473b-bd4d-d33d7deceea7?sp=r&sv=2018-11-09&sr=b&spr=https&se=2025-08-28T13%3A20%3A56Z&rscd=attachment%3B+filename%3Dnuclei_3.1.0_linux_amd64.zip&rsct=application%2Foctet-stream&skoid=96c2d410-5711-43a1-aedd-ab1947aa7ab0&sktid=398a6654-997b-47e9-b12b-9515b896b4de&skt=2025-08-28T12%3A20%3A47Z&ske=2025-08-28T13%3A20%3A56Z&sks=b&skv=2018-11-09&sig=wYvyS9Zp4mmcPFfVQ2HYEwlXQD8sBOuDeVK%2F9qjO73Q%3D&jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmVsZWFzZS1hc3NldHMuZ2l0aHVidXNlcmNvbnRlbnQuY29tIiwia2V5Ijoia2V5MSIsImV4cCI6MTc1NjM4NDM5NiwibmJmIjoxNzU2Mzg0MDk2LCJwYXRoIjoicmVsZWFzZWFzc2V0cHJvZHVjdGlvbi5ibG9iLmNvcmUud2luZG93cy5uZXQifQ.6beSfmtCdKVFQo6WuzS5Uaxamo3s7uJNBBKoqPdUm2U&response-content-disposition=attachment%3B%20filename%3Dnuclei_3.1.0_linux_amd64.zip&response-content-type=application%2Foctet-stream [following]
+--2025-08-28 12:28:16--  https://release-assets.githubusercontent.com/github-production-release-asset/252813491/eca174ce-2642-473b-bd4d-d33d7deceea7?sp=r&sv=2018-11-09&sr=b&spr=https&se=2025-08-28T13%3A20%3A56Z&rscd=attachment%3B+filename%3Dnuclei_3.1.0_linux_amd64.zip&rsct=application%2Foctet-stream&skoid=96c2d410-5711-43a1-aedd-ab1947aa7ab0&sktid=398a6654-997b-47e9-b12b-9515b896b4de&skt=2025-08-28T12%3A20%3A47Z&ske=2025-08-28T13%3A20%3A56Z&sks=b&skv=2018-11-09&sig=wYvyS9Zp4mmcPFfVQ2HYEwlXQD8sBOuDeVK%2F9qjO73Q%3D&jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmVsZWFzZS1hc3NldHMuZ2l0aHVidXNlcmNvbnRlbnQuY29tIiwia2V5Ijoia2V5MSIsImV4cCI6MTc1NjM4NDM5NiwibmJmIjoxNzU2Mzg0MDk2LCJwYXRoIjoicmVsZWFzZWFzc2V0cHJvZHVjdGlvbi5ibG9iLmNvcmUud2luZG93cy5uZXQifQ.6beSfmtCdKVFQo6WuzS5Uaxamo3s7uJNBBKoqPdUm2U&response-content-disposition=attachment%3B%20filename%3Dnuclei_3.1.0_linux_amd64.zip&response-content-type=application%2Foctet-stream
+Resolving release-assets.githubusercontent.com (release-assets.githubusercontent.com)... 185.199.108.133, 185.199.110.133, 185.199.111.133, ...
+Connecting to release-assets.githubusercontent.com (release-assets.githubusercontent.com)|185.199.108.133|:443... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 24849052 (24M) [application/octet-stream]
+Saving to: ‘/tmp/nuclei.zip’
+
+/tmp/nuclei.zip                                      100%[======================================================================================================================>]  23.70M  48.0MB/s    in 0.5s
+
+2025-08-28 12:28:17 (48.0 MB/s) - ‘/tmp/nuclei.zip’ saved [24849052/24849052]
+
+flag provided but not defined: -templates-dir
+root@vlxsam04:~#
