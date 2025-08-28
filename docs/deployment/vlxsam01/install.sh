@@ -857,11 +857,21 @@ else
     error "❌ Erro na configuração NGINX temporária"
 fi
 
-# Recarregar NGINX com configuração temporária
-if systemctl reload nginx; then
-    log "✅ NGINX recarregado com sucesso"
+# Verificar se NGINX está rodando e iniciar/recarregar conforme necessário
+if systemctl is-active nginx >/dev/null 2>&1; then
+    log "NGINX está rodando, recarregando configuração..."
+    if systemctl reload nginx; then
+        log "✅ NGINX recarregado com sucesso"
+    else
+        error "❌ Falha ao recarregar NGINX"
+    fi
 else
-    error "❌ Falha ao recarregar NGINX"
+    log "NGINX não está rodando, iniciando serviço..."
+    if systemctl start nginx; then
+        log "✅ NGINX iniciado com sucesso"
+    else
+        error "❌ Falha ao iniciar NGINX"
+    fi
 fi
 
 log "NGINX configurado temporariamente (HTTP apenas)"
