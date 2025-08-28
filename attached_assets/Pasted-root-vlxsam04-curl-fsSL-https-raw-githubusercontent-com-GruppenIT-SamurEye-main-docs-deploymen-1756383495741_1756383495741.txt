@@ -1,0 +1,153 @@
+root@vlxsam04:~# curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/install.sh | bash
+[12:18:11] 🚀 Iniciando instalação vlxsam04 - Collector Agent
+[12:18:11] Servidor: 192.168.100.151 (rede interna isolada)
+[12:18:11] Collector Directory: /opt/samureye-collector
+[12:18:11] 📦 Atualizando sistema base...
+Hit:1 https://deb.nodesource.com/node_20.x nodistro InRelease
+Hit:2 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:3 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:4 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:5 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+All packages are up to date.
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+Calculating upgrade... Done
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+curl is already the newest version (8.5.0-2ubuntu10.6).
+wget is already the newest version (1.21.4-1ubuntu4.1).
+gnupg is already the newest version (2.4.4-2ubuntu17.3).
+software-properties-common is already the newest version (0.99.49.3).
+apt-transport-https is already the newest version (2.8.3).
+ca-certificates is already the newest version (20240203).
+lsb-release is already the newest version (12.0-2).
+jq is already the newest version (1.7.1-3ubuntu0.24.04.1).
+htop is already the newest version (3.3.0-4build1).
+iotop is already the newest version (0.6-42-ga14256a-0.2build1).
+netcat-openbsd is already the newest version (1.226-1ubuntu2).
+net-tools is already the newest version (2.10-0.1ubuntu4.4).
+dnsutils is already the newest version (1:9.18.30-0ubuntu0.24.04.2).
+tcpdump is already the newest version (4.99.4-3ubuntu4).
+python3.12 is already the newest version (3.12.3-1ubuntu0.8).
+python3.12-venv is already the newest version (3.12.3-1ubuntu0.8).
+python3.12-dev is already the newest version (3.12.3-1ubuntu0.8).
+python3-pip is already the newest version (24.0+dfsg-1ubuntu1.2).
+build-essential is already the newest version (12.10ubuntu1).
+git is already the newest version (1:2.43.0-1ubuntu7.3).
+unzip is already the newest version (6.0-28ubuntu4.1).
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+[12:18:15] Sistema base atualizado
+[12:18:15] 🟢 Instalando Node.js 20.x...
+2025-08-28 12:18:16 - Installing pre-requisites
+Hit:1 https://deb.nodesource.com/node_20.x nodistro InRelease
+Hit:2 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:3 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:4 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:5 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists... Done
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+apt-transport-https is already the newest version (2.8.3).
+ca-certificates is already the newest version (20240203).
+curl is already the newest version (8.5.0-2ubuntu10.6).
+gnupg is already the newest version (2.4.4-2ubuntu17.3).
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+Hit:1 https://deb.nodesource.com/node_20.x nodistro InRelease
+Hit:2 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:3 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:4 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:5 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists... Done
+2025-08-28 12:18:21 - Repository configured successfully.
+2025-08-28 12:18:21 - To install Node.js, run: apt-get install nodejs -y
+2025-08-28 12:18:21 - You can use N|solid Runtime as a node.js alternative
+2025-08-28 12:18:21 - To install N|solid Runtime, run: apt-get install nsolid -y
+
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+nodejs is already the newest version (20.19.4-1nodesource1).
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+[12:18:22] Node.js instalado: v20.19.4
+[12:18:22] npm instalado: 10.8.2
+[12:18:22] 🐍 Configurando Python 3.12...
+[12:18:22] Configurando pip para Python 3.12...
+[12:18:22] ✅ pip funcionando, atualizando com --break-system-packages (Ubuntu 24.04)...
+Requirement already satisfied: pip in /usr/lib/python3/dist-packages (24.0)
+Collecting pip
+  Using cached pip-25.2-py3-none-any.whl.metadata (4.7 kB)
+Requirement already satisfied: setuptools in /usr/lib/python3/dist-packages (68.1.2)
+Collecting setuptools
+  Using cached setuptools-80.9.0-py3-none-any.whl.metadata (6.6 kB)
+Requirement already satisfied: wheel in /usr/lib/python3/dist-packages (0.42.0)
+Collecting wheel
+  Using cached wheel-0.45.1-py3-none-any.whl.metadata (2.3 kB)
+Using cached pip-25.2-py3-none-any.whl (1.8 MB)
+Using cached setuptools-80.9.0-py3-none-any.whl (1.2 MB)
+Using cached wheel-0.45.1-py3-none-any.whl (72 kB)
+Installing collected packages: wheel, setuptools, pip
+  Attempting uninstall: wheel
+    Found existing installation: wheel 0.42.0
+[12:18:24] ⚠️ Pip upgrade falhou, usando versão do sistema...
+[12:18:24] 📦 Instalando dependências Python...
+Requirement already satisfied: aiohttp in /usr/local/lib/python3.12/dist-packages (3.12.15)
+Requirement already satisfied: websockets in /usr/local/lib/python3.12/dist-packages (15.0.1)
+Requirement already satisfied: cryptography in /usr/lib/python3/dist-packages (41.0.7)
+Requirement already satisfied: requests in /usr/lib/python3/dist-packages (2.31.0)
+Requirement already satisfied: certifi in /usr/lib/python3/dist-packages (2023.11.17)
+Requirement already satisfied: psutil in /usr/local/lib/python3.12/dist-packages (7.0.0)
+Requirement already satisfied: pyyaml in /usr/lib/python3/dist-packages (6.0.1)
+Requirement already satisfied: structlog in /usr/local/lib/python3.12/dist-packages (25.4.0)
+Requirement already satisfied: python-multipart in /usr/local/lib/python3.12/dist-packages (0.0.20)
+Requirement already satisfied: aiofiles in /usr/local/lib/python3.12/dist-packages (24.1.0)
+Requirement already satisfied: aiohappyeyeballs>=2.5.0 in /usr/local/lib/python3.12/dist-packages (from aiohttp) (2.6.1)
+Requirement already satisfied: aiosignal>=1.4.0 in /usr/local/lib/python3.12/dist-packages (from aiohttp) (1.4.0)
+Requirement already satisfied: attrs>=17.3.0 in /usr/lib/python3/dist-packages (from aiohttp) (23.2.0)
+Requirement already satisfied: frozenlist>=1.1.1 in /usr/local/lib/python3.12/dist-packages (from aiohttp) (1.7.0)
+Requirement already satisfied: multidict<7.0,>=4.5 in /usr/local/lib/python3.12/dist-packages (from aiohttp) (6.6.4)
+Requirement already satisfied: propcache>=0.2.0 in /usr/local/lib/python3.12/dist-packages (from aiohttp) (0.3.2)
+Requirement already satisfied: yarl<2.0,>=1.17.0 in /usr/local/lib/python3.12/dist-packages (from aiohttp) (1.20.1)
+Requirement already satisfied: typing-extensions>=4.2 in /usr/local/lib/python3.12/dist-packages (from aiosignal>=1.4.0->aiohttp) (4.15.0)
+Requirement already satisfied: idna>=2.0 in /usr/lib/python3/dist-packages (from yarl<2.0,>=1.17.0->aiohttp) (3.6)
+WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv
+[12:18:25] Python 3.12 e dependências instaladas
+[12:18:25] 🔍 Validando compatibilidade Ubuntu 24.04...
+[12:18:25] Ubuntu detectado: 24.04 (noble)
+[12:18:25] ✅ Ubuntu 24.04 Noble detectado - compatibilidade OK
+[12:18:25] 🧪 Testando componentes instalados...
+[12:18:25] ✅ Python 3.12: Python 3.12.3
+[12:18:25] Testando importações Python...
+✅ Todas as dependências Python importadas com sucesso
+✅ Python path: /usr/bin/python3
+[12:18:26] ✅ netcat-openbsd disponível: /usr/bin/nc
+[12:18:26] ✅ Node.js 20.x: v20.19.4
+[12:18:26] 🎉 Validação de compatibilidade concluída com sucesso!
+[12:18:26] 👤 Configurando usuário collector...
+[12:18:26] Usuário e diretórios configurados
+[12:18:26] 🔧 Instalando ferramentas de segurança...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+nmap is already the newest version (7.94+git20230807.3be01efb1+dfsg-3build2).
+nmap-common is already the newest version (7.94+git20230807.3be01efb1+dfsg-3build2).
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following NEW packages will be installed:
+  masscan
+0 upgraded, 1 newly installed, 0 to remove and 0 not upgraded.
+Need to get 237 kB of archives.
+After this operation, 566 kB of additional disk space will be used.
+Err:1 http://archive.ubuntu.com/ubuntu noble/universe amd64 masscan amd64 2:1.3.2+ds1-1
+  403  Forbidden [IP: 185.125.190.83 80]
+E: Failed to fetch http://archive.ubuntu.com/ubuntu/pool/universe/m/masscan/masscan_1.3.2%2bds1-1_amd64.deb  403  Forbidden [IP: 185.125.190.83 80]
+E: Unable to fetch some archives, maybe run apt-get update or try with --fix-missing?
+root@vlxsam04:~#

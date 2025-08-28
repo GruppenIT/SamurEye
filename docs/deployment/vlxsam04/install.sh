@@ -249,8 +249,20 @@ log "🔧 Instalando ferramentas de segurança..."
 # Nmap 7.94+ (repositório oficial)
 apt install -y nmap nmap-common
 
-# Masscan
-apt install -y masscan
+# Masscan (com fallback para compilação se apt falhar)
+if ! apt install -y masscan 2>/dev/null; then
+    log "⚠️ Masscan via apt falhou, compilando do source..."
+    cd /tmp
+    git clone https://github.com/robertdavidgraham/masscan
+    cd masscan
+    make
+    make install
+    cd /
+    rm -rf /tmp/masscan
+    log "✅ Masscan compilado e instalado"
+else
+    log "✅ Masscan instalado via apt"
+fi
 
 # Gobuster
 wget -O /tmp/gobuster.tar.gz "https://github.com/OJ/gobuster/releases/download/v3.6.0/gobuster_Linux_x86_64.tar.gz"
