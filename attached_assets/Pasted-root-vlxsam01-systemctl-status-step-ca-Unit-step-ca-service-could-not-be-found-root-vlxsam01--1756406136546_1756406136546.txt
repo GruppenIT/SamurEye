@@ -1,0 +1,41 @@
+root@vlxsam01:~# systemctl status step-ca
+Unit step-ca.service could not be found.
+root@vlxsam01:~# systemctl status nginx
+● nginx.service - A high performance web server and a reverse proxy server
+     Loaded: loaded (/usr/lib/systemd/system/nginx.service; enabled; preset: enabled)
+     Active: active (running) since Tue 2025-08-26 13:26:52 -03; 2 days ago
+       Docs: man:nginx(8)
+    Process: 73013 ExecReload=/usr/sbin/nginx -g daemon on; master_process on; -s reload (code=exited, status=0/SUCCESS)
+   Main PID: 62795 (nginx)
+      Tasks: 5 (limit: 9443)
+     Memory: 8.7M (peak: 10.0M)
+        CPU: 3.951s
+     CGroup: /system.slice/nginx.service
+             ├─62795 "nginx: master process /usr/sbin/nginx -g daemon on; master_process on;"
+             ├─73015 "nginx: worker process"
+             ├─73016 "nginx: worker process"
+             ├─73017 "nginx: worker process"
+             └─73018 "nginx: worker process"
+
+Aug 26 15:00:18 vlxsam01 systemd[1]: Reloading nginx.service - A high performance web server and a reverse proxy server...
+Aug 26 15:00:18 vlxsam01 nginx[70836]: 2025/08/26 15:00:18 [notice] 70836#70836: signal process started
+Aug 26 15:00:18 vlxsam01 systemd[1]: Reloaded nginx.service - A high performance web server and a reverse proxy server.
+Aug 26 15:04:11 vlxsam01 systemd[1]: Reloading nginx.service - A high performance web server and a reverse proxy server...
+Aug 26 15:04:11 vlxsam01 nginx[72575]: 2025/08/26 15:04:11 [notice] 72575#72575: signal process started
+Aug 26 15:04:11 vlxsam01 systemd[1]: Reloaded nginx.service - A high performance web server and a reverse proxy server.
+Aug 26 15:06:11 vlxsam01 systemd[1]: Reloading nginx.service - A high performance web server and a reverse proxy server...
+Aug 26 15:06:11 vlxsam01 nginx[73013]: 2025/08/26 15:06:11 [warn] 73013#73013: "ssl_stapling" ignored, no OCSP responder URL in the certificate "/etc/letsencrypt/live/samureye.com.br/fullchain.pem"
+Aug 26 15:06:11 vlxsam01 nginx[73013]: 2025/08/26 15:06:11 [notice] 73013#73013: signal process started
+Aug 26 15:06:11 vlxsam01 systemd[1]: Reloaded nginx.service - A high performance web server and a reverse proxy server.
+root@vlxsam01:~# ping ca.samureye.com.br
+PING ca.samureye.com.br (172.24.1.151) 56(84) bytes of data.
+64 bytes from vlxsam01 (172.24.1.151): icmp_seq=1 ttl=64 time=0.016 ms
+64 bytes from vlxsam01 (172.24.1.151): icmp_seq=2 ttl=64 time=0.044 ms
+
+^C--- ca.samureye.com.br ping statistics ---
+2 packets transmitted, 2 received, 0% packet loss, time 1002ms
+rtt min/avg/max/mdev = 0.016/0.030/0.044/0.014 ms
+root@vlxsam01:~# step certificate fingerprint /etc/step-ca/certs/root_ca.crt
+Command 'step' not found, but can be installed with:
+apt install step
+root@vlxsam01:~#

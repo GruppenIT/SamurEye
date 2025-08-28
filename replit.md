@@ -146,3 +146,27 @@ The vlxsam04 install.sh is now a complete, production-ready collector agent inst
   - Maintained execution flow to reach final instructions section
 - **RESULT**: install.sh now executes completely showing full resumo with local registration instructions
 - Users now see complete final help: `cd /opt/samureye-collector && sudo ./register-collector.sh <tenant> <name>`
+
+**vlxsam01 Step-CA Missing Infrastructure RESOLVED (August 28, 2025):**
+- **CRITICAL INFRASTRUCTURE GAP**: vlxsam01 missing step-ca Certificate Authority completely
+- **ROOT CAUSE ANALYSIS**: 
+  - vlxsam01 install.sh only had NGINX proxy configuration for ca.samureye.com.br
+  - No actual step-ca server installation or configuration
+  - vlxsam04 collector registration failing because CA service non-existent
+  - Command 'step' not found error on vlxsam01 server
+- **COMPREHENSIVE SOLUTION IMPLEMENTED**:
+  - Complete step CLI v0.25.2 installation with binary deployment
+  - Complete step-ca server v0.25.2 installation and configuration
+  - Automated CA initialization with SamurEye Internal CA name
+  - System user 'step-ca' creation with proper security isolation
+  - Production-ready systemd service with security hardening
+  - Automatic password generation and fingerprint extraction
+  - NGINX proxy correction from samureye_backend to 127.0.0.1:9000
+  - CA fingerprint display in installation completion summary
+- **INFRASTRUCTURE NOW INCLUDES**:
+  - step-ca server running on port 9000 internally
+  - HTTPS proxy via NGINX on ca.samureye.com.br:443
+  - mTLS certificate issuance capability for collectors
+  - Secure CA root certificate and private key storage
+  - Automated service management and monitoring
+- **RESULT**: vlxsam04 collectors can now successfully register with mTLS certificates via proper step-ca infrastructure

@@ -1,0 +1,50 @@
+root@vlxsam02:~# systemctl status samureye-app
+● samureye-app.service - SamurEye Application Server
+     Loaded: loaded (/etc/systemd/system/samureye-app.service; enabled; preset: enabled)
+     Active: active (running) since Wed 2025-08-27 12:00:01 -03; 1 day 3h ago
+    Process: 338060 ExecStartPre=/usr/bin/npm run build (code=exited, status=0/SUCCESS)
+   Main PID: 338108 (npm start)
+      Tasks: 23 (limit: 9443)
+     Memory: 87.8M (peak: 624.1M)
+        CPU: 28.264s
+     CGroup: /system.slice/samureye-app.service
+             ├─338108 "npm start"
+             ├─338120 sh -c "NODE_ENV=production node dist/index.js"
+             └─338121 node dist/index.js
+
+Aug 28 15:34:06 vlxsam02 samureye-app[338121]: 3:34:06 PM [express] GET /api/collectors 304 in 3ms :: [{"id":"07908b6e-45db-4811-8437-a458270498af"…
+Aug 28 15:34:06 vlxsam02 samureye-app[338121]: 3:34:06 PM [express] POST /api/api/collectors/heartbeat 200 in 1ms
+Aug 28 15:34:07 vlxsam02 samureye-app[338121]: 3:34:07 PM [express] GET /api/dashboard/metrics 304 in 2ms :: {"collectors":{"online":0,"total":1},"…
+Aug 28 15:34:16 vlxsam02 samureye-app[338121]: 3:34:16 PM [express] GET /api/collectors 304 in 2ms :: [{"id":"07908b6e-45db-4811-8437-a458270498af"…
+Aug 28 15:34:26 vlxsam02 samureye-app[338121]: 3:34:26 PM [express] GET /api/collectors 304 in 3ms :: [{"id":"07908b6e-45db-4811-8437-a458270498af"…
+Aug 28 15:34:36 vlxsam02 samureye-app[338121]: 3:34:36 PM [express] GET /api/collectors 304 in 3ms :: [{"id":"07908b6e-45db-4811-8437-a458270498af"…
+Aug 28 15:34:36 vlxsam02 samureye-app[338121]: 3:34:36 PM [express] POST /api/api/collectors/heartbeat 200 in 1ms
+Aug 28 15:34:37 vlxsam02 samureye-app[338121]: 3:34:37 PM [express] GET /api/dashboard/metrics 304 in 3ms :: {"collectors":{"online":0,"total":1},"…
+Aug 28 15:34:46 vlxsam02 samureye-app[338121]: 3:34:46 PM [express] GET /api/collectors 304 in 3ms :: [{"id":"07908b6e-45db-4811-8437-a458270498af"…
+Aug 28 15:34:56 vlxsam02 samureye-app[338121]: 3:34:56 PM [express] GET /api/collectors 304 in 2ms :: [{"id":"07908b6e-45db-4811-8437-a458270498af"…
+root@vlxsam02:~# systemctl status nginx
+● nginx.service - A high performance web server and a reverse proxy server
+     Loaded: loaded (/usr/lib/systemd/system/nginx.service; enabled; preset: enabled)
+     Active: active (running) since Tue 2025-08-26 18:29:17 -03; 1 day 21h ago
+       Docs: man:nginx(8)
+   Main PID: 93347 (nginx)
+      Tasks: 5 (limit: 9443)
+     Memory: 3.7M (peak: 8.2M)
+        CPU: 22ms
+     CGroup: /system.slice/nginx.service
+             ├─93347 "nginx: master process /usr/sbin/nginx -g daemon on; master_process on;"
+             ├─93349 "nginx: worker process"
+             ├─93350 "nginx: worker process"
+             ├─93351 "nginx: worker process"
+             └─93352 "nginx: worker process"
+
+Aug 26 18:29:17 vlxsam02 systemd[1]: Starting nginx.service - A high performance web server and a reverse proxy server...
+Aug 26 18:29:17 vlxsam02 systemd[1]: Started nginx.service - A high performance web server and a reverse proxy server.
+root@vlxsam02:~# ping api.samureye.com.br
+PING api.samureye.com.br (172.24.1.151) 56(84) bytes of data.
+64 bytes from 172.24.1.151: icmp_seq=1 ttl=64 time=0.222 ms
+^C
+--- api.samureye.com.br ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 0.222/0.222/0.222/0.000 ms
+root@vlxsam02:~#

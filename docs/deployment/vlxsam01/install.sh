@@ -55,7 +55,161 @@ apt-get install -y \
     htop \
     unzip \
     jq \
-    fail2ban
+    fail2ban \
+    openssl
+
+# ============================================================================
+# 1.5. INSTALAÇÃO STEP-CA
+# ============================================================================
+
+log "🔐 Instalando step-ca Certificate Authority..."
+
+# Instalar step CLI e step-ca
+STEP_VERSION="0.25.2"
+STEP_CA_VERSION="0.25.2"
+
+# Download e instalação do step CLI
+log "Baixando step CLI v$STEP_VERSION..."
+wget -q -O /tmp/step-cli.tar.gz "https://github.com/smallstep/cli/releases/download/v$STEP_VERSION/step_linux_${STEP_VERSION}_amd64.tar.gz"
+tar -xzf /tmp/step-cli.tar.gz -C /tmp/
+mv "/tmp/step_$STEP_VERSION/bin/step" /usr/local/bin/step
+chmod +x /usr/local/bin/step
+
+# Download e instalação do step-ca
+log "Baixando step-ca v$STEP_CA_VERSION..."
+wget -q -O /tmp/step-ca.tar.gz "https://github.com/smallstep/certificates/releases/download/v$STEP_CA_VERSION/step-ca_linux_${STEP_CA_VERSION}_amd64.tar.gz"
+tar -xzf /tmp/step-ca.tar.gz -C /tmp/
+mv "/tmp/step-ca_$STEP_CA_VERSION/bin/step-ca" /usr/local/bin/step-ca
+chmod +x /usr/local/bin/step-ca
+
+# Criar usuário step-ca
+useradd --system --home /etc/step-ca --shell /bin/false step-ca || true
+
+# Verificar instalação
+step version
+step-ca version
+
+log "step-ca CLI instalado com sucesso"
+
+# Configurar step-ca
+log "Configurando step-ca Certificate Authority..."
+
+# Diretório de configuração
+STEP_CA_DIR="/etc/step-ca"
+mkdir -p "$STEP_CA_DIR"
+
+# Gerar configuração step-ca
+cat > /tmp/step-ca-init.sh << 'STEP_INIT'
+#!/bin/bash
+# Inicializar step-ca de forma não-interativa
+
+cd /etc/step-ca
+
+# Definir variáveis
+CA_NAME="SamurEye Internal CA"
+DNS_NAME="ca.samureye.com.br"
+ADDRESS=":9000"
+PASSWORD="samureye-ca-$(openssl rand -hex 16)"
+
+# Salvar senha em arquivo seguro
+echo "$PASSWORD" > /etc/step-ca/password.txt
+chmod 600 /etc/step-ca/password.txt
+
+# Inicializar CA
+step ca init \
+    --name="$CA_NAME" \
+    --dns="$DNS_NAME" \
+    --address="$ADDRESS" \
+    --provisioner="admin@samureye.com.br" \
+    --password-file="/etc/step-ca/password.txt" \
+    --root="/etc/step-ca/certs/root_ca.crt" \
+    --key="/etc/step-ca/secrets/root_ca_key" \
+    --with-ca-url="https://$DNS_NAME"
+
+echo "step-ca inicializado com sucesso"
+echo "CA Name: $CA_NAME"
+echo "DNS: $DNS_NAME"
+echo "Address: $ADDRESS"
+echo "Password saved to: /etc/step-ca/password.txt"
+
+# Obter fingerprint
+FINGERPRINT=$(step certificate fingerprint /etc/step-ca/certs/root_ca.crt)
+echo "CA Fingerprint: $FINGERPRINT"
+echo "$FINGERPRINT" > /etc/step-ca/fingerprint.txt
+STEP_INIT
+
+chmod +x /tmp/step-ca-init.sh
+sudo -u step-ca /tmp/step-ca-init.sh
+
+# Ajustar propriedades
+chown -R step-ca:step-ca "$STEP_CA_DIR"
+chmod -R 700 "$STEP_CA_DIR"
+
+# Criar serviço systemd para step-ca
+cat > /etc/systemd/system/step-ca.service << 'EOF'
+[Unit]
+Description=Step-CA Certificate Authority
+Documentation=https://smallstep.com/docs/step-ca
+Documentation=https://smallstep.com/docs/step-ca/certificate-authority-server-production
+After=network.target
+Wants=network.target
+
+[Service]
+Type=simple
+User=step-ca
+Group=step-ca
+Environment=STEPPATH=/etc/step-ca
+WorkingDirectory=/etc/step-ca
+ExecStart=/usr/local/bin/step-ca config/ca.json --password-file password.txt
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=30
+StartLimitInterval=30
+StartLimitBurst=3
+
+# Security settings
+NoNewPrivileges=true
+ProtectHome=true
+ProtectSystem=strict
+ReadWritePaths=/etc/step-ca
+PrivateTmp=true
+ProtectControlGroups=true
+ProtectKernelModules=true
+ProtectKernelTunables=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+RestrictNamespaces=true
+RestrictRealtime=true
+RestrictSUIDSGID=true
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+# Habilitar e iniciar step-ca
+systemctl daemon-reload
+systemctl enable step-ca
+systemctl start step-ca
+
+# Aguardar inicialização
+sleep 3
+
+# Verificar status
+if systemctl is-active step-ca >/dev/null 2>&1; then
+    log "✅ step-ca service iniciado com sucesso"
+    
+    # Mostrar informações
+    FINGERPRINT=$(cat /etc/step-ca/fingerprint.txt 2>/dev/null || echo "N/A")
+    log "CA Fingerprint: $FINGERPRINT"
+    log "CA URL: https://ca.samureye.com.br"
+    log "CA Config: /etc/step-ca/config/ca.json"
+    log "CA Password: /etc/step-ca/password.txt"
+else
+    error "Falha ao iniciar step-ca service"
+fi
+
+rm -f /tmp/step-*
+log "step-ca Certificate Authority configurado"
 
 # ============================================================================
 # 2. CONFIGURAÇÃO DE FIREWALL
@@ -445,13 +599,19 @@ server {
     # Headers
     add_header Strict-Transport-Security "max-age=63072000" always;
     
-    # CA endpoints (step-ca ou similar)
+    # step-ca Certificate Authority endpoints
     location / {
-        proxy_pass http://samureye_backend;
+        proxy_pass http://127.0.0.1:9000;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Host $host;
+        
+        # Timeouts para step-ca
+        proxy_connect_timeout 5s;
+        proxy_send_timeout 60s;
+        proxy_read_timeout 60s;
     }
 }
 EOF
@@ -854,6 +1014,20 @@ echo ""
 echo "📋 PRÓXIMOS PASSOS:"
 echo "=================="
 echo ""
+
+# Mostrar fingerprint da CA step-ca
+if [[ -f /etc/step-ca/fingerprint.txt ]]; then
+    CA_FINGERPRINT=$(cat /etc/step-ca/fingerprint.txt)
+    echo "🔐 STEP-CA CERTIFICATE AUTHORITY:"
+    echo "   Status: $(systemctl is-active step-ca)"
+    echo "   URL: https://ca.samureye.com.br"
+    echo "   Fingerprint: $CA_FINGERPRINT"
+    echo ""
+    echo "   Para usar no vlxsam04 collector:"
+    echo "   STEP_CA_FINGERPRINT=$CA_FINGERPRINT"
+    echo ""
+fi
+
 echo "1. Solicitar certificado SSL WILDCARD (recomendado):"
 echo "   /opt/request-ssl.sh"
 echo "   ↳ Seguir instruções para adicionar registros TXT no DNS"
@@ -865,18 +1039,25 @@ echo ""
 echo "3. Configurar DNS (obrigatório):"
 echo "   samureye.com.br        → $(hostname -I | awk '{print $1}')"
 echo "   *.samureye.com.br      → $(hostname -I | awk '{print $1}')"
+echo "   ca.samureye.com.br     → $(hostname -I | awk '{print $1}')  # step-ca"
 echo ""
 echo "4. Testar configuração:"
 echo "   /opt/samureye/scripts/health-check.sh"
 echo "   /opt/samureye/scripts/check-ssl.sh"
+echo "   systemctl status step-ca  # verificar CA"
 echo ""
 echo "5. Verificar logs:"
 echo "   tail -f /var/log/nginx/samureye-access.log"
 echo "   tail -f /var/log/nginx/samureye-error.log"
+echo "   journalctl -f -u step-ca  # logs da CA"
 echo ""
 echo "🌐 URLs que funcionarão após SSL:"
-echo "   https://app.samureye.com.br"
-echo "   https://api.samureye.com.br"
+echo "   https://app.samureye.com.br   # Frontend"
+echo "   https://api.samureye.com.br   # Backend API"
+echo "   https://ca.samureye.com.br    # Certificate Authority"
 echo "   https://qualquer.samureye.com.br (wildcard)"
 echo ""
-echo "⚠️  IMPORTANTE: Wildcard DNS challenge é o método recomendado!"
+echo "⚠️  IMPORTANTE:"
+echo "   • Wildcard DNS challenge é o método recomendado!"
+echo "   • step-ca rodando na porta 9000 (proxy via NGINX 443)"
+echo "   • Collectors precisam do fingerprint CA para registro mTLS"
