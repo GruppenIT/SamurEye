@@ -108,8 +108,14 @@ log "🐍 Configurando Python 3.12..."
 update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.12 100
 update-alternatives --install /usr/bin/python python /usr/bin/python3.12 100
 
-# Instalar pip para Python 3.12
-python3.12 -m ensurepip --upgrade
+# Instalar pip para Python 3.12 (Ubuntu 24.04 já tem pip instalado)
+if ! python3.12 -m pip --version &>/dev/null; then
+    log "Instalando pip para Python 3.12..."
+    python3.12 -m ensurepip --upgrade 2>/dev/null || {
+        log "ensurepip falhou (normal no Ubuntu 24.04), usando pip do sistema"
+        apt install -y python3-pip python3-venv
+    }
+fi
 python3.12 -m pip install --upgrade pip setuptools wheel
 
 # Dependências Python para o agente

@@ -1,0 +1,117 @@
+root@vlxsam04:~# curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/install.sh | bash
+[11:48:18] 🚀 Iniciando instalação vlxsam04 - Collector Agent
+[11:48:18] Servidor: 192.168.100.151 (rede interna isolada)
+[11:48:18] Collector Directory: /opt/samureye-collector
+[11:48:18] 📦 Atualizando sistema base...
+Hit:1 https://deb.nodesource.com/node_20.x nodistro InRelease
+Hit:2 http://archive.ubuntu.com/ubuntu noble InRelease
+Get:3 http://security.ubuntu.com/ubuntu noble-security InRelease [126 kB]
+Get:4 http://archive.ubuntu.com/ubuntu noble-updates InRelease [126 kB]
+Get:5 http://archive.ubuntu.com/ubuntu noble-backports InRelease [126 kB]
+Get:6 http://security.ubuntu.com/ubuntu noble-security/main amd64 Packages [1,106 kB]
+Get:7 http://security.ubuntu.com/ubuntu noble-security/main Translation-en [190 kB]
+Get:8 http://security.ubuntu.com/ubuntu noble-security/main amd64 Components [21.5 kB]
+Get:9 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 Packages [1,374 kB]
+Get:10 http://security.ubuntu.com/ubuntu noble-security/main amd64 c-n-f Metadata [8,708 B]
+Get:11 http://archive.ubuntu.com/ubuntu noble-updates/main Translation-en [272 kB]
+Get:12 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 Components [175 kB]
+Get:13 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 c-n-f Metadata [14.9 kB]
+Get:14 http://archive.ubuntu.com/ubuntu noble-updates/restricted amd64 Components [212 B]
+Get:15 http://security.ubuntu.com/ubuntu noble-security/restricted amd64 Packages [1,685 kB]
+Get:16 http://security.ubuntu.com/ubuntu noble-security/restricted Translation-en [377 kB]
+Get:17 http://security.ubuntu.com/ubuntu noble-security/restricted amd64 Components [212 B]
+Get:18 http://archive.ubuntu.com/ubuntu noble-updates/universe amd64 Packages [1,122 kB]
+Get:19 http://security.ubuntu.com/ubuntu noble-security/universe amd64 Components [52.2 kB]
+Get:20 http://archive.ubuntu.com/ubuntu noble-updates/universe Translation-en [288 kB]
+Get:21 http://security.ubuntu.com/ubuntu noble-security/universe amd64 c-n-f Metadata [18.0 kB]
+Get:22 http://archive.ubuntu.com/ubuntu noble-updates/universe amd64 Components [377 kB]
+Get:23 http://security.ubuntu.com/ubuntu noble-security/multiverse amd64 Components [212 B]
+Get:24 http://archive.ubuntu.com/ubuntu noble-updates/universe amd64 c-n-f Metadata [27.7 kB]
+Get:25 http://archive.ubuntu.com/ubuntu noble-updates/multiverse amd64 Components [940 B]
+Get:26 http://archive.ubuntu.com/ubuntu noble-backports/main amd64 Components [7,084 B]
+Get:27 http://archive.ubuntu.com/ubuntu noble-backports/restricted amd64 Components [216 B]
+Get:28 http://archive.ubuntu.com/ubuntu noble-backports/universe amd64 Components [19.2 kB]
+Get:29 http://archive.ubuntu.com/ubuntu noble-backports/multiverse amd64 Components [212 B]
+Fetched 7,516 kB in 5s (1,528 kB/s)
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+All packages are up to date.
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+Calculating upgrade... Done
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+curl is already the newest version (8.5.0-2ubuntu10.6).
+wget is already the newest version (1.21.4-1ubuntu4.1).
+gnupg is already the newest version (2.4.4-2ubuntu17.3).
+software-properties-common is already the newest version (0.99.49.3).
+apt-transport-https is already the newest version (2.8.3).
+ca-certificates is already the newest version (20240203).
+lsb-release is already the newest version (12.0-2).
+jq is already the newest version (1.7.1-3ubuntu0.24.04.1).
+htop is already the newest version (3.3.0-4build1).
+iotop is already the newest version (0.6-42-ga14256a-0.2build1).
+netcat-openbsd is already the newest version (1.226-1ubuntu2).
+net-tools is already the newest version (2.10-0.1ubuntu4.4).
+dnsutils is already the newest version (1:9.18.30-0ubuntu0.24.04.2).
+tcpdump is already the newest version (4.99.4-3ubuntu4).
+python3.12 is already the newest version (3.12.3-1ubuntu0.8).
+python3.12-venv is already the newest version (3.12.3-1ubuntu0.8).
+python3.12-dev is already the newest version (3.12.3-1ubuntu0.8).
+python3-pip is already the newest version (24.0+dfsg-1ubuntu1.2).
+build-essential is already the newest version (12.10ubuntu1).
+git is already the newest version (1:2.43.0-1ubuntu7.3).
+unzip is already the newest version (6.0-28ubuntu4.1).
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+[11:48:35] Sistema base atualizado
+[11:48:35] 🟢 Instalando Node.js 20.x...
+2025-08-28 11:48:36 - Installing pre-requisites
+Hit:1 https://deb.nodesource.com/node_20.x nodistro InRelease
+Hit:2 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:3 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:4 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:5 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists... Done
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+apt-transport-https is already the newest version (2.8.3).
+ca-certificates is already the newest version (20240203).
+curl is already the newest version (8.5.0-2ubuntu10.6).
+gnupg is already the newest version (2.4.4-2ubuntu17.3).
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+Hit:1 https://deb.nodesource.com/node_20.x nodistro InRelease
+Hit:2 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:3 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:4 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:5 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists... Done
+2025-08-28 11:48:41 - Repository configured successfully.
+2025-08-28 11:48:41 - To install Node.js, run: apt-get install nodejs -y
+2025-08-28 11:48:41 - You can use N|solid Runtime as a node.js alternative
+2025-08-28 11:48:41 - To install N|solid Runtime, run: apt-get install nsolid -y
+
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+nodejs is already the newest version (20.19.4-1nodesource1).
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+[11:48:42] Node.js instalado: v20.19.4
+[11:48:42] npm instalado: 10.8.2
+[11:48:42] 🐍 Configurando Python 3.12...
+ensurepip is disabled in Debian/Ubuntu for the system python.
+
+Python modules for the system python are usually handled by dpkg and apt-get.
+
+    apt install python3-<module name>
+
+Install the python3-pip package to use pip itself.  Using pip together
+with the system python might have unexpected results for any system installed
+module, so use it on your own risk, or make sure to only use it in virtual
+environments.
+
+root@vlxsam04:~#
