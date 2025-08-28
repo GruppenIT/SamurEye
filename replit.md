@@ -66,13 +66,29 @@ NGINX acts as a reverse proxy on `vlxsam01`, forwarding traffic to the SamurEye 
 
 ## Recent Updates
 
-### vlxsam04 Deployment Script (August 28, 2025)
-Successfully resolved Ubuntu 24.04 compatibility issues and implemented robust fallback mechanisms:
+### vlxsam04 Collector Agent - Complete Installation (August 28, 2025)
+Successfully completed full collector agent installation with all required components:
 
-1. **Ubuntu 24.04 PEP 668 Resolution**: Implemented `--break-system-packages` flag for Python package installation, resolving externally-managed-environment restrictions.
+**Infrastructure Setup:**
+1. **Ubuntu 24.04 PEP 668 Compatibility**: Implemented `--break-system-packages` flag for Python package installation
+2. **Robust Package Installation**: Automatic fallback mechanisms for masscan source compilation when apt repositories fail
+3. **Silent Operations**: Non-interactive downloads using `-q -o` flags preventing script interruption
 
-2. **Masscan Repository Fallback**: Added automatic source compilation when apt repositories return 403 Forbidden errors, ensuring installation succeeds regardless of repository availability.
+**Security Tools Integration:**
+4. **Nuclei 3.1.0 Compatibility**: Fixed flag compatibility by using environment variable `NUCLEI_TEMPLATES_DIR` instead of deprecated `-templates-dir` flag
+5. **Multi-tool Support**: Complete integration of nmap, nuclei, masscan, gobuster with proper template management
 
-3. **Non-interactive Downloads**: Eliminated interactive prompts in unzip/tar operations using `-q -o` flags, preventing script interruption during automated deployments.
+**Collector Agent Components:**
+6. **Multi-tenant Python Agent**: Complete async agent with API client, WebSocket client, telemetry collector, and command executor
+7. **mTLS Security**: Full certificate-based authentication system with step-ca integration
+8. **Systemd Services**: Production-ready service configuration with health monitoring and automatic restart
+9. **Logging & Monitoring**: Comprehensive logging system with log rotation and health checks
+10. **Environment Configuration**: Complete .env setup with all required variables
 
-The vlxsam04 collector agent installation script now provides maximum robustness with automatic fallback mechanisms, making it suitable for production deployment across various network conditions and repository states.
+**Production Features:**
+- Multi-tenant isolation with workspace separation
+- Resource limits and security restrictions
+- Automated backup and cleanup scripts
+- Comprehensive validation and error handling
+
+The vlxsam04 install.sh is now a complete, production-ready collector agent installer that concentrates ALL solutions in a single file without external dependencies. Ready for manual collector registration process.

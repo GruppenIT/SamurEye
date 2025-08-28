@@ -504,6 +504,7 @@ from pathlib import Path
 
 class SamurEyeAPIClient:
     def __init__(self):
+        import os
         self.base_url = os.getenv('SAMUREYE_API_URL', 'https://api.samureye.com.br')
         self.cert_file = '/opt/samureye-collector/certs/collector.crt'
         self.key_file = '/opt/samureye-collector/certs/collector.key'
@@ -718,8 +719,11 @@ class CommandExecutor:
     async def _run_nuclei(self, args, work_dir, tenant_id):
         """Executa Nuclei"""
         template_dir = "/opt/samureye-collector/tools/nuclei/templates"
-        cmd = ['nuclei', '-templates-dir', template_dir] + args
-        return await self._execute_subprocess(cmd, work_dir, tenant_id)
+        # Nuclei 3.x usa variável de ambiente, não flag
+        env = os.environ.copy()
+        env['NUCLEI_TEMPLATES_DIR'] = template_dir
+        cmd = ['nuclei'] + args
+        return await self._execute_subprocess(cmd, work_dir, tenant_id, env)
     
     async def _run_masscan(self, args, work_dir, tenant_id):
         """Executa Masscan"""
@@ -731,7 +735,7 @@ class CommandExecutor:
         cmd = ['gobuster'] + args
         return await self._execute_subprocess(cmd, work_dir, tenant_id)
     
-    async def _execute_subprocess(self, cmd, work_dir, tenant_id):
+    async def _execute_subprocess(self, cmd, work_dir, tenant_id, env=None):
         """Executa subprocess com limitações"""
         try:
             # Log do comando
@@ -739,10 +743,15 @@ class CommandExecutor:
             with open(log_file, 'a') as f:
                 f.write(f"[{asyncio.get_event_loop().time()}] Executando: {' '.join(cmd)}\n")
             
+            # Preparar ambiente
+            if env is None:
+                env = os.environ.copy()
+            
             # Executar comando
             process = await asyncio.create_subprocess_exec(
                 *cmd,
                 cwd=work_dir,
+                env=env,
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE,
                 preexec_fn=lambda: os.setuid(1001)  # samureye-collector user
@@ -823,6 +832,376 @@ SAMUREYE_API_URL=https://api.samureye.com.br
 SAMUREYE_WS_URL=wss://api.samureye.com.br/ws
 
 # step-ca Configuration
+STEP_CA_URL=https://ca.samureye.com.br
+STEP_CA_FINGERPRINT=
+STEP_CA_ROOT=/opt/samureye-collector/certs/ca.crt
+
+# Logging
+LOG_LEVEL=INFO
+LOG_DIR=/var/log/samureye-collector
+
+# Multi-tenant
+MAX_TENANTS=50
+TENANT_ISOLATION=strict
+
+# Tools
+TOOLS_DIR=/opt/samureye-collector/tools
+NUCLEI_TEMPLATES_DIR=/opt/samureye-collector/tools/nuclei/templates
+EOF
+
+# Permissões do arquivo de configuração
+chmod 600 "$CONFIG_DIR/.env"
+chown "$COLLECTOR_USER:$COLLECTOR_USER" "$CONFIG_DIR/.env"
+
+log "Variáveis de ambiente configuradas"
+
+# ============================================================================
+# 9. CONFIGURAÇÃO SYSTEMD
+# ============================================================================
+
+log "⚙️ Configurando serviços systemd..."
+
+# Serviço principal do collector
+cat > /etc/systemd/system/samureye-collector.service << 'EOF'
+[Unit]
+Description=SamurEye Collector Agent - Multi-Tenant
+Documentation=https://docs.samureye.com.br/collector
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=exec
+User=samureye-collector
+Group=samureye-collector
+WorkingDirectory=/opt/samureye-collector
+Environment=PYTHONPATH=/opt/samureye-collector
+EnvironmentFile=/opt/samureye-collector/config/.env
+ExecStart=/usr/bin/python3 /opt/samureye-collector/agent/main.py
+ExecReload=/bin/kill -HUP $MAINPID
+KillMode=process
+Restart=always
+RestartSec=10
+
+# Segurança
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ReadWritePaths=/opt/samureye-collector /var/log/samureye-collector /tmp
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+
+# Limites de recursos
+LimitNOFILE=65536
+LimitNPROC=4096
+TasksMax=4096
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=samureye-collector
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+# Serviço de monitoramento de saúde
+cat > /etc/systemd/system/samureye-health.service << 'EOF'
+[Unit]
+Description=SamurEye Health Monitor
+After=samureye-collector.service
+Requires=samureye-collector.service
+
+[Service]
+Type=oneshot
+User=samureye-collector
+Group=samureye-collector
+ExecStart=/usr/bin/python3 /opt/samureye-collector/scripts/health-check.py
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+# Timer para health check
+cat > /etc/systemd/system/samureye-health.timer << 'EOF'
+[Unit]
+Description=SamurEye Health Check Timer
+Requires=samureye-health.service
+
+[Timer]
+OnBootSec=5min
+OnUnitActiveSec=5min
+
+[Install]
+WantedBy=timers.target
+EOF
+
+# Recarregar systemd
+systemctl daemon-reload
+
+# Habilitar serviços
+systemctl enable samureye-collector.service
+systemctl enable samureye-health.timer
+
+log "Serviços systemd configurados"
+
+# ============================================================================
+# 10. SCRIPTS AUXILIARES
+# ============================================================================
+
+log "📝 Criando scripts auxiliares..."
+
+# Script de health check
+cat > "$COLLECTOR_DIR/scripts/health-check.py" << 'EOF'
+#!/usr/bin/env python3
+"""
+Script de verificação de saúde do collector
+"""
+
+import os
+import sys
+import json
+import requests
+import subprocess
+from pathlib import Path
+from datetime import datetime
+
+def check_services():
+    """Verifica se os serviços estão rodando"""
+    try:
+        result = subprocess.run(['systemctl', 'is-active', 'samureye-collector'], 
+                              capture_output=True, text=True)
+        return result.stdout.strip() == 'active'
+    except:
+        return False
+
+def check_certificates():
+    """Verifica certificados"""
+    cert_file = Path('/opt/samureye-collector/certs/collector.crt')
+    key_file = Path('/opt/samureye-collector/certs/collector.key')
+    ca_file = Path('/opt/samureye-collector/certs/ca.crt')
+    
+    return all([cert_file.exists(), key_file.exists(), ca_file.exists()])
+
+def check_api_connection():
+    """Testa conexão com API"""
+    try:
+        response = requests.get('https://api.samureye.com.br/health', timeout=10)
+        return response.status_code == 200
+    except:
+        return False
+
+def main():
+    health_data = {
+        'timestamp': datetime.utcnow().isoformat(),
+        'hostname': os.uname().nodename,
+        'services_running': check_services(),
+        'certificates_valid': check_certificates(),
+        'api_reachable': check_api_connection(),
+        'disk_usage': os.statvfs('/opt/samureye-collector').f_bavail
+    }
+    
+    # Log do resultado
+    log_file = '/var/log/samureye-collector/health.log'
+    with open(log_file, 'a') as f:
+        f.write(json.dumps(health_data) + '\n')
+    
+    # Exit code baseado na saúde
+    if all([health_data['services_running'], health_data['certificates_valid']]):
+        sys.exit(0)
+    else:
+        sys.exit(1)
+
+if __name__ == '__main__':
+    main()
+EOF
+
+# Script de backup de configurações
+cat > "$COLLECTOR_DIR/scripts/backup-config.sh" << 'EOF'
+#!/bin/bash
+# Backup das configurações do collector
+
+BACKUP_DIR="/opt/samureye-collector/backups"
+DATE=$(date +%Y%m%d_%H%M%S)
+
+mkdir -p "$BACKUP_DIR"
+
+# Backup de configurações
+tar -czf "$BACKUP_DIR/config-$DATE.tar.gz" \
+    /opt/samureye-collector/config/ \
+    /opt/samureye-collector/certs/ \
+    /etc/systemd/system/samureye-*.service
+
+# Manter apenas os últimos 10 backups
+cd "$BACKUP_DIR"
+ls -t config-*.tar.gz | tail -n +11 | xargs rm -f
+
+echo "Backup criado: config-$DATE.tar.gz"
+EOF
+
+# Script de limpeza de logs
+cat > "$COLLECTOR_DIR/scripts/cleanup-logs.sh" << 'EOF'
+#!/bin/bash
+# Limpeza de logs antigos
+
+LOG_DIR="/var/log/samureye-collector"
+
+# Logs de tenants mais antigos que 7 dias
+find "$LOG_DIR" -name "tenant-*.log" -mtime +7 -delete
+
+# Logs de health mais antigos que 30 dias
+find "$LOG_DIR" -name "health.log" -mtime +30 -delete
+
+# Arquivos temporários mais antigos que 1 dia
+find "/opt/samureye-collector/temp" -type f -mtime +1 -delete
+
+echo "Limpeza de logs concluída"
+EOF
+
+# Permissões dos scripts
+chmod +x "$COLLECTOR_DIR/scripts/"*.sh
+chmod +x "$COLLECTOR_DIR/scripts/"*.py
+chown -R "$COLLECTOR_USER:$COLLECTOR_USER" "$COLLECTOR_DIR/scripts"
+
+log "Scripts auxiliares criados"
+
+# ============================================================================
+# 11. CONFIGURAÇÃO DE LOGS E ROTAÇÃO
+# ============================================================================
+
+log "📊 Configurando sistema de logs..."
+
+# Configuração de logrotate
+cat > /etc/logrotate.d/samureye-collector << 'EOF'
+/var/log/samureye-collector/*.log {
+    daily
+    missingok
+    rotate 30
+    compress
+    delaycompress
+    notifempty
+    create 644 samureye-collector samureye-collector
+    sharedscripts
+    postrotate
+        systemctl reload-or-restart samureye-collector.service
+    endscript
+}
+EOF
+
+# Configuração de rsyslog para centralizar logs
+cat > /etc/rsyslog.d/30-samureye-collector.conf << 'EOF'
+# SamurEye Collector Logging
+if $programname == 'samureye-collector' then /var/log/samureye-collector/agent.log
+& stop
+
+# Forward critical errors to syslog
+:programname, isequal, "samureye-collector" /var/log/syslog
+& stop
+EOF
+
+# Restart rsyslog
+systemctl restart rsyslog
+
+log "Sistema de logs configurado"
+
+# ============================================================================
+# 12. CONFIGURAÇÃO FINAL E VALIDAÇÃO
+# ============================================================================
+
+log "✅ Executando validação final..."
+
+# Verificar estrutura de diretórios
+required_dirs=(
+    "$COLLECTOR_DIR"
+    "$COLLECTOR_DIR/agent"
+    "$COLLECTOR_DIR/scripts"
+    "$COLLECTOR_DIR/certs"
+    "$COLLECTOR_DIR/config"
+    "$COLLECTOR_DIR/tools"
+    "$COLLECTOR_DIR/temp"
+    "$TOOLS_DIR"
+    "$TOOLS_DIR/nuclei/templates"
+    "/var/log/samureye-collector"
+)
+
+for dir in "${required_dirs[@]}"; do
+    if [[ ! -d "$dir" ]]; then
+        log "❌ Diretório ausente: $dir"
+        exit 1
+    fi
+done
+
+# Verificar ferramentas instaladas
+tools_check=(
+    "nmap --version"
+    "nuclei -version"
+    "masscan --version"
+    "gobuster version"
+    "step version"
+    "python3 --version"
+    "node --version"
+)
+
+for tool_cmd in "${tools_check[@]}"; do
+    if ! eval "$tool_cmd" >/dev/null 2>&1; then
+        log "❌ Ferramenta não funcionando: $tool_cmd"
+        exit 1
+    fi
+done
+
+# Verificar serviços systemd
+if ! systemctl is-enabled samureye-collector.service >/dev/null 2>&1; then
+    log "❌ Serviço samureye-collector não habilitado"
+    exit 1
+fi
+
+# Verificar permissões
+if [[ ! -r "$CONFIG_DIR/.env" ]]; then
+    log "❌ Arquivo .env não acessível"
+    exit 1
+fi
+
+log "🎉 Validação final concluída com sucesso!"
+
+# ============================================================================
+# 13. RESUMO E PRÓXIMOS PASSOS
+# ============================================================================
+
+log "📋 Instalação concluída - Resumo:"
+log "Collector ID será gerado automaticamente no primeiro boot"
+log "Usuário: $COLLECTOR_USER"
+log "Diretório base: $COLLECTOR_DIR"
+log "Logs: /var/log/samureye-collector/"
+log ""
+log "🔧 Comandos úteis:"
+log "  systemctl start samureye-collector    # Iniciar collector"
+log "  systemctl status samureye-collector   # Ver status"
+log "  journalctl -f -u samureye-collector   # Ver logs em tempo real"
+log ""
+log "⚠️  PRÓXIMOS PASSOS MANUAIS:"
+log "1. Executar script de registro do collector:"
+log "   curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/scripts/register-collector.sh | bash -s <tenant-slug> <collector-name>"
+log ""
+log "2. O script de registro irá:"
+log "   - Gerar certificados mTLS via step-ca"
+log "   - Registrar collector na plataforma"
+log "   - Iniciar serviços automaticamente"
+log ""
+log "🚀 vlxsam04 Collector Agent pronto para registro!"
+
+# Final timestamp
+log "⏰ Instalação finalizada em: $(date '+%Y-%m-%d %H:%M:%S')"
+log ""
+log "2. O script de registro irá:"
+log "   - Gerar certificados mTLS via step-ca"
+log "   - Registrar collector na plataforma"
+log "   - Iniciar serviços automaticamente"
+log ""
+log "🚀 vlxsam04 Collector Agent pronto para registro!"
+
+# Final timestamp
+log "⏰ Instalação finalizada em: $(date '+%Y-%m-%d %H:%M:%S')"
 STEP_CA_URL=https://ca.samureye.com.br
 STEP_CA_FINGERPRINT=auto-configured
 
