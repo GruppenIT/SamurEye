@@ -1,208 +1,259 @@
 #!/bin/bash
+# Diagnóstico Completo vlxsam04 - 28 de Agosto 2025
+# Script para identificar e corrigir problemas do systemd
 
-# Diagnóstico e correção completa do vlxsam04
-set -e
+set -euo pipefail
 
-echo "=== DIAGNÓSTICO VLXSAM04 ==="
+echo "🔍 DIAGNÓSTICO VLXSAM04 - SYSTEMD COLLECTOR SERVICE"
+echo "Data: $(date)"
+echo "Host: $(hostname)"
+echo
 
-# 1. Parar serviços
-echo "1. Parando serviços..."
-systemctl stop samureye-collector 2>/dev/null || true
-systemctl disable samureye-collector 2>/dev/null || true
+# Verificar se executando como root
+if [[ $EUID -ne 0 ]]; then
+    echo "❌ Este script deve ser executado como root"
+    exit 1
+fi
 
-# 2. Verificar estrutura atual
-echo "2. Estrutura atual:"
-echo "Diretórios existentes:"
-ls -la /opt/ | grep samur || echo "- Nenhum diretório samureye em /opt/"
-ls -la /etc/ | grep samur || echo "- Nenhum diretório samureye em /etc/"
+echo "1. VERIFICANDO ARQUIVOS E DIRETÓRIOS NECESSÁRIOS:"
+echo "=================================================="
 
-echo ""
-echo "Usuários existentes:"
-id samureye-collector 2>/dev/null || echo "- Usuário samureye-collector não existe"
-
-echo ""
-echo "Serviços systemd:"
-ls -la /etc/systemd/system/samur* 2>/dev/null || echo "- Nenhum serviço samureye"
-
-# 3. Limpeza completa
-echo ""
-echo "3. Limpeza completa..."
-rm -rf /opt/samureye-collector /etc/samureye-collector 2>/dev/null || true
-rm -f /etc/systemd/system/samureye-*.service /etc/systemd/system/samureye-*.timer 2>/dev/null || true
-userdel -f samureye-collector 2>/dev/null || true
-systemctl daemon-reload
-
-# 4. Criação do zero
-echo ""
-echo "4. Recriando estrutura completa..."
-
-# Variáveis
-COLLECTOR_USER="samureye-collector"
-COLLECTOR_DIR="/opt/samureye-collector"  
+# Verificar diretórios
+COLLECTOR_DIR="/opt/samureye-collector"
 CONFIG_DIR="/etc/samureye-collector"
-CERTS_DIR="$COLLECTOR_DIR/certs"
+LOG_DIR="/var/log/samureye-collector"
 
-# Criar usuário
-useradd -r -m -d "$COLLECTOR_DIR" -s /bin/bash "$COLLECTOR_USER"
-echo "✓ Usuário criado"
+echo -n "• $COLLECTOR_DIR: "
+if [[ -d "$COLLECTOR_DIR" ]]; then
+    echo "✅ Existe"
+else
+    echo "❌ NÃO EXISTE"
+    mkdir -p "$COLLECTOR_DIR"
+    echo "  📁 Criado"
+fi
 
-# Criar diretórios
-mkdir -p "$CONFIG_DIR" 
-mkdir -p "$COLLECTOR_DIR"/{logs,temp,uploads,certs}
-mkdir -p /var/log/samureye-collector
+echo -n "• $CONFIG_DIR: "
+if [[ -d "$CONFIG_DIR" ]]; then
+    echo "✅ Existe"
+else
+    echo "❌ NÃO EXISTE"
+    mkdir -p "$CONFIG_DIR"
+    echo "  📁 Criado"
+fi
 
-# Permissões
-chown -R "$COLLECTOR_USER:$COLLECTOR_USER" "$COLLECTOR_DIR"
-chown -R "$COLLECTOR_USER:$COLLECTOR_USER" /var/log/samureye-collector
-chown root:$COLLECTOR_USER "$CONFIG_DIR"
-chmod 755 "$COLLECTOR_DIR"
-chmod 750 "$CONFIG_DIR"  
-chmod 700 "$COLLECTOR_DIR/certs"
+echo -n "• $LOG_DIR: "
+if [[ -d "$LOG_DIR" ]]; then
+    echo "✅ Existe"
+else
+    echo "❌ NÃO EXISTE"
+    mkdir -p "$LOG_DIR"
+    echo "  📁 Criado"
+fi
 
-echo "✓ Diretórios criados"
+# Verificar usuário samureye-collector
+echo -n "• Usuário samureye-collector: "
+if id samureye-collector >/dev/null 2>&1; then
+    echo "✅ Existe"
+else
+    echo "❌ NÃO EXISTE"
+    useradd -r -s /bin/false -d "$COLLECTOR_DIR" samureye-collector
+    echo "  👤 Criado"
+fi
 
-# 5. Criar arquivo .env
-cat > "$CONFIG_DIR/.env" << 'EOF'
+echo
+echo "2. VERIFICANDO ARQUIVOS CRÍTICOS:"
+echo "=================================="
+
+# Verificar arquivo .env
+ENV_FILE="$CONFIG_DIR/.env"
+echo -n "• $ENV_FILE: "
+if [[ -f "$ENV_FILE" ]]; then
+    echo "✅ Existe"
+    echo "  📄 Tamanho: $(wc -c < "$ENV_FILE") bytes"
+    echo "  🔑 Permissões: $(stat -c "%a" "$ENV_FILE")"
+    echo "  👤 Proprietário: $(stat -c "%U:%G" "$ENV_FILE")"
+else
+    echo "❌ NÃO EXISTE - CRIANDO..."
+    
+    cat > "$ENV_FILE" << 'EOF'
 # SamurEye Collector Configuration - vlxsam04
 API_BASE_URL=https://api.samureye.com.br
 WS_URL=wss://api.samureye.com.br/ws
 FRONTEND_URL=https://app.samureye.com.br
 STEP_CA_URL=https://ca.samureye.com.br
 STEP_CA_FINGERPRINT=auto-configured
+PUBLIC_OBJECT_SEARCH_PATHS=auto-configured
+PRIVATE_OBJECT_DIR=auto-configured
+DEFAULT_OBJECT_STORAGE_BUCKET_ID=auto-configured
 COLLECTOR_ID=auto-generated
 COLLECTOR_VERSION=1.0.0
 HEARTBEAT_INTERVAL=30
 COMMAND_TIMEOUT=300
+CERT_RENEWAL_DAYS=7
+LOG_RETENTION_DAYS=30
+MAX_CONCURRENT_COMMANDS=5
 NMAP_PATH=/usr/bin/nmap
 NUCLEI_PATH=/usr/local/bin/nuclei
 MASSCAN_PATH=/usr/bin/masscan
+GOBUSTER_PATH=/usr/local/bin/gobuster
 STEP_PATH=/usr/local/bin/step
 LOG_LEVEL=INFO
 LOG_FORMAT=json
+SYSLOG_ENABLED=true
 EOF
+    
+    chmod 644 "$ENV_FILE"
+    chown samureye-collector:samureye-collector "$ENV_FILE"
+    echo "  ✅ Arquivo .env criado"
+fi
 
-chmod 640 "$CONFIG_DIR/.env"
-chown root:$COLLECTOR_USER "$CONFIG_DIR/.env"
-
-echo "✓ Arquivo .env criado"
-
-# 6. Criar agente Python funcional
-cat > "$COLLECTOR_DIR/collector_agent.py" << 'EOF'
+# Verificar arquivo collector_agent.py
+AGENT_FILE="$COLLECTOR_DIR/collector_agent.py"
+echo -n "• $AGENT_FILE: "
+if [[ -f "$AGENT_FILE" ]]; then
+    echo "✅ Existe"
+    echo "  📄 Tamanho: $(wc -c < "$AGENT_FILE") bytes"
+    echo "  🔑 Permissões: $(stat -c "%a" "$AGENT_FILE")"
+    echo "  👤 Proprietário: $(stat -c "%U:%G" "$AGENT_FILE")"
+else
+    echo "❌ NÃO EXISTE - CRIANDO..."
+    
+    cat > "$AGENT_FILE" << 'EOF'
 #!/usr/bin/env python3
+"""
+SamurEye Collector Agent - v1.0.0
+Multi-tenant secure collector for SamurEye platform
+"""
 
 import asyncio
+import json
 import logging
+import os
 import sys
 import signal
-import os
-import uuid
+import time
 from pathlib import Path
 from datetime import datetime
 
 class SamureyeCollectorAgent:
     def __init__(self):
+        self.config_dir = Path("/etc/samureye-collector")
+        self.collector_dir = Path("/opt/samureye-collector")
+        self.logger = self._setup_logging()
+        self.config = self._load_config()
         self.running = False
-        self.setup_logging()
-        self.load_config()
-        self.collector_id = self.get_collector_id()
         
-    def setup_logging(self):
+    def _setup_logging(self):
         logging.basicConfig(
-            level=logging.INFO,
             format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+            level=logging.INFO,
             handlers=[
                 logging.FileHandler('/var/log/samureye-collector/agent.log'),
                 logging.StreamHandler()
             ]
         )
-        self.logger = logging.getLogger('samureye-collector')
+        return logging.getLogger('samureye-collector')
+    
+    def _load_config(self):
+        config = {}
+        env_file = self.config_dir / ".env"
         
-    def load_config(self):
-        self.config = {}
-        config_file = Path('/etc/samureye-collector/.env')
-        
-        if config_file.exists():
-            with open(config_file) as f:
+        if env_file.exists():
+            with open(env_file) as f:
                 for line in f:
                     if line.strip() and not line.startswith('#'):
                         key, _, value = line.strip().partition('=')
-                        self.config[key] = value
-    
-    def get_collector_id(self):
-        id_file = Path('/opt/samureye-collector/certs/collector-id.txt')
-        
-        if id_file.exists():
-            return id_file.read_text().strip()
-        
-        # Generate new ID
-        collector_id = str(uuid.uuid4())
-        id_file.parent.mkdir(parents=True, exist_ok=True)
-        id_file.write_text(collector_id)
-        return collector_id
+                        if key and value:
+                            config[key] = value
+        return config
     
     async def start(self):
-        self.logger.info("=== SamurEye Collector Agent v1.0.0 ===")
-        self.logger.info(f"Collector ID: {self.collector_id}")
-        self.logger.info("Status: Aguardando registro manual na plataforma")
-        self.logger.info("API Base URL: %s", self.config.get('API_BASE_URL', 'not configured'))
-        
         self.running = True
-        signal.signal(signal.SIGTERM, self.signal_handler)
-        signal.signal(signal.SIGINT, self.signal_handler)
+        self.logger.info("Starting SamurEye Collector Agent")
+        
+        signal.signal(signal.SIGTERM, self._signal_handler)
+        signal.signal(signal.SIGINT, self._signal_handler)
         
         try:
-            counter = 0
-            while self.running:
-                counter += 1
-                if counter % 12 == 0:  # A cada 1 minuto (12 x 5s)
-                    self.logger.info("Heartbeat - Collector funcionando, aguardando registro manual")
-                await asyncio.sleep(5)
-                
+            await self._main_loop()
         except Exception as e:
-            self.logger.error(f"Erro crítico: {e}")
-        finally:
-            self.logger.info("Collector agent finalizando...")
-            
-    def signal_handler(self, signum, frame):
-        self.logger.info(f"Recebido sinal {signum}, finalizando...")
+            self.logger.error(f"Error in collector agent: {e}")
+        
+    def _signal_handler(self, signum, frame):
+        self.logger.info(f"Received signal {signum}, shutting down...")
         self.running = False
+    
+    async def _main_loop(self):
+        while self.running:
+            try:
+                self.logger.debug("Heartbeat - collector running")
+                await asyncio.sleep(30)
+            except Exception as e:
+                self.logger.error(f"Error in main loop: {e}")
+                await asyncio.sleep(5)
 
-async def main():
+def main():
+    agent = SamureyeCollectorAgent()
     try:
-        agent = SamureyeCollectorAgent()
-        await agent.start()
+        asyncio.run(agent.start())
+    except KeyboardInterrupt:
+        print("\nShutdown requested by user")
     except Exception as e:
-        print(f"Erro fatal: {e}")
+        print(f"Fatal error: {e}")
         sys.exit(1)
 
 if __name__ == "__main__":
-    try:
-        asyncio.run(main())
-    except KeyboardInterrupt:
-        print("\nCollector agent parado pelo usuário")
+    main()
 EOF
+    
+    chmod +x "$AGENT_FILE"
+    chown samureye-collector:samureye-collector "$AGENT_FILE"
+    echo "  ✅ Agent Python criado"
+fi
 
-chmod +x "$COLLECTOR_DIR/collector_agent.py"
-chown "$COLLECTOR_USER:$COLLECTOR_USER" "$COLLECTOR_DIR/collector_agent.py"
+echo
+echo "3. VERIFICANDO SERVIÇO SYSTEMD:"
+echo "==============================="
 
-echo "✓ Agente Python criado"
+SERVICE_FILE="/etc/systemd/system/samureye-collector.service"
+echo -n "• $SERVICE_FILE: "
+if [[ -f "$SERVICE_FILE" ]]; then
+    echo "✅ Existe"
+else
+    echo "❌ NÃO EXISTE - CRIANDO..."
+fi
 
-# 7. Criar serviço systemd limpo
-cat > /etc/systemd/system/samureye-collector.service << EOF
+# Sempre recriar o arquivo do serviço para garantir que esteja correto
+echo "  🔄 Recriando serviço systemd..."
+
+cat > "$SERVICE_FILE" << 'EOF'
 [Unit]
 Description=SamurEye Collector Agent - vlxsam04
+Documentation=https://docs.samureye.com.br/collector
 After=network-online.target
 Wants=network-online.target
+StartLimitIntervalSec=0
 
 [Service]
 Type=simple
 Restart=always
 RestartSec=30
-User=$COLLECTOR_USER
-Group=$COLLECTOR_USER
-WorkingDirectory=$COLLECTOR_DIR
-ExecStart=/usr/bin/python3 $COLLECTOR_DIR/collector_agent.py
-EnvironmentFile=$CONFIG_DIR/.env
+User=samureye-collector
+Group=samureye-collector
+WorkingDirectory=/opt/samureye-collector
+ExecStart=/usr/bin/python3 /opt/samureye-collector/collector_agent.py
+EnvironmentFile=/etc/samureye-collector/.env
+
+# Security settings
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/opt/samureye-collector /var/log/samureye-collector /tmp
+PrivateTmp=yes
+
+# Resource limits
+MemoryMax=1G
+CPUQuota=50%
 
 # Logging
 StandardOutput=journal
@@ -213,40 +264,78 @@ SyslogIdentifier=samureye-collector
 WantedBy=multi-user.target
 EOF
 
-# 8. Recarregar e habilitar
+echo "  ✅ Arquivo de serviço criado"
+
+echo
+echo "4. CORRIGINDO PERMISSÕES:"
+echo "========================="
+
+chown -R samureye-collector:samureye-collector "$COLLECTOR_DIR"
+chown -R samureye-collector:samureye-collector "$CONFIG_DIR" 
+chown -R samureye-collector:samureye-collector "$LOG_DIR"
+
+echo "✅ Todas as permissões corrigidas"
+
+echo
+echo "5. REINICIALIZANDO SYSTEMD:"
+echo "==========================="
+
+# Parar serviço se estiver rodando
+systemctl stop samureye-collector.service >/dev/null 2>&1 || true
+systemctl disable samureye-collector.service >/dev/null 2>&1 || true
+
+# Recarregar daemon
 systemctl daemon-reload
+systemctl reset-failed samureye-collector.service >/dev/null 2>&1 || true
+
+echo "✅ SystemD recarregado"
+
+echo
+echo "6. INICIANDO SERVIÇO:"
+echo "===================="
+
+# Habilitar e iniciar
 systemctl enable samureye-collector.service
 
-echo "✓ Serviço systemd configurado"
+if systemctl start samureye-collector.service; then
+    echo "✅ Serviço iniciado com SUCESSO!"
+    
+    # Verificar status
+    sleep 3
+    if systemctl is-active --quiet samureye-collector.service; then
+        echo "✅ Serviço está ATIVO e rodando"
+    else
+        echo "⚠️ Serviço pode não estar rodando corretamente"
+    fi
+else
+    echo "❌ ERRO ao iniciar serviço"
+    echo
+    echo "LOGS DO ERRO:"
+    journalctl -u samureye-collector.service --no-pager -n 20
+fi
 
-# 9. Validação final
-echo ""
-echo "=== VALIDAÇÃO FINAL ==="
+echo
+echo "7. STATUS FINAL:"
+echo "================"
 
-echo "Estrutura de arquivos:"
-ls -la "$CONFIG_DIR/"
-ls -la "$COLLECTOR_DIR/"
+echo "🔹 Status do serviço: $(systemctl is-active samureye-collector.service)"
+echo "🔹 Enabled: $(systemctl is-enabled samureye-collector.service)"
+echo "🔹 Restart count: $(systemctl show samureye-collector.service -p NRestarts --value)"
 
-echo ""
-echo "Permissões:"
-ls -ld "$CONFIG_DIR" "$COLLECTOR_DIR" "$COLLECTOR_DIR/certs"
+echo
+echo "📊 RESUMO DO DIAGNÓSTICO:"
+echo "========================="
+echo "• Todos os diretórios necessários: CRIADOS"
+echo "• Arquivo .env: PRESENTE"
+echo "• Agent Python: PRESENTE" 
+echo "• Serviço systemd: CONFIGURADO"
+echo "• Permissões: CORRIGIDAS"
 
-echo ""
-echo "Arquivo .env:"
-head -5 "$CONFIG_DIR/.env"
+echo
+echo "🎯 PRÓXIMOS PASSOS:"
+echo "• Verificar logs: journalctl -u samureye-collector -f"
+echo "• Status do serviço: systemctl status samureye-collector"
+echo "• Registrar collector na plataforma SamurEye"
 
-echo ""
-echo "Python agent teste:"
-python3 -c "import sys; print(f'Python {sys.version}')"
-python3 "$COLLECTOR_DIR/collector_agent.py" --version 2>/dev/null || echo "Agent carrega sem erros"
-
-echo ""
-echo "=== RESULTADO ==="
-echo "✅ Estrutura completa recriada!"
-echo ""
-echo "Comandos para testar:"
-echo "  systemctl start samureye-collector"
-echo "  systemctl status samureye-collector  "
-echo "  journalctl -f -u samureye-collector"
-echo ""
-echo "Se funcionar, próximo passo é o registro manual via interface web."
+echo
+echo "✅ Diagnóstico e correção concluídos!"

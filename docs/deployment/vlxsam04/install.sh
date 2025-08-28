@@ -1036,6 +1036,10 @@ log "Agente collector configurado"
 
 log "🔧 Configurando variáveis de ambiente..."
 
+# Garantir que o diretório de configuração existe
+mkdir -p "$CONFIG_DIR"
+chown "$COLLECTOR_USER:$COLLECTOR_USER" "$CONFIG_DIR"
+
 # Criar arquivo .env completo
 cat > "$CONFIG_DIR/.env" << 'EOF'
 # SamurEye Collector Configuration - vlxsam04
@@ -1088,8 +1092,12 @@ log "Variáveis de ambiente configuradas"
 
 log "⚙️ Configurando serviços systemd..."
 
+# Parar serviço existente se estiver rodando
+systemctl stop samureye-collector.service >/dev/null 2>&1 || true
+systemctl disable samureye-collector.service >/dev/null 2>&1 || true
+
 # Serviço principal do collector
-cat > /etc/systemd/system/samureye-collector.service << EOF
+cat > /etc/systemd/system/samureye-collector.service << 'EOF'
 [Unit]
 Description=SamurEye Collector Agent - vlxsam04
 Documentation=https://docs.samureye.com.br/collector
@@ -1101,17 +1109,17 @@ StartLimitIntervalSec=0
 Type=simple
 Restart=always
 RestartSec=30
-User=$COLLECTOR_USER
-Group=$COLLECTOR_USER
-WorkingDirectory=$COLLECTOR_DIR
-ExecStart=/usr/bin/python3 $COLLECTOR_DIR/collector_agent.py
-EnvironmentFile=$CONFIG_DIR/.env
+User=samureye-collector
+Group=samureye-collector
+WorkingDirectory=/opt/samureye-collector
+ExecStart=/usr/bin/python3 /opt/samureye-collector/collector_agent.py
+EnvironmentFile=/etc/samureye-collector/.env
 
 # Security settings
 NoNewPrivileges=yes
 ProtectSystem=strict
 ProtectHome=yes
-ReadWritePaths=$COLLECTOR_DIR /var/log/samureye-collector /tmp
+ReadWritePaths=/opt/samureye-collector /var/log/samureye-collector /tmp
 PrivateTmp=yes
 
 # Resource limits
@@ -1158,12 +1166,23 @@ OnUnitActiveSec=5min
 WantedBy=timers.target
 EOF
 
-# Recarregar systemd
+# Recarregar systemd e resetar estados de falha
 systemctl daemon-reload
+systemctl reset-failed samureye-collector.service >/dev/null 2>&1 || true
 
-# Habilitar serviços
+# Habilitar e iniciar serviços
 systemctl enable samureye-collector.service
 systemctl enable samureye-health.timer
+
+# Aguardar um pouco antes de tentar iniciar
+sleep 2
+
+# Iniciar serviço principal
+if systemctl start samureye-collector.service; then
+    log "✅ Serviço samureye-collector iniciado com sucesso"
+else
+    log "⚠️ Erro ao iniciar samureye-collector, verificar logs com: journalctl -u samureye-collector -f"
+fi
 
 log "Serviços systemd configurados"
 
