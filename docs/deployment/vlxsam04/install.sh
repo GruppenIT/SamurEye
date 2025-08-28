@@ -1280,10 +1280,76 @@ chmod 700 "$CERTS_DIR"
 
 log "2. Configurando step-ca client..."
 
-# Bootstrap step-ca
-if ! sudo -u samureye-collector "$STEP_PATH" ca bootstrap --ca-url "$CA_URL" --install --force; then
-    error "Falha ao configurar step-ca client"
+# Obter fingerprint da CA automaticamente
+log "   Obtendo fingerprint da CA..."
+CA_FINGERPRINT=""
+
+# Primeira tentativa: comando step
+if command -v step >/dev/null 2>&1; then
+    CA_FINGERPRINT=$(step ca fingerprint "$CA_URL" 2>/dev/null | grep -o '[a-fA-F0-9]\{64\}' | head -1 || true)
+fi
+
+# Segunda tentativa: via openssl se step falhar
+if [[ -z "$CA_FINGERPRINT" ]]; then
+    log "   Tentando obter fingerprint via openssl..."
+    CA_FINGERPRINT=$(timeout 10 openssl s_client -connect ca.samureye.com.br:443 -servername ca.samureye.com.br </dev/null 2>/dev/null | openssl x509 -fingerprint -sha256 -noout 2>/dev/null | cut -d'=' -f2 | tr -d ':' | tr '[:upper:]' '[:lower:]' || true)
+fi
+
+# Fallback: usar fingerprint conhecido (será atualizado em produção)
+if [[ -z "$CA_FINGERPRINT" ]]; then
+    warn "Não foi possível obter fingerprint automaticamente"
+    CA_FINGERPRINT="auto-configured-placeholder"
+fi
+
+log "   Fingerprint obtido: ${CA_FINGERPRINT:0:16}..."
+
+# Verificar conectividade com CA antes de bootstrap
+log "   Verificando conectividade com CA..."
+if ! timeout 10 nc -z ca.samureye.com.br 443 2>/dev/null; then
+    error "❌ CA inacessível em ca.samureye.com.br:443"
+    echo ""
+    echo "DIAGNÓSTICO REQUERIDO:"
+    echo "1. Verificar se vlxsam01 está funcionando:"
+    echo "   • Servidor vlxsam01 ligado e acessível"
+    echo "   • Serviço step-ca rodando: systemctl status step-ca"
+    echo "   • NGINX proxy funcionando: systemctl status nginx"
+    echo ""
+    echo "2. Verificar DNS/conectividade de rede:"
+    echo "   • ping ca.samureye.com.br"
+    echo "   • nslookup ca.samureye.com.br"
+    echo ""
+    echo "3. Verificar certificados SSL da CA:"
+    echo "   • openssl s_client -connect ca.samureye.com.br:443"
+    echo ""
     exit 1
+fi
+
+# Bootstrap step-ca com fingerprint
+if [[ "$CA_FINGERPRINT" != "auto-configured-placeholder" ]]; then
+    log "   Executando bootstrap com fingerprint..."
+    if ! sudo -u samureye-collector "$STEP_PATH" ca bootstrap --ca-url "$CA_URL" --fingerprint "$CA_FINGERPRINT" --install --force; then
+        error "Falha ao configurar step-ca client com fingerprint"
+        echo "Tente obter o fingerprint manualmente:"
+        echo "  step certificate fingerprint /etc/step-ca/certs/root_ca.crt  (no vlxsam01)"
+        exit 1
+    fi
+else
+    # Método alternativo sem fingerprint para desenvolvimento/teste
+    warn "CA não acessível - tentando método alternativo"
+    if ! sudo -u samureye-collector "$STEP_PATH" ca bootstrap --ca-url "$CA_URL" --install --force --insecure; then
+        warn "Bootstrap alternativo também falhou"
+        echo ""
+        echo "SOLUÇÕES MANUAIS:"
+        echo "1. Obter fingerprint no vlxsam01:"
+        echo "   step certificate fingerprint /etc/step-ca/certs/root_ca.crt"
+        echo ""
+        echo "2. Editar manualmente $CONFIG_DIR/.env:"
+        echo "   STEP_CA_FINGERPRINT=<fingerprint_obtido>"
+        echo ""
+        echo "3. Re-executar o registro:"
+        echo "   cd $COLLECTOR_DIR && sudo ./register-collector.sh gruppen-it vlxsam04"
+        exit 1
+    fi
 fi
 
 log "3. Gerando certificado mTLS para o collector..."
