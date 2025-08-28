@@ -1,0 +1,29 @@
+cc -g -ggdb    -Wall -O2 -o bin/masscan tmp/crypto-base64.o tmp/crypto-blackrock.o tmp/crypto-blackrock2.o tmp/crypto-lcg.o tmp/crypto-primegen.o tmp/crypto-siphash24.o tmp/event-timeout.o tmp/in-binary.o tmp/in-filter.o tmp/in-report.o tmp/main-conf.o tmp/main-dedup.o tmp/main-initadapter.o tmp/main-listscan.o tmp/main-ptrace.o tmp/main-readrange.o tmp/main-status.o tmp/main-throttle.o tmp/main.o tmp/masscan-app.o tmp/massip-addr.o tmp/massip-parse.o tmp/massip-rangesv4.o tmp/massip-rangesv6.o tmp/massip.o tmp/misc-rstfilter.o tmp/out-binary.o tmp/out-certs.o tmp/out-grepable.o tmp/out-hostonly.o tmp/out-json.o tmp/out-ndjson.o tmp/out-null.o tmp/out-redis.o tmp/out-tcp-services.o tmp/out-text.o tmp/out-unicornscan.o tmp/out-xml.o tmp/output.o tmp/pixie-backtrace.o tmp/pixie-file.o tmp/pixie-threads.o tmp/pixie-timer.o tmp/proto-arp.o tmp/proto-banner1.o tmp/proto-banout.o tmp/proto-coap.o tmp/proto-dns.o tmp/proto-ftp.o tmp/proto-http.o tmp/proto-icmp.o tmp/proto-imap4.o tmp/proto-isakmp.o tmp/proto-mc.o tmp/proto-memcached.o tmp/proto-netbios.o tmp/proto-ntlmssp.o tmp/proto-ntp.o tmp/proto-oproto.o tmp/proto-pop3.o tmp/proto-preprocess.o tmp/proto-sctp.o tmp/proto-smb.o tmp/proto-smtp.o tmp/proto-snmp.o tmp/proto-ssh.o tmp/proto-ssl-test.o tmp/proto-ssl.o tmp/proto-tcp-rdp.o tmp/proto-tcp-telnet.o tmp/proto-udp.o tmp/proto-versioning.o tmp/proto-vnc.o tmp/proto-x509.o tmp/proto-zeroaccess.o tmp/rawsock-getif.o tmp/rawsock-getip.o tmp/rawsock-getip6.o tmp/rawsock-getmac.o tmp/rawsock-getroute.o tmp/rawsock-pcapfile.o tmp/rawsock.o tmp/read-service-probes.o tmp/rte-ring.o tmp/scripting-banner.o tmp/scripting-masscan.o tmp/scripting.o tmp/smack1.o tmp/smackqueue.o tmp/stack-arpv4.o tmp/stack-if.o tmp/stack-ndpv6.o tmp/stack-queue.o tmp/stack-src.o tmp/stack-tcp-app.o tmp/stack-tcp-core.o tmp/stub-lua.o tmp/stub-pcap.o tmp/stub-pfring.o tmp/syn-cookie.o tmp/templ-nmap-payloads.o tmp/templ-payloads.o tmp/templ-pkt.o tmp/templ-tcp-hdr.o tmp/util-checksum.o tmp/util-errormsg.o tmp/util-extract.o tmp/util-logger.o tmp/util-malloc.o tmp/util-safefunc.o tmp/vulncheck-heartbleed.o tmp/vulncheck-ntp-monlist.o tmp/vulncheck-sslv3.o tmp/vulncheck.o tmp/xring.o   -lm -lrt -ldl -lpthread
+install -pDm755 bin/masscan /usr/bin/masscan
+[12:46:52] ✅ Masscan compilado e instalado
+
+                     __     _
+   ____  __  _______/ /__  (_)
+  / __ \/ / / / ___/ / _ \/ /
+ / / / / /_/ / /__/ /  __/ /
+/_/ /_/\__,_/\___/_/\___/_/   v3.1.0
+
+                projectdiscovery.io
+
+[INF] No new updates found for nuclei templates
+[12:46:55] Ferramentas de segurança instaladas
+[12:46:55] 🔐 Instalando step-ca client...
+[12:46:56] step-ca client instalado: Smallstep CLI/0.25.2 (linux/amd64)
+Release Date: 2024-01-19T21:15:39Z
+[12:46:56] step-ca client configurado
+[12:46:56] 🤖 Configurando agente collector...
+[12:46:56] Agente collector configurado
+[12:46:56] 🔧 Configurando variáveis de ambiente...
+[12:46:56] Variáveis de ambiente configuradas
+[12:46:56] ⚙️ Configurando serviços systemd...
+Created symlink /etc/systemd/system/multi-user.target.wants/samureye-collector.service → /etc/systemd/system/samureye-collector.service.
+Created symlink /etc/systemd/system/timers.target.wants/samureye-health.timer → /etc/systemd/system/samureye-health.timer.
+[12:46:57] Serviços systemd configurados
+[12:46:57] 📝 Criando scripts auxiliares...
+bash: line 956: /opt/samureye-collector/scripts/health-check.py: No such file or directory
+root@vlxsam04:~#

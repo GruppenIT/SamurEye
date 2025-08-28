@@ -952,6 +952,9 @@ log "Serviços systemd configurados"
 
 log "📝 Criando scripts auxiliares..."
 
+# Criar diretório de scripts se não existir
+mkdir -p "$COLLECTOR_DIR/scripts"
+
 # Script de health check
 cat > "$COLLECTOR_DIR/scripts/health-check.py" << 'EOF'
 #!/usr/bin/env python3
