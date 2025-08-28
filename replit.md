@@ -63,3 +63,16 @@ NGINX acts as a reverse proxy on `vlxsam01`, forwarding traffic to the SamurEye 
 - **HTTPS-only** communication on port 443.
 - **Certificate-based authentication** via `step-ca` issued certificates.
 - Encrypted telemetry streaming and secure command execution.
+
+## Recent Updates
+
+### vlxsam04 Deployment Script (August 28, 2025)
+Successfully resolved Ubuntu 24.04 compatibility issues and implemented robust fallback mechanisms:
+
+1. **Ubuntu 24.04 PEP 668 Resolution**: Implemented `--break-system-packages` flag for Python package installation, resolving externally-managed-environment restrictions.
+
+2. **Masscan Repository Fallback**: Added automatic source compilation when apt repositories return 403 Forbidden errors, ensuring installation succeeds regardless of repository availability.
+
+3. **Non-interactive Downloads**: Eliminated interactive prompts in unzip/tar operations using `-q -o` flags, preventing script interruption during automated deployments.
+
+The vlxsam04 collector agent installation script now provides maximum robustness with automatic fallback mechanisms, making it suitable for production deployment across various network conditions and repository states.
