@@ -1386,3 +1386,44 @@ echo "📞 Se precisar de ajuda, este script pode ser executado novamente."
 echo "    Ele faz limpeza completa e recria tudo do zero."
 echo ""
 echo "🎯 INSTALAÇÃO CONCLUÍDA COM SUCESSO!"
+
+# ============================================================================
+# CONFIGURAÇÃO SSL AUTOMÁTICA (se certificado wildcard existir)
+# ============================================================================
+
+# Verificar se certificado wildcard já existe e aplicar SSL automaticamente
+if [ -f "/etc/letsencrypt/live/samureye.com.br/fullchain.pem" ]; then
+    log "🔧 Certificado wildcard encontrado! Aplicando configuração SSL automaticamente..."
+    
+    # Baixar e aplicar script de correção SSL
+    if curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/vlxsam01/fix-nginx-ssl-complete.sh | bash; then
+        log "✅ Configuração SSL aplicada automaticamente"
+        
+        echo ""
+        log "🔗 SamurEye Gateway configurado e ativo:"
+        echo "  Aplicação: https://app.samureye.com.br"
+        echo "  API:       https://api.samureye.com.br" 
+        echo "  Portal:    https://samureye.com.br"
+        echo "  CA:        https://ca.samureye.com.br"
+        echo "  Health:    https://app.samureye.com.br/health"
+        echo ""
+        echo "✅ SamurEye Gateway (vlxsam01) TOTALMENTE CONFIGURADO COM SSL!"
+    else
+        warn "Falha na aplicação automática do SSL - configure manualmente"
+    fi
+else
+    echo ""
+    log "📋 Para finalizar a configuração SSL:"
+    echo ""
+    echo "# 1. Obter certificado wildcard SSL (DNS challenge):"
+    echo "sudo certbot certonly --manual --preferred-challenges=dns -d samureye.com.br -d '*.samureye.com.br'"
+    echo ""
+    echo "# 2. Aplicar configuração SSL automaticamente:"
+    echo "curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/vlxsam01/fix-nginx-ssl-complete.sh | bash"
+    echo ""
+    echo "🔗 URLs após configurar SSL:"
+    echo "  Aplicação: https://app.samureye.com.br"
+    echo "  API:       https://api.samureye.com.br"
+    echo "  Portal:    https://samureye.com.br"
+    echo "  CA:        https://ca.samureye.com.br"
+fi
