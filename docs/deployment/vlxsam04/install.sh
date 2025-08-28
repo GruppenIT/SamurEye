@@ -1266,8 +1266,8 @@ LOG_FORMAT=json
 SYSLOG_ENABLED=true
 EOF
 
-chmod 640 "$CONFIG_DIR/.env"
-chown root:$COLLECTOR_USER "$CONFIG_DIR/.env"
+chmod 644 "$CONFIG_DIR/.env"
+chown $COLLECTOR_USER:$COLLECTOR_USER "$CONFIG_DIR/.env"
 
 log "Variáveis de ambiente configuradas"
 
