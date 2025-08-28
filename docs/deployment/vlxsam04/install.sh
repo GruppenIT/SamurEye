@@ -1154,36 +1154,21 @@ tools_check=(
     "node --version"
 )
 
-# Verificação especial para masscan (pode estar em /usr/local/bin ou /usr/bin)
-masscan_found=false
+# Verificação simples do masscan
+log "🔍 Verificando masscan..."
 
-# Verificar se masscan está no PATH
-if command -v masscan >/dev/null 2>&1; then
-    if masscan --version >/dev/null 2>&1; then
-        log "✅ Masscan funcionando ($(which masscan))"
-        masscan_found=true
-    fi
-fi
+# Atualizar PATH e hash para garantir detecção
+export PATH="/usr/bin:/usr/local/bin:$PATH"
+hash -r
 
-# Se não encontrado, verificar localizações específicas
-if [[ "$masscan_found" == "false" ]]; then
-    for masscan_path in "/usr/bin/masscan" "/usr/local/bin/masscan"; do
-        if [[ -f "$masscan_path" ]] && [[ -x "$masscan_path" ]]; then
-            if "$masscan_path" --version >/dev/null 2>&1; then
-                log "✅ Masscan encontrado em: $masscan_path"
-                # Criar link simbólico se necessário
-                if [[ "$masscan_path" != "/usr/bin/masscan" ]]; then
-                    ln -sf "$masscan_path" /usr/bin/masscan
-                fi
-                masscan_found=true
-                break
-            fi
-        fi
-    done
-fi
-
-if [[ "$masscan_found" == "false" ]]; then
-    log "❌ Masscan não funcional"
+# Verificação direta e simples
+if [[ -x "/usr/bin/masscan" ]]; then
+    log "✅ Masscan encontrado em /usr/bin/masscan"
+elif [[ -x "/usr/local/bin/masscan" ]]; then
+    log "✅ Masscan encontrado em /usr/local/bin/masscan"
+    ln -sf /usr/local/bin/masscan /usr/bin/masscan
+else
+    log "❌ Masscan não encontrado"
     exit 1
 fi
 
