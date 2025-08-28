@@ -418,6 +418,13 @@ if kill -0 $MANUAL_PID 2>/dev/null; then
     # Verificar status
     if systemctl is-active step-ca >/dev/null 2>&1; then
         log "✅ step-ca service iniciado com sucesso"
+        
+        # Mostrar informações
+        FINGERPRINT=$(cat /etc/step-ca/fingerprint.txt 2>/dev/null || echo "N/A")
+        log "CA Fingerprint: $FINGERPRINT"
+        log "CA URL: https://ca.samureye.com.br"
+        log "CA Config: /etc/step-ca/config/ca.json"
+        log "CA Password: /etc/step-ca/password.txt"
     else
         warn "❌ Falha ao iniciar step-ca service"
         log "Status do serviço:"
@@ -427,16 +434,6 @@ if kill -0 $MANUAL_PID 2>/dev/null; then
     fi
 else
     error "❌ step-ca não funciona manualmente - verificar configuração"
-fi
-    
-    # Mostrar informações
-    FINGERPRINT=$(cat /etc/step-ca/fingerprint.txt 2>/dev/null || echo "N/A")
-    log "CA Fingerprint: $FINGERPRINT"
-    log "CA URL: https://ca.samureye.com.br"
-    log "CA Config: /etc/step-ca/config/ca.json"
-    log "CA Password: /etc/step-ca/password.txt"
-else
-    error "Falha ao iniciar step-ca service"
 fi
 
 rm -f /tmp/step-*

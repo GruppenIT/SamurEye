@@ -1,0 +1,100 @@
+root@vlxsam01:~# curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/vlxsam01/install.sh | bash
+[2025-08-28 16:47:09] 🚀 Iniciando instalação do SamurEye Gateway (vlxsam01)...
+[2025-08-28 16:47:09] 🧹 Executando limpeza completa do sistema...
+[2025-08-28 16:47:09] Removendo configurações NGINX antigas...
+[2025-08-28 16:47:09] Removendo certificados SSL antigos...
+[2025-08-28 16:47:09] Removendo step-ca anterior...
+[2025-08-28 16:47:09] Limpando arquivos temporários...
+[2025-08-28 16:47:10] ✅ Limpeza completa finalizada
+[2025-08-28 16:47:10] INFO: 📋 Configurando sistema base...
+[2025-08-28 16:47:10] Atualizando sistema Ubuntu...
+Hit:1 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:2 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:3 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:4 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists... Done
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+Calculating upgrade... Done
+The following packages have been kept back:
+  linux-generic linux-headers-generic linux-image-generic sosreport
+0 upgraded, 0 newly installed, 0 to remove and 4 not upgraded.
+[2025-08-28 16:47:13] Configurando timezone para America/Sao_Paulo...
+[2025-08-28 16:47:13] Instalando pacotes essenciais...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+nginx is already the newest version (1.24.0-2ubuntu7.5).
+certbot is already the newest version (2.9.0-1).
+python3-certbot-nginx is already the newest version (2.9.0-1).
+python3-certbot-dns-cloudflare is already the newest version (2.0.0-1).
+ufw is already the newest version (0.36.2-6).
+curl is already the newest version (8.5.0-2ubuntu10.6).
+wget is already the newest version (1.21.4-1ubuntu4.1).
+git is already the newest version (1:2.43.0-1ubuntu7.3).
+htop is already the newest version (3.3.0-4build1).
+unzip is already the newest version (6.0-28ubuntu4.1).
+jq is already the newest version (1.7.1-3ubuntu0.24.04.1).
+fail2ban is already the newest version (1.0.2-3ubuntu0.1).
+openssl is already the newest version (3.0.13-0ubuntu3.5).
+0 upgraded, 0 newly installed, 0 to remove and 4 not upgraded.
+[2025-08-28 16:47:14] 🔐 Instalando step-ca Certificate Authority...
+[2025-08-28 16:47:14] Baixando step CLI v0.25.2...
+[2025-08-28 16:47:15] Baixando step-ca v0.25.2...
+[2025-08-28 16:47:15] URL: https://github.com/smallstep/certificates/releases/download/v0.25.2/step-ca_linux_0.25.2_amd64.tar.gz
+[2025-08-28 16:47:16] Conteúdo extraído em /tmp:
+-rwxr-xr-x 1 1001  127 39594177 Nov 29  2023 /tmp/step-ca
+-rw-r--r-- 1 root root 12491373 Nov 29  2023 /tmp/step-ca.tar.gz
+[2025-08-28 16:47:16] ✅ step-ca encontrado em: /tmp/step-ca
+[2025-08-28 16:47:16] step-ca instalado em /usr/local/bin/step-ca
+[2025-08-28 16:47:16] Verificando instalação do step e step-ca...
+[2025-08-28 16:47:16] ✅ step CLI instalado corretamente: Smallstep CLI/0.25.2 (linux/amd64)
+[2025-08-28 16:47:16] ✅ step-ca instalado corretamente: Smallstep CA/0.25.2 (linux/amd64)
+[2025-08-28 16:47:16] step-ca Certificate Authority CLI instalado com sucesso
+[2025-08-28 16:47:16] Configurando step-ca Certificate Authority...
+[2025-08-28 16:47:16] Diretório /etc/step-ca configurado com permissões corretas
+[2025-08-28 16:47:16] Inicializando Certificate Authority...
+[2025-08-28 16:47:16] Criando certificados e configuração step-ca manualmente...
+Certificate request self-signature ok
+subject=C = BR, ST = SP, L = Sao Paulo, O = SamurEye, OU = Certificate Authority, CN = SamurEye Internal Intermediate CA
+[2025-08-28 16:47:19] Certificados e configuração step-ca criados com sucesso
+[2025-08-28 16:47:19] CA Fingerprint: 961f55c6457a35a062950ca2799b41d04cbe0e076907b7cb545c1d1ecf837ad9
+[2025-08-28 16:47:19] step-ca inicializado com sucesso
+[2025-08-28 16:47:19] CA Name: SamurEye Internal CA
+[2025-08-28 16:47:19] DNS: ca.samureye.com.br
+[2025-08-28 16:47:19] Address: :9000
+[2025-08-28 16:47:19] Password saved to: /etc/step-ca/password.txt
+[2025-08-28 16:47:19] CA Fingerprint: 961f55c6457a35a062950ca2799b41d04cbe0e076907b7cb545c1d1ecf837ad9
+[2025-08-28 16:47:19] step-ca inicializado e configurado com sucesso
+[2025-08-28 16:47:19] Verificando configuração step-ca...
+[2025-08-28 16:47:19] ✅ step-ca binary funcional
+[2025-08-28 16:47:19] ✅ Arquivo de configuração encontrado
+[2025-08-28 16:47:19] ✅ Configuração JSON válida
+[2025-08-28 16:47:19] Atualizando configuração do serviço systemd...
+Created symlink /etc/systemd/system/multi-user.target.wants/step-ca.service → /etc/systemd/system/step-ca.service.
+[2025-08-28 16:47:20] Testando step-ca manualmente...
+badger 2025/08/28 16:47:20 INFO: All 0 tables opened in 0s
+2025/08/28 16:47:20 Starting Smallstep CA/0.25.2 (linux/amd64)
+2025/08/28 16:47:20 Documentation: https://u.step.sm/docs/ca
+2025/08/28 16:47:20 Community Discord: https://u.step.sm/discord
+2025/08/28 16:47:20 Config file: config/ca.json
+2025/08/28 16:47:20 The primary server URL is https://ca.samureye.com.br:9000
+2025/08/28 16:47:20 Root certificates are available at https://ca.samureye.com.br:9000/roots.pem
+2025/08/28 16:47:20 X.509 Root Fingerprint: 961f55c6457a35a062950ca2799b41d04cbe0e076907b7cb545c1d1ecf837ad9
+2025/08/28 16:47:20 Serving HTTPS on :9000 ...
+[2025-08-28 16:47:22] ✅ step-ca funciona manualmente
+2025/08/28 16:47:22 shutting down ...
+badger 2025/08/28 16:47:22 INFO: Storing value log head: {Fid:0 Len:30 Offset:1437}
+badger 2025/08/28 16:47:22 INFO: [Compactor: 173] Running compaction: {level:0 score:1.73 dropPrefixes:[]} for level: 0
+badger 2025/08/28 16:47:22 INFO: LOG Compact 0->1, del 1 tables, add 1 tables, took 5.380175ms
+badger 2025/08/28 16:47:22 INFO: [Compactor: 173] Compaction for level: 0 DONE
+badger 2025/08/28 16:47:22 INFO: Force compaction on level 0 done
+[2025-08-28 16:47:22] Iniciando serviço step-ca...
+[2025-08-28 16:47:25] ✅ step-ca service iniciado com sucesso
+[2025-08-28 16:47:25] CA Fingerprint: 961f55c6457a35a062950ca2799b41d04cbe0e076907b7cb545c1d1ecf837ad9
+[2025-08-28 16:47:25] CA URL: https://ca.samureye.com.br
+[2025-08-28 16:47:25] CA Config: /etc/step-ca/config/ca.json
+[2025-08-28 16:47:25] CA Password: /etc/step-ca/password.txt
+bash: line 438: syntax error near unexpected token `else'
+root@vlxsam01:~#
