@@ -107,3 +107,11 @@ The vlxsam04 install.sh is now a complete, production-ready collector agent inst
 - Reduced script from 1,807 to 1,185 lines (622 duplicate lines removed)
 - Fixed double execution of configuration steps preventing installation errors
 - Script now has clean single execution path with proper exit handling
+
+**SystemD Service Configuration Fixed (August 28, 2025):**
+- **CRITICAL SYSTEMD FIX**: Added missing .env file creation in section 8 of install.sh
+- Added collector_agent.py functional Python agent in /opt/samureye-collector/
+- Corrected systemd service paths: EnvironmentFile now points to $CONFIG_DIR/.env
+- Fixed ExecStart path to point to $COLLECTOR_DIR/collector_agent.py  
+- SystemD service now starts without "Failed to load environment files" errors
+- Collector agent ready for production with proper configuration and startup

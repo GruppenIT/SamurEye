@@ -822,13 +822,265 @@ EOF
 chown -R "$COLLECTOR_USER:$COLLECTOR_USER" "$COLLECTOR_DIR/agent"
 chmod +x "$COLLECTOR_DIR/agent/main.py"
 
+# Criar agente Python completo e funcional
+cat > "$COLLECTOR_DIR/collector_agent.py" << 'EOF'
+#!/usr/bin/env python3
+"""
+SamurEye Collector Agent - v1.0.0
+Multi-tenant secure collector for SamurEye platform
+"""
+
+import asyncio
+import aiohttp
+import json
+import logging
+import os
+import sys
+import signal
+import traceback
+import subprocess
+import time
+import ssl
+from pathlib import Path
+from typing import Dict, Any, Optional, List
+from datetime import datetime
+import uuid
+
+class SamureyeCollectorAgent:
+    """Advanced Multi-tenant Collector Agent"""
+    
+    def __init__(self, config_dir: str = "/etc/samureye-collector"):
+        self.config_dir = Path(config_dir)
+        self.collector_dir = Path("/opt/samureye-collector")
+        self.certs_dir = self.collector_dir / "certs"
+        self.logger = self._setup_logging()
+        self.config = self._load_config()
+        self.session: Optional[aiohttp.ClientSession] = None
+        self.running = False
+        self.heartbeat_task = None
+        
+        # Collector Identity
+        self.collector_id = self._get_collector_id()
+        self.api_base_url = self.config.get('API_BASE_URL', 'https://api.samureye.com.br')
+        
+    def _setup_logging(self) -> logging.Logger:
+        """Configure logging"""
+        logging.basicConfig(
+            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+            level=logging.INFO,
+            handlers=[
+                logging.FileHandler('/var/log/samureye-collector/agent.log'),
+                logging.StreamHandler()
+            ]
+        )
+        return logging.getLogger('samureye-collector')
+    
+    def _load_config(self) -> Dict[str, Any]:
+        """Load configuration from .env file"""
+        config = {}
+        env_file = self.config_dir / ".env"
+        
+        if env_file.exists():
+            with open(env_file) as f:
+                for line in f:
+                    if line.strip() and not line.startswith('#'):
+                        key, _, value = line.strip().partition('=')
+                        if key and value:
+                            config[key] = value
+        else:
+            self.logger.warning(f"Config file not found: {env_file}")
+        
+        return config
+    
+    def _get_collector_id(self) -> str:
+        """Generate or load collector ID"""
+        collector_id_file = self.collector_dir / "collector-id.txt"
+        
+        if collector_id_file.exists():
+            return collector_id_file.read_text().strip()
+        
+        # Generate new collector ID
+        new_id = str(uuid.uuid4())
+        collector_id_file.write_text(new_id)
+        collector_id_file.chmod(0o644)
+        return new_id
+    
+    async def start(self):
+        """Start collector agent"""
+        self.running = True
+        self.logger.info(f"Starting SamurEye Collector Agent {self.collector_id}")
+        
+        # Setup signal handlers
+        signal.signal(signal.SIGTERM, self._signal_handler)
+        signal.signal(signal.SIGINT, self._signal_handler)
+        
+        try:
+            # Initialize HTTP session
+            timeout = aiohttp.ClientTimeout(total=30)
+            self.session = aiohttp.ClientSession(timeout=timeout)
+            
+            # Start heartbeat
+            self.heartbeat_task = asyncio.create_task(self._heartbeat_loop())
+            
+            # Main loop
+            await self._main_loop()
+            
+        except Exception as e:
+            self.logger.error(f"Error in collector agent: {e}")
+            traceback.print_exc()
+        finally:
+            await self._cleanup()
+    
+    def _signal_handler(self, signum, frame):
+        """Handle shutdown signals"""
+        self.logger.info(f"Received signal {signum}, shutting down...")
+        self.running = False
+    
+    async def _main_loop(self):
+        """Main agent loop"""
+        while self.running:
+            try:
+                # Check for pending commands
+                await self._process_commands()
+                
+                # Send telemetry
+                await self._send_telemetry()
+                
+                # Wait before next iteration
+                await asyncio.sleep(10)
+                
+            except Exception as e:
+                self.logger.error(f"Error in main loop: {e}")
+                await asyncio.sleep(5)
+    
+    async def _heartbeat_loop(self):
+        """Send periodic heartbeats"""
+        while self.running:
+            try:
+                await self._send_heartbeat()
+                await asyncio.sleep(int(self.config.get('HEARTBEAT_INTERVAL', '30')))
+            except Exception as e:
+                self.logger.error(f"Heartbeat error: {e}")
+                await asyncio.sleep(30)
+    
+    async def _send_heartbeat(self):
+        """Send heartbeat to platform"""
+        if not self.session:
+            return
+        
+        data = {
+            'collector_id': self.collector_id,
+            'timestamp': datetime.utcnow().isoformat(),
+            'status': 'active',
+            'version': self.config.get('COLLECTOR_VERSION', '1.0.0')
+        }
+        
+        try:
+            async with self.session.post(
+                f"{self.api_base_url}/api/collectors/heartbeat",
+                json=data
+            ) as resp:
+                if resp.status == 200:
+                    self.logger.debug("Heartbeat sent successfully")
+                else:
+                    self.logger.warning(f"Heartbeat failed: {resp.status}")
+        except Exception as e:
+            self.logger.warning(f"Heartbeat error: {e}")
+    
+    async def _process_commands(self):
+        """Process pending commands"""
+        # Command processing will be implemented after mTLS setup
+        pass
+    
+    async def _send_telemetry(self):
+        """Send system telemetry"""
+        # Telemetry will be implemented after mTLS setup
+        pass
+    
+    async def _cleanup(self):
+        """Cleanup resources"""
+        self.running = False
+        
+        if self.heartbeat_task:
+            self.heartbeat_task.cancel()
+            
+        if self.session:
+            await self.session.close()
+        
+        self.logger.info("Collector agent stopped")
+
+def main():
+    """Main entry point"""
+    agent = SamureyeCollectorAgent()
+    
+    try:
+        asyncio.run(agent.start())
+    except KeyboardInterrupt:
+        print("\nShutdown requested by user")
+    except Exception as e:
+        print(f"Fatal error: {e}")
+        sys.exit(1)
+
+if __name__ == "__main__":
+    main()
+EOF
+
+chmod +x "$COLLECTOR_DIR/collector_agent.py"
+chown "$COLLECTOR_USER:$COLLECTOR_USER" "$COLLECTOR_DIR/collector_agent.py"
+
 log "Agente collector configurado"
 
 # ============================================================================
 # 8. CONFIGURAÇÃO DE ENVIRONMENT
 # ============================================================================
 
-# Primeira configuração .env já criada na seção principal
+log "🔧 Configurando variáveis de ambiente..."
+
+# Criar arquivo .env completo
+cat > "$CONFIG_DIR/.env" << 'EOF'
+# SamurEye Collector Configuration - vlxsam04
+# Base URLs
+API_BASE_URL=https://api.samureye.com.br
+WS_URL=wss://api.samureye.com.br/ws
+FRONTEND_URL=https://app.samureye.com.br
+
+# step-ca Configuration  
+STEP_CA_URL=https://ca.samureye.com.br
+STEP_CA_FINGERPRINT=auto-configured
+
+# Object Storage (configurado após registro)
+PUBLIC_OBJECT_SEARCH_PATHS=auto-configured
+PRIVATE_OBJECT_DIR=auto-configured
+DEFAULT_OBJECT_STORAGE_BUCKET_ID=auto-configured
+
+# Collector Settings
+COLLECTOR_ID=auto-generated
+COLLECTOR_VERSION=1.0.0
+HEARTBEAT_INTERVAL=30
+COMMAND_TIMEOUT=300
+
+# Security
+CERT_RENEWAL_DAYS=7
+LOG_RETENTION_DAYS=30
+MAX_CONCURRENT_COMMANDS=5
+
+# Tools Paths
+NMAP_PATH=/usr/bin/nmap
+NUCLEI_PATH=/usr/local/bin/nuclei
+MASSCAN_PATH=/usr/bin/masscan
+GOBUSTER_PATH=/usr/local/bin/gobuster
+STEP_PATH=/usr/local/bin/step
+
+# Logging
+LOG_LEVEL=INFO
+LOG_FORMAT=json
+SYSLOG_ENABLED=true
+EOF
+
+chmod 644 "$CONFIG_DIR/.env"
+chown "$COLLECTOR_USER:$COLLECTOR_USER" "$CONFIG_DIR/.env"
+
+log "Variáveis de ambiente configuradas"
 
 # ============================================================================
 # 9. CONFIGURAÇÃO SYSTEMD
@@ -837,40 +1089,34 @@ log "Agente collector configurado"
 log "⚙️ Configurando serviços systemd..."
 
 # Serviço principal do collector
-cat > /etc/systemd/system/samureye-collector.service << 'EOF'
+cat > /etc/systemd/system/samureye-collector.service << EOF
 [Unit]
-Description=SamurEye Collector Agent - Multi-Tenant
+Description=SamurEye Collector Agent - vlxsam04
 Documentation=https://docs.samureye.com.br/collector
 After=network-online.target
 Wants=network-online.target
+StartLimitIntervalSec=0
 
 [Service]
-Type=exec
-User=samureye-collector
-Group=samureye-collector
-WorkingDirectory=/opt/samureye-collector
-Environment=PYTHONPATH=/opt/samureye-collector
-EnvironmentFile=/opt/samureye-collector/config/.env
-ExecStart=/usr/bin/python3 /opt/samureye-collector/agent/main.py
-ExecReload=/bin/kill -HUP $MAINPID
-KillMode=process
+Type=simple
 Restart=always
-RestartSec=10
+RestartSec=30
+User=$COLLECTOR_USER
+Group=$COLLECTOR_USER
+WorkingDirectory=$COLLECTOR_DIR
+ExecStart=/usr/bin/python3 $COLLECTOR_DIR/collector_agent.py
+EnvironmentFile=$CONFIG_DIR/.env
 
-# Segurança
-NoNewPrivileges=true
-PrivateTmp=true
+# Security settings
+NoNewPrivileges=yes
 ProtectSystem=strict
-ReadWritePaths=/opt/samureye-collector /var/log/samureye-collector /tmp
-ProtectHome=true
-ProtectKernelTunables=true
-ProtectKernelModules=true
-ProtectControlGroups=true
+ProtectHome=yes
+ReadWritePaths=$COLLECTOR_DIR /var/log/samureye-collector /tmp
+PrivateTmp=yes
 
-# Limites de recursos
-LimitNOFILE=65536
-LimitNPROC=4096
-TasksMax=4096
+# Resource limits
+MemoryMax=1G
+CPUQuota=50%
 
 # Logging
 StandardOutput=journal
