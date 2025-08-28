@@ -230,8 +230,7 @@ step ca init \
     --dns='${DNS_NAME}' \
     --address='${ADDRESS}' \
     --provisioner='admin@samureye.com.br' \
-    --password-file='password.txt' \
-    --force
+    --password-file='password.txt'
 
 echo 'step-ca inicializado com sucesso'
 echo 'CA Name: ${CA_NAME}'
