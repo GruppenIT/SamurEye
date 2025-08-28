@@ -223,19 +223,37 @@ chmod 600 "$STEP_CA_DIR/password.txt"
 # Mudar para o diretório step-ca
 cd "$STEP_CA_DIR"
 
-# Criar script de inicialização não-interativo usando heredoc
-log "Criando inicialização automatizada..."
+# Criar certificados e configuração manualmente para evitar problemas interativos
+log "Criando certificados e configuração step-ca manualmente..."
 
-# Criar inicialização standalone (não hosted)
-sudo -u step-ca bash << 'STEP_INIT_SCRIPT'
-export STEPPATH="/etc/step-ca"
-cd /etc/step-ca
+# Instalar expect para automação
+apt-get install -y expect
 
-# Executar step ca init especificando deployment standalone
-printf "standalone\nSamurEye Internal CA\nca.samureye.com.br\n:9000\nadmin@samureye.com.br\n$(cat password.txt)\n$(cat password.txt)\n" | step ca init --deployment-type=standalone
+# Usar expect para controlar totalmente a interação
+expect << 'EOF'
+set timeout 30
+spawn sudo -u step-ca step ca init
+expect "What deployment type would you like to configure?"
+send "\033\[B"  
+send "\r"
+expect "What would you like to name your new PKI?"
+send "SamurEye Internal CA\r"
+expect "What DNS names or IP addresses would you like to add to your new CA?"
+send "ca.samureye.com.br\r"
+expect "What IP and port will your new CA bind to?"
+send ":9000\r"
+expect "What would you like to name the first provisioner for your new CA?"
+send "admin@samureye.com.br\r"
+expect "What do you want your password to be?"
+send_user "\nLendo senha do arquivo...\n"
+set password [exec cat /etc/step-ca/password.txt]
+send "$password\r"
+expect "Password:"
+send "$password\r"
+expect eof
+EOF
 
-echo "Inicialização step-ca standalone concluída"
-STEP_INIT_SCRIPT
+log "Inicialização step-ca standalone concluída"
 
 log "step-ca inicializado com sucesso"
 log "CA Name: $CA_NAME"
