@@ -1155,22 +1155,36 @@ tools_check=(
 )
 
 # Verificação especial para masscan (pode estar em /usr/local/bin ou /usr/bin)
-if ! masscan --version >/dev/null 2>&1; then
-    if [[ -f /usr/local/bin/masscan ]]; then
-        PATH="/usr/local/bin:$PATH"
-        export PATH
-        if masscan --version >/dev/null 2>&1; then
-            log "✅ Masscan encontrado em /usr/local/bin"
-        else
-            log "❌ Masscan não funcional em /usr/local/bin"
-            exit 1
-        fi
-    else
-        log "❌ Masscan não encontrado"
-        exit 1
+masscan_found=false
+
+# Verificar se masscan está no PATH
+if command -v masscan >/dev/null 2>&1; then
+    if masscan --version >/dev/null 2>&1; then
+        log "✅ Masscan funcionando ($(which masscan))"
+        masscan_found=true
     fi
-else
-    log "✅ Masscan funcionando"
+fi
+
+# Se não encontrado, verificar localizações específicas
+if [[ "$masscan_found" == "false" ]]; then
+    for masscan_path in "/usr/bin/masscan" "/usr/local/bin/masscan"; do
+        if [[ -f "$masscan_path" ]] && [[ -x "$masscan_path" ]]; then
+            if "$masscan_path" --version >/dev/null 2>&1; then
+                log "✅ Masscan encontrado em: $masscan_path"
+                # Criar link simbólico se necessário
+                if [[ "$masscan_path" != "/usr/bin/masscan" ]]; then
+                    ln -sf "$masscan_path" /usr/bin/masscan
+                fi
+                masscan_found=true
+                break
+            fi
+        fi
+    done
+fi
+
+if [[ "$masscan_found" == "false" ]]; then
+    log "❌ Masscan não funcional"
+    exit 1
 fi
 
 for tool_cmd in "${tools_check[@]}"; do
