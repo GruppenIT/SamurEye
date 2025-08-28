@@ -226,34 +226,104 @@ cd "$STEP_CA_DIR"
 # Criar certificados e configuração manualmente para evitar problemas interativos
 log "Criando certificados e configuração step-ca manualmente..."
 
-# Instalar expect para automação
-apt-get install -y expect
+# Criar estrutura de diretórios
+mkdir -p "$STEP_CA_DIR"/{certs,secrets,config,db}
 
-# Usar expect para controlar totalmente a interação
-expect << 'EOF'
-set timeout 30
-spawn sudo -u step-ca step ca init
-expect "What deployment type would you like to configure?"
-send "\033\[B"  
-send "\r"
-expect "What would you like to name your new PKI?"
-send "SamurEye Internal CA\r"
-expect "What DNS names or IP addresses would you like to add to your new CA?"
-send "ca.samureye.com.br\r"
-expect "What IP and port will your new CA bind to?"
-send ":9000\r"
-expect "What would you like to name the first provisioner for your new CA?"
-send "admin@samureye.com.br\r"
-expect "What do you want your password to be?"
-send_user "\nLendo senha do arquivo...\n"
-set password [exec cat /etc/step-ca/password.txt]
-send "$password\r"
-expect "Password:"
-send "$password\r"
-expect eof
-EOF
+# Gerar chave privada root
+openssl genrsa -aes256 -passout "pass:$PASSWORD" -out "$STEP_CA_DIR/secrets/root_ca_key" 4096
+chmod 600 "$STEP_CA_DIR/secrets/root_ca_key"
 
-log "Inicialização step-ca standalone concluída"
+# Gerar certificado root auto-assinado
+openssl req -new -x509 -key "$STEP_CA_DIR/secrets/root_ca_key" -passin "pass:$PASSWORD" \
+    -out "$STEP_CA_DIR/certs/root_ca.crt" -days 3650 \
+    -subj "/C=BR/ST=SP/L=Sao Paulo/O=SamurEye/OU=Certificate Authority/CN=SamurEye Internal CA"
+chmod 644 "$STEP_CA_DIR/certs/root_ca.crt"
+
+# Gerar chave privada intermediate
+openssl genrsa -aes256 -passout "pass:$PASSWORD" -out "$STEP_CA_DIR/secrets/intermediate_ca_key" 4096
+chmod 600 "$STEP_CA_DIR/secrets/intermediate_ca_key"
+
+# Gerar CSR intermediate
+openssl req -new -key "$STEP_CA_DIR/secrets/intermediate_ca_key" -passin "pass:$PASSWORD" \
+    -out "$STEP_CA_DIR/intermediate_ca.csr" \
+    -subj "/C=BR/ST=SP/L=Sao Paulo/O=SamurEye/OU=Certificate Authority/CN=SamurEye Internal Intermediate CA"
+
+# Assinar certificado intermediate com root
+openssl x509 -req -in "$STEP_CA_DIR/intermediate_ca.csr" \
+    -CA "$STEP_CA_DIR/certs/root_ca.crt" -CAkey "$STEP_CA_DIR/secrets/root_ca_key" \
+    -passin "pass:$PASSWORD" -CAcreateserial \
+    -out "$STEP_CA_DIR/certs/intermediate_ca.crt" -days 1825 \
+    -extensions v3_intermediate_ca \
+    -extfile <(cat << 'EXT'
+[v3_intermediate_ca]
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid:always,issuer
+basicConstraints = critical, CA:true, pathlen:0
+keyUsage = critical, digitalSignature, cRLSign, keyCertSign
+EXT
+)
+
+# Limpar CSR temporário
+rm "$STEP_CA_DIR/intermediate_ca.csr"
+
+# Criar configuração step-ca
+cat > "$STEP_CA_DIR/config/ca.json" << 'JSON_CONFIG'
+{
+  "root": "/etc/step-ca/certs/root_ca.crt",
+  "federatedRoots": null,
+  "crt": "/etc/step-ca/certs/intermediate_ca.crt",
+  "key": "/etc/step-ca/secrets/intermediate_ca_key",
+  "address": ":9000",
+  "insecureAddress": "",
+  "dnsNames": ["ca.samureye.com.br"],
+  "logger": {"format": "text"},
+  "db": {
+    "type": "badgerv2",
+    "dataSource": "/etc/step-ca/db",
+    "badgerFileLoadingMode": ""
+  },
+  "authority": {
+    "provisioners": [
+      {
+        "type": "JWK",
+        "name": "admin@samureye.com.br",
+        "key": {
+          "use": "sig",
+          "kty": "EC",
+          "kid": "admin-key",
+          "crv": "P-256",
+          "alg": "ES256",
+          "x": "placeholder-x",
+          "y": "placeholder-y"
+        },
+        "encryptedKey": "placeholder-encrypted-key"
+      }
+    ]
+  },
+  "tls": {
+    "cipherSuites": [
+      "TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256",
+      "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256"
+    ],
+    "minVersion": 1.2,
+    "maxVersion": 1.3,
+    "renegotiation": false
+  }
+}
+JSON_CONFIG
+
+# Gerar fingerprint do certificado root
+FINGERPRINT=$(openssl x509 -noout -fingerprint -sha256 -in "$STEP_CA_DIR/certs/root_ca.crt" | cut -d'=' -f2 | tr -d ':' | tr '[:upper:]' '[:lower:]')
+echo "$FINGERPRINT" > "$STEP_CA_DIR/fingerprint.txt"
+
+# Configurar permissões finais
+chown -R step-ca:step-ca "$STEP_CA_DIR"
+chmod -R 700 "$STEP_CA_DIR"
+chmod 644 "$STEP_CA_DIR"/certs/*.crt
+chmod 644 "$STEP_CA_DIR/fingerprint.txt"
+
+log "Certificados e configuração step-ca criados com sucesso"
+log "CA Fingerprint: $FINGERPRINT"
 
 log "step-ca inicializado com sucesso"
 log "CA Name: $CA_NAME"
