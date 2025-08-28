@@ -196,3 +196,14 @@ The vlxsam04 install.sh is now a complete, production-ready collector agent inst
   - **Autocontido**: Concentra 100% das soluções em um único arquivo
   - **Diagnóstico Integrado**: Inclui verificações de saúde e troubleshooting
 - **RESULT**: vlxsam01 install.sh agora é um script de reset completo que resolve TODAS configurações nginx sem dependências externas
+
+**vlxsam01 Step-CA Download Path CORRECTION (August 28, 2025):**
+- **CRITICAL PATH FIX**: Corrigido erro "cannot stat '/tmp/step-ca_0.25.2/bin/step-ca': No such file or directory"
+- **ROOT CAUSE**: Estrutura do arquivo tar.gz do step-ca é diferente do step CLI
+- **DISCOVERY**:
+  - **step CLI**: `step_linux_amd64/bin/step` (contém diretório bin/)
+  - **step-ca**: `step-ca_linux_amd64/step-ca` (binário direto no root, SEM bin/)
+- **CORREÇÃO APLICADA**:
+  - Alterado de: `"/tmp/step-ca_$STEP_CA_VERSION/bin/step-ca"`
+  - Para: `"/tmp/step-ca_linux_${STEP_CA_VERSION}_amd64/step-ca"`
+- **RESULT**: Instalação step-ca agora funciona corretamente, download e extração do binário corretos

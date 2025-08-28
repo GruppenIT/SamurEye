@@ -136,7 +136,7 @@ chmod +x /usr/local/bin/step
 log "Baixando step-ca v$STEP_CA_VERSION..."
 wget -q -O /tmp/step-ca.tar.gz "https://github.com/smallstep/certificates/releases/download/v$STEP_CA_VERSION/step-ca_linux_${STEP_CA_VERSION}_amd64.tar.gz"
 tar -xzf /tmp/step-ca.tar.gz -C /tmp/
-mv "/tmp/step-ca_$STEP_CA_VERSION/bin/step-ca" /usr/local/bin/step-ca
+mv "/tmp/step-ca_linux_${STEP_CA_VERSION}_amd64/step-ca" /usr/local/bin/step-ca
 chmod +x /usr/local/bin/step-ca
 
 # Criar usuário step-ca
