@@ -1,0 +1,45 @@
+[2025-08-28 15:57:09] 🚀 Iniciando instalação do SamurEye Gateway (vlxsam01)...
+[2025-08-28 15:57:09] 🧹 Executando limpeza completa do sistema...
+[2025-08-28 15:57:09] Removendo configurações NGINX antigas...
+[2025-08-28 15:57:09] Removendo certificados SSL antigos...
+[2025-08-28 15:57:10] ✅ Limpeza completa finalizada
+[2025-08-28 15:57:10] INFO: 📋 Configurando sistema base...
+[2025-08-28 15:57:10] Atualizando sistema Ubuntu...
+Hit:1 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:2 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:3 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:4 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists... Done
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+Calculating upgrade... Done
+The following packages have been kept back:
+  linux-generic linux-headers-generic linux-image-generic sosreport
+0 upgraded, 0 newly installed, 0 to remove and 4 not upgraded.
+[2025-08-28 15:57:13] Configurando timezone para America/Sao_Paulo...
+[2025-08-28 15:57:13] Instalando pacotes essenciais...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+nginx is already the newest version (1.24.0-2ubuntu7.5).
+certbot is already the newest version (2.9.0-1).
+python3-certbot-nginx is already the newest version (2.9.0-1).
+python3-certbot-dns-cloudflare is already the newest version (2.0.0-1).
+ufw is already the newest version (0.36.2-6).
+curl is already the newest version (8.5.0-2ubuntu10.6).
+wget is already the newest version (1.21.4-1ubuntu4.1).
+git is already the newest version (1:2.43.0-1ubuntu7.3).
+htop is already the newest version (3.3.0-4build1).
+unzip is already the newest version (6.0-28ubuntu4.1).
+jq is already the newest version (1.7.1-3ubuntu0.24.04.1).
+fail2ban is already the newest version (1.0.2-3ubuntu0.1).
+openssl is already the newest version (3.0.13-0ubuntu3.5).
+0 upgraded, 0 newly installed, 0 to remove and 4 not upgraded.
+[2025-08-28 15:57:14] 🔐 Instalando step-ca Certificate Authority...
+[2025-08-28 15:57:14] Baixando step CLI v0.25.2...
+[2025-08-28 15:57:15] Baixando step-ca v0.25.2...
+mv: cannot stat '/tmp/step-ca_0.25.2/bin/step-ca': No such file or directory
+root@vlxsam01:~# ls -l /tmp/step-ca_0.25.2
+ls: cannot access '/tmp/step-ca_0.25.2': No such file or directory
+root@vlxsam01:~#

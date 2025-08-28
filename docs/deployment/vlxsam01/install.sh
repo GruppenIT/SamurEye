@@ -134,10 +134,26 @@ chmod +x /usr/local/bin/step
 
 # Download e instalação do step-ca
 log "Baixando step-ca v$STEP_CA_VERSION..."
-wget -q -O /tmp/step-ca.tar.gz "https://github.com/smallstep/certificates/releases/download/v$STEP_CA_VERSION/step-ca_linux_${STEP_CA_VERSION}_amd64.tar.gz"
+STEP_CA_URL="https://github.com/smallstep/certificates/releases/download/v$STEP_CA_VERSION/step-ca_linux_${STEP_CA_VERSION}_amd64.tar.gz"
+STEP_CA_EXTRACT_PATH="/tmp/step-ca_linux_${STEP_CA_VERSION}_amd64"
+log "URL: $STEP_CA_URL"
+log "Caminho de extração esperado: $STEP_CA_EXTRACT_PATH"
+
+wget -q -O /tmp/step-ca.tar.gz "$STEP_CA_URL"
 tar -xzf /tmp/step-ca.tar.gz -C /tmp/
-mv "/tmp/step-ca_linux_${STEP_CA_VERSION}_amd64/step-ca" /usr/local/bin/step-ca
-chmod +x /usr/local/bin/step-ca
+
+# Verificar o que foi realmente extraído
+log "Conteúdo extraído em /tmp:"
+ls -la /tmp/step-ca* || true
+
+# Mover do caminho correto
+if [ -f "$STEP_CA_EXTRACT_PATH/step-ca" ]; then
+    log "✅ step-ca encontrado no caminho correto: $STEP_CA_EXTRACT_PATH/step-ca"
+    mv "$STEP_CA_EXTRACT_PATH/step-ca" /usr/local/bin/step-ca
+    chmod +x /usr/local/bin/step-ca
+else
+    error "❌ step-ca não encontrado em $STEP_CA_EXTRACT_PATH/step-ca"
+fi
 
 # Criar usuário step-ca
 useradd --system --home /etc/step-ca --shell /bin/false step-ca || true
