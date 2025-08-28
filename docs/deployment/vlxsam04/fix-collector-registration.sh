@@ -340,5 +340,9 @@ EOF
 
 chmod +x "$COLLECTOR_DIR/register-collector-fixed.sh"
 
-log "✅ Script de registro corrigido criado"
-log "Execute: cd $COLLECTOR_DIR && sudo ./register-collector-fixed.sh gruppen-it vlxsam04"
+# Baixar script funcionando (método simplificado)
+curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/vlxsam04/register-collector-working.sh -o "$COLLECTOR_DIR/register-collector-working.sh"
+chmod +x "$COLLECTOR_DIR/register-collector-working.sh"
+
+log "✅ Script de registro simplificado criado"
+log "Execute: cd $COLLECTOR_DIR && sudo ./register-collector-working.sh gruppen-it vlxsam04"
