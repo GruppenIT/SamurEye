@@ -1,0 +1,260 @@
+root@vlxsam04:~# curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/install.sh | bash
+[12:15:04] 🚀 Iniciando instalação vlxsam04 - Collector Agent
+[12:15:04] Servidor: 192.168.100.151 (rede interna isolada)
+[12:15:04] Collector Directory: /opt/samureye-collector
+[12:15:04] 📦 Atualizando sistema base...
+Hit:1 https://deb.nodesource.com/node_20.x nodistro InRelease
+Hit:2 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:3 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:4 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:5 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+All packages are up to date.
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+Calculating upgrade... Done
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+curl is already the newest version (8.5.0-2ubuntu10.6).
+wget is already the newest version (1.21.4-1ubuntu4.1).
+gnupg is already the newest version (2.4.4-2ubuntu17.3).
+software-properties-common is already the newest version (0.99.49.3).
+apt-transport-https is already the newest version (2.8.3).
+ca-certificates is already the newest version (20240203).
+lsb-release is already the newest version (12.0-2).
+jq is already the newest version (1.7.1-3ubuntu0.24.04.1).
+htop is already the newest version (3.3.0-4build1).
+iotop is already the newest version (0.6-42-ga14256a-0.2build1).
+netcat-openbsd is already the newest version (1.226-1ubuntu2).
+net-tools is already the newest version (2.10-0.1ubuntu4.4).
+dnsutils is already the newest version (1:9.18.30-0ubuntu0.24.04.2).
+tcpdump is already the newest version (4.99.4-3ubuntu4).
+python3.12 is already the newest version (3.12.3-1ubuntu0.8).
+python3.12-venv is already the newest version (3.12.3-1ubuntu0.8).
+python3.12-dev is already the newest version (3.12.3-1ubuntu0.8).
+python3-pip is already the newest version (24.0+dfsg-1ubuntu1.2).
+build-essential is already the newest version (12.10ubuntu1).
+git is already the newest version (1:2.43.0-1ubuntu7.3).
+unzip is already the newest version (6.0-28ubuntu4.1).
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+[12:15:08] Sistema base atualizado
+[12:15:08] 🟢 Instalando Node.js 20.x...
+2025-08-28 12:15:09 - Installing pre-requisites
+Hit:1 https://deb.nodesource.com/node_20.x nodistro InRelease
+Hit:2 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:3 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:4 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:5 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists... Done
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+apt-transport-https is already the newest version (2.8.3).
+ca-certificates is already the newest version (20240203).
+curl is already the newest version (8.5.0-2ubuntu10.6).
+gnupg is already the newest version (2.4.4-2ubuntu17.3).
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+Hit:1 https://deb.nodesource.com/node_20.x nodistro InRelease
+Hit:2 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:3 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:4 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:5 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists... Done
+2025-08-28 12:15:14 - Repository configured successfully.
+2025-08-28 12:15:14 - To install Node.js, run: apt-get install nodejs -y
+2025-08-28 12:15:14 - You can use N|solid Runtime as a node.js alternative
+2025-08-28 12:15:14 - To install N|solid Runtime, run: apt-get install nsolid -y
+
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+nodejs is already the newest version (20.19.4-1nodesource1).
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+[12:15:15] Node.js instalado: v20.19.4
+[12:15:15] npm instalado: 10.8.2
+[12:15:15] 🐍 Configurando Python 3.12...
+[12:15:15] Configurando pip para Python 3.12...
+[12:15:16] ✅ pip funcionando, atualizando com --break-system-packages (Ubuntu 24.04)...
+Requirement already satisfied: pip in /usr/lib/python3/dist-packages (24.0)
+Collecting pip
+  Downloading pip-25.2-py3-none-any.whl.metadata (4.7 kB)
+Requirement already satisfied: setuptools in /usr/lib/python3/dist-packages (68.1.2)
+Collecting setuptools
+  Downloading setuptools-80.9.0-py3-none-any.whl.metadata (6.6 kB)
+Requirement already satisfied: wheel in /usr/lib/python3/dist-packages (0.42.0)
+Collecting wheel
+  Downloading wheel-0.45.1-py3-none-any.whl.metadata (2.3 kB)
+Downloading pip-25.2-py3-none-any.whl (1.8 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.8/1.8 MB 11.5 MB/s eta 0:00:00
+Downloading setuptools-80.9.0-py3-none-any.whl (1.2 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.2/1.2 MB 39.2 MB/s eta 0:00:00
+Downloading wheel-0.45.1-py3-none-any.whl (72 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 72.5/72.5 kB 11.4 MB/s eta 0:00:00
+Installing collected packages: wheel, setuptools, pip
+  Attempting uninstall: wheel
+    Found existing installation: wheel 0.42.0
+[12:15:19] ⚠️ Pip upgrade falhou, usando versão do sistema...
+[12:15:19] 📦 Instalando dependências Python...
+Collecting aiohttp
+  Downloading aiohttp-3.12.15-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (7.7 kB)
+Collecting websockets
+  Downloading websockets-15.0.1-cp312-cp312-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (6.8 kB)
+Requirement already satisfied: cryptography in /usr/lib/python3/dist-packages (41.0.7)
+Requirement already satisfied: requests in /usr/lib/python3/dist-packages (2.31.0)
+Requirement already satisfied: certifi in /usr/lib/python3/dist-packages (2023.11.17)
+Collecting psutil
+  Downloading psutil-7.0.0-cp36-abi3-manylinux_2_12_x86_64.manylinux2010_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (22 kB)
+Requirement already satisfied: pyyaml in /usr/lib/python3/dist-packages (6.0.1)
+Collecting structlog
+  Downloading structlog-25.4.0-py3-none-any.whl.metadata (7.6 kB)
+Collecting python-multipart
+  Downloading python_multipart-0.0.20-py3-none-any.whl.metadata (1.8 kB)
+Collecting aiofiles
+  Downloading aiofiles-24.1.0-py3-none-any.whl.metadata (10 kB)
+Collecting aiohappyeyeballs>=2.5.0 (from aiohttp)
+  Downloading aiohappyeyeballs-2.6.1-py3-none-any.whl.metadata (5.9 kB)
+Collecting aiosignal>=1.4.0 (from aiohttp)
+  Downloading aiosignal-1.4.0-py3-none-any.whl.metadata (3.7 kB)
+Requirement already satisfied: attrs>=17.3.0 in /usr/lib/python3/dist-packages (from aiohttp) (23.2.0)
+Collecting frozenlist>=1.1.1 (from aiohttp)
+  Downloading frozenlist-1.7.0-cp312-cp312-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (18 kB)
+Collecting multidict<7.0,>=4.5 (from aiohttp)
+  Downloading multidict-6.6.4-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (5.3 kB)
+Collecting propcache>=0.2.0 (from aiohttp)
+  Downloading propcache-0.3.2-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (12 kB)
+Collecting yarl<2.0,>=1.17.0 (from aiohttp)
+  Downloading yarl-1.20.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (73 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 73.9/73.9 kB 2.4 MB/s eta 0:00:00
+Collecting typing-extensions>=4.2 (from aiosignal>=1.4.0->aiohttp)
+  Downloading typing_extensions-4.15.0-py3-none-any.whl.metadata (3.3 kB)
+Requirement already satisfied: idna>=2.0 in /usr/lib/python3/dist-packages (from yarl<2.0,>=1.17.0->aiohttp) (3.6)
+Downloading aiohttp-3.12.15-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (1.7 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.7/1.7 MB 14.7 MB/s eta 0:00:00
+Downloading websockets-15.0.1-cp312-cp312-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl (182 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 182.5/182.5 kB 27.2 MB/s eta 0:00:00
+Downloading psutil-7.0.0-cp36-abi3-manylinux_2_12_x86_64.manylinux2010_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl (277 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 278.0/278.0 kB 38.6 MB/s eta 0:00:00
+Downloading structlog-25.4.0-py3-none-any.whl (68 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 68.7/68.7 kB 8.6 MB/s eta 0:00:00
+Downloading python_multipart-0.0.20-py3-none-any.whl (24 kB)
+Downloading aiofiles-24.1.0-py3-none-any.whl (15 kB)
+Downloading aiohappyeyeballs-2.6.1-py3-none-any.whl (15 kB)
+Downloading aiosignal-1.4.0-py3-none-any.whl (7.5 kB)
+Downloading frozenlist-1.7.0-cp312-cp312-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl (241 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 241.8/241.8 kB 17.1 MB/s eta 0:00:00
+Downloading multidict-6.6.4-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (256 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 256.1/256.1 kB 37.5 MB/s eta 0:00:00
+Downloading propcache-0.3.2-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (224 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 224.4/224.4 kB 33.0 MB/s eta 0:00:00
+Downloading yarl-1.20.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (355 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 355.6/355.6 kB 45.3 MB/s eta 0:00:00
+Downloading typing_extensions-4.15.0-py3-none-any.whl (44 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 44.6/44.6 kB 6.3 MB/s eta 0:00:00
+Installing collected packages: websockets, typing-extensions, structlog, python-multipart, psutil, propcache, multidict, frozenlist, aiohappyeyeballs, aiofiles, yarl, aiosignal, aiohttp
+Successfully installed aiofiles-24.1.0 aiohappyeyeballs-2.6.1 aiohttp-3.12.15 aiosignal-1.4.0 frozenlist-1.7.0 multidict-6.6.4 propcache-0.3.2 psutil-7.0.0 python-multipart-0.0.20 structlog-25.4.0 typing-extensions-4.15.0 websockets-15.0.1 yarl-1.20.1
+WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv
+[12:15:25] Python 3.12 e dependências instaladas
+[12:15:25] 🔍 Validando compatibilidade Ubuntu 24.04...
+[12:15:25] Ubuntu detectado: 24.04 (noble)
+[12:15:25] ✅ Ubuntu 24.04 Noble detectado - compatibilidade OK
+[12:15:25] 🧪 Testando componentes instalados...
+[12:15:25] ✅ Python 3.12: Python 3.12.3
+[12:15:25] Testando importações Python...
+✅ Todas as dependências Python importadas com sucesso
+✅ Python path: /usr/bin/python3
+[12:15:25] ✅ netcat-openbsd disponível: /usr/bin/nc
+[12:15:25] ✅ Node.js 20.x: v20.19.4
+[12:15:25] 🎉 Validação de compatibilidade concluída com sucesso!
+[12:15:25] 👤 Configurando usuário collector...
+[12:15:26] Usuário e diretórios configurados
+[12:15:26] 🔧 Instalando ferramentas de segurança...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following additional packages will be installed:
+  libblas3 liblinear4 liblua5.4-0 libssh2-1t64
+Suggested packages:
+  liblinear-tools liblinear-dev ncat ndiff zenmap
+The following NEW packages will be installed:
+  libblas3 liblinear4 liblua5.4-0 libssh2-1t64 nmap nmap-common
+0 upgraded, 6 newly installed, 0 to remove and 0 not upgraded.
+Need to get 6,452 kB of archives.
+After this operation, 28.0 MB of additional disk space will be used.
+Get:1 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libblas3 amd64 3.12.0-3build1.1 [238 kB]
+Get:2 http://archive.ubuntu.com/ubuntu noble/universe amd64 liblinear4 amd64 2.3.0+dfsg-5build1 [42.3 kB]
+Get:3 http://archive.ubuntu.com/ubuntu noble/main amd64 liblua5.4-0 amd64 5.4.6-3build2 [166 kB]
+Get:4 http://archive.ubuntu.com/ubuntu noble/main amd64 libssh2-1t64 amd64 1.11.0-4.1build2 [120 kB]
+Get:5 http://archive.ubuntu.com/ubuntu noble/universe amd64 nmap-common all 7.94+git20230807.3be01efb1+dfsg-3build2 [4,192 kB]
+Get:6 http://archive.ubuntu.com/ubuntu noble/universe amd64 nmap amd64 7.94+git20230807.3be01efb1+dfsg-3build2 [1,694 kB]
+Fetched 6,452 kB in 4s (1,575 kB/s)
+Selecting previously unselected package libblas3:amd64.
+(Reading database ... 133780 files and directories currently installed.)
+Preparing to unpack .../0-libblas3_3.12.0-3build1.1_amd64.deb ...
+Unpacking libblas3:amd64 (3.12.0-3build1.1) ...
+Selecting previously unselected package liblinear4:amd64.
+Preparing to unpack .../1-liblinear4_2.3.0+dfsg-5build1_amd64.deb ...
+Unpacking liblinear4:amd64 (2.3.0+dfsg-5build1) ...
+Selecting previously unselected package liblua5.4-0:amd64.
+Preparing to unpack .../2-liblua5.4-0_5.4.6-3build2_amd64.deb ...
+Unpacking liblua5.4-0:amd64 (5.4.6-3build2) ...
+Selecting previously unselected package libssh2-1t64:amd64.
+Preparing to unpack .../3-libssh2-1t64_1.11.0-4.1build2_amd64.deb ...
+Unpacking libssh2-1t64:amd64 (1.11.0-4.1build2) ...
+Selecting previously unselected package nmap-common.
+Preparing to unpack .../4-nmap-common_7.94+git20230807.3be01efb1+dfsg-3build2_all.deb ...
+Unpacking nmap-common (7.94+git20230807.3be01efb1+dfsg-3build2) ...
+Selecting previously unselected package nmap.
+Preparing to unpack .../5-nmap_7.94+git20230807.3be01efb1+dfsg-3build2_amd64.deb ...
+Unpacking nmap (7.94+git20230807.3be01efb1+dfsg-3build2) ...
+Setting up libblas3:amd64 (3.12.0-3build1.1) ...
+update-alternatives: using /usr/lib/x86_64-linux-gnu/blas/libblas.so.3 to provide /usr/lib/x86_64-linux-gnu/libblas.so.3 (libblas.so.3-x86_64-linux-gnu) in auto mode
+Setting up nmap-common (7.94+git20230807.3be01efb1+dfsg-3build2) ...
+Setting up liblua5.4-0:amd64 (5.4.6-3build2) ...
+Setting up libssh2-1t64:amd64 (1.11.0-4.1build2) ...
+Setting up liblinear4:amd64 (2.3.0+dfsg-5build1) ...
+Setting up nmap (7.94+git20230807.3be01efb1+dfsg-3build2) ...
+Processing triggers for man-db (2.12.0-4build2) ...
+Processing triggers for libc-bin (2.39-0ubuntu8.5) ...
+Scanning processes...
+Scanning candidates...
+Scanning linux images...
+
+Pending kernel upgrade!
+Running kernel version:
+  6.8.0-41-generic
+Diagnostics:
+  The currently running kernel version is not the expected kernel version 6.8.0-79-generic.
+
+Restarting the system to load the new kernel will not be handled automatically, so you should consider rebooting.
+
+Restarting services...
+
+Service restarts being deferred:
+ /etc/needrestart/restart.d/dbus.service
+ systemctl restart getty@tty1.service
+ systemctl restart systemd-logind.service
+ systemctl restart unattended-upgrades.service
+
+No containers need to be restarted.
+
+No user sessions are running outdated binaries.
+
+No VM guests are running outdated hypervisor (qemu) binaries on this host.
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following NEW packages will be installed:
+  masscan
+0 upgraded, 1 newly installed, 0 to remove and 0 not upgraded.
+Need to get 237 kB of archives.
+After this operation, 566 kB of additional disk space will be used.
+Err:1 http://archive.ubuntu.com/ubuntu noble/universe amd64 masscan amd64 2:1.3.2+ds1-1
+  403  Forbidden [IP: 185.125.190.83 80]
+E: Failed to fetch http://archive.ubuntu.com/ubuntu/pool/universe/m/masscan/masscan_1.3.2%2bds1-1_amd64.deb  403  Forbidden [IP: 185.125.190.83 80]
+E: Unable to fetch some archives, maybe run apt-get update or try with --fix-missing?
+root@vlxsam04:~#
