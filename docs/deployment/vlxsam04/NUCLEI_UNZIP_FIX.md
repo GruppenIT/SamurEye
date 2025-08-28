@@ -6,30 +6,47 @@
 **Servidor**: vlxsam04  
 **OS**: Ubuntu 24.04 Noble
 
-### Erro Encontrado:
+### Erros Encontrados:
+**Erro 1 - Unzip interativo:**
 ```
 replace /tmp/LICENSE.md? [y]es, [n]o, [A]ll, [N]one, [r]ename: error: invalid response [mv /tmp/n]
 replace /tmp/LICENSE.md? [y]es, [n]o, [A]ll, [N]one, [r]ename: error: invalid response [uclei /us]
 bash: line 277: syntax error near unexpected token `('
 ```
 
-**Causa**: O comando `unzip` estava pedindo confirmação interativa para sobrescrever arquivos e interpretando comandos do script como respostas.
+**Erro 2 - Nuclei templates flag:**
+```
+flag provided but not defined: -templates-dir
+```
+
+**Causas**: 
+1. O comando `unzip` estava pedindo confirmação interativa para sobrescrever arquivos
+2. Nuclei 3.1.0 mudou a sintaxe da flag `-templates-dir` para variável de ambiente
 
 ## ✅ Solução Implementada
 
-### Flags Silenciosas para Downloads
+### Correções Implementadas
+
+**1. Downloads Silenciosos:**
 ```bash
 # ANTES:
 wget -O /tmp/nuclei.zip "https://github.com/..."
 unzip /tmp/nuclei.zip -d /tmp/
 tar -xzf /tmp/gobuster.tar.gz -C /tmp/
-wget -O /tmp/step-cli.tar.gz "https://github.com/..."
 
 # AGORA:
 wget -q -O /tmp/nuclei.zip "https://github.com/..."
 unzip -q -o /tmp/nuclei.zip -d /tmp/
 tar -xzf /tmp/gobuster.tar.gz -C /tmp/ 2>/dev/null
-wget -q -O /tmp/step-cli.tar.gz "https://github.com/..."
+```
+
+**2. Nuclei Templates Flag:**
+```bash
+# ANTES:
+nuclei -update-templates -templates-dir "$TOOLS_DIR/nuclei/templates"
+
+# AGORA:
+NUCLEI_TEMPLATES_DIR="$TOOLS_DIR/nuclei/templates" nuclei -update-templates
 ```
 
 ### Flags Utilizadas:

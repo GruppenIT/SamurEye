@@ -1,0 +1,17 @@
+--2025-08-28 12:34:14--  https://github.com/projectdiscovery/nuclei/releases/download/v3.1.0/nuclei_3.1.0_linux_amd64.zip
+Resolving github.com (github.com)... 20.201.28.151
+Connecting to github.com (github.com)|20.201.28.151|:443... connected.
+HTTP request sent, awaiting response... 302 Found
+Location: https://release-assets.githubusercontent.com/github-production-release-asset/252813491/eca174ce-2642-473b-bd4d-d33d7deceea7?sp=r&sv=2018-11-09&sr=b&spr=https&se=2025-08-28T13%3A21%3A30Z&rscd=attachment%3B+filename%3Dnuclei_3.1.0_linux_amd64.zip&rsct=application%2Foctet-stream&skoid=96c2d410-5711-43a1-aedd-ab1947aa7ab0&sktid=398a6654-997b-47e9-b12b-9515b896b4de&skt=2025-08-28T12%3A21%3A03Z&ske=2025-08-28T13%3A21%3A30Z&sks=b&skv=2018-11-09&sig=lnr6taJAfGclJZAI2VcrGTrTQTBZQw6dv0tc0Ie1jdg%3D&jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmVsZWFzZS1hc3NldHMuZ2l0aHVidXNlcmNvbnRlbnQuY29tIiwia2V5Ijoia2V5MSIsImV4cCI6MTc1NjM4NDc1NCwibmJmIjoxNzU2Mzg0NDU0LCJwYXRoIjoicmVsZWFzZWFzc2V0cHJvZHVjdGlvbi5ibG9iLmNvcmUud2luZG93cy5uZXQifQ.zmvNeSK4fNSESe3W8ygWFRqIvq5WRQp5kyPNMqN-qRE&response-content-disposition=attachment%3B%20filename%3Dnuclei_3.1.0_linux_amd64.zip&response-content-type=application%2Foctet-stream [following]
+--2025-08-28 12:34:14--  https://release-assets.githubusercontent.com/github-production-release-asset/252813491/eca174ce-2642-473b-bd4d-d33d7deceea7?sp=r&sv=2018-11-09&sr=b&spr=https&se=2025-08-28T13%3A21%3A30Z&rscd=attachment%3B+filename%3Dnuclei_3.1.0_linux_amd64.zip&rsct=application%2Foctet-stream&skoid=96c2d410-5711-43a1-aedd-ab1947aa7ab0&sktid=398a6654-997b-47e9-b12b-9515b896b4de&skt=2025-08-28T12%3A21%3A03Z&ske=2025-08-28T13%3A21%3A30Z&sks=b&skv=2018-11-09&sig=lnr6taJAfGclJZAI2VcrGTrTQTBZQw6dv0tc0Ie1jdg%3D&jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmVsZWFzZS1hc3NldHMuZ2l0aHVidXNlcmNvbnRlbnQuY29tIiwia2V5Ijoia2V5MSIsImV4cCI6MTc1NjM4NDc1NCwibmJmIjoxNzU2Mzg0NDU0LCJwYXRoIjoicmVsZWFzZWFzc2V0cHJvZHVjdGlvbi5ibG9iLmNvcmUud2luZG93cy5uZXQifQ.zmvNeSK4fNSESe3W8ygWFRqIvq5WRQp5kyPNMqN-qRE&response-content-disposition=attachment%3B%20filename%3Dnuclei_3.1.0_linux_amd64.zip&response-content-type=application%2Foctet-stream
+Resolving release-assets.githubusercontent.com (release-assets.githubusercontent.com)... 185.199.108.133, 185.199.109.133, 185.199.111.133, ...
+Connecting to release-assets.githubusercontent.com (release-assets.githubusercontent.com)|185.199.108.133|:443... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 24849052 (24M) [application/octet-stream]
+Saving to: ‘/tmp/nuclei.zip’
+
+/tmp/nuclei.zip                                      100%[======================================================================================================================>]  23.70M  41.9MB/s    in 0.6s
+
+2025-08-28 12:34:15 (41.9 MB/s) - ‘/tmp/nuclei.zip’ saved [24849052/24849052]
+
+flag provided but not defined: -templates-dir

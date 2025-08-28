@@ -278,7 +278,7 @@ chmod +x /usr/local/bin/nuclei
 
 # Templates Nuclei
 sudo -u "$COLLECTOR_USER" mkdir -p "$TOOLS_DIR/nuclei/templates"
-sudo -u "$COLLECTOR_USER" nuclei -update-templates -templates-dir "$TOOLS_DIR/nuclei/templates"
+sudo -u "$COLLECTOR_USER" NUCLEI_TEMPLATES_DIR="$TOOLS_DIR/nuclei/templates" nuclei -update-templates
 
 log "Ferramentas de segurança instaladas"
 
