@@ -253,15 +253,27 @@ apt install -y nmap nmap-common
 if ! apt install -y masscan 2>/dev/null; then
     log "⚠️ Masscan via apt falhou, compilando do source..."
     cd /tmp
+    
+    # Instalar dependências para compilação
+    apt install -y build-essential git libpcap-dev
+    
     git clone https://github.com/robertdavidgraham/masscan
     cd masscan
-    make
+    make -j$(nproc) 2>/dev/null || make
     make install
     cd /
     rm -rf /tmp/masscan
     log "✅ Masscan compilado e instalado"
 else
     log "✅ Masscan instalado via apt"
+fi
+
+# Verificar se masscan está funcionando
+if ! masscan --version >/dev/null 2>&1; then
+    # Tentar criar link simbólico se não encontrado no PATH
+    if [[ -f /usr/local/bin/masscan ]]; then
+        ln -sf /usr/local/bin/masscan /usr/bin/masscan
+    fi
 fi
 
 # Gobuster
@@ -1135,13 +1147,31 @@ done
 # Verificar ferramentas instaladas
 tools_check=(
     "nmap --version"
-    "nuclei -version"
-    "masscan --version"
+    "nuclei -version" 
     "gobuster version"
     "step version"
     "python3 --version"
     "node --version"
 )
+
+# Verificação especial para masscan (pode estar em /usr/local/bin ou /usr/bin)
+if ! masscan --version >/dev/null 2>&1; then
+    if [[ -f /usr/local/bin/masscan ]]; then
+        PATH="/usr/local/bin:$PATH"
+        export PATH
+        if masscan --version >/dev/null 2>&1; then
+            log "✅ Masscan encontrado em /usr/local/bin"
+        else
+            log "❌ Masscan não funcional em /usr/local/bin"
+            exit 1
+        fi
+    else
+        log "❌ Masscan não encontrado"
+        exit 1
+    fi
+else
+    log "✅ Masscan funcionando"
+fi
 
 for tool_cmd in "${tools_check[@]}"; do
     if ! eval "$tool_cmd" >/dev/null 2>&1; then
