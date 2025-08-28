@@ -1,0 +1,67 @@
+root@vlxsam01:~# curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/vlxsam01/install.sh | bash
+[2025-08-28 16:14:55] 🚀 Iniciando instalação do SamurEye Gateway (vlxsam01)...
+[2025-08-28 16:14:55] 🧹 Executando limpeza completa do sistema...
+[2025-08-28 16:14:55] Removendo configurações NGINX antigas...
+[2025-08-28 16:14:55] Removendo certificados SSL antigos...
+[2025-08-28 16:14:55] Removendo step-ca anterior...
+[2025-08-28 16:14:56] ✅ Limpeza completa finalizada
+[2025-08-28 16:14:56] INFO: 📋 Configurando sistema base...
+[2025-08-28 16:14:56] Atualizando sistema Ubuntu...
+Hit:1 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:2 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:3 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:4 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists... Done
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+Calculating upgrade... Done
+The following packages have been kept back:
+  linux-generic linux-headers-generic linux-image-generic sosreport
+0 upgraded, 0 newly installed, 0 to remove and 4 not upgraded.
+[2025-08-28 16:14:59] Configurando timezone para America/Sao_Paulo...
+[2025-08-28 16:14:59] Instalando pacotes essenciais...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+nginx is already the newest version (1.24.0-2ubuntu7.5).
+certbot is already the newest version (2.9.0-1).
+python3-certbot-nginx is already the newest version (2.9.0-1).
+python3-certbot-dns-cloudflare is already the newest version (2.0.0-1).
+ufw is already the newest version (0.36.2-6).
+curl is already the newest version (8.5.0-2ubuntu10.6).
+wget is already the newest version (1.21.4-1ubuntu4.1).
+git is already the newest version (1:2.43.0-1ubuntu7.3).
+htop is already the newest version (3.3.0-4build1).
+unzip is already the newest version (6.0-28ubuntu4.1).
+jq is already the newest version (1.7.1-3ubuntu0.24.04.1).
+fail2ban is already the newest version (1.0.2-3ubuntu0.1).
+openssl is already the newest version (3.0.13-0ubuntu3.5).
+0 upgraded, 0 newly installed, 0 to remove and 4 not upgraded.
+[2025-08-28 16:15:00] 🔐 Instalando step-ca Certificate Authority...
+[2025-08-28 16:15:00] Baixando step CLI v0.25.2...
+[2025-08-28 16:15:01] Baixando step-ca v0.25.2...
+[2025-08-28 16:15:01] URL: https://github.com/smallstep/certificates/releases/download/v0.25.2/step-ca_linux_0.25.2_amd64.tar.gz
+[2025-08-28 16:15:02] Conteúdo extraído em /tmp:
+-rwxr-xr-x 1 1001  127 39594177 Nov 29  2023 /tmp/step-ca
+-rwxr-xr-x 1 root root     1018 Aug 28 16:12 /tmp/step-ca-init.sh
+-rw-r--r-- 1 root root 12491373 Nov 29  2023 /tmp/step-ca.tar.gz
+[2025-08-28 16:15:02] ✅ step-ca encontrado em: /tmp/step-ca
+[2025-08-28 16:15:02] step-ca instalado em /usr/local/bin/step-ca
+[2025-08-28 16:15:02] Verificando instalação do step e step-ca...
+[2025-08-28 16:15:02] ✅ step CLI instalado corretamente: Smallstep CLI/0.25.2 (linux/amd64)
+[2025-08-28 16:15:02] ✅ step-ca instalado corretamente: Smallstep CA/0.25.2 (linux/amd64)
+[2025-08-28 16:15:02] step-ca Certificate Authority CLI instalado com sucesso
+[2025-08-28 16:15:02] Configurando step-ca Certificate Authority...
+/tmp/step-ca-init.sh: line 13: /etc/step-ca/password.txt: Permission denied
+chmod: cannot access '/etc/step-ca/password.txt': No such file or directory
+error reading /etc/step-ca/certs/root_ca.crt: no such file or directory
+step-ca inicializado com sucesso
+CA Name: SamurEye Internal CA
+DNS: ca.samureye.com.br
+Address: :9000
+Password saved to: /etc/step-ca/password.txt
+error reading /etc/step-ca/certs/root_ca.crt: no such file or directory
+CA Fingerprint:
+/tmp/step-ca-init.sh: line 36: /etc/step-ca/fingerprint.txt: Permission denied
+root@vlxsam01:~#

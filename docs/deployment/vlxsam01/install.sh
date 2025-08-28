@@ -68,6 +68,13 @@ if [ -d "/etc/step-ca" ]; then
     rm -rf /etc/step-ca/*
 fi
 
+# Remover arquivos temporários de step-ca antigos
+log "Limpando arquivos temporários..."
+rm -f /tmp/step-ca-init.sh
+rm -f /tmp/step-ca-init-fixed.sh
+rm -f /tmp/step-ca.tar.gz
+rm -f /tmp/step-cli.tar.gz
+
 # Remover usuário step-ca antigo
 if id "step-ca" &>/dev/null; then
     userdel step-ca 2>/dev/null || true
@@ -214,28 +221,28 @@ set -e
 cd /etc/step-ca
 
 # Salvar senha em arquivo seguro
-echo '$PASSWORD' > password.txt
+echo '${PASSWORD}' > password.txt
 chmod 600 password.txt
 
 # Inicializar CA
 step ca init \
-    --name='$CA_NAME' \
-    --dns='$DNS_NAME' \
-    --address='$ADDRESS' \
+    --name='${CA_NAME}' \
+    --dns='${DNS_NAME}' \
+    --address='${ADDRESS}' \
     --provisioner='admin@samureye.com.br' \
     --password-file='password.txt' \
     --force
 
 echo 'step-ca inicializado com sucesso'
-echo 'CA Name: $CA_NAME'
-echo 'DNS: $DNS_NAME'
-echo 'Address: $ADDRESS'
+echo 'CA Name: ${CA_NAME}'
+echo 'DNS: ${DNS_NAME}'
+echo 'Address: ${ADDRESS}'
 echo 'Password saved to: /etc/step-ca/password.txt'
 
 # Obter e salvar fingerprint
 if [ -f 'certs/root_ca.crt' ]; then
     FINGERPRINT=\$(step certificate fingerprint certs/root_ca.crt)
-    echo 'CA Fingerprint: \$FINGERPRINT'
+    echo \"CA Fingerprint: \$FINGERPRINT\"
     echo \"\$FINGERPRINT\" > fingerprint.txt
     chmod 644 fingerprint.txt
 else
