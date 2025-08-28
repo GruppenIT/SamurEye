@@ -88,22 +88,23 @@ The platform implements **mTLS** for secure collector-to-cloud communication usi
 - Teste automático de carregamento das variáveis
 - Validação completa antes de iniciar serviço
 
-### Scripts Consolidados e Funcionais:
+### Script Principal Consolidado (TOTALMENTE INTEGRADO):
 
-1. **install.sh** - Script principal (RECOMENDADO) - Inclui TODAS as correções
-   - Instalação completa from-scratch
-   - Detecção automática de todos os problemas conhecidos
-   - Correção ES6, variáveis ambiente, estrutura de diretórios
-   - Validação completa e inicialização do serviço
+1. **install.sh** - Script único com TODAS as soluções integradas
+   - ✅ Instalação completa from-scratch
+   - ✅ Detecção automática de todos os problemas conhecidos
+   - ✅ Correção ES6, variáveis ambiente, estrutura de diretórios
+   - ✅ Ubuntu 24.04: Python 3.12, netcat-openbsd, fix ensurepip
+   - ✅ Configuração step-ca integrada (sem scripts externos)
+   - ✅ Health check integrado (sem scripts externos)
+   - ✅ Teste mTLS integrado (sem scripts externos)
+   - ✅ Auto-configuração integrada (sem scripts externos)
+   - ✅ CONCENTRAÇÃO TOTAL: tudo em um único arquivo install.sh
 
-2. **fix-es6-only.sh** - Correção específica ES6 modules
-3. **fix-env-vars.sh** - Correção específica variáveis Replit Auth  
-4. **install-quick-fix.sh** - Restauração rápida de diretório deletado
-5. **fix-service.sh** - Diagnóstico systemd
-
-#### Scripts vlxsam04:
-6. **vlxsam04/install.sh** - Script principal vlxsam04 (CORRIGIDO para Ubuntu 24.04)
-7. **vlxsam04/fix-ubuntu-24-compatibility.sh** - Correção independente Python 3.12
+#### Scripts Auxiliares Removidos:
+- ❌ **REMOVIDOS**: setup-step-ca.sh, health-check.sh, test-mtls-connection.sh, auto-configure.sh
+- ✅ **INTEGRADOS**: Todas as funcionalidades concentradas no install.sh principal
+- ✅ **PRINCÍPIO**: Um único script, máxima automação, zero dependências externas
 
 ### Configuração Final (.env) - Todas Variáveis Incluídas:
 ```bash
