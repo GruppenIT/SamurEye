@@ -215,39 +215,40 @@ PASSWORD="samureye-ca-$(openssl rand -hex 16)"
 
 log "Inicializando Certificate Authority..."
 
-# Executar inicialização diretamente como usuário step-ca
-sudo -u step-ca bash -c "
-set -e
-cd /etc/step-ca
+# Criar e salvar arquivo de senha
+echo "$PASSWORD" > "$STEP_CA_DIR/password.txt"
+chown step-ca:step-ca "$STEP_CA_DIR/password.txt"
+chmod 600 "$STEP_CA_DIR/password.txt"
 
-# Salvar senha em arquivo seguro
-echo '${PASSWORD}' > password.txt
-chmod 600 password.txt
+# Debug: mostrar o comando que será executado
+log "Comando step ca init que será executado:"
+log "step ca init --name=\"$CA_NAME\" --dns=\"$DNS_NAME\" --address=\"$ADDRESS\" --provisioner=\"admin@samureye.com.br\" --password-file=\"password.txt\""
 
-# Inicializar CA
-step ca init \
-    --name='${CA_NAME}' \
-    --dns='${DNS_NAME}' \
-    --address='${ADDRESS}' \
-    --provisioner='admin@samureye.com.br' \
-    --password-file='password.txt'
+# Executar inicialização do CA
+cd "$STEP_CA_DIR"
+sudo -u step-ca step ca init \
+    --name="$CA_NAME" \
+    --dns="$DNS_NAME" \
+    --address="$ADDRESS" \
+    --provisioner="admin@samureye.com.br" \
+    --password-file="password.txt"
 
-echo 'step-ca inicializado com sucesso'
-echo 'CA Name: ${CA_NAME}'
-echo 'DNS: ${DNS_NAME}'
-echo 'Address: ${ADDRESS}'
-echo 'Password saved to: /etc/step-ca/password.txt'
+log "step-ca inicializado com sucesso"
+log "CA Name: $CA_NAME"
+log "DNS: $DNS_NAME"
+log "Address: $ADDRESS"
+log "Password saved to: $STEP_CA_DIR/password.txt"
 
-# Obter e salvar fingerprint
-if [ -f 'certs/root_ca.crt' ]; then
-    FINGERPRINT=\$(step certificate fingerprint certs/root_ca.crt)
-    echo \"CA Fingerprint: \$FINGERPRINT\"
-    echo \"\$FINGERPRINT\" > fingerprint.txt
-    chmod 644 fingerprint.txt
+# Obter e salvar fingerprint se o certificado foi criado
+if [ -f "$STEP_CA_DIR/certs/root_ca.crt" ]; then
+    FINGERPRINT=$(step certificate fingerprint "$STEP_CA_DIR/certs/root_ca.crt")
+    log "CA Fingerprint: $FINGERPRINT"
+    echo "$FINGERPRINT" > "$STEP_CA_DIR/fingerprint.txt"
+    chown step-ca:step-ca "$STEP_CA_DIR/fingerprint.txt"
+    chmod 644 "$STEP_CA_DIR/fingerprint.txt"
 else
-    echo 'Certificado root não encontrado, verificar configuração'
+    warn "Certificado root não encontrado, verificar configuração"
 fi
-"
 
 # Ajustar permissões finais
 chown -R step-ca:step-ca "$STEP_CA_DIR"
