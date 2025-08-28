@@ -271,14 +271,15 @@ mv /tmp/gobuster /usr/local/bin/gobuster
 chmod +x /usr/local/bin/gobuster
 
 # Nuclei 3.x
-wget -O /tmp/nuclei.zip "https://github.com/projectdiscovery/nuclei/releases/download/v3.1.0/nuclei_3.1.0_linux_amd64.zip"
+wget -q -O /tmp/nuclei.zip "https://github.com/projectdiscovery/nuclei/releases/download/v3.1.0/nuclei_3.1.0_linux_amd64.zip"
 unzip -q -o /tmp/nuclei.zip -d /tmp/
 mv /tmp/nuclei /usr/local/bin/nuclei
 chmod +x /usr/local/bin/nuclei
 
-# Templates Nuclei
+# Templates Nuclei - versão 3.x usa -ut flag
 sudo -u "$COLLECTOR_USER" mkdir -p "$TOOLS_DIR/nuclei/templates"
-sudo -u "$COLLECTOR_USER" NUCLEI_TEMPLATES_DIR="$TOOLS_DIR/nuclei/templates" nuclei -update-templates
+cd "$TOOLS_DIR/nuclei/templates"
+sudo -u "$COLLECTOR_USER" nuclei -ut
 
 log "Ferramentas de segurança instaladas"
 
