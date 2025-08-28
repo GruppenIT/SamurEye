@@ -1752,9 +1752,15 @@ fi
 log "🔒 Aplicando correção final de permissões..."
 
 # Garantir que todos os arquivos/diretórios têm as permissões corretas
-chown -R "$COLLECTOR_USER:$COLLECTOR_USER" "$COLLECTOR_DIR"
-chown -R "$COLLECTOR_USER:$COLLECTOR_USER" "$LOG_DIR"
-chown -R "$COLLECTOR_USER:$COLLECTOR_USER" "$CONFIG_DIR"
+if [[ -n "$COLLECTOR_USER" && -n "$COLLECTOR_DIR" ]]; then
+    chown -R "$COLLECTOR_USER:$COLLECTOR_USER" "$COLLECTOR_DIR" 2>/dev/null || true
+fi
+if [[ -n "$COLLECTOR_USER" && -n "$LOG_DIR" ]]; then
+    chown -R "$COLLECTOR_USER:$COLLECTOR_USER" "$LOG_DIR" 2>/dev/null || true
+fi
+if [[ -n "$COLLECTOR_USER" && -n "$CONFIG_DIR" ]]; then
+    chown -R "$COLLECTOR_USER:$COLLECTOR_USER" "$CONFIG_DIR" 2>/dev/null || true
+fi
 
 # Garantir permissões específicas do arquivo .env
 chmod 644 "$CONFIG_DIR/.env"
