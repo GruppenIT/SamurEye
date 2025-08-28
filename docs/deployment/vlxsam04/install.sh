@@ -222,7 +222,7 @@ if ! id "$COLLECTOR_USER" &>/dev/null; then
 fi
 
 # Criar estrutura de diretórios
-mkdir -p "$COLLECTOR_DIR"/{agent,certs,tools,logs,temp,uploads}
+mkdir -p "$COLLECTOR_DIR"/{agent,certs,tools,logs,temp,uploads,scripts,config,backups}
 mkdir -p "$COLLECTOR_DIR"/logs/{system,tenant-{1..10}}
 mkdir -p "$COLLECTOR_DIR"/temp/{tenant-{1..10}}
 mkdir -p "$COLLECTOR_DIR"/uploads/{tenant-{1..10}}
@@ -951,9 +951,6 @@ log "Serviços systemd configurados"
 # ============================================================================
 
 log "📝 Criando scripts auxiliares..."
-
-# Criar diretório de scripts se não existir
-mkdir -p "$COLLECTOR_DIR/scripts"
 
 # Script de health check
 cat > "$COLLECTOR_DIR/scripts/health-check.py" << 'EOF'
