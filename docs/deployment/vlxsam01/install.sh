@@ -846,6 +846,9 @@ EOF
 log "Ativando configuração temporária (sem SSL)..."
 ln -sf /etc/nginx/sites-available/samureye-temp /etc/nginx/sites-enabled/samureye
 
+# Garantir que NGINX está habilitado no boot
+systemctl enable nginx >/dev/null 2>&1 || true
+
 # Criar diretório para validação Let's Encrypt
 mkdir -p /var/www/html/.well-known/acme-challenge
 chown -R www-data:www-data /var/www/html
@@ -858,19 +861,40 @@ else
 fi
 
 # Verificar se NGINX está rodando e iniciar/recarregar conforme necessário
-if systemctl is-active nginx >/dev/null 2>&1; then
+NGINX_STATUS=$(systemctl is-active nginx 2>/dev/null || echo "inactive")
+log "Status atual do NGINX: $NGINX_STATUS"
+
+if [ "$NGINX_STATUS" = "active" ]; then
     log "NGINX está rodando, recarregando configuração..."
     if systemctl reload nginx; then
         log "✅ NGINX recarregado com sucesso"
     else
-        error "❌ Falha ao recarregar NGINX"
+        warn "Falha no reload, tentando restart..."
+        systemctl restart nginx
+        if systemctl is-active nginx >/dev/null 2>&1; then
+            log "✅ NGINX reiniciado com sucesso"
+        else
+            error "❌ Falha ao reiniciar NGINX"
+        fi
     fi
 else
-    log "NGINX não está rodando, iniciando serviço..."
+    log "NGINX não está rodando ($NGINX_STATUS), iniciando serviço..."
+    
+    # Habilitar o serviço primeiro
+    systemctl enable nginx
+    
+    # Tentar iniciar
     if systemctl start nginx; then
-        log "✅ NGINX iniciado com sucesso"
+        sleep 2
+        if systemctl is-active nginx >/dev/null 2>&1; then
+            log "✅ NGINX iniciado com sucesso"
+        else
+            log "NGINX não respondeu, verificando status..."
+            systemctl status nginx --no-pager
+        fi
     else
-        error "❌ Falha ao iniciar NGINX"
+        error "❌ Falha ao iniciar NGINX - verificando logs"
+        journalctl -u nginx --no-pager -n 10
     fi
 fi
 
