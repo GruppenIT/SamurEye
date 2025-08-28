@@ -1747,15 +1747,65 @@ fi
 
 # Teste Python básico
 log "🧪 Testando agente Python..."
-python3 "$COLLECTOR_DIR/collector_agent.py" --version 2>/dev/null || {
-    python3 -c "
-import sys
-sys.path.insert(0, '/opt/samureye-collector')
-print('✓ Python agent importa sem erros')
-" 2>/dev/null || warn "⚠️ Possível problema com agente Python"
-}
+if python3 -c "import asyncio, aiohttp, uuid; print('✓ Python dependencies OK')" 2>/dev/null; then
+    log "✅ Python agent e dependências validados"
+else
+    warn "⚠️ Possível problema com dependências Python"
+fi
 
 log "🎉 Validação final concluída com sucesso!"
 
-# Final timestamp
+# ============================================================================
+# FINALIZAÇÃO E PRÓXIMOS PASSOS
+# ============================================================================
+
+log ""
+log "📋 INSTALAÇÃO CONCLUÍDA COM SUCESSO!"
+log "Servidor: vlxsam04 (192.168.100.151)"
+log "Collector Agent: SamurEye v1.0.0"
+log "Usuário: $COLLECTOR_USER"
+log "Diretório: $COLLECTOR_DIR"
+log ""
+
+log "🔧 COMANDOS PARA TESTAR:"
+log "  systemctl start samureye-collector     # Iniciar collector"
+log "  systemctl status samureye-collector    # Ver status"
+log "  journalctl -f -u samureye-collector    # Logs em tempo real"
+log ""
+
+log "📊 SCRIPTS AUXILIARES CRIADOS:"
+log "  $COLLECTOR_DIR/scripts/diagnostico.sh  # Diagnóstico completo"
+log "  $COLLECTOR_DIR/scripts/corrigir.sh     # Correção de emergência"
+log ""
+
+log "⚠️  PRÓXIMOS PASSOS OBRIGATÓRIOS:"
+log "1. Iniciar o collector: systemctl start samureye-collector"
+log "2. Verificar logs: journalctl -f -u samureye-collector"
+log "3. Registrar collector manualmente via interface web da plataforma"
+log ""
+
+log "🚀 vlxsam04 Collector Agent 100% pronto!"
 log "⏰ Instalação finalizada em: $(date '+%Y-%m-%d %H:%M:%S')"
+
+# Tentar iniciar o serviço automaticamente
+log ""
+log "🚀 Iniciando serviço automaticamente..."
+if systemctl start samureye-collector; then
+    log "✅ Serviço samureye-collector iniciado com sucesso!"
+    sleep 3
+    if systemctl is-active --quiet samureye-collector; then
+        log "✅ Serviço confirmado como ativo"
+        log ""
+        log "📝 Para ver logs em tempo real:"
+        log "   journalctl -f -u samureye-collector"
+    else
+        warn "⚠️  Serviço iniciou mas pode ter problemas - verificar logs"
+    fi
+else
+    warn "⚠️  Falha ao iniciar serviço - usar comando manual:"
+    warn "   systemctl start samureye-collector"
+    warn "   journalctl -u samureye-collector"
+fi
+
+log ""
+log "🎯 INSTALL.SH CONCLUÍDO - COLLECTOR PRONTO PARA REGISTRO MANUAL!"

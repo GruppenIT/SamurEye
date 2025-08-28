@@ -1,0 +1,57 @@
+[INF] No new updates found for nuclei templates
+[13:32:50] Ferramentas de segurança instaladas
+[13:32:50] 🔐 Instalando step-ca client...
+[13:32:51] step-ca client instalado: Smallstep CLI/0.25.2 (linux/amd64)
+Release Date: 2024-01-19T21:15:39Z
+[13:32:51] step-ca client configurado
+[13:32:51] 🤖 Configurando agente collector...
+[13:32:51] Agente collector configurado
+[13:32:51] 🔧 Configurando variáveis de ambiente...
+[13:32:51] Variáveis de ambiente configuradas
+[13:32:51] ⚙️ Configurando serviços systemd...
+[13:32:52] Serviços systemd configurados
+[13:32:52] 📝 Criando scripts auxiliares...
+[13:32:52] Scripts auxiliares criados
+[13:32:52] 📊 Configurando sistema de logs...
+[13:32:52] Sistema de logs configurado
+[13:32:52] ✅ Executando validação final...
+[13:32:52] 🔍 Verificando masscan...
+[13:32:52] ✅ Masscan encontrado em /usr/bin/masscan
+[13:32:52] 🎉 Validação final concluída com sucesso!
+[13:32:52] 📋 Instalação concluída - Resumo:
+[13:32:52] Collector ID será gerado automaticamente no primeiro boot
+[13:32:52] Usuário: samureye-collector
+[13:32:52] Diretório base: /opt/samureye-collector
+[13:32:52] Logs: /var/log/samureye-collector/
+[13:32:52]
+[13:32:52] 🔧 Comandos úteis:
+[13:32:52]   systemctl start samureye-collector    # Iniciar collector
+[13:32:52]   systemctl status samureye-collector   # Ver status
+[13:32:52]   journalctl -f -u samureye-collector   # Ver logs em tempo real
+[13:32:52]
+[13:32:52] ⚠️  PRÓXIMOS PASSOS MANUAIS:
+[13:32:52] 1. Executar script de registro do collector:
+[13:32:52]    curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/scripts/register-collector.sh | bash -s <tenant-slug> <collector-name>
+[13:32:52]
+[13:32:52] 2. O script de registro irá:
+[13:32:52]    - Gerar certificados mTLS via step-ca
+[13:32:52]    - Registrar collector na plataforma
+[13:32:52]    - Iniciar serviços automaticamente
+[13:32:52]
+[13:32:52] 🚀 vlxsam04 Collector Agent pronto para registro!
+[13:32:52] 🔧 Configurando variáveis de ambiente...
+[13:32:52] Variáveis de ambiente configuradas
+[13:32:52] 🤖 Configurando agente collector...
+[13:32:52] Agente collector configurado
+[13:32:52] ⚙️ Configurando serviços systemd...
+[13:32:53] Serviços systemd configurados
+[13:32:53] 📝 Criando scripts auxiliares...
+[13:32:53] Scripts auxiliares criados
+[13:32:53] 📊 Configurando sistema de logs...
+[13:32:53] Sistema de logs configurado
+[13:32:53] ✅ Executando validação final...
+[13:32:53] 🔍 Verificando masscan...
+[13:32:53] ✅ Masscan encontrado em /usr/bin/masscan
+[13:32:53] 🧪 Testando agente Python...
+
+
