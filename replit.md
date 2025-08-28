@@ -124,3 +124,14 @@ The vlxsam04 install.sh is now a complete, production-ready collector agent inst
 - Environment files loading correctly, no more "No such file or directory" errors
 - Functional Python agent with heartbeat, logging, and configuration management
 - Ready for manual collector registration with mTLS certificate setup
+
+**Local Registration Script Implementation (August 28, 2025):**
+- **SELF-CONTAINED SOLUTION**: Added complete register-collector.sh script locally to install.sh
+- Eliminated external dependency: No more curl to GitHub for registration script
+- Local script path: `/opt/samureye-collector/register-collector.sh`
+- Full mTLS certificate generation via step-ca integration
+- Automated collector registration with SamurEye platform API
+- Comprehensive error handling with retry mechanisms
+- Usage: `cd /opt/samureye-collector && sudo ./register-collector.sh <tenant-slug> <collector-name>`
+- All auxiliary scripts now created locally: registration, health-check, backup
+- install.sh now concentrates 100% of solutions without external dependencies

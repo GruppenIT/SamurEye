@@ -1192,6 +1192,242 @@ log "Serviços systemd configurados"
 
 log "📝 Criando scripts auxiliares..."
 
+# Script de registro do collector (LOCAL)
+cat > "$COLLECTOR_DIR/register-collector.sh" << 'EOF'
+#!/bin/bash
+# Script de Registro do Collector SamurEye - vlxsam04
+# Versão: 1.0.0
+# Uso: ./register-collector.sh <tenant-slug> <collector-name>
+
+set -euo pipefail
+
+# Configurações
+COLLECTOR_DIR="/opt/samureye-collector"
+CONFIG_DIR="/etc/samureye-collector"
+API_BASE_URL="https://api.samureye.com.br"
+CA_URL="https://ca.samureye.com.br"
+CERTS_DIR="$COLLECTOR_DIR/certs"
+STEP_PATH="/usr/local/bin/step"
+
+# Cores para output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+log() {
+    echo -e "[$(date '+%H:%M:%S')] ${GREEN}$*${NC}"
+}
+
+error() {
+    echo -e "[$(date '+%H:%M:%S')] ${RED}ERROR: $*${NC}" >&2
+}
+
+warn() {
+    echo -e "[$(date '+%H:%M:%S')] ${YELLOW}WARNING: $*${NC}"
+}
+
+info() {
+    echo -e "[$(date '+%H:%M:%S')] ${BLUE}INFO: $*${NC}"
+}
+
+# Verificar argumentos
+if [[ $# -ne 2 ]]; then
+    echo "Uso: $0 <tenant-slug> <collector-name>"
+    echo ""
+    echo "Exemplo:"
+    echo "  $0 gruppenIT vlxsam04-collector"
+    echo ""
+    echo "Parâmetros:"
+    echo "  tenant-slug    : Identificador do tenant na plataforma SamurEye"
+    echo "  collector-name : Nome único para este collector"
+    exit 1
+fi
+
+TENANT_SLUG="$1"
+COLLECTOR_NAME="$2"
+
+# Verificar se executando como root
+if [[ $EUID -ne 0 ]]; then
+    error "Este script deve ser executado como root"
+    exit 1
+fi
+
+echo "🔧 SamurEye Collector Registration - vlxsam04"
+echo "=============================================="
+echo "Tenant: $TENANT_SLUG"
+echo "Collector: $COLLECTOR_NAME"
+echo "API: $API_BASE_URL"
+echo "CA: $CA_URL"
+echo ""
+
+# Verificar se collector service está rodando
+if ! systemctl is-active samureye-collector.service >/dev/null 2>&1; then
+    error "Serviço samureye-collector não está rodando"
+    echo "Execute: systemctl start samureye-collector.service"
+    exit 1
+fi
+
+log "1. Preparando diretórios de certificados..."
+mkdir -p "$CERTS_DIR"
+chown samureye-collector:samureye-collector "$CERTS_DIR"
+chmod 700 "$CERTS_DIR"
+
+log "2. Configurando step-ca client..."
+
+# Bootstrap step-ca
+if ! sudo -u samureye-collector "$STEP_PATH" ca bootstrap --ca-url "$CA_URL" --install --force; then
+    error "Falha ao configurar step-ca client"
+    exit 1
+fi
+
+log "3. Gerando certificado mTLS para o collector..."
+
+# Gerar chave privada e CSR
+sudo -u samureye-collector "$STEP_PATH" certificate create \
+    "$COLLECTOR_NAME" \
+    "$CERTS_DIR/collector.crt" \
+    "$CERTS_DIR/collector.key" \
+    --profile leaf \
+    --not-after 8760h \
+    --san "$COLLECTOR_NAME" \
+    --san "vlxsam04" \
+    --san "$(hostname -f)" \
+    --force
+
+if [[ ! -f "$CERTS_DIR/collector.crt" ]] || [[ ! -f "$CERTS_DIR/collector.key" ]]; then
+    error "Falha ao gerar certificados"
+    exit 1
+fi
+
+log "4. Baixando certificado CA..."
+sudo -u samureye-collector "$STEP_PATH" ca root "$CERTS_DIR/ca.crt"
+
+log "5. Gerando Collector ID único..."
+COLLECTOR_ID=$(uuidgen)
+echo "$COLLECTOR_ID" > "$COLLECTOR_DIR/collector-id.txt"
+chown samureye-collector:samureye-collector "$COLLECTOR_DIR/collector-id.txt"
+
+log "6. Registrando collector na plataforma SamurEye..."
+
+# Payload para registro
+REGISTRATION_PAYLOAD=$(cat <<JSON
+{
+  "collector_id": "$COLLECTOR_ID",
+  "collector_name": "$COLLECTOR_NAME", 
+  "tenant_slug": "$TENANT_SLUG",
+  "hostname": "$(hostname -f)",
+  "ip_address": "$(hostname -I | awk '{print $1}')",
+  "version": "1.0.0",
+  "capabilities": [
+    "nmap-scan",
+    "nuclei-scan", 
+    "masscan-scan",
+    "directory-brute",
+    "cert-monitor"
+  ],
+  "certificate": "$(base64 -w 0 "$CERTS_DIR/collector.crt")"
+}
+JSON
+)
+
+# Tentar registrar (com retry)
+REGISTER_SUCCESS=false
+for attempt in {1..3}; do
+    info "Tentativa $attempt de registro..."
+    
+    if curl -s --fail \
+        --cert "$CERTS_DIR/collector.crt" \
+        --key "$CERTS_DIR/collector.key" \
+        --cacert "$CERTS_DIR/ca.crt" \
+        -H "Content-Type: application/json" \
+        -d "$REGISTRATION_PAYLOAD" \
+        "$API_BASE_URL/api/collectors/register"; then
+        
+        REGISTER_SUCCESS=true
+        break
+    else
+        warn "Tentativa $attempt falhou, aguardando 5s..."
+        sleep 5
+    fi
+done
+
+if [[ "$REGISTER_SUCCESS" != "true" ]]; then
+    error "Falha ao registrar collector após 3 tentativas"
+    error "Verifique conectividade e credenciais"
+    exit 1
+fi
+
+log "7. Atualizando configuração do collector..."
+
+# Atualizar .env com as novas configurações
+cat >> "$CONFIG_DIR/.env" << ENV_APPEND
+
+# Configurações de registro - Geradas automaticamente
+COLLECTOR_ID=$COLLECTOR_ID
+COLLECTOR_NAME=$COLLECTOR_NAME
+TENANT_SLUG=$TENANT_SLUG
+CERT_PATH=$CERTS_DIR/collector.crt
+KEY_PATH=$CERTS_DIR/collector.key
+CA_CERT_PATH=$CERTS_DIR/ca.crt
+REGISTERED=true
+REGISTRATION_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+ENV_APPEND
+
+log "8. Reiniciando serviços..."
+
+# Reiniciar collector com nova configuração
+systemctl restart samureye-collector.service
+
+# Aguardar inicialização
+sleep 5
+
+if systemctl is-active samureye-collector.service >/dev/null 2>&1; then
+    log "✅ Serviço reiniciado com sucesso"
+else
+    error "Erro ao reiniciar serviço"
+    echo "Verifique os logs: journalctl -u samureye-collector -f"
+    exit 1
+fi
+
+log "9. Verificando conectividade com a plataforma..."
+
+# Teste de conectividade
+if curl -s --fail \
+    --cert "$CERTS_DIR/collector.crt" \
+    --key "$CERTS_DIR/collector.key" \
+    --cacert "$CERTS_DIR/ca.crt" \
+    "$API_BASE_URL/api/collectors/$COLLECTOR_ID/ping" >/dev/null; then
+    log "✅ Conectividade com plataforma OK"
+else
+    warn "Conectividade limitada - verifique firewall e DNS"
+fi
+
+echo ""
+echo "🎉 REGISTRO CONCLUÍDO COM SUCESSO!"
+echo "=================================="
+echo "Collector ID: $COLLECTOR_ID"
+echo "Nome: $COLLECTOR_NAME"
+echo "Tenant: $TENANT_SLUG"
+echo "Status: Registrado e ativo"
+echo ""
+echo "📊 Comandos úteis:"
+echo "  systemctl status samureye-collector   # Status do serviço"
+echo "  journalctl -f -u samureye-collector   # Logs em tempo real"
+echo "  $STEP_PATH certificate inspect $CERTS_DIR/collector.crt  # Info do certificado"
+echo ""
+echo "🔗 Acesse o painel em: https://app.samureye.com.br"
+echo "   Login com suas credenciais do tenant '$TENANT_SLUG'"
+echo ""
+echo "✅ vlxsam04 collector está pronto para operação!"
+EOF
+
+chmod +x "$COLLECTOR_DIR/register-collector.sh"
+chown samureye-collector:samureye-collector "$COLLECTOR_DIR/register-collector.sh"
+
+log "Script de registro criado: $COLLECTOR_DIR/register-collector.sh"
+
 # Script de health check
 cat > "$COLLECTOR_DIR/scripts/health-check.py" << 'EOF'
 #!/usr/bin/env python3
@@ -1437,15 +1673,25 @@ log "  systemctl status samureye-collector   # Ver status"
 log "  journalctl -f -u samureye-collector   # Ver logs em tempo real"
 log ""
 log "⚠️  PRÓXIMOS PASSOS MANUAIS:"
-log "1. Executar script de registro do collector:"
-log "   curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/scripts/register-collector.sh | bash -s <tenant-slug> <collector-name>"
+log "1. Executar script de registro LOCAL do collector:"
+log "   cd $COLLECTOR_DIR && sudo ./register-collector.sh <tenant-slug> <collector-name>"
 log ""
-log "2. O script de registro irá:"
+log "   Exemplo:"
+log "   cd $COLLECTOR_DIR && sudo ./register-collector.sh gruppenIT vlxsam04-collector"
+log ""
+log "2. O script de registro LOCAL irá:"
 log "   - Gerar certificados mTLS via step-ca"
-log "   - Registrar collector na plataforma"
-log "   - Iniciar serviços automaticamente"
+log "   - Registrar collector na plataforma SamurEye"
+log "   - Configurar autenticação segura"
+log "   - Reiniciar serviços automaticamente"
+log "   - Verificar conectividade com a plataforma"
 log ""
-log "🚀 vlxsam04 Collector Agent pronto para registro!"
+log "3. Scripts auxiliares criados:"
+log "   📄 $COLLECTOR_DIR/register-collector.sh - Script de registro"
+log "   📄 $COLLECTOR_DIR/scripts/health-check.py - Verificação de saúde"
+log "   📄 $COLLECTOR_DIR/scripts/backup.sh - Backup de configurações"
+log ""
+log "🚀 vlxsam04 Collector Agent pronto para registro LOCAL!"
 
 # Script de instalação concluído com sucesso
 exit 0
