@@ -135,9 +135,7 @@ chmod +x /usr/local/bin/step
 # Download e instalação do step-ca
 log "Baixando step-ca v$STEP_CA_VERSION..."
 STEP_CA_URL="https://github.com/smallstep/certificates/releases/download/v$STEP_CA_VERSION/step-ca_linux_${STEP_CA_VERSION}_amd64.tar.gz"
-STEP_CA_EXTRACT_PATH="/tmp/step-ca_linux_${STEP_CA_VERSION}_amd64"
 log "URL: $STEP_CA_URL"
-log "Caminho de extração esperado: $STEP_CA_EXTRACT_PATH"
 
 wget -q -O /tmp/step-ca.tar.gz "$STEP_CA_URL"
 tar -xzf /tmp/step-ca.tar.gz -C /tmp/
@@ -146,23 +144,50 @@ tar -xzf /tmp/step-ca.tar.gz -C /tmp/
 log "Conteúdo extraído em /tmp:"
 ls -la /tmp/step-ca* || true
 
-# Mover do caminho correto
-if [ -f "$STEP_CA_EXTRACT_PATH/step-ca" ]; then
-    log "✅ step-ca encontrado no caminho correto: $STEP_CA_EXTRACT_PATH/step-ca"
-    mv "$STEP_CA_EXTRACT_PATH/step-ca" /usr/local/bin/step-ca
-    chmod +x /usr/local/bin/step-ca
+# Buscar step-ca nos locais possíveis
+STEP_CA_BINARY=""
+if [ -f "/tmp/step-ca_linux_${STEP_CA_VERSION}_amd64/step-ca" ]; then
+    STEP_CA_BINARY="/tmp/step-ca_linux_${STEP_CA_VERSION}_amd64/step-ca"
+    log "✅ step-ca encontrado em: $STEP_CA_BINARY"
+elif [ -f "/tmp/step-ca" ]; then
+    STEP_CA_BINARY="/tmp/step-ca"
+    log "✅ step-ca encontrado em: $STEP_CA_BINARY"
 else
-    error "❌ step-ca não encontrado em $STEP_CA_EXTRACT_PATH/step-ca"
+    # Procurar em qualquer arquivo step-ca* extraído
+    STEP_CA_BINARY=$(find /tmp -name "step-ca" -type f -executable 2>/dev/null | head -1)
+    if [ -n "$STEP_CA_BINARY" ]; then
+        log "✅ step-ca encontrado em: $STEP_CA_BINARY"
+    else
+        error "❌ step-ca não encontrado em nenhum local conhecido"
+        exit 1
+    fi
 fi
+
+# Mover binário para localização final
+mv "$STEP_CA_BINARY" /usr/local/bin/step-ca
+chmod +x /usr/local/bin/step-ca
+log "step-ca instalado em /usr/local/bin/step-ca"
 
 # Criar usuário step-ca
 useradd --system --home /etc/step-ca --shell /bin/false step-ca || true
 
 # Verificar instalação
-step version
-step-ca version
+log "Verificando instalação do step e step-ca..."
+if step version > /dev/null 2>&1; then
+    log "✅ step CLI instalado corretamente: $(step version | head -1)"
+else
+    error "❌ Falha na instalação do step CLI"
+    exit 1
+fi
 
-log "step-ca CLI instalado com sucesso"
+if step-ca version > /dev/null 2>&1; then
+    log "✅ step-ca instalado corretamente: $(step-ca version | head -1)"
+else
+    error "❌ Falha na instalação do step-ca"
+    exit 1
+fi
+
+log "step-ca Certificate Authority CLI instalado com sucesso"
 
 # Configurar step-ca
 log "Configurando step-ca Certificate Authority..."

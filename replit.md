@@ -1,7 +1,7 @@
 # SamurEye MVP - Breach & Attack Simulation Platform
 
 ## Overview
-SamurEye is a cloud-based Breach & Attack Simulation (BAS) platform for SMEs in Brazil. It provides attack surface validation, threat intelligence, and security testing capabilities. The platform automates vulnerability discovery, tests EDR/AV solutions, monitors Active Directory hygiene, and validates security posture using a cloud-based frontend and edge collectors to orchestrate security testing with tools like Nmap and Nuclei.
+SamurEye is a cloud-based Breach & Attack Simulation (BAS) platform designed for SMEs in Brazil. Its primary purpose is to validate attack surfaces, provide threat intelligence, and offer robust security testing capabilities. The platform automates vulnerability discovery, assesses EDR/AV solution effectiveness, monitors Active Directory hygiene, and validates overall security posture. This is achieved through a cloud-based frontend that orchestrates security testing via edge collectors utilizing tools like Nmap and Nuclei.
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
@@ -9,201 +9,57 @@ Preferred communication style: Simple, everyday language.
 ## System Architecture
 
 ### Frontend Architecture
-The frontend uses React 18 with TypeScript, built with Vite. It features shadcn/ui components, Radix UI primitives, and TailwindCSS for styling. Wouter is used for routing, TanStack Query for server state management, and React Hook Form with Zod for form handling.
+The frontend is built with React 18 and TypeScript, using Vite for development. It leverages `shadcn/ui` components, Radix UI primitives, and TailwindCSS for styling. Wouter handles routing, TanStack Query manages server state, and React Hook Form with Zod is used for form validation and handling.
 
 ### Backend Architecture
-The backend is an Express.js server on Node.js, with PostgreSQL 16 managed by Drizzle ORM. It supports WebSockets for real-time updates and uses session-based authentication with connect-pg-simple, integrating Replit Auth for SSO.
+The backend is an Express.js server running on Node.js, with PostgreSQL 16 managed by Drizzle ORM. It incorporates WebSockets for real-time communication and uses session-based authentication with `connect-pg-simple`, integrating Replit Auth for Single Sign-On (SSO).
 
 ### Database Design
-A multi-tenant architecture ensures strict tenant isolation. It includes a dual user system: global admin users via Replit Auth and tenant-scoped users with local authentication. The schema supports user authentication, tenant management, user-tenant relationships, collector registration, security testing journeys, credential management, threat intelligence, and activity logging.
+The system employs a multi-tenant architecture to ensure strict tenant isolation. It supports a dual-user system: global admin users authenticated via Replit Auth, and tenant-scoped users with local authentication. The database schema is designed to manage user authentication, tenant information, user-tenant relationships, collector registration, security testing workflows, credential management, threat intelligence, and activity logging.
 
 ### Authentication & Authorization
-SamurEye employs a dual authentication system: session-based for administrators at `/admin` and Replit OpenID Connect for regular users. Access control is multi-layered, including global admins, SOC users (all tenants), and tenant-specific roles (tenant_admin, operator, viewer, tenant_auditor).
+SamurEye implements a dual authentication mechanism: session-based for administrators accessing the `/admin` path, and Replit OpenID Connect for regular users. Access control is multi-layered, defining roles such as global administrators, SOC users (with access to all tenants), and tenant-specific roles (tenant_admin, operator, viewer, tenant_auditor).
 
 ### Real-time Communication
-A WebSocket server provides live updates for collector status, telemetry streaming from edge collectors, journey execution status, and security alerts.
+A dedicated WebSocket server provides live updates for critical operational data, including collector status, telemetry streams from edge collectors, security journey execution status, and real-time security alerts.
 
 ### Security Features
-mTLS secures collector-to-cloud communication via an internal step-ca Certificate Authority. Public services use Let's Encrypt certificates with HTTPS enforcement and HSTS headers. CSP headers and other security middleware are applied.
+Communication between collectors and the cloud platform is secured using mTLS, facilitated by an internal `step-ca` Certificate Authority. Public-facing services are secured with Let's Encrypt certificates, enforced HTTPS, and HSTS headers. Additional security measures include Content Security Policy (CSP) headers and various security middleware.
 
 ### NGINX Configuration
-NGINX acts as a reverse proxy on `vlxsam01`, forwarding traffic to the SamurEye application on `vlxsam02`. It handles SSL termination with Let's Encrypt certificates and supports rate limiting.
+NGINX functions as a reverse proxy, forwarding traffic to the SamurEye application. It handles SSL termination using Let's Encrypt certificates and implements rate limiting to protect against abuse.
 
 ## External Dependencies
 
 ### Database & Storage
-- **PostgreSQL 16**: Primary data storage.
-- **MinIO**: Object storage for scan results (planned S3 migration).
-- **Redis**: Caching and session storage.
+- **PostgreSQL 16**: Primary relational database.
+- **MinIO**: Object storage (planned migration to S3).
+- **Redis**: Used for caching and session management.
 
 ### Secret Management
-- **Delinea Secret Server**: Credential storage via API integration.
+- **Delinea Secret Server**: Integrated for secure credential storage and retrieval via API.
 
 ### Monitoring & Observability
-- **Grafana**: Metrics and monitoring.
-- **FortiSIEM**: Log aggregation (CEF/UDP 514).
+- **Grafana**: Utilized for metrics visualization and system monitoring.
+- **FortiSIEM**: For centralized log aggregation via CEF/UDP 514.
 
 ### Development & Deployment
-- **Docker Registry**: Container image management.
-- **step-ca**: Internal Certificate Authority.
-- **NGINX**: Reverse proxy and load balancer.
-- **vSphere**: Virtualization platform.
+- **Docker Registry**: Manages and stores container images.
+- **step-ca**: Internal Certificate Authority for mTLS.
+- **NGINX**: Acts as a reverse proxy and load balancer.
+- **vSphere**: Virtualization platform for infrastructure.
 
 ### DNS & TLS
-- **samureye.com.br**: Domain with wildcard certificate support.
-- **Let's Encrypt DNS-01 Challenge**: For wildcard certificates and automated renewal.
-- Multi-provider DNS support (Cloudflare, AWS Route53, Google Cloud DNS).
+- **samureye.com.br**: Primary domain, supporting wildcard certificates.
+- **Let's Encrypt DNS-01 Challenge**: For automated wildcard certificate issuance and renewal.
+- Multi-provider DNS support: Cloudflare, AWS Route53, Google Cloud DNS.
 
 ### Security Tools Integration
-- **Nmap**: Network scanning.
-- **Nuclei**: Vulnerability scanning.
-- **CVE databases**: Threat intelligence.
+- **Nmap**: Network scanning utility.
+- **Nuclei**: Vulnerability scanning tool.
+- **CVE databases**: Integrated for threat intelligence feeds.
 
 ### Edge Collector Communication
-- **HTTPS-only** communication on port 443.
-- **Certificate-based authentication** via `step-ca` issued certificates.
+- **HTTPS-only**: Communication restricted to port 443.
+- **Certificate-based authentication**: Uses certificates issued by `step-ca`.
 - Encrypted telemetry streaming and secure command execution.
-
-## Recent Updates
-
-### vlxsam04 Collector Agent - Complete Installation (August 28, 2025)
-Successfully completed full collector agent installation with all required components:
-
-**Infrastructure Setup:**
-1. **Ubuntu 24.04 PEP 668 Compatibility**: Implemented `--break-system-packages` flag for Python package installation
-2. **Robust Package Installation**: Automatic fallback mechanisms for masscan source compilation when apt repositories fail
-3. **Silent Operations**: Non-interactive downloads using `-q -o` flags preventing script interruption
-4. **Directory Structure Fix**: Corrected scripts directory creation order to prevent file write failures
-
-**Security Tools Integration:**
-5. **Nuclei 3.1.0 Compatibility**: Fixed flag compatibility by using environment variable `NUCLEI_TEMPLATES_DIR` instead of deprecated `-templates-dir` flag
-6. **Multi-tool Support**: Complete integration of nmap, nuclei, masscan, gobuster with proper template management
-
-**Collector Agent Components:**
-7. **Multi-tenant Python Agent**: Complete async agent with API client, WebSocket client, telemetry collector, and command executor
-8. **mTLS Security**: Full certificate-based authentication system with step-ca integration
-9. **Systemd Services**: Production-ready service configuration with health monitoring and automatic restart
-10. **Logging & Monitoring**: Comprehensive logging system with log rotation and health checks
-11. **Environment Configuration**: Complete .env setup with all required variables
-
-**Production Features:**
-- Multi-tenant isolation with workspace separation
-- Resource limits and security restrictions
-- Automated backup and cleanup scripts
-- Comprehensive validation and error handling
-- Fixed auxiliary scripts creation with proper directory structure
-
-The vlxsam04 install.sh is now a complete, production-ready collector agent installer that concentrates ALL solutions in a single file without external dependencies. Directory creation bug fixed, permission issues resolved with integrated final permission correction - ready for manual collector registration process.
-
-**Critical Permission Fix Integrated (August 28, 2025):**
-- Fixed .env file permissions: 644 instead of 640/600 (readable by samureye-collector user)
-- Fixed .env ownership: samureye-collector:samureye-collector instead of root:samureye-collector
-- Added comprehensive final permission validation ensuring collector user can access all required files
-- Integrated permission test verification before service startup to prevent PermissionError failures
-
-**Script Duplication Bug Fixed (August 28, 2025):**
-- **CRITICAL FIX**: Removed complete script duplication in vlxsam04 install.sh causing double execution
-- Eliminated duplicate sections 13.1, 13.2, 13.3 causing chown errors with undefined variables
-- Reduced script from 1,807 to 1,185 lines (622 duplicate lines removed)
-- Fixed double execution of configuration steps preventing installation errors
-- Script now has clean single execution path with proper exit handling
-
-**SystemD Service Configuration Fixed (August 28, 2025):**
-- **CRITICAL SYSTEMD FIX**: Added missing .env file creation in section 8 of install.sh
-- Added collector_agent.py functional Python agent in /opt/samureye-collector/
-- Corrected systemd service paths: EnvironmentFile now points to $CONFIG_DIR/.env
-- Fixed ExecStart path to point to $COLLECTOR_DIR/collector_agent.py  
-- SystemD service now starts without "Failed to load environment files" errors
-- Collector agent ready for production with proper configuration and startup
-
-**vlxsam04 SystemD Service - PROBLEMA RESOLVIDO COMPLETAMENTE (August 28, 2025):**
-- **SUCCESS CONFIRMED**: SystemD service starting successfully after all corrections applied
-- Service status: "Started samureye-collector.service - SamurEye Collector Agent - vlxsam04"
-- Agent running: "Starting SamurEye Collector Agent c0355198-b952-4630-a00c-2934344bc2ba"
-- Restart counter reset from 207+ to normal operation levels
-- Environment files loading correctly, no more "No such file or directory" errors
-- Functional Python agent with heartbeat, logging, and configuration management
-- Ready for manual collector registration with mTLS certificate setup
-
-**Local Registration Script Implementation (August 28, 2025):**
-- **SELF-CONTAINED SOLUTION**: Added complete register-collector.sh script locally to install.sh
-- Eliminated external dependency: No more curl to GitHub for registration script
-- Local script path: `/opt/samureye-collector/register-collector.sh`
-- Full mTLS certificate generation via step-ca integration
-- Automated collector registration with SamurEye platform API
-- Comprehensive error handling with retry mechanisms
-- Usage: `cd /opt/samureye-collector && sudo ./register-collector.sh <tenant-slug> <collector-name>`
-- All auxiliary scripts now created locally: registration, health-check, backup
-- install.sh now concentrates 100% of solutions without external dependencies
-
-**Install.sh Completion Issue RESOLVED (August 28, 2025):**
-- **CRITICAL FIX**: Script was stopping before final resume/help section
-- **ROOT CAUSE**: Excessive validation with `exit 1` causing premature termination
-- **SOLUTION APPLIED**:
-  - Fixed unsafe `cd` command in nuclei templates section (line 296)
-  - Converted rigid validations from `exit 1` to warnings with continuation
-  - Implemented automatic directory creation for missing paths
-  - Maintained execution flow to reach final instructions section
-- **RESULT**: install.sh now executes completely showing full resumo with local registration instructions
-- Users now see complete final help: `cd /opt/samureye-collector && sudo ./register-collector.sh <tenant> <name>`
-
-**vlxsam01 Step-CA Missing Infrastructure RESOLVED (August 28, 2025):**
-- **CRITICAL INFRASTRUCTURE GAP**: vlxsam01 missing step-ca Certificate Authority completely
-- **ROOT CAUSE ANALYSIS**: 
-  - vlxsam01 install.sh only had NGINX proxy configuration for ca.samureye.com.br
-  - No actual step-ca server installation or configuration
-  - vlxsam04 collector registration failing because CA service non-existent
-  - Command 'step' not found error on vlxsam01 server
-- **COMPREHENSIVE SOLUTION IMPLEMENTED**:
-  - Complete step CLI v0.25.2 installation with binary deployment
-  - Complete step-ca server v0.25.2 installation and configuration
-  - Automated CA initialization with SamurEye Internal CA name
-  - System user 'step-ca' creation with proper security isolation
-  - Production-ready systemd service with security hardening
-  - Automatic password generation and fingerprint extraction
-  - NGINX proxy correction from samureye_backend to 127.0.0.1:9000
-  - CA fingerprint display in installation completion summary
-- **INFRASTRUCTURE NOW INCLUDES**:
-  - step-ca server running on port 9000 internally
-  - HTTPS proxy via NGINX on ca.samureye.com.br:443
-  - mTLS certificate issuance capability for collectors
-  - Secure CA root certificate and private key storage
-  - Automated service management and monitoring
-- **RESULT**: vlxsam04 collectors can now successfully register with mTLS certificates via proper step-ca infrastructure
-
-**vlxsam01 NGINX Configuration RESET COMPLETO (August 28, 2025):**
-- **CRITICAL NGINX FIX**: Resolvido erro "limit_req_zone 'api' is already bound to key '$binary_remote_addr'"
-- **ROOT CAUSE ANALYSIS**: 
-  - Configurações duplicadas de `limit_req_zone` entre nginx.conf e sites-available/samureye
-  - Scripts externos de fix causando dependências desnecessárias
-  - Instalação falhando devido a configurações conflitantes
-- **SOLUÇÃO RESET COMPLETO IMPLEMENTADA**:
-  - **Limpeza Completa Prévia**: Script agora remove TODAS configurações nginx/ssl/step-ca antes de começar
-  - **Remoção de Configurações Antigas**: Backup e limpeza de sites-enabled, sites-available, certificados SSL
-  - **Reset de Serviços**: Parada completa de nginx e step-ca antes da limpeza
-  - **Consolidação de Rate Limiting**: Todas zones definidas apenas no nginx.conf (linhas 306-315)
-  - **Eliminação de Duplicatas**: Removidas definições duplicadas de limit_req_zone no sites-available
-  - **Auto-Diagnóstico**: Testes de conectividade, verificação de portas e status de serviços integrados
-- **CORREÇÕES ESPECÍFICAS**:
-  - Removido `limit_req_zone` duplicado das configurações de site
-  - Adicionada validação de configuração nginx antes de reload
-  - Implementados testes básicos de HTTP/HTTPS/step-ca ao final
-  - Removidos scripts externos (quick-fix-nginx.sh, fix-nginx-proxy.sh, diagnose-nginx.sh)
-  - Melhorado resumo final com troubleshooting integrado
-- **SCRIPT AGORA É RESET COMPLETO**:
-  - **Zero Dependências Externas**: Não requer scripts de fix adicionais
-  - **Idempotente**: Pode ser executado múltiplas vezes sem problemas
-  - **Autocontido**: Concentra 100% das soluções em um único arquivo
-  - **Diagnóstico Integrado**: Inclui verificações de saúde e troubleshooting
-- **RESULT**: vlxsam01 install.sh agora é um script de reset completo que resolve TODAS configurações nginx sem dependências externas
-
-**vlxsam01 Step-CA Download Path CORRECTION (August 28, 2025):**
-- **CRITICAL PATH FIX**: Corrigido erro "cannot stat '/tmp/step-ca_0.25.2/bin/step-ca': No such file or directory"
-- **ROOT CAUSE**: Estrutura do arquivo tar.gz do step-ca é diferente do step CLI
-- **DISCOVERY**:
-  - **step CLI**: `step_linux_amd64/bin/step` (contém diretório bin/)
-  - **step-ca**: `step-ca_linux_amd64/step-ca` (binário direto no root, SEM bin/)
-- **CORREÇÃO APLICADA**:
-  - Alterado de: `"/tmp/step-ca_$STEP_CA_VERSION/bin/step-ca"`
-  - Para: `"/tmp/step-ca_linux_${STEP_CA_VERSION}_amd64/step-ca"`
-- **RESULT**: Instalação step-ca agora funciona corretamente, download e extração do binário corretos
