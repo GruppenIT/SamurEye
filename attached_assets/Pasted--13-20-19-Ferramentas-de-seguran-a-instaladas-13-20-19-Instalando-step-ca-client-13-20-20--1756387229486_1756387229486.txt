@@ -1,0 +1,61 @@
+[13:20:19] Ferramentas de segurança instaladas
+[13:20:19] 🔐 Instalando step-ca client...
+[13:20:20] step-ca client instalado: Smallstep CLI/0.25.2 (linux/amd64)
+Release Date: 2024-01-19T21:15:39Z
+[13:20:20] step-ca client configurado
+[13:20:20] 🤖 Configurando agente collector...
+[13:20:20] Agente collector configurado
+[13:20:20] 🔧 Configurando variáveis de ambiente...
+[13:20:20] Variáveis de ambiente configuradas
+[13:20:20] ⚙️ Configurando serviços systemd...
+[13:20:21] Serviços systemd configurados
+[13:20:21] 📝 Criando scripts auxiliares...
+[13:20:21] Scripts auxiliares criados
+[13:20:21] 📊 Configurando sistema de logs...
+[13:20:21] Sistema de logs configurado
+[13:20:21] ✅ Executando validação final...
+[13:20:21] 🔍 Verificando masscan...
+[13:20:21] ✅ Masscan encontrado em /usr/bin/masscan
+[13:20:21] 🎉 Validação final concluída com sucesso!
+[13:20:21] 📋 Instalação concluída - Resumo:
+[13:20:21] Collector ID será gerado automaticamente no primeiro boot
+[13:20:21] Usuário: samureye-collector
+[13:20:21] Diretório base: /opt/samureye-collector
+[13:20:21] Logs: /var/log/samureye-collector/
+[13:20:21]
+[13:20:21] 🔧 Comandos úteis:
+[13:20:21]   systemctl start samureye-collector    # Iniciar collector
+[13:20:21]   systemctl status samureye-collector   # Ver status
+[13:20:21]   journalctl -f -u samureye-collector   # Ver logs em tempo real
+[13:20:21]
+[13:20:21] ⚠️  PRÓXIMOS PASSOS MANUAIS:
+[13:20:21] 1. Executar script de registro do collector:
+[13:20:21]    curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/scripts/register-collector.sh | bash -s <tenant-slug> <collector-name>
+[13:20:21]
+[13:20:21] 2. O script de registro irá:
+[13:20:21]    - Gerar certificados mTLS via step-ca
+[13:20:21]    - Registrar collector na plataforma
+[13:20:21]    - Iniciar serviços automaticamente
+[13:20:21]
+[13:20:21] 🚀 vlxsam04 Collector Agent pronto para registro!
+[13:20:21] ⏰ Instalação finalizada em: 2025-08-28 13:20:21
+root@vlxsam04:~# systemctl start samureye-collector
+Job for samureye-collector.service failed because of unavailable resources or another system error.
+See "systemctl status samureye-collector.service" and "journalctl -xeu samureye-collector.service" for details.
+root@vlxsam04:~# journalctl -f -u samureye-collector
+Aug 28 13:20:33 vlxsam04 systemd[1]: samureye-collector.service: Failed to load environment files: No such file or directory
+Aug 28 13:20:33 vlxsam04 systemd[1]: samureye-collector.service: Failed to spawn 'start' task: No such file or directory
+Aug 28 13:20:33 vlxsam04 systemd[1]: samureye-collector.service: Failed with result 'resources'.
+Aug 28 13:20:33 vlxsam04 systemd[1]: Failed to start samureye-collector.service - SamurEye Collector Agent - Multi-Tenant.
+Aug 28 13:20:43 vlxsam04 systemd[1]: samureye-collector.service: Scheduled restart job, restart counter is at 1.
+Aug 28 13:20:43 vlxsam04 systemd[1]: samureye-collector.service: Failed to load environment files: No such file or directory
+Aug 28 13:20:43 vlxsam04 systemd[1]: samureye-collector.service: Failed to spawn 'start' task: No such file or directory
+Aug 28 13:20:43 vlxsam04 systemd[1]: samureye-collector.service: Failed with result 'resources'.
+Aug 28 13:20:43 vlxsam04 systemd[1]: Failed to start samureye-collector.service - SamurEye Collector Agent - Multi-Tenant.
+Aug 28 13:20:54 vlxsam04 systemd[1]: samureye-collector.service: Scheduled restart job, restart counter is at 2.
+Aug 28 13:20:54 vlxsam04 systemd[1]: samureye-collector.service: Failed to load environment files: No such file or directory
+Aug 28 13:20:54 vlxsam04 systemd[1]: samureye-collector.service: Failed to spawn 'start' task: No such file or directory
+Aug 28 13:20:54 vlxsam04 systemd[1]: samureye-collector.service: Failed with result 'resources'.
+Aug 28 13:20:54 vlxsam04 systemd[1]: Failed to start samureye-collector.service - SamurEye Collector Agent - Multi-Tenant.
+^C
+root@vlxsam04:~#
