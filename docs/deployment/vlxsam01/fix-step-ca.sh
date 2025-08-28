@@ -22,7 +22,7 @@ if [ -f "/tmp/step-ca" ]; then
         echo "🎉 Correção aplicada com sucesso!"
         echo ""
         echo "Agora você pode continuar com o script principal ou executar:"
-        echo "curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam01/install.sh | bash"
+        echo "curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/vlxsam01/install.sh | bash"
     else
         echo "❌ Erro na verificação do step-ca"
         exit 1
