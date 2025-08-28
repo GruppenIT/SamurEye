@@ -119,25 +119,33 @@ fi
 
 # Verificar se pip está funcionando
 if python3.12 -m pip --version &>/dev/null; then
-    log "✅ pip funcionando, atualizando..."
-    python3.12 -m pip install --upgrade pip setuptools wheel
+    log "✅ pip funcionando, atualizando com --break-system-packages (Ubuntu 24.04)..."
+    python3.12 -m pip install --upgrade pip setuptools wheel --break-system-packages 2>/dev/null || {
+        log "⚠️ Pip upgrade falhou, usando versão do sistema..."
+    }
 else
     error "❌ Falha ao configurar pip para Python 3.12"
 fi
 
-# Dependências Python para o agente
-python3.12 -m pip install \
+# Dependências Python para o agente (Ubuntu 24.04 com --break-system-packages)
+log "📦 Instalando dependências Python..."
+python3.12 -m pip install --break-system-packages \
     aiohttp \
     websockets \
     cryptography \
     requests \
     certifi \
     psutil \
-    asyncio \
     pyyaml \
     structlog \
     python-multipart \
-    aiofiles
+    aiofiles \
+|| {
+    log "⚠️ Instalação via pip falhou, tentando via apt..."
+    apt install -y python3-aiohttp python3-websockets python3-cryptography \
+                   python3-requests python3-certifi python3-psutil \
+                   python3-yaml python3-structlog
+}
 
 log "Python 3.12 e dependências instaladas"
 

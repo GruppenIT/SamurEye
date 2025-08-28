@@ -1,7 +1,7 @@
 # SamurEye MVP - Breach & Attack Simulation Platform
 
 ## Overview
-SamurEye is a cloud-based Breach & Attack Simulation (BAS) platform designed for small to medium enterprises (SMEs) in Brazil. Its primary purpose is to provide attack surface validation, threat intelligence, and security testing capabilities. The platform uses a cloud-based frontend and edge collectors to orchestrate security testing journeys with tools like Nmap and Nuclei. SamurEye aims to automate the discovery of vulnerabilities, test EDR/AV solutions, monitor Active Directory hygiene, and validate an organization's security posture.
+SamurEye is a cloud-based Breach & Attack Simulation (BAS) platform for SMEs in Brazil. It provides attack surface validation, threat intelligence, and security testing capabilities. The platform automates vulnerability discovery, tests EDR/AV solutions, monitors Active Directory hygiene, and validates security posture using a cloud-based frontend and edge collectors to orchestrate security testing with tools like Nmap and Nuclei.
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
@@ -9,260 +9,57 @@ Preferred communication style: Simple, everyday language.
 ## System Architecture
 
 ### Frontend Architecture
-The frontend is built with **React 18** and TypeScript, using **Vite** for building. It leverages **shadcn/ui** components with Radix UI primitives and **TailwindCSS** for a consistent and customizable design. **Wouter** handles client-side routing, **TanStack Query** manages server state, and **React Hook Form** with Zod is used for form handling and validation.
+The frontend uses React 18 with TypeScript, built with Vite. It features shadcn/ui components, Radix UI primitives, and TailwindCSS for styling. Wouter is used for routing, TanStack Query for server state management, and React Hook Form with Zod for form handling.
 
 ### Backend Architecture
-The backend is an **Express.js** server running on **Node.js**. It uses **PostgreSQL 16** as its database, managed with **Drizzle ORM**. The PostgreSQL instance runs locally on `vlxsam03`. The system supports **WebSockets** for real-time updates and uses **session-based authentication** with `connect-pg-simple`. It also integrates **Replit Auth** for SSO.
+The backend is an Express.js server on Node.js, with PostgreSQL 16 managed by Drizzle ORM. It supports WebSockets for real-time updates and uses session-based authentication with connect-pg-simple, integrating Replit Auth for SSO.
 
 ### Database Design
-The system employs a **multi-tenant architecture** with strict tenant isolation. It features a **dual user system**: global admin users (via Replit Auth) and tenant-scoped users with local authentication. The database schema includes fields for user authentication, tenant management (CRUD operations for admins), user-tenant relationships, collector registration, security testing journeys, credential management, threat intelligence, and activity logging.
+A multi-tenant architecture ensures strict tenant isolation. It includes a dual user system: global admin users via Replit Auth and tenant-scoped users with local authentication. The schema supports user authentication, tenant management, user-tenant relationships, collector registration, security testing journeys, credential management, threat intelligence, and activity logging.
 
 ### Authentication & Authorization
-SamurEye uses a **dual authentication system**: a session-based system at `/admin` for administrators with hardcoded credentials, and **Replit OpenID Connect** for regular users. Access control is multi-layered, including global admins, SOC users (with access to all tenants), and tenant-specific users with role-based permissions (tenant_admin, operator, viewer, tenant_auditor). Session management is handled via PostgreSQL.
+SamurEye employs a dual authentication system: session-based for administrators at `/admin` and Replit OpenID Connect for regular users. Access control is multi-layered, including global admins, SOC users (all tenants), and tenant-specific roles (tenant_admin, operator, viewer, tenant_auditor).
 
 ### Real-time Communication
-A **WebSocket server** provides live updates for various events, including collector status, real-time telemetry streaming from edge collectors, journey execution status, and critical security alert notifications.
+A WebSocket server provides live updates for collector status, telemetry streaming from edge collectors, journey execution status, and security alerts.
 
 ### Security Features
-The platform implements **mTLS** for secure collector-to-cloud communication using an internal **step-ca** Certificate Authority. Public-facing services use **Let's Encrypt** certificates with **HTTPS enforcement** and HSTS headers. **CSP headers** and other security middleware are also applied.
+mTLS secures collector-to-cloud communication via an internal step-ca Certificate Authority. Public services use Let's Encrypt certificates with HTTPS enforcement and HSTS headers. CSP headers and other security middleware are applied.
 
-## Recent Progress and Fixes
-
-### vlxsam02 Deployment Issues Resolution (August 2025) - ✅ TOTALMENTE RESOLVIDO
-
-🎉 **Status Final**: Sistema completamente funcional em produção!
-
-**✅ COMPLETAMENTE RESOLVIDO (27/08/2025):**
-**Problema 8: NGINX Proxy Página em Branco no HTTPS**
-- **Sintoma**: `https://app.samureye.com.br` mostrava certificado válido, mas página em branco
-- **Causa**: Configuração nginx complexa com problemas de headers e buffering
-- **Solução Implementada**: Configuração nginx simplificada e otimizada
-- **Status**: ✅ RESOLVIDO - Sistema funcionando perfeitamente
-- **Resultado**: Interface completa carregando em `https://app.samureye.com.br`
-- **Scripts Atualizados**: `docs/deployment/vlxsam01/install.sh` com configuração nginx que funciona
-
-**✅ OUTROS PROBLEMAS RESOLVIDOS:**
-**Problema 6: Autenticação PostgreSQL no vlxsam03**
-- **Status**: ✅ RESOLVIDO - Conectividade total entre vlxsam02 e vlxsam03
-- **Scripts**: Soluções automáticas implementadas e funcionando
-
-**Problema 7: Tabelas do Banco Não Existem**
-- **Status**: ✅ RESOLVIDO - Migração Drizzle funcionando
-- **Solução**: `docs/deployment/vlxsam02/fix-database-tables.sh`
-
-### Problemas Identificados e Resolvidos:
-
-#### 1. ✅ RESOLVIDO: Erro ES6 "require is not defined"
-**Problema**: Scripts falhavam com erro ES6 modules "require is not defined in ES module scope"
-**Causa**: Incompatibilidade entre CommonJS (require) e ES6 modules (import) no package.json com "type": "module"
-**Solução Implementada**:
-- Script `fix-es6-only.sh` criado com sintaxe ES6 correta
-- Todos os testes usando `import dotenv from 'dotenv'` 
-- Arquivos `.mjs` para garantir compatibilidade ES6
-- Integrado no script principal de instalação
-
-#### 2. ✅ RESOLVIDO: Conexão PostgreSQL porta 443 incorreta
-**Problema**: Aplicação tentando conectar PostgreSQL na porta 443 em vez de 5432
-**Causa**: DATABASE_URL incorreta ou configuração hardcoded
-**Solução Implementada**:
-- Detecção automática de porta incorreta no .env
-- Correção automática para porta 5432
-- Validação de conectividade PostgreSQL
-- Configuração .env padronizada com todas as variáveis
-
-#### 3. ✅ RESOLVIDO: Diretório /opt/samureye/SamurEye deletado
-**Problema**: "No such file or directory" durante instalação
-**Causa**: Limpeza excessiva ou Git clone incorreto
-**Solução Implementada**:
-- Script `install-quick-fix.sh` para restauração rápida
-- Git clone corrigido para criar estrutura correta
-- Verificação e backup automático de diretórios
-- Permissões adequadas (samureye:samureye)
-
-#### 4. ✅ RESOLVIDO: Variáveis REPLIT_DOMAINS faltantes
-**Problema**: "Environment variable REPLIT_DOMAINS not provided"
-**Causa**: Configuração incompleta do .env para autenticação Replit
-**Solução Implementada**:
-- Script `fix-env-vars.sh` adiciona todas as variáveis Replit Auth
-- REPLIT_DOMAINS, REPL_ID, ISSUER_URL configurados automaticamente
-- Teste automático de carregamento das variáveis
-- Validação completa antes de iniciar serviço
-
-### Script Principal Consolidado (TOTALMENTE INTEGRADO):
-
-1. **install.sh** - Script único com TODAS as soluções integradas
-   - ✅ Instalação completa from-scratch
-   - ✅ Detecção automática de todos os problemas conhecidos
-   - ✅ Correção ES6, variáveis ambiente, estrutura de diretórios
-   - ✅ Ubuntu 24.04: Python 3.12, netcat-openbsd, fix ensurepip
-   - ✅ Configuração step-ca integrada (sem scripts externos)
-   - ✅ Health check integrado (sem scripts externos)
-   - ✅ Teste mTLS integrado (sem scripts externos)
-   - ✅ Auto-configuração integrada (sem scripts externos)
-   - ✅ CONCENTRAÇÃO TOTAL: tudo em um único arquivo install.sh
-
-#### Scripts Auxiliares Removidos:
-- ❌ **REMOVIDOS**: setup-step-ca.sh, health-check.sh, test-mtls-connection.sh, auto-configure.sh
-- ✅ **INTEGRADOS**: Todas as funcionalidades concentradas no install.sh principal
-- ✅ **PRINCÍPIO**: Um único script, máxima automação, zero dependências externas
-
-### Configuração Final (.env) - Todas Variáveis Incluídas:
-```bash
-# Environment básico
-NODE_ENV=development
-PORT=5000
-
-# PostgreSQL (vlxsam03) - CORRIGIDO
-DATABASE_URL=postgresql://samureye:SamurEye2024!@172.24.1.153:5432/samureye_prod
-PGHOST=172.24.1.153
-PGPORT=5432
-
-# Replit Auth - ADICIONADO
-REPLIT_DOMAINS=samureye.com.br,app.samureye.com.br,api.samureye.com.br,vlxsam02.samureye.com.br
-REPL_ID=samureye-production-vlxsam02
-ISSUER_URL=https://replit.com/oidc
-
-# Session & Security
-SESSION_SECRET=samureye_secret_2024_vlxsam02_production
-```
-
-### Status dos Serviços:
-- ✅ **samureye-app.service**: Ativo e operacional
-- ✅ **PostgreSQL**: Conectividade validada (vlxsam03:5432)
-- ✅ **ES6 Modules**: Funcionando corretamente
-- ✅ **Replit Auth**: Configurado com todas as variáveis necessárias
-- ✅ **Database Driver**: Driver PostgreSQL padrão (pg) funcionando perfeitamente
-- ✅ **Tenant Creation**: Funcionalidade completamente operacional
-- ✅ **Logs**: Sem erros críticos, sistema estável
-
-#### 5. ✅ RESOLVIDO: Problema Crítico de Criação de Tenants
-**Problema**: Driver Neon serverless tentando conexões WebSocket na porta 443
-**Causa**: @neondatabase/serverless forçando WebSocket em vez de conexão PostgreSQL padrão
-**Solução Implementada**:
-- Substituição completa do driver Neon pelo driver PostgreSQL padrão (pg)
-- Configuração adequada para conexão local na porta 5432
-- Implementação de geração automática de slug para tenants
-- Correção de tipos TypeScript para validação de schema
-- **Resultado**: Criação de tenants funcionando 100% (teste confirmado)
-
-#### 6. ✅ RESOLVIDO COMPLETAMENTE: Incompatibilidade vlxsam04 com Ubuntu 24.04 (27/08/2025)
-**Problema**: Pacotes Python 3.11 não encontrados no Ubuntu 24.04
-**Sintoma**: `E: Unable to locate package python3.11`, `E: Package 'netcat' has no installation candidate`
-**Causa**: Ubuntu 24.04 usa Python 3.12 por padrão, netcat foi renomeado para netcat-openbsd
-**Solução Implementada FINAL**:
-- ✅ Script principal `install.sh` 100% corrigido para Python 3.12
-- ✅ Substituição `netcat` → `netcat-openbsd` aplicada
-- ✅ Validação robusta de compatibilidade Ubuntu 24.04 integrada
-- ✅ Teste automático de importações Python críticas
-- ✅ Log de compatibilidade gerado: `/var/log/samureye-collector/ubuntu-24-04-compatibility.log`
-- ✅ Resumo final inclui confirmação Ubuntu 24.04 nativo
-- **Resultado FINAL**: vlxsam04 100% compatível e validado para Ubuntu 24.04
-
-#### 7. ✅ COMPLETAMENTE FINALIZADO: Script vlxsam04 e Documentação (27/08/2025)
-**Problema**: Script install.sh incompleto, falta de automação e orientações claras sobre próximos passos
-**Solução Implementada FINAL**:
-- ✅ **Script install.sh completamente finalizado** (1.424 linhas)
-- ✅ **Automação máxima**: Configuração .env automática, teste de dependências
-- ✅ **Scripts auxiliares**: setup-step-ca.sh, health-check.sh, test-mtls-connection.sh
-- ✅ **Script auto-configure.sh**: Configuração pós-instalação automatizada
-- ✅ **README.md detalhado**: Instruções completas de instalação
-- ✅ **INSTRUCOES_DETALHADAS.md**: Passo a passo com troubleshooting
-- ✅ **Orientações claras**: Próximos passos numerados e automatizados
-- ✅ **Problema GitHub**: Documentado que script local é atualizado vs GitHub desatualizado
-- **Resultado FINAL**: Script vlxsam04 totalmente automatizado e documentado
-
-### Documentação Atualizada:
-- **README.md**: Documentação completa com todos os scripts e soluções
-- **install.sh**: Script unificado com todas as correções integradas
-- **Troubleshooting**: Guia completo de solução de problemas
-- **Testes**: Validação automática de todas as configurações
-
-**Resultado**: Sistema vlxsam02 completamente funcional e pronto para produção.
-
-### Configuração NGINX Finalizada (27/08/2025) - ✅ FUNCIONANDO
-
-**Arquitetura Final:**
-- **vlxsam01**: NGINX proxy reverso com certificados Let's Encrypt
-- **vlxsam02**: Aplicação SamurEye (React 18 + Express.js) na porta 5000  
-- **vlxsam03**: PostgreSQL 16 na porta 5432
-
-**Configuração NGINX que funciona:**
-```nginx
-# Rate limiting
-limit_req_zone $binary_remote_addr zone=api:10m rate=10r/s;
-limit_req_zone $binary_remote_addr zone=app:10m rate=30r/s;
-
-# Upstream backend
-upstream samureye_backend {
-    server 172.24.1.152:5000 max_fails=3 fail_timeout=30s;
-    keepalive 32;
-}
-
-# HTTPS - Aplicação Principal
-server {
-    listen 443 ssl http2;
-    server_name app.samureye.com.br;
-    
-    # SSL Configuration
-    ssl_certificate /etc/letsencrypt/live/app.samureye.com.br/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/app.samureye.com.br/privkey.pem;
-    
-    # Proxy headers
-    proxy_set_header Host $host;
-    proxy_set_header X-Real-IP $remote_addr;
-    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    proxy_set_header X-Forwarded-Proto $scheme;
-    
-    # Main application
-    location / {
-        proxy_pass http://samureye_backend;
-    }
-}
-```
-
-**URLs Funcionais:**
-- ✅ `https://app.samureye.com.br` - Interface principal
-- ✅ `https://api.samureye.com.br` - Endpoints API
-- ✅ `https://ca.samureye.com.br` - Certificate Authority
-- ✅ `http://172.24.1.152:5000` - Acesso direto backend
-
-**Scripts Atualizados:**
-- `docs/deployment/vlxsam01/install.sh` - Configuração nginx simplificada e funcional
-- Todas as soluções automáticas integradas no script principal
+### NGINX Configuration
+NGINX acts as a reverse proxy on `vlxsam01`, forwarding traffic to the SamurEye application on `vlxsam02`. It handles SSL termination with Let's Encrypt certificates and supports rate limiting.
 
 ## External Dependencies
 
 ### Database & Storage
-- **PostgreSQL 16**: Primary data storage, local on `vlxsam03`.
-- **MinIO**: Object storage for scan results (future S3 migration planned).
+- **PostgreSQL 16**: Primary data storage.
+- **MinIO**: Object storage for scan results (planned S3 migration).
 - **Redis**: Caching and session storage.
 
 ### Secret Management
-- **Delinea Secret Server**: For credential storage via API integration using API key authentication.
+- **Delinea Secret Server**: Credential storage via API integration.
 
 ### Monitoring & Observability
-- **Grafana**: For metrics and monitoring.
-- **FortiSIEM**: Log aggregation via CEF/UDP 514.
-- Custom telemetry collection from edge collectors.
+- **Grafana**: Metrics and monitoring.
+- **FortiSIEM**: Log aggregation (CEF/UDP 514).
 
 ### Development & Deployment
-- **Docker Registry**: For container image management.
+- **Docker Registry**: Container image management.
 - **step-ca**: Internal Certificate Authority.
 - **NGINX**: Reverse proxy and load balancer.
-- **vSphere**: Virtualization platform for infrastructure.
+- **vSphere**: Virtualization platform.
 
 ### DNS & TLS
 - **samureye.com.br**: Domain with wildcard certificate support.
-- **Let's Encrypt DNS-01 Challenge**: For enhanced security and wildcard certificates.
-- Multi-provider DNS support (Cloudflare, AWS Route53, Google Cloud DNS, manual).
-- Automated certificate management with intelligent renewal hooks.
+- **Let's Encrypt DNS-01 Challenge**: For wildcard certificates and automated renewal.
+- Multi-provider DNS support (Cloudflare, AWS Route53, Google Cloud DNS).
 
 ### Security Tools Integration
 - **Nmap**: Network scanning.
 - **Nuclei**: Vulnerability scanning.
-- **CVE databases**: For threat intelligence.
+- **CVE databases**: Threat intelligence.
 
 ### Edge Collector Communication
 - **HTTPS-only** communication on port 443.
 - **Certificate-based authentication** via `step-ca` issued certificates.
-- Encrypted telemetry streaming and secure command execution for security tools.
+- Encrypted telemetry streaming and secure command execution.
