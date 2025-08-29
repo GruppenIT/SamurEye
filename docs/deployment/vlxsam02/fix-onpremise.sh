@@ -33,20 +33,20 @@ else
     log "  Execute: systemctl start samureye-app"
 fi
 
-# 3. Verificar banco de dados PostgreSQL
-log "3. Verificando PostgreSQL..."
-if systemctl is-active postgresql >/dev/null 2>&1; then
-    log "✅ PostgreSQL ativo"
+# 3. Verificar banco de dados PostgreSQL no vlxsam03
+log "3. Verificando PostgreSQL no vlxsam03..."
+if nc -z vlxsam03 5432 2>/dev/null; then
+    log "✅ PostgreSQL vlxsam03:5432 acessível"
     
-    # Testar conexão
-    if sudo -u postgres psql -c "SELECT version();" >/dev/null 2>&1; then
-        log "✅ PostgreSQL acessível"
+    # Testar conexão via aplicação
+    if curl -s http://localhost:5000/api/system/settings | grep -q "samureye" 2>/dev/null; then
+        log "✅ Aplicação conectando ao PostgreSQL"
     else
-        log "⚠️ Problema de conexão PostgreSQL"
+        log "⚠️ Problema na conexão da aplicação com PostgreSQL"
     fi
 else
-    log "❌ PostgreSQL inativo"
-    systemctl restart postgresql
+    log "❌ PostgreSQL vlxsam03:5432 inacessível"
+    log "  Verifique se o PostgreSQL está funcionando no vlxsam03"
 fi
 
 # 4. Verificar endpoints críticos da API
@@ -88,16 +88,15 @@ else
     log "⚠️ Problema na conectividade com Gateway"
 fi
 
-# 7. Status dos collectors registrados
-log "7. Verificando collectors no banco..."
-COLLECTORS_COUNT=$(sudo -u postgres psql -d samureye -t -c "SELECT COUNT(*) FROM collectors;" 2>/dev/null || echo "0")
+# 7. Status dos collectors registrados (via API)
+log "7. Verificando collectors registrados..."
+COLLECTORS_JSON=$(curl -s http://localhost:5000/api/admin/collectors 2>/dev/null || echo '[]')
+COLLECTORS_COUNT=$(echo "$COLLECTORS_JSON" | grep -o '"id"' | wc -l 2>/dev/null || echo "0")
 log "Collectors registrados: $COLLECTORS_COUNT"
 
 if [[ $COLLECTORS_COUNT -gt 0 ]]; then
-    echo "  Status dos collectors:"
-    sudo -u postgres psql -d samureye -t -c "SELECT name, status, last_seen FROM collectors ORDER BY last_seen DESC LIMIT 3;" 2>/dev/null | while read line; do
-        echo "    $line"
-    done
+    echo "  Verificar detalhes na interface admin:"
+    echo "    https://app.samureye.com.br/admin"
 fi
 
 # 8. Status final

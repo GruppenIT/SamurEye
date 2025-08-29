@@ -945,20 +945,15 @@ main() {
     echo "   PostgreSQL: $POSTGRES_HOST:$POSTGRES_PORT"
     echo "   Redis: $REDIS_HOST:$REDIS_PORT"
     echo ""
-    # Correção para collectors em status ENROLLING
-    log "🔧 Aplicando correções para collectors ENROLLING..."
-
-    # Script SQL para forçar collectors online se estiverem há mais de 5 minutos em ENROLLING
-    sudo -u postgres psql -d samureye -c "
-    UPDATE collectors 
-    SET status = 'online', last_seen = NOW() 
-    WHERE status = 'enrolling' 
-      AND created_at < NOW() - INTERVAL '5 minutes';
-    " 2>/dev/null && log "✅ Status de collectors antigos corrigido" || log "⚠️ Não foi possível corrigir status de collectors"
-
-    # Verificar quantos collectors foram atualizados
-    UPDATED_COLLECTORS=$(sudo -u postgres psql -d samureye -t -c "SELECT COUNT(*) FROM collectors WHERE status = 'online';" 2>/dev/null | tr -d ' ')
-    log "📊 Collectors online: $UPDATED_COLLECTORS"
+    # Nota sobre PostgreSQL (está no vlxsam03, não vlxsam02)
+    log "🗃️ PostgreSQL está no vlxsam03 - configuração correta no .env"
+    
+    # Verificar conectividade com PostgreSQL no vlxsam03
+    if nc -z vlxsam03 5432 2>/dev/null; then
+        log "✅ Conectividade com PostgreSQL vlxsam03:5432 OK"
+    else
+        log "⚠️ PostgreSQL vlxsam03:5432 não acessível - verificar vlxsam03"
+    fi
 
     log "✅ SamurEye vlxsam02 instalado e funcionando!"
 }

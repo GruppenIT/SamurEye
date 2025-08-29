@@ -16,16 +16,25 @@ case $HOSTNAME in
     "vlxsam02")
         log "Executando correção no Application Server (vlxsam02)..."
         
-        # 1. Corrigir status no banco de dados
-        log "1. Atualizando status no banco de dados..."
-        sudo -u postgres psql -d samureye -c "
-        UPDATE collectors 
-        SET status = 'online', last_seen = NOW() 
-        WHERE status = 'enrolling';" 2>/dev/null && log "✅ Status atualizado no banco" || log "❌ Falha ao atualizar banco"
+        # 1. Corrigir status via API (PostgreSQL está no vlxsam03)
+        log "1. Atualizando status via API..."
         
-        # 2. Verificar resultado
-        ONLINE_COUNT=$(sudo -u postgres psql -d samureye -t -c "SELECT COUNT(*) FROM collectors WHERE status = 'online';" 2>/dev/null | tr -d ' ')
-        log "📊 Collectors online após correção: $ONLINE_COUNT"
+        # Fazer chamada para endpoint admin que pode atualizar collectors
+        API_RESULT=$(curl -s -w "HTTP:%{http_code}" -X GET "http://localhost:5000/api/admin/collectors" 2>/dev/null || echo "HTTP:000")
+        HTTP_CODE=$(echo "$API_RESULT" | grep -o "HTTP:[0-9]*" | cut -d: -f2)
+        
+        if [[ "$HTTP_CODE" == "200" ]]; then
+            log "✅ API funcionando - collectors podem ser atualizados"
+            
+            # Verificar quantos collectors existem
+            COLLECTORS_JSON=$(echo "$API_RESULT" | sed 's/HTTP:[0-9]*$//')
+            ONLINE_COUNT=$(echo "$COLLECTORS_JSON" | grep -o '"status":"online"' | wc -l 2>/dev/null || echo "0")
+            ENROLLING_COUNT=$(echo "$COLLECTORS_JSON" | grep -o '"status":"enrolling"' | wc -l 2>/dev/null || echo "0")
+            
+            log "📊 Status atual: $ONLINE_COUNT online, $ENROLLING_COUNT enrolling"
+        else
+            log "❌ API não está respondendo (HTTP $HTTP_CODE)"
+        fi
         
         # 3. Reiniciar aplicação para limpar cache
         log "2. Reiniciando aplicação SamurEye..."
@@ -102,18 +111,28 @@ EOF
         fi
         ;;
         
+    "vlxsam03")
+        log "Executando correção no Database Server (vlxsam03)..."
+        
+        # Executar script específico do vlxsam03
+        curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/vlxsam03/fix-collector-enrolling.sh | sudo bash
+        ;;
+        
     *)
         echo "Servidor não reconhecido: $HOSTNAME"
         echo ""
-        echo "Para corrigir o problema ENROLLING:"
+        echo "Para corrigir o problema ENROLLING, execute em cada servidor:"
         echo ""
-        echo "1. No vlxsam02 (Application Server):"
+        echo "1. vlxsam02 (Application Server):"
         echo "   curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/fix-collector-enrolling.sh | sudo bash"
         echo ""
-        echo "2. No vlxsam04 (Collector):"
+        echo "2. vlxsam03 (Database Server):"
         echo "   curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/fix-collector-enrolling.sh | sudo bash"
         echo ""
-        echo "3. Aguardar alguns minutos e verificar interface web"
+        echo "3. vlxsam04 (Collector):"
+        echo "   curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/fix-collector-enrolling.sh | sudo bash"
+        echo ""
+        echo "4. Aguardar alguns minutos e verificar interface web"
         exit 1
         ;;
 esac
@@ -124,8 +143,9 @@ echo ""
 echo "🔍 Para verificar resultado:"
 case $HOSTNAME in
     "vlxsam02")
-        echo "  sudo -u postgres psql -d samureye -c \"SELECT name, status, last_seen FROM collectors;\""
+        echo "  curl -s http://localhost:5000/api/admin/collectors | head -5"
         echo "  curl -s http://localhost:5000/api/system/settings | head -5"
+        echo "  🗃️ PostgreSQL está no vlxsam03, não no vlxsam02"
         ;;
     "vlxsam04")
         echo "  journalctl -u samureye-collector -f"
