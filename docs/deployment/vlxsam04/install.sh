@@ -551,7 +551,7 @@ class SamurEyeAPIClient:
     
     async def send_heartbeat(self, data):
         """Envia heartbeat"""
-        async with self.session.post(f"{self.base_url}/api/collectors/heartbeat", json=data) as resp:
+        async with self.session.post(f"{self.base_url}/collector-api/heartbeat", json=data) as resp:
             return await resp.json() if resp.status == 200 else None
     
     async def get_pending_commands(self):
@@ -981,7 +981,7 @@ class SamureyeCollectorAgent:
         
         try:
             async with self.session.post(
-                f"{self.api_base_url}/api/collectors/heartbeat",
+                f"{self.api_base_url}/collector-api/heartbeat",
                 json=data
             ) as resp:
                 if resp.status == 200:

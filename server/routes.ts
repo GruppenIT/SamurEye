@@ -71,6 +71,70 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware (for Replit Auth - disabled for now to avoid conflicts)
   // await setupAuth(app);
 
+  // Collector heartbeat endpoint (using different prefix to avoid Vite conflicts)
+  app.post('/collector-api/heartbeat', async (req, res) => {
+    try {
+      const { 
+        collector_id, 
+        status, 
+        timestamp, 
+        telemetry, 
+        capabilities,
+        version 
+      } = req.body;
+      
+      if (!collector_id) {
+        return res.status(400).json({ message: "collector_id required" });
+      }
+
+      // Find collector by name or ID across all tenants
+      const tenants = await storage.getAllTenants();
+      let collector = null;
+      
+      for (const tenant of tenants) {
+        const tenantCollectors = await storage.getCollectorsByTenant(tenant.id);
+        collector = tenantCollectors.find((c: any) => 
+          c.name === collector_id || 
+          c.id === collector_id ||
+          c.hostname === collector_id
+        );
+        if (collector) break;
+      }
+      
+      if (!collector) {
+        return res.status(404).json({ message: "Collector not found" });
+      }
+
+      // Update collector status to online
+      await storage.updateCollectorStatus(collector.id, 'online');
+
+      // Store telemetry if provided
+      if (telemetry) {
+        await storage.addCollectorTelemetry({
+          collectorId: collector.id,
+          cpuUsage: telemetry.cpu_percent || 0,
+          memoryUsage: telemetry.memory_percent || 0,
+          diskUsage: telemetry.disk_percent || 0,
+          networkThroughput: JSON.stringify(telemetry.network_io || {}),
+          processes: telemetry.processes || 0,
+          timestamp: new Date(timestamp || Date.now())
+        });
+      }
+
+      // Log collector activity
+      console.log(`Collector heartbeat: ${collector.name} (${collector.hostname}) - Status: ${status}`);
+      
+      res.json({ 
+        message: "Heartbeat received", 
+        collector_id: collector.id,
+        status: "online"
+      });
+    } catch (error) {
+      console.error("Error processing collector heartbeat:", error);
+      res.status(500).json({ message: "Failed to process heartbeat" });
+    }
+  });
+
   // Admin authentication routes
   app.post('/api/admin/login', async (req, res) => {
     try {
@@ -160,6 +224,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting tenant:", error);
       res.status(500).json({ message: "Failed to delete tenant" });
+    }
+  });
+
+  // Admin collector routes
+  app.get('/api/admin/collectors', isAdmin, async (req, res) => {
+    try {
+      // Get all tenants and their collectors
+      const tenants = await storage.getAllTenants();
+      const allCollectors = [];
+      
+      for (const tenant of tenants) {
+        const collectors = await storage.getCollectorsByTenant(tenant.id);
+        allCollectors.push(...collectors.map(c => ({ ...c, tenantName: tenant.name })));
+      }
+      
+      res.json(allCollectors);
+    } catch (error) {
+      console.error("Error fetching collectors:", error);
+      res.status(500).json({ message: "Failed to fetch collectors" });
     }
   });
 
@@ -714,7 +797,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Collector telemetry endpoint (authenticated via enrollment token)
+
+
+  // Legacy telemetry endpoint (authenticated via enrollment token)
   app.post('/api/telemetry', async (req, res) => {
     try {
       const { token, telemetry } = req.body;
