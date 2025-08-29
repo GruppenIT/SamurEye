@@ -10,7 +10,7 @@ export function CollectorStatus() {
   const { t } = useI18n();
   
   const { data: collectors, isLoading } = useQuery({
-    queryKey: ['/api/collectors'],
+    queryKey: ['/api/admin/collectors'],
     refetchInterval: 10000, // Refresh every 10 seconds
   });
 
@@ -39,7 +39,7 @@ export function CollectorStatus() {
   }
 
   // Mock telemetry data - in real app this would come from WebSocket or separate API
-  const collectorsWithTelemetry = collectors?.map((collector: any, index: number) => ({
+  const collectorsWithTelemetry = (collectors as any[] || [])?.map((collector: any, index: number) => ({
     ...collector,
     telemetry: {
       cpu: index === 0 ? 23.4 : index === 1 ? 12.1 : index === 2 ? 89.3 : 0,

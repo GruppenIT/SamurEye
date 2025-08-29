@@ -23,7 +23,7 @@ export default function Collectors() {
   const [showJourneyForm, setShowJourneyForm] = useState(false);
 
   const { data: collectors, isLoading } = useQuery({
-    queryKey: ['/api/collectors'],
+    queryKey: ['/api/admin/collectors'],
     refetchInterval: 10000,
   });
 
@@ -37,7 +37,7 @@ export default function Collectors() {
         title: "Token regenerado",
         description: "Novo token de enrollment gerado com sucesso",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/collectors'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/collectors'] });
     },
     onError: (error) => {
       toast({
