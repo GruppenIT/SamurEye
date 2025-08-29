@@ -134,4 +134,7 @@ case $HOSTNAME in
 esac
 echo ""
 echo "🌐 Verificar interface web:"
-echo "  https://app.samureye.com.br > Login admin > Gestão de Coletores"
+echo "  1. Acesse: https://app.samureye.com.br/admin"
+echo "  2. Login: admin@samureye.com.br / SamurEye2024!"
+echo "  3. Navegue para: Gestão de Coletores"
+echo "  4. Verifique se vlxsam04 aparece como 'ONLINE'"
