@@ -1641,6 +1641,58 @@ log "Sistema de logs configurado"
 # 12. CONFIGURAÇÃO FINAL E VALIDAÇÃO
 # ============================================================================
 
+log "🔧 Aplicando correções específicas para ENROLLING..."
+
+# Corrigir endpoint antigo se existir
+if [[ -f "$COLLECTOR_DIR/collector_agent.py" ]]; then
+    if grep -q "/api/collectors/heartbeat" "$COLLECTOR_DIR/collector_agent.py" 2>/dev/null; then
+        log "⚠️ Endpoint antigo detectado - corrigindo..."
+        sed -i 's|/api/collectors/heartbeat|/collector-api/heartbeat|g' "$COLLECTOR_DIR/collector_agent.py"
+        log "✅ Endpoint atualizado para /collector-api/heartbeat"
+    fi
+fi
+
+# Forçar status online no banco via API
+log "🔄 Forçando atualização de status via heartbeat..."
+if [[ -f "$COLLECTOR_DIR/certs/collector.crt" && -f "$COLLECTOR_DIR/certs/collector.key" && -n "$COLLECTOR_NAME" ]]; then
+    FORCE_HEARTBEAT_DATA=$(cat <<EOF
+{
+    "collector_id": "$COLLECTOR_NAME",
+    "status": "online",
+    "timestamp": "$(date -Iseconds)",
+    "telemetry": {
+        "cpu_percent": $(awk '{print $1}' /proc/loadavg | awk '{printf "%.1f", $1*100/4}' 2>/dev/null || echo "10.0"),
+        "memory_percent": $(free | awk 'NR==2{printf "%.1f", $3*100/$2}' 2>/dev/null || echo "30.0"),
+        "disk_percent": $(df / | awk 'NR==2{sub(/%/,"",$5); print $5}' 2>/dev/null || echo "20"),
+        "processes": $(ps aux 2>/dev/null | wc -l || echo "100")
+    },
+    "capabilities": ["nmap", "nuclei", "masscan"]
+}
+EOF
+)
+
+    # Tentar múltiplas vezes o heartbeat
+    for i in {1..3}; do
+        log "Tentativa $i de heartbeat..."
+        HEARTBEAT_RESULT=$(curl -k -s -w "HTTP:%{http_code}" -X POST \
+            -H "Content-Type: application/json" \
+            -d "$FORCE_HEARTBEAT_DATA" \
+            --connect-timeout 10 \
+            --cert "$COLLECTOR_DIR/certs/collector.crt" \
+            --key "$COLLECTOR_DIR/certs/collector.key" \
+            "$API_BASE_URL/collector-api/heartbeat" 2>/dev/null || echo "HTTP:000")
+        
+        HEARTBEAT_HTTP_CODE=$(echo "$HEARTBEAT_RESULT" | grep -o "HTTP:[0-9]*" | cut -d: -f2)
+        if [[ "$HEARTBEAT_HTTP_CODE" == "200" ]]; then
+            log "✅ Heartbeat enviado com sucesso (HTTP $HEARTBEAT_HTTP_CODE)"
+            break
+        else
+            log "⚠️ Tentativa $i falhou (HTTP $HEARTBEAT_HTTP_CODE)"
+            sleep 2
+        fi
+    done
+fi
+
 log "✅ Executando validação final..."
 
 # Verificar estrutura de diretórios
@@ -1751,6 +1803,10 @@ log "   📄 $COLLECTOR_DIR/scripts/health-check.py - Verificação de saúde"
 log "   📄 $COLLECTOR_DIR/scripts/backup.sh - Backup de configurações"
 log ""
 log "🚀 vlxsam04 Collector Agent pronto para registro LOCAL!"
+log ""
+log "🔍 DIAGNÓSTICO DISPONÍVEL:"
+log "   Para diagnóstico completo execute:"
+log "   curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/diagnostico-collector.sh | sudo bash"
 
 # Script de instalação concluído com sucesso
 exit 0
