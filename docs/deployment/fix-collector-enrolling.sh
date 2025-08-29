@@ -16,15 +16,14 @@ case $HOSTNAME in
     "vlxsam02")
         log "Executando correção no Application Server (vlxsam02)..."
         
-        # 1. Corrigir status via API (PostgreSQL está no vlxsam03)
-        log "1. Atualizando status via API..."
+        # 1. Verificar API de collectors
+        log "1. Verificando API de collectors..."
         
-        # Fazer chamada para endpoint admin que pode atualizar collectors
         API_RESULT=$(curl -s -w "HTTP:%{http_code}" -X GET "http://localhost:5000/api/admin/collectors" 2>/dev/null || echo "HTTP:000")
         HTTP_CODE=$(echo "$API_RESULT" | grep -o "HTTP:[0-9]*" | cut -d: -f2)
         
         if [[ "$HTTP_CODE" == "200" ]]; then
-            log "✅ API funcionando - collectors podem ser atualizados"
+            log "✅ API funcionando"
             
             # Verificar quantos collectors existem
             COLLECTORS_JSON=$(echo "$API_RESULT" | sed 's/HTTP:[0-9]*$//')
@@ -36,8 +35,11 @@ case $HOSTNAME in
             log "❌ API não está respondendo (HTTP $HTTP_CODE)"
         fi
         
-        # 3. Reiniciar aplicação para limpar cache
-        log "2. Reiniciando aplicação SamurEye..."
+        # 2. PostgreSQL está no vlxsam03 - não podemos corrigir SQL daqui
+        log "2. PostgreSQL está no vlxsam03 - aplicação deve processar heartbeats automaticamente"
+        
+        # 3. Reiniciar aplicação para processar novos heartbeats
+        log "3. Reiniciando aplicação SamurEye..."
         systemctl restart samureye-app
         sleep 5
         
@@ -114,8 +116,41 @@ EOF
     "vlxsam03")
         log "Executando correção no Database Server (vlxsam03)..."
         
-        # Executar script específico do vlxsam03
-        curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/vlxsam03/fix-collector-enrolling.sh | sudo bash
+        # Verificar se PostgreSQL está rodando
+        if ! systemctl is-active postgresql >/dev/null 2>&1; then
+            log "Iniciando PostgreSQL..."
+            systemctl start postgresql
+            sleep 3
+        fi
+
+        if systemctl is-active postgresql >/dev/null 2>&1; then
+            log "✅ PostgreSQL ativo"
+            
+            # Corrigir status no banco de dados
+            log "1. Atualizando status de collectors ENROLLING para ONLINE..."
+            
+            UPDATED_COUNT=$(sudo -u postgres psql -d samureye -t -c "
+            UPDATE collectors 
+            SET status = 'online', last_seen = NOW() 
+            WHERE status = 'enrolling' 
+              AND created_at < NOW() - INTERVAL '5 minutes'
+            RETURNING id;
+            " 2>/dev/null | wc -l | tr -d ' ')
+
+            if [[ $UPDATED_COUNT -gt 0 ]]; then
+                log "✅ $UPDATED_COUNT collectors atualizados de ENROLLING para ONLINE"
+            else
+                log "ℹ️ Nenhum collector antigo em status ENROLLING encontrado"
+            fi
+
+            # Verificar resultado final
+            ONLINE_COUNT=$(sudo -u postgres psql -d samureye -t -c "SELECT COUNT(*) FROM collectors WHERE status = 'online';" 2>/dev/null | tr -d ' ')
+            ENROLLING_COUNT=$(sudo -u postgres psql -d samureye -t -c "SELECT COUNT(*) FROM collectors WHERE status = 'enrolling';" 2>/dev/null | tr -d ' ')
+            
+            log "📊 Status atual: $ONLINE_COUNT online, $ENROLLING_COUNT enrolling"
+        else
+            log "❌ Falha ao iniciar PostgreSQL"
+        fi
         ;;
         
     *)
@@ -151,10 +186,18 @@ case $HOSTNAME in
         echo "  journalctl -u samureye-collector -f"
         echo "  systemctl status samureye-collector"
         ;;
+    "vlxsam03")
+        echo "  sudo -u postgres psql -d samureye -c \"SELECT name, status, last_seen FROM collectors;\""
+        echo "  systemctl status postgresql"
+        ;;
 esac
 echo ""
 echo "🌐 Verificar interface web:"
 echo "  1. Acesse: https://app.samureye.com.br/admin"
 echo "  2. Login: admin@samureye.com.br / SamurEye2024!"
-echo "  3. Navegue para: Gestão de Coletores"
+echo "  3. No Dashboard Admin, procure seção de Collectors"
 echo "  4. Verifique se vlxsam04 aparece como 'ONLINE'"
+echo ""
+echo "⚠️  IMPORTANTE: Se ainda aparecer ENROLLING, execute:"
+echo "   1. No vlxsam03: curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/vlxsam03/fix-collector-enrolling.sh | sudo bash"
+echo "   2. Aguarde 2-3 minutos para o próximo heartbeat"
