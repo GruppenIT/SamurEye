@@ -207,11 +207,19 @@ export class DatabaseStorage implements IStorage {
     const [totalUsersResult] = await db.select({ count: sql<number>`count(*)` }).from(users);
     const [socUsersResult] = await db.select({ count: sql<number>`count(*)` }).from(users).where(eq(users.isSocUser, true));
 
+    // Collector statistics
+    const [totalCollectorsResult] = await db.select({ count: sql<number>`count(*)` }).from(collectors);
+    const [onlineCollectorsResult] = await db.select({ count: sql<number>`count(*)` }).from(collectors).where(eq(collectors.status, 'online'));
+    const [enrollingCollectorsResult] = await db.select({ count: sql<number>`count(*)` }).from(collectors).where(eq(collectors.status, 'enrolling'));
+
     return {
       totalTenants: totalTenantsResult.count || 0,
       activeTenants: activeTenantsResult.count || 0,
       totalUsers: totalUsersResult.count || 0,
-      socUsers: socUsersResult.count || 0
+      socUsers: socUsersResult.count || 0,
+      totalCollectors: totalCollectorsResult.count || 0,
+      onlineCollectors: onlineCollectorsResult.count || 0,
+      enrollingCollectors: enrollingCollectorsResult.count || 0
     };
   }
 

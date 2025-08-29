@@ -14,6 +14,11 @@ Preferred communication style: Simple, everyday language.
 - **29/08/2025**: Collector enviando telemetria corretamente (CPU, Memory, Disk, Processes)
 - **29/08/2025**: Scripts de correção on-premise criados para todos os servidores (vlxsam01, vlxsam02, vlxsam04)
 - **29/08/2025**: Sistema SamurEye completamente operacional no ambiente on-premise
+- **29/08/2025**: Interface de Gestão de Coletores implementada no painel admin
+- **29/08/2025**: Rota `/admin/collectors` adicionada e funcional
+- **29/08/2025**: Scripts corrigidos para PostgreSQL no vlxsam03 (não vlxsam02)
+- **29/08/2025**: Estatísticas de coletores integradas no AdminDashboard
+- **29/08/2025**: Script de teste de banco de dados criado para diagnóstico
 
 ## System Architecture
 

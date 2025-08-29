@@ -62,6 +62,11 @@ function Router() {
           <TenantUsers />
         </AdminProtectedRoute>
       </Route>
+      <Route path="/admin/collectors">
+        <AdminProtectedRoute>
+          <Collectors />
+        </AdminProtectedRoute>
+      </Route>
       
       {/* Regular user routes */}
       {isLoading ? (

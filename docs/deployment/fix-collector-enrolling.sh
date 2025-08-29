@@ -132,7 +132,10 @@ EOF
         echo "3. vlxsam04 (Collector):"
         echo "   curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/fix-collector-enrolling.sh | sudo bash"
         echo ""
-        echo "4. Aguardar alguns minutos e verificar interface web"
+        echo "4. Testar banco vlxsam03:"
+        echo "   curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/test-collector-database.sh | sudo bash"
+        echo ""
+        echo "5. Aguardar alguns minutos e verificar interface web"
         exit 1
         ;;
 esac
@@ -156,5 +159,6 @@ echo ""
 echo "🌐 Verificar interface web:"
 echo "  1. Acesse: https://app.samureye.com.br/admin"
 echo "  2. Login: admin@samureye.com.br / SamurEye2024!"
-echo "  3. Navegue para: Gestão de Coletores"
-echo "  4. Verifique se vlxsam04 aparece como 'ONLINE'"
+echo "  3. Clique na aba: 'Gestão de Coletores'"
+echo "  4. Clique em: 'Ver Coletores'"
+echo "  5. Verifique se vlxsam04 aparece como 'ONLINE'"

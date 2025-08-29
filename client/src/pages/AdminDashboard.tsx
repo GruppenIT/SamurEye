@@ -261,6 +261,7 @@ export default function AdminDashboard() {
           <TabsList>
             <TabsTrigger value="tenants">Gestão de Tenants</TabsTrigger>
             <TabsTrigger value="users">Gestão de Usuários</TabsTrigger>
+            <TabsTrigger value="collectors">Gestão de Coletores</TabsTrigger>
           </TabsList>
 
           <TabsContent value="tenants" className="space-y-6">
@@ -486,6 +487,50 @@ export default function AdminDashboard() {
                 </Button>
               </div>
               <AdminUsersList />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="collectors">
+            <div className="space-y-6">
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-semibold">Gestão de Coletores</h2>
+                <Button onClick={() => setLocation("/admin/collectors")} data-testid="button-view-collectors">
+                  <Plus className="mr-2 h-4 w-4" />
+                  Ver Coletores
+                </Button>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Coletores Online</CardTitle>
+                    <div className="h-4 w-4 bg-green-500 rounded-full" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{statsData.onlineCollectors || 0}</div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Coletores Registrando</CardTitle>
+                    <div className="h-4 w-4 bg-yellow-500 rounded-full" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{statsData.enrollingCollectors || 0}</div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Total Coletores</CardTitle>
+                    <div className="h-4 w-4 bg-blue-500 rounded-full" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{statsData.totalCollectors || 0}</div>
+                  </CardContent>
+                </Card>
+              </div>
+              <p className="text-muted-foreground text-center">
+                Clique em "Ver Coletores" para acessar a interface completa de gestão de coletores
+              </p>
             </div>
           </TabsContent>
         </Tabs>
