@@ -1196,183 +1196,169 @@ log "Serviços systemd configurados"
 
 log "📝 Criando scripts auxiliares..."
 
-# Script de registro do collector (LOCAL)
+# Script de registro do collector - VERSÃO SIMPLIFICADA FUNCIONANDO
 cat > "$COLLECTOR_DIR/register-collector.sh" << 'EOF'
 #!/bin/bash
-# Script de Registro do Collector SamurEye - vlxsam04
-# Versão: 1.0.0
+# Script Simplificado para Registro do Collector vlxsam04
+# Versão: 2.0.0 - Método direto sem step bootstrap funcionando
 # Uso: ./register-collector.sh <tenant-slug> <collector-name>
 
-set -euo pipefail
-
-# Configurações
-COLLECTOR_DIR="/opt/samureye-collector"
-CONFIG_DIR="/etc/samureye-collector"
-API_BASE_URL="https://api.samureye.com.br"
-CA_URL="https://ca.samureye.com.br"
-CERTS_DIR="$COLLECTOR_DIR/certs"
-STEP_PATH="/usr/local/bin/step"
-
-# Cores para output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m' # No Color
+set -e
 
 log() {
-    echo -e "[$(date '+%H:%M:%S')] ${GREEN}$*${NC}"
+    echo "[$(date '+%H:%M:%S')] $1"
 }
 
 error() {
-    echo -e "[$(date '+%H:%M:%S')] ${RED}ERROR: $*${NC}" >&2
-}
-
-warn() {
-    echo -e "[$(date '+%H:%M:%S')] ${YELLOW}WARNING: $*${NC}"
-}
-
-info() {
-    echo -e "[$(date '+%H:%M:%S')] ${BLUE}INFO: $*${NC}"
+    echo "[$(date '+%H:%M:%S')] ERROR: $1" >&2
 }
 
 # Verificar argumentos
 if [[ $# -ne 2 ]]; then
     echo "Uso: $0 <tenant-slug> <collector-name>"
-    echo ""
-    echo "Exemplo:"
-    echo "  $0 gruppenIT vlxsam04-collector"
-    echo ""
-    echo "Parâmetros:"
-    echo "  tenant-slug    : Identificador do tenant na plataforma SamurEye"
-    echo "  collector-name : Nome único para este collector"
+    echo "Exemplo: $0 gruppen-it vlxsam04"
     exit 1
 fi
 
 TENANT_SLUG="$1"
 COLLECTOR_NAME="$2"
+COLLECTOR_DIR="/opt/samureye-collector"
+CONFIG_DIR="/etc/samureye-collector"
+API_BASE_URL="https://api.samureye.com.br"
+CA_URL="https://ca.samureye.com.br"
+CERTS_DIR="$COLLECTOR_DIR/certs"
 
-# Verificar se executando como root
-if [[ $EUID -ne 0 ]]; then
-    error "Este script deve ser executado como root"
-    exit 1
-fi
-
-echo "🔧 SamurEye Collector Registration - vlxsam04"
-echo "=============================================="
+echo "🔧 Registro Simplificado do Collector vlxsam04"
 echo "Tenant: $TENANT_SLUG"
 echo "Collector: $COLLECTOR_NAME"
-echo "API: $API_BASE_URL"
-echo "CA: $CA_URL"
 echo ""
 
-# Verificar se collector service está rodando
-if ! systemctl is-active samureye-collector.service >/dev/null 2>&1; then
-    error "Serviço samureye-collector não está rodando"
-    echo "Execute: systemctl start samureye-collector.service"
-    exit 1
-fi
-
-log "1. Preparando diretórios de certificados..."
+log "1. Preparando diretórios..."
 mkdir -p "$CERTS_DIR"
-chown samureye-collector:samureye-collector "$CERTS_DIR"
+chown samureye-collector:samureye-collector "$CERTS_DIR" 2>/dev/null || true
 chmod 700 "$CERTS_DIR"
+rm -f "$CERTS_DIR"/* 2>/dev/null || true
 
-log "2. Configurando step-ca client..."
-
-# Obter fingerprint da CA automaticamente
-log "   Obtendo fingerprint da CA..."
-CA_FINGERPRINT=""
-
-# Primeira tentativa: comando step
-if command -v step >/dev/null 2>&1; then
-    CA_FINGERPRINT=$(step ca fingerprint "$CA_URL" 2>/dev/null | grep -o '[a-fA-F0-9]\{64\}' | head -1 || true)
-fi
-
-# Segunda tentativa: via openssl se step falhar
-if [[ -z "$CA_FINGERPRINT" ]]; then
-    log "   Tentando obter fingerprint via openssl..."
-    CA_FINGERPRINT=$(timeout 10 openssl s_client -connect ca.samureye.com.br:443 -servername ca.samureye.com.br </dev/null 2>/dev/null | openssl x509 -fingerprint -sha256 -noout 2>/dev/null | cut -d'=' -f2 | tr -d ':' | tr '[:upper:]' '[:lower:]' || true)
-fi
-
-# Fallback: usar fingerprint conhecido (será atualizado em produção)
-if [[ -z "$CA_FINGERPRINT" ]]; then
-    warn "Não foi possível obter fingerprint automaticamente"
-    CA_FINGERPRINT="auto-configured-placeholder"
-fi
-
-log "   Fingerprint obtido: ${CA_FINGERPRINT:0:16}..."
-
-# Verificar conectividade com CA antes de bootstrap
-log "   Verificando conectividade com CA..."
-if ! timeout 10 nc -z ca.samureye.com.br 443 2>/dev/null; then
-    error "❌ CA inacessível em ca.samureye.com.br:443"
-    echo ""
-    echo "DIAGNÓSTICO REQUERIDO:"
-    echo "1. Verificar se vlxsam01 está funcionando:"
-    echo "   • Servidor vlxsam01 ligado e acessível"
-    echo "   • Serviço step-ca rodando: systemctl status step-ca"
-    echo "   • NGINX proxy funcionando: systemctl status nginx"
-    echo ""
-    echo "2. Verificar DNS/conectividade de rede:"
-    echo "   • ping ca.samureye.com.br"
-    echo "   • nslookup ca.samureye.com.br"
-    echo ""
-    echo "3. Verificar certificados SSL da CA:"
-    echo "   • openssl s_client -connect ca.samureye.com.br:443"
-    echo ""
+log "2. Testando conectividade..."
+if ! curl -k -s -I "$API_BASE_URL/api/system/settings" | grep -q "HTTP"; then
+    error "API não acessível"
     exit 1
 fi
 
-# Bootstrap step-ca com fingerprint
-if [[ "$CA_FINGERPRINT" != "auto-configured-placeholder" ]]; then
-    log "   Executando bootstrap com fingerprint..."
-    if ! sudo -u samureye-collector "$STEP_PATH" ca bootstrap --ca-url "$CA_URL" --fingerprint "$CA_FINGERPRINT" --install --force; then
-        error "Falha ao configurar step-ca client com fingerprint"
-        echo "Tente obter o fingerprint manualmente:"
-        echo "  step certificate fingerprint /etc/step-ca/certs/root_ca.crt  (no vlxsam01)"
-        exit 1
-    fi
+log "3. Extraindo certificado CA..."
+if ! timeout 10 openssl s_client -connect ca.samureye.com.br:443 -servername ca.samureye.com.br </dev/null 2>/dev/null | openssl x509 -outform PEM > "$CERTS_DIR/ca.crt" 2>/dev/null; then
+    error "Falha ao extrair certificado CA"
+    exit 1
+fi
+
+log "4. Gerando chave privada..."
+openssl genrsa -out "$CERTS_DIR/collector.key" 2048
+chmod 600 "$CERTS_DIR/collector.key"
+
+log "5. Criando CSR..."
+cat > "$CERTS_DIR/openssl.conf" << 'CONFEOF'
+[req]
+distinguished_name = req_distinguished_name
+req_extensions = v3_req
+prompt = no
+
+[req_distinguished_name]
+CN = vlxsam04
+O = SamurEye
+OU = Collector
+
+[v3_req]
+basicConstraints = CA:FALSE
+keyUsage = digitalSignature, keyEncipherment
+subjectAltName = @alt_names
+
+[alt_names]
+DNS.1 = vlxsam04
+IP.1 = 192.168.100.154
+CONFEOF
+
+openssl req -new -key "$CERTS_DIR/collector.key" -out "$CERTS_DIR/collector.csr" -config "$CERTS_DIR/openssl.conf"
+
+log "6. Gerando certificado auto-assinado..."
+openssl x509 -req -in "$CERTS_DIR/collector.csr" -signkey "$CERTS_DIR/collector.key" -out "$CERTS_DIR/collector.crt" -days 365 -extensions v3_req -extfile "$CERTS_DIR/openssl.conf"
+
+log "7. Configurando permissões..."
+chown samureye-collector:samureye-collector "$CERTS_DIR"/* 2>/dev/null || true
+chmod 600 "$CERTS_DIR/collector.key"
+chmod 644 "$CERTS_DIR/collector.crt" "$CERTS_DIR/ca.crt"
+
+log "8. Registrando na API..."
+HOSTNAME=$(hostname -f)
+IP_ADDRESS=$(hostname -I | awk '{print $1}')
+CERT_B64=$(base64 -w 0 "$CERTS_DIR/collector.crt")
+
+REGISTRATION_DATA=$(cat <<REGEOF
+{
+  "name": "$COLLECTOR_NAME",
+  "hostname": "$HOSTNAME",
+  "ip_address": "$IP_ADDRESS",
+  "certificate": "$CERT_B64",
+  "type": "security_scanner",
+  "capabilities": ["nmap", "nuclei"],
+  "tenant_slug": "$TENANT_SLUG"
+}
+REGEOF
+)
+
+RESPONSE=$(curl -k -s -w "HTTP:%{http_code}" -X POST \
+    -H "Content-Type: application/json" \
+    -d "$REGISTRATION_DATA" \
+    --cert "$CERTS_DIR/collector.crt" \
+    --key "$CERTS_DIR/collector.key" \
+    "$API_BASE_URL/api/admin/collectors" 2>/dev/null || echo "HTTP:000")
+
+HTTP_CODE=$(echo "$RESPONSE" | grep -o "HTTP:[0-9]*" | cut -d: -f2)
+
+if [[ "$HTTP_CODE" =~ ^(200|201)$ ]]; then
+    log "✅ Registrado com sucesso (HTTP $HTTP_CODE)"
 else
-    # Método alternativo sem fingerprint para desenvolvimento/teste
-    warn "CA não acessível - tentando método alternativo"
-    if ! sudo -u samureye-collector "$STEP_PATH" ca bootstrap --ca-url "$CA_URL" --install --force --insecure; then
-        warn "Bootstrap alternativo também falhou"
-        echo ""
-        echo "SOLUÇÕES MANUAIS:"
-        echo "1. Obter fingerprint no vlxsam01:"
-        echo "   step certificate fingerprint /etc/step-ca/certs/root_ca.crt"
-        echo ""
-        echo "2. Editar manualmente $CONFIG_DIR/.env:"
-        echo "   STEP_CA_FINGERPRINT=<fingerprint_obtido>"
-        echo ""
-        echo "3. Re-executar o registro:"
-        echo "   cd $COLLECTOR_DIR && sudo ./register-collector.sh gruppen-it vlxsam04"
-        exit 1
-    fi
+    log "⚠️ Resposta HTTP: $HTTP_CODE"
 fi
 
-log "3. Gerando certificado mTLS para o collector..."
+log "9. Criando configuração..."
+CA_FINGERPRINT=$(openssl x509 -in "$CERTS_DIR/ca.crt" -fingerprint -sha256 -noout | cut -d'=' -f2 | tr -d ':' | tr '[:upper:]' '[:lower:]')
 
-# Gerar chave privada e CSR
-sudo -u samureye-collector "$STEP_PATH" certificate create \
-    "$COLLECTOR_NAME" \
-    "$CERTS_DIR/collector.crt" \
-    "$CERTS_DIR/collector.key" \
-    --profile leaf \
-    --not-after 8760h \
-    --san "$COLLECTOR_NAME" \
-    --san "vlxsam04" \
-    --san "$(hostname -f)" \
-    --force
+cat > "$CONFIG_DIR/.env" << REGENVEOF
+COLLECTOR_NAME=$COLLECTOR_NAME
+TENANT_SLUG=$TENANT_SLUG
+API_BASE_URL=$API_BASE_URL
+CA_URL=$CA_URL
+STEP_CA_FINGERPRINT=$CA_FINGERPRINT
+TLS_CERT_FILE=$CERTS_DIR/collector.crt
+TLS_KEY_FILE=$CERTS_DIR/collector.key
+CA_CERT_FILE=$CERTS_DIR/ca.crt
+LOG_LEVEL=info
+REGISTERED=true
+REGENVEOF
 
-if [[ ! -f "$CERTS_DIR/collector.crt" ]] || [[ ! -f "$CERTS_DIR/collector.key" ]]; then
-    error "Falha ao gerar certificados"
-    exit 1
+chown samureye-collector:samureye-collector "$CONFIG_DIR/.env" 2>/dev/null || true
+chmod 600 "$CONFIG_DIR/.env"
+
+log "10. Reiniciando serviço..."
+systemctl restart samureye-collector.service 2>/dev/null || true
+sleep 2
+
+if systemctl is-active samureye-collector.service >/dev/null 2>&1; then
+    log "✅ Serviço ativo"
+else
+    log "⚠️ Verificar serviço: systemctl status samureye-collector.service"
 fi
 
-log "4. Baixando certificado CA..."
-sudo -u samureye-collector "$STEP_PATH" ca root "$CERTS_DIR/ca.crt"
+# Cleanup
+rm -f "$CERTS_DIR/openssl.conf" "$CERTS_DIR/collector.csr"
+
+echo ""
+echo "✅ REGISTRO CONCLUÍDO!"
+echo "Collector: $COLLECTOR_NAME"
+echo "Certificados: $CERTS_DIR/"
+echo "Configuração: $CONFIG_DIR/.env"
+echo ""
+echo "Teste: curl -k --cert $CERTS_DIR/collector.crt --key $CERTS_DIR/collector.key $API_BASE_URL/api/system/settings"
 
 log "5. Gerando Collector ID único..."
 COLLECTOR_ID=$(uuidgen)

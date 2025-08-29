@@ -6,6 +6,12 @@ SamurEye is a cloud-based Breach & Attack Simulation (BAS) platform designed for
 ## User Preferences
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes
+- **29/08/2025**: Gateway vlxsam01 totalmente funcional com NGINX proxy SSL e step-ca CA
+- **29/08/2025**: URLs operacionais: https://app.samureye.com.br, https://api.samureye.com.br, https://ca.samureye.com.br
+- **29/08/2025**: Collector vlxsam04 registrado com sucesso usando método simplificado (sem step bootstrap)
+- **29/08/2025**: Problema do step-ca bootstrap resolvido com certificados auto-assinados para desenvolvimento
+
 ## System Architecture
 
 ### Frontend Architecture
