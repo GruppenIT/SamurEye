@@ -1427,3 +1427,15 @@ else
     echo "  Portal:    https://samureye.com.br"
     echo "  CA:        https://ca.samureye.com.br"
 fi
+
+echo ""
+echo "🔐 ACESSO ADMINISTRATIVO:"
+echo "   URL: https://app.samureye.com.br/admin"
+echo "   Login: admin@samureye.com.br"
+echo "   Senha: SamurEye2024!"
+echo ""
+echo "📊 GESTÃO DE COLETORES (após SSL configurado):"
+echo "   1. Acesse https://app.samureye.com.br/admin"
+echo "   2. Clique na aba 'Gestão de Coletores'"
+echo "   3. Clique em 'Ver Coletores'"
+echo "   4. Verifique status dos coletores registrados"

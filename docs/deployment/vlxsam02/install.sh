@@ -956,6 +956,18 @@ main() {
     fi
 
     log "✅ SamurEye vlxsam02 instalado e funcionando!"
+    log ""
+    log "📊 GESTÃO DE COLETORES:"
+    log "   Interface: https://app.samureye.com.br/admin"
+    log "   Login: admin@samureye.com.br / SamurEye2024!"
+    log "   Aba: 'Gestão de Coletores' > 'Ver Coletores'"
+    log ""
+    log "🔧 CORREÇÃO COLLECTORS ENROLLING:"
+    log "   curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/fix-collector-enrolling.sh | sudo bash"
+    log ""
+    log "🔍 TESTE DE BANCO DE DADOS:"
+    log "   ssh vlxsam03"
+    log "   curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/test-collector-database.sh | sudo bash"
 }
 
 # Executar instalação

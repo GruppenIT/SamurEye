@@ -19,6 +19,10 @@ Preferred communication style: Simple, everyday language.
 - **29/08/2025**: Scripts corrigidos para PostgreSQL no vlxsam03 (não vlxsam02)
 - **29/08/2025**: Estatísticas de coletores integradas no AdminDashboard
 - **29/08/2025**: Script de teste de banco de dados criado para diagnóstico
+- **29/08/2025**: Todos os install.sh atualizados com informações de Gestão de Coletores
+- **29/08/2025**: vlxsam03/install.sh criado com PostgreSQL 16 e correções automáticas
+- **29/08/2025**: Scripts include cron job para limpeza automática ENROLLING
+- **29/08/2025**: Informações de acesso admin integradas em todos os install.sh
 
 ## System Architecture
 
