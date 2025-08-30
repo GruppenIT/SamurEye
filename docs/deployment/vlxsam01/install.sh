@@ -54,12 +54,51 @@ if [ -f /etc/nginx/nginx.conf ]; then
     cp /etc/nginx/nginx.conf /etc/nginx/nginx.conf.backup.$(date +%Y%m%d-%H%M%S)
 fi
 
-# Remover certificados Let's Encrypt antigos se existirem
-if [ -d "/etc/letsencrypt/live" ]; then
-    log "Removendo certificados SSL antigos..."
-    rm -rf /etc/letsencrypt/live/*
-    rm -rf /etc/letsencrypt/archive/*
-    rm -rf /etc/letsencrypt/renewal/*
+# ============================================================================
+# PRESERVAÇÃO DE CERTIFICADOS SSL EXISTENTES
+# ============================================================================
+
+SSL_BACKUP_DIR="/opt/ssl-backup-$(date +%Y%m%d-%H%M%S)"
+EXISTING_SSL=false
+SSL_DOMAIN_FOUND=""
+
+# Verificar se existem certificados válidos do Let's Encrypt
+if [ -d "/etc/letsencrypt/live" ] && [ "$(ls -A /etc/letsencrypt/live 2>/dev/null)" ]; then
+    for domain_dir in /etc/letsencrypt/live/*/; do
+        if [ -d "$domain_dir" ]; then
+            domain_name=$(basename "$domain_dir")
+            cert_file="$domain_dir/fullchain.pem"
+            key_file="$domain_dir/privkey.pem"
+            
+            if [ -f "$cert_file" ] && [ -f "$key_file" ]; then
+                # Verificar se o certificado não está expirado
+                if openssl x509 -checkend 86400 -noout -in "$cert_file" 2>/dev/null; then
+                    log "🔒 Certificado válido encontrado para: $domain_name"
+                    EXISTING_SSL=true
+                    SSL_DOMAIN_FOUND="$domain_name"
+                    
+                    # Fazer backup dos certificados existentes
+                    log "📦 Fazendo backup dos certificados existentes..."
+                    mkdir -p "$SSL_BACKUP_DIR"
+                    cp -r /etc/letsencrypt "$SSL_BACKUP_DIR/"
+                    
+                    log "✅ Backup salvo em: $SSL_BACKUP_DIR"
+                    break
+                else
+                    warn "Certificado expirado encontrado para: $domain_name"
+                fi
+            fi
+        fi
+    done
+fi
+
+if [ "$EXISTING_SSL" = false ]; then
+    log "🧹 Nenhum certificado SSL válido encontrado - limpando configurações antigas..."
+    rm -rf /etc/letsencrypt/live/* 2>/dev/null || true
+    rm -rf /etc/letsencrypt/archive/* 2>/dev/null || true
+    rm -rf /etc/letsencrypt/renewal/* 2>/dev/null || true
+else
+    log "🔐 Certificados SSL existentes serão preservados e reutilizados"
 fi
 
 # Remover step-ca antigo se existir
@@ -640,7 +679,16 @@ server {
 EOF
 
 # Configuração HTTPS final (será aplicada após obter certificados)
-cat > /etc/nginx/sites-available/samureye << 'EOF'
+# Determinar qual domínio usar para certificados
+if [ "$EXISTING_SSL" = true ] && [ -n "$SSL_DOMAIN_FOUND" ]; then
+    CERT_DOMAIN="$SSL_DOMAIN_FOUND"
+    log "🔐 Usando certificados existentes para: $CERT_DOMAIN"
+else
+    CERT_DOMAIN="app.samureye.com.br"
+    log "🆕 Configuração preparada para novos certificados: $CERT_DOMAIN"
+fi
+
+cat > /etc/nginx/sites-available/samureye << EOF
 # SamurEye - Configuração NGINX Gateway (RESET COMPLETO - 28/08/2025)
 # Domínio: *.samureye.com.br
 # Servidor: vlxsam01 (172.24.1.151)
@@ -676,9 +724,9 @@ server {
     server_name app.samureye.com.br;
     
     # SSL Configuration
-    ssl_certificate /etc/letsencrypt/live/app.samureye.com.br/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/app.samureye.com.br/privkey.pem;
-    ssl_trusted_certificate /etc/letsencrypt/live/app.samureye.com.br/chain.pem;
+    ssl_certificate /etc/letsencrypt/live/$CERT_DOMAIN/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/$CERT_DOMAIN/privkey.pem;
+    ssl_trusted_certificate /etc/letsencrypt/live/$CERT_DOMAIN/chain.pem;
     
     # SSL Security
     ssl_protocols TLSv1.2 TLSv1.3;
@@ -773,9 +821,9 @@ server {
     server_name api.samureye.com.br;
     
     # SSL Configuration
-    ssl_certificate /etc/letsencrypt/live/app.samureye.com.br/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/app.samureye.com.br/privkey.pem;
-    ssl_trusted_certificate /etc/letsencrypt/live/app.samureye.com.br/chain.pem;
+    ssl_certificate /etc/letsencrypt/live/$CERT_DOMAIN/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/$CERT_DOMAIN/privkey.pem;
+    ssl_trusted_certificate /etc/letsencrypt/live/$CERT_DOMAIN/chain.pem;
     
     # SSL Security (same as app)
     ssl_protocols TLSv1.2 TLSv1.3;
@@ -810,9 +858,9 @@ server {
     server_name ca.samureye.com.br;
     
     # SSL Configuration
-    ssl_certificate /etc/letsencrypt/live/app.samureye.com.br/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/app.samureye.com.br/privkey.pem;
-    ssl_trusted_certificate /etc/letsencrypt/live/app.samureye.com.br/chain.pem;
+    ssl_certificate /etc/letsencrypt/live/$CERT_DOMAIN/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/$CERT_DOMAIN/privkey.pem;
+    ssl_trusted_certificate /etc/letsencrypt/live/$CERT_DOMAIN/chain.pem;
     
     # SSL Security (same as app)
     ssl_protocols TLSv1.2 TLSv1.3;
@@ -1391,13 +1439,16 @@ echo "🎯 INSTALAÇÃO CONCLUÍDA COM SUCESSO!"
 # CONFIGURAÇÃO SSL AUTOMÁTICA (se certificado wildcard existir)
 # ============================================================================
 
-# Verificar se certificado wildcard já existe e aplicar SSL automaticamente
-if [ -f "/etc/letsencrypt/live/samureye.com.br/fullchain.pem" ]; then
-    log "🔧 Certificado wildcard encontrado! Aplicando configuração SSL automaticamente..."
+# Verificar se certificado já existe e aplicar SSL automaticamente
+if [ "$EXISTING_SSL" = true ]; then
+    log "🔧 Certificado válido encontrado ($SSL_DOMAIN_FOUND)! Aplicando configuração SSL automaticamente..."
     
-    # Baixar e aplicar script de correção SSL
-    if curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/vlxsam01/fix-nginx-ssl-complete.sh | bash; then
-        log "✅ Configuração SSL aplicada automaticamente"
+    # Ativar configuração NGINX com SSL existente
+    ln -sf /etc/nginx/sites-available/samureye /etc/nginx/sites-enabled/samureye
+    
+    # Testar e recarregar configuração
+    if nginx -t && systemctl reload nginx; then
+        log "✅ Configuração SSL aplicada automaticamente usando certificados existentes"
         
         echo ""
         log "🔗 SamurEye Gateway configurado e ativo:"
@@ -1407,13 +1458,15 @@ if [ -f "/etc/letsencrypt/live/samureye.com.br/fullchain.pem" ]; then
         echo "  CA:        https://ca.samureye.com.br"
         echo "  Health:    https://app.samureye.com.br/health"
         echo ""
-        echo "✅ SamurEye Gateway (vlxsam01) TOTALMENTE CONFIGURADO COM SSL!"
+        echo "✅ SamurEye Gateway (vlxsam01) TOTALMENTE CONFIGURADO COM SSL EXISTENTE!"
+        echo "   Certificados preservados: $SSL_DOMAIN_FOUND"
+        echo "   Backup salvo em: $SSL_BACKUP_DIR"
     else
         warn "Falha na aplicação automática do SSL - configure manualmente"
     fi
 else
     echo ""
-    log "📋 Para finalizar a configuração SSL:"
+    log "📋 Para finalizar a configuração SSL (novos certificados):"
     echo ""
     echo "# 1. Obter certificado wildcard SSL (DNS challenge):"
     echo "sudo certbot certonly --manual --preferred-challenges=dns -d samureye.com.br -d '*.samureye.com.br'"
@@ -1426,6 +1479,8 @@ else
     echo "  API:       https://api.samureye.com.br"
     echo "  Portal:    https://samureye.com.br"
     echo "  CA:        https://ca.samureye.com.br"
+    echo ""
+    echo "💡 DICA: Execute novamente este script para reutilizar certificados existentes"
 fi
 
 echo ""
@@ -1439,3 +1494,14 @@ echo "   1. Acesse https://app.samureye.com.br/admin"
 echo "   2. Clique na aba 'Gestão de Coletores'"
 echo "   3. Clique em 'Ver Coletores'"
 echo "   4. Verifique status dos coletores registrados"
+echo ""
+echo "🔒 STATUS DOS CERTIFICADOS SSL:"
+if [ "$EXISTING_SSL" = true ]; then
+    echo "   ✅ Certificados preservados e reutilizados"
+    echo "   📂 Backup salvo em: $SSL_BACKUP_DIR"
+    echo "   🏷️  Domínio: $SSL_DOMAIN_FOUND"
+    echo "   📅 Validade: $(openssl x509 -enddate -noout -in "/etc/letsencrypt/live/$SSL_DOMAIN_FOUND/fullchain.pem" 2>/dev/null | cut -d= -f2 || echo "N/A")"
+else
+    echo "   ⚠️  Certificados SSL precisam ser configurados"
+    echo "   💡 Use: sudo /opt/request-ssl.sh (DNS challenge recomendado)"
+fi

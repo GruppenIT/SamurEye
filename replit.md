@@ -23,6 +23,10 @@ Preferred communication style: Simple, everyday language.
 - **29/08/2025**: vlxsam03/install.sh criado com PostgreSQL 16 e correções automáticas
 - **29/08/2025**: Scripts include cron job para limpeza automática ENROLLING
 - **29/08/2025**: Informações de acesso admin integradas em todos os install.sh
+- **30/08/2025**: vlxsam01/install.sh otimizado para preservar certificados SSL existentes
+- **30/08/2025**: Sistema de backup automático de certificados antes de reinstalação
+- **30/08/2025**: Detecção inteligente de certificados válidos vs expirados
+- **30/08/2025**: Configuração dinâmica NGINX baseada em certificados disponíveis
 
 ## System Architecture
 
