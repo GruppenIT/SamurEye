@@ -968,6 +968,12 @@ main() {
     log "🔍 TESTE DE BANCO DE DADOS:"
     log "   ssh vlxsam03"
     log "   curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/test-collector-database.sh | sudo bash"
+    log ""
+    log "🔧 SINCRONIZAR SCHEMA COMPLETO:"
+    log "   curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/sync-database-schema.sh | sudo bash"
+    log ""
+    log "🚀 CORREÇÃO COMPLETA ON-PREMISE:"
+    log "   curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/fix-onpremise-complete.sh | sudo bash"
 }
 
 # Executar instalação

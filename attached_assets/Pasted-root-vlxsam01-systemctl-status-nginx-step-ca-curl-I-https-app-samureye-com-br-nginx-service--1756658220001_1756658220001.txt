@@ -1,0 +1,69 @@
+root@vlxsam01:~# systemctl status nginx step-ca
+curl -I https://app.samureye.com.br
+● nginx.service - A high performance web server and a reverse proxy server
+     Loaded: loaded (/usr/lib/systemd/system/nginx.service; enabled; preset: enabled)
+     Active: active (running) since Sun 2025-08-31 13:30:17 -03; 4min 46s ago
+       Docs: man:nginx(8)
+    Process: 334786 ExecReload=/usr/sbin/nginx -g daemon on; master_process on; -s reload (code=exited, status=0/SUCCESS)
+   Main PID: 334385 (nginx)
+      Tasks: 5 (limit: 9443)
+     Memory: 7.5M (peak: 10.1M)
+        CPU: 115ms
+     CGroup: /system.slice/nginx.service
+             ├─334385 "nginx: master process /usr/sbin/nginx -g daemon on; master_process on;"
+             ├─334790 "nginx: worker process"
+             ├─334791 "nginx: worker process"
+             ├─334792 "nginx: worker process"
+             └─334793 "nginx: worker process"
+
+Aug 31 13:30:17 vlxsam01 systemd[1]: Starting nginx.service - A high performance web server and a reverse proxy server...
+Aug 31 13:30:17 vlxsam01 systemd[1]: Started nginx.service - A high performance web server and a reverse proxy server.
+Aug 31 13:30:40 vlxsam01 systemd[1]: Reloading nginx.service - A high performance web server and a reverse proxy server...
+Aug 31 13:30:40 vlxsam01 nginx[334786]: 2025/08/31 13:30:40 [warn] 334786#334786: "ssl_stapling" ignored, no OCSP responder URL in the certificate "/etc/letsencrypt/live/samureye.com.br/fu>
+Aug 31 13:30:40 vlxsam01 nginx[334786]: 2025/08/31 13:30:40 [notice] 334786#334786: signal process started
+Aug 31 13:30:40 vlxsam01 systemd[1]: Reloaded nginx.service - A high performance web server and a reverse proxy server.
+
+● step-ca.service - Step-CA Certificate Authority
+     Loaded: loaded (/etc/systemd/system/step-ca.service; enabled; preset: enabled)
+     Active: active (running) since Sun 2025-08-31 13:30:10 -03; 4min 53s ago
+       Docs: https://smallstep.com/docs/step-ca
+   Main PID: 333011 (step-ca)
+      Tasks: 9 (limit: 9443)
+     Memory: 13.7M (peak: 14.4M)
+        CPU: 807ms
+     CGroup: /system.slice/step-ca.service
+             └─333011 /usr/local/bin/step-ca config/ca.json --password-file=password.txt
+
+Aug 31 13:30:10 vlxsam01 step-ca[333011]: badger 2025/08/31 13:30:10 INFO: Replaying file id: 0 at offset: 1467
+Aug 31 13:30:10 vlxsam01 step-ca[333011]: badger 2025/08/31 13:30:10 INFO: Replay took: 1.536µs
+Aug 31 13:30:10 vlxsam01 step-ca[333011]: 2025/08/31 13:30:10 Starting Smallstep CA/0.25.2 (linux/amd64)
+Aug 31 13:30:10 vlxsam01 step-ca[333011]: 2025/08/31 13:30:10 Documentation: https://u.step.sm/docs/ca
+Aug 31 13:30:10 vlxsam01 step-ca[333011]: 2025/08/31 13:30:10 Community Discord: https://u.step.sm/discord
+Aug 31 13:30:10 vlxsam01 step-ca[333011]: 2025/08/31 13:30:10 Config file: config/ca.json
+Aug 31 13:30:10 vlxsam01 step-ca[333011]: 2025/08/31 13:30:10 The primary server URL is https://ca.samureye.com.br:9000
+Aug 31 13:30:10 vlxsam01 step-ca[333011]: 2025/08/31 13:30:10 Root certificates are available at https://ca.samureye.com.br:9000/roots.pem
+Aug 31 13:30:10 vlxsam01 step-ca[333011]: 2025/08/31 13:30:10 X.509 Root Fingerprint: b710890fee9bbf55bad08ffc09f954abb1a8ccc78fff428709412e1b4a8e8dfd
+Aug 31 13:30:10 vlxsam01 step-ca[333011]: 2025/08/31 13:30:10 Serving HTTPS on :9000 ...
+HTTP/2 200
+server: nginx
+date: Sun, 31 Aug 2025 16:36:51 GMT
+content-type: text/html; charset=UTF-8
+content-length: 43577
+vary: Accept-Encoding
+x-powered-by: Express
+access-control-allow-origin: *
+access-control-allow-methods: GET, POST, PUT, DELETE, PATCH, OPTIONS
+access-control-allow-headers: Origin, X-Requested-With, Content-Type, Accept, Authorization
+access-control-allow-credentials: true
+accept-ranges: bytes
+cache-control: public, max-age=0
+last-modified: Sun, 31 Aug 2025 16:29:19 GMT
+etag: W/"aa39-19900f633cf"
+strict-transport-security: max-age=63072000; includeSubDomains; preload
+x-frame-options: DENY
+x-content-type-options: nosniff
+x-xss-protection: 1; mode=block
+referrer-policy: strict-origin-when-cross-origin
+content-security-policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' ws: wss:;
+
+root@vlxsam01:~#
