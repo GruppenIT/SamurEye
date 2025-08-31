@@ -1,348 +1,311 @@
 #!/bin/bash
 
-# Script para corrigir registro do collector vlxsam04
+# vlxsam04 - Correção Registro Collector
+# Execute APENAS no vlxsam04
+
 set -e
 
-log() {
-    echo "[$(date '+%H:%M:%S')] $1"
-}
-
-error() {
-    echo "[$(date '+%H:%M:%S')] ERROR: $1" >&2
-}
-
-log "🔧 Corrigindo registro do collector vlxsam04..."
-
-# Configurações
-COLLECTOR_DIR="/opt/samureye-collector"
-CERTS_DIR="$COLLECTOR_DIR/certs"
-CA_URL="https://ca.samureye.com.br"
-STEP_PATH="/usr/local/bin/step"
-
-# Verificar se step está instalado
-if ! command -v step >/dev/null 2>&1; then
-    error "step-ca client não está instalado"
-    exit 1
-fi
-
-# Criar script de registro corrigido
-cat > "$COLLECTOR_DIR/register-collector-fixed.sh" << 'EOF'
-#!/bin/bash
-# Script de Registro do Collector SamurEye - CORRIGIDO
-# Versão: 2.0.0 - Corrigido para step-ca
-# Uso: ./register-collector-fixed.sh <tenant-slug> <collector-name>
-
-set -euo pipefail
-
-# Configurações
-COLLECTOR_DIR="/opt/samureye-collector"
-CONFIG_DIR="/etc/samureye-collector"
-API_BASE_URL="https://api.samureye.com.br"
-CA_URL="https://ca.samureye.com.br"
-CERTS_DIR="$COLLECTOR_DIR/certs"
-STEP_PATH="/usr/local/bin/step"
-
-# Cores para output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
 NC='\033[0m'
 
-log() {
-    echo -e "[$(date '+%H:%M:%S')] ${GREEN}$*${NC}"
-}
+log() { echo -e "${GREEN}[$(date '+%H:%M:%S')] $1${NC}"; }
+warn() { echo -e "${YELLOW}[$(date '+%H:%M:%S')] WARNING: $1${NC}"; }
+error() { echo -e "${RED}[$(date '+%H:%M:%S')] ERROR: $1${NC}"; exit 1; }
 
-error() {
-    echo -e "[$(date '+%H:%M:%S')] ${RED}ERROR: $*${NC}" >&2
-}
-
-warn() {
-    echo -e "[$(date '+%H:%M:%S')] ${YELLOW}WARNING: $*${NC}"
-}
-
-# Verificar argumentos
-if [[ $# -ne 2 ]]; then
-    echo "Uso: $0 <tenant-slug> <collector-name>"
-    echo ""
-    echo "Exemplo:"
-    echo "  $0 gruppen-it vlxsam04"
-    exit 1
+if [ "$EUID" -ne 0 ]; then
+    error "Execute como root: sudo ./fix-collector-registration.sh"
 fi
 
-TENANT_SLUG="$1"
-COLLECTOR_NAME="$2"
-
-# Verificar se executando como root
-if [[ $EUID -ne 0 ]]; then
-    error "Este script deve ser executado como root"
-    exit 1
-fi
-
-echo "🔧 SamurEye Collector Registration - CORRIGIDO"
-echo "=============================================="
-echo "Tenant: $TENANT_SLUG"
-echo "Collector: $COLLECTOR_NAME"
-echo "API: $API_BASE_URL"
-echo "CA: $CA_URL"
+echo "🔧 vlxsam04 - CORREÇÃO REGISTRO COLLECTOR"
+echo "========================================"
+echo "Servidor: vlxsam04 (192.168.100.151)"
+echo "Função: Collector Agent"
 echo ""
 
-log "1. Preparando ambiente..."
-mkdir -p "$CERTS_DIR"
-chown samureye-collector:samureye-collector "$CERTS_DIR"
-chmod 700 "$CERTS_DIR"
+COLLECTOR_DIR="/opt/samureye-collector"
+CONFIG_DIR="/etc/samureye-collector"
 
-# Remover configuração anterior do step se existir
-rm -rf /home/samureye-collector/.step 2>/dev/null || true
-rm -rf "$CERTS_DIR"/* 2>/dev/null || true
-
-log "2. Testando conectividade com CA..."
-if ! timeout 10 curl -k -s -I "$CA_URL" | grep -q "HTTP"; then
-    error "CA não está acessível em $CA_URL"
-    echo ""
-    echo "Verificações necessárias:"
-    echo "1. vlxsam01 (Gateway) está funcionando?"
-    echo "2. NGINX está proxy para step-ca na porta 9000?"
-    echo "3. DNS aponta ca.samureye.com.br para vlxsam01?"
-    echo ""
-    echo "Teste manual: curl -k -I $CA_URL"
-    exit 1
+if [ ! -d "$COLLECTOR_DIR" ]; then
+    error "Diretório do collector não encontrado: $COLLECTOR_DIR"
 fi
 
-log "✅ CA acessível"
+log "📁 Collector encontrado em: $COLLECTOR_DIR"
 
-log "3. Obtendo root certificate..."
-# Método 1: Baixar root certificate diretamente
-ROOT_CERT_URL="$CA_URL/root"
-if curl -k -s -f "$ROOT_CERT_URL" -o "$CERTS_DIR/root_ca.crt"; then
-    log "✅ Root certificate baixado via API"
-    
-    # Verificar se é um certificado válido
-    if openssl x509 -in "$CERTS_DIR/root_ca.crt" -text -noout >/dev/null 2>&1; then
-        log "✅ Root certificate válido"
-        
-        # Calcular fingerprint correto
-        CA_FINGERPRINT=$(openssl x509 -in "$CERTS_DIR/root_ca.crt" -fingerprint -sha256 -noout | cut -d'=' -f2 | tr -d ':' | tr '[:upper:]' '[:lower:]')
-        log "✅ Fingerprint calculado: ${CA_FINGERPRINT:0:16}..."
-    else
-        error "Root certificate inválido"
-        exit 1
-    fi
-else
-    error "Falha ao baixar root certificate de $ROOT_CERT_URL"
-    
-    # Método 2: Extrair do TLS handshake
-    log "Tentando método alternativo..."
-    if timeout 10 openssl s_client -connect ca.samureye.com.br:443 -servername ca.samureye.com.br </dev/null 2>/dev/null | openssl x509 -outform PEM > "$CERTS_DIR/root_ca.crt" 2>/dev/null; then
-        log "✅ Root certificate extraído via TLS"
-        CA_FINGERPRINT=$(openssl x509 -in "$CERTS_DIR/root_ca.crt" -fingerprint -sha256 -noout | cut -d'=' -f2 | tr -d ':' | tr '[:upper:]' '[:lower:]')
-        log "✅ Fingerprint: ${CA_FINGERPRINT:0:16}..."
-    else
-        error "Não foi possível obter root certificate"
-        exit 1
-    fi
-fi
+# ============================================================================
+# 1. PARAR COLLECTOR
+# ============================================================================
 
-log "4. Configurando step-ca bootstrap..."
-# Executar bootstrap como usuário collector
-if sudo -u samureye-collector "$STEP_PATH" ca bootstrap \
-    --ca-url "$CA_URL" \
-    --fingerprint "$CA_FINGERPRINT" \
-    --install \
-    --force; then
-    log "✅ Step-ca bootstrap concluído"
-else
-    error "Falha no step-ca bootstrap"
-    
-    # Método alternativo - configuração manual
-    log "Tentando configuração manual..."
-    
-    # Criar diretório step para o usuário
-    STEP_HOME="/home/samureye-collector/.step"
-    mkdir -p "$STEP_HOME"
-    chown samureye-collector:samureye-collector "$STEP_HOME"
-    
-    # Criar configuração manual
-    cat > "$STEP_HOME/config.json" << STEPEOF
-{
-  "ca-url": "$CA_URL",
-  "fingerprint": "$CA_FINGERPRINT",
-  "root": "$STEP_HOME/certs/root_ca.crt"
-}
-STEPEOF
-    
-    # Copiar root certificate
-    mkdir -p "$STEP_HOME/certs"
-    cp "$CERTS_DIR/root_ca.crt" "$STEP_HOME/certs/root_ca.crt"
-    chown -R samureye-collector:samureye-collector "$STEP_HOME"
-    
-    log "✅ Configuração manual do step-ca aplicada"
-fi
+log "⏹️ Parando collector..."
+systemctl stop samureye-collector 2>/dev/null || warn "Collector já estava parado"
 
-log "5. Testando step-ca configuration..."
-if sudo -u samureye-collector "$STEP_PATH" ca health; then
-    log "✅ Step-ca configurado e funcionando"
-else
-    warn "Step-ca health check falhou - prosseguindo..."
-fi
+# ============================================================================
+# 2. CORRIGIR COLLECTOR_ID
+# ============================================================================
 
-log "6. Gerando certificados do collector..."
+log "🔧 Corrigindo collector_id..."
 
-# Gerar certificado do collector
-if sudo -u samureye-collector "$STEP_PATH" certificate create \
-    "$COLLECTOR_NAME" \
-    "$CERTS_DIR/collector.crt" \
-    "$CERTS_DIR/collector.key" \
-    --profile leaf \
-    --not-after 8760h \
-    --san "$COLLECTOR_NAME" \
-    --san "vlxsam04" \
-    --san "$(hostname -f)" \
-    --san "$(hostname -s)" \
-    --force; then
-    log "✅ Certificado do collector gerado"
-else
-    error "Falha ao gerar certificado do collector"
-    exit 1
-fi
+# Forçar ID correto no arquivo
+echo "vlxsam04" > "$COLLECTOR_DIR/collector-id.txt"
+chown samureye-collector:samureye-collector "$COLLECTOR_DIR/collector-id.txt"
+chmod 600 "$COLLECTOR_DIR/collector-id.txt"
 
-# Verificar arquivos gerados
-if [[ -f "$CERTS_DIR/collector.crt" && -f "$CERTS_DIR/collector.key" ]]; then
-    log "✅ Arquivos de certificado verificados"
-    
-    # Verificar certificado
-    if openssl x509 -in "$CERTS_DIR/collector.crt" -text -noout | grep -q "$COLLECTOR_NAME"; then
-        log "✅ Certificado contém SAN correto"
-    else
-        warn "Certificado pode não ter SAN correto"
-    fi
-else
-    error "Arquivos de certificado não encontrados"
-    exit 1
-fi
+# Corrigir config.yaml
+cat > "$CONFIG_DIR/config.yaml" << EOF
+# SamurEye Collector Configuration - vlxsam04 CORRIGIDO
+collector:
+  id: "vlxsam04"
+  name: "vlxsam04"
+  tenant_id: "default-tenant-id"
 
-log "7. Configurando permissões..."
-chown -R samureye-collector:samureye-collector "$CERTS_DIR"
-chmod 600 "$CERTS_DIR"/*.key 2>/dev/null || true
-chmod 644 "$CERTS_DIR"/*.crt 2>/dev/null || true
+api:
+  base_url: "https://api.samureye.com.br"
+  heartbeat_endpoint: "/collector-api/heartbeat"
+  telemetry_endpoint: "/collector-api/telemetry"
+  verify_ssl: false
+  timeout: 30
 
-log "8. Registrando collector na API..."
+logging:
+  level: "INFO"
+  file: "/var/log/samureye-collector.log"
 
-# Criar payload de registro
-REGISTRATION_DATA=$(cat <<REGEOF
-{
-  "name": "$COLLECTOR_NAME",
-  "hostname": "$(hostname -f)",
-  "ip_address": "$(hostname -I | awk '{print $1}')",
-  "certificate": "$(base64 -w 0 "$CERTS_DIR/collector.crt")",
-  "type": "security_scanner",
-  "capabilities": ["nmap", "nuclei", "security_scan"],
-  "tenant_slug": "$TENANT_SLUG"
-}
-REGEOF
-)
-
-# Registrar via API
-REGISTER_RESPONSE=$(curl -k -s -X POST \
-    -H "Content-Type: application/json" \
-    -d "$REGISTRATION_DATA" \
-    --cert "$CERTS_DIR/collector.crt" \
-    --key "$CERTS_DIR/collector.key" \
-    --cacert "$CERTS_DIR/root_ca.crt" \
-    "$API_BASE_URL/api/admin/collectors" || echo "CURL_FAILED")
-
-if [[ "$REGISTER_RESPONSE" == "CURL_FAILED" ]]; then
-    warn "Falha na comunicação com API - verificando conectividade..."
-    
-    # Teste básico da API
-    if curl -k -s -I "$API_BASE_URL/api/system/settings" | grep -q "HTTP"; then
-        log "✅ API acessível"
-    else
-        error "API não está acessível"
-        exit 1
-    fi
-    
-    # Tentar novamente sem certificado cliente para teste
-    TEST_RESPONSE=$(curl -k -s -X GET "$API_BASE_URL/api/system/settings" || echo "FAILED")
-    if [[ "$TEST_RESPONSE" != "FAILED" ]]; then
-        warn "API funciona sem mTLS - problema pode ser nos certificados"
-    fi
-else
-    log "✅ Resposta da API recebida"
-    echo "Response: $REGISTER_RESPONSE"
-    
-    # Verificar se registro foi bem-sucedido
-    if echo "$REGISTER_RESPONSE" | grep -q '"id"'; then
-        log "✅ Collector registrado com sucesso na API"
-    else
-        warn "Registro pode não ter sido bem-sucedido"
-        echo "Resposta completa: $REGISTER_RESPONSE"
-    fi
-fi
-
-log "9. Atualizando configuração do collector..."
-
-# Atualizar arquivo de configuração
-cat > "$CONFIG_DIR/.env" << ENVEOF
-# SamurEye Collector Configuration - Auto-generated
-COLLECTOR_NAME=$COLLECTOR_NAME
-TENANT_SLUG=$TENANT_SLUG
-API_BASE_URL=$API_BASE_URL
-CA_URL=$CA_URL
-STEP_CA_FINGERPRINT=$CA_FINGERPRINT
-
-# Certificados
-TLS_CERT_FILE=$CERTS_DIR/collector.crt
-TLS_KEY_FILE=$CERTS_DIR/collector.key
-CA_CERT_FILE=$CERTS_DIR/root_ca.crt
-
-# Logs
-LOG_LEVEL=info
-LOG_FILE=/var/log/samureye-collector/collector.log
-ENVEOF
-
-chown samureye-collector:samureye-collector "$CONFIG_DIR/.env"
-chmod 600 "$CONFIG_DIR/.env"
-
-log "10. Reiniciando serviço..."
-systemctl restart samureye-collector.service
-
-# Aguardar estabilização
-sleep 3
-
-if systemctl is-active samureye-collector.service >/dev/null 2>&1; then
-    log "✅ Serviço samureye-collector reiniciado com sucesso"
-else
-    error "Falha ao reiniciar serviço"
-    echo "Verificar logs: journalctl -u samureye-collector.service -f"
-    exit 1
-fi
-
-echo ""
-echo "🎉 REGISTRO DO COLLECTOR CONCLUÍDO COM SUCESSO!"
-echo "=============================================="
-echo ""
-echo "📊 Resumo da configuração:"
-echo "  Collector: $COLLECTOR_NAME"
-echo "  Tenant: $TENANT_SLUG"
-echo "  Certificados: $CERTS_DIR"
-echo "  Configuração: $CONFIG_DIR/.env"
-echo ""
-echo "🔍 Verificar status:"
-echo "  systemctl status samureye-collector.service"
-echo "  journalctl -u samureye-collector.service -f"
-echo ""
-echo "🌐 Teste de conectividade:"
-echo "  curl -k --cert $CERTS_DIR/collector.crt --key $CERTS_DIR/collector.key $API_BASE_URL/api/system/settings"
-echo ""
-echo "✅ Collector vlxsam04 registrado e operacional!"
+intervals:
+  heartbeat: 30
+  telemetry: 60
+  health_check: 300
 EOF
 
-chmod +x "$COLLECTOR_DIR/register-collector-fixed.sh"
+chown samureye-collector:samureye-collector "$CONFIG_DIR/config.yaml"
+chmod 600 "$CONFIG_DIR/config.yaml"
 
-# Baixar script funcionando (método simplificado)
-curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/vlxsam04/register-collector-working.sh -o "$COLLECTOR_DIR/register-collector-working.sh"
-chmod +x "$COLLECTOR_DIR/register-collector-working.sh"
+log "✅ collector_id configurado como: vlxsam04"
 
-log "✅ Script de registro simplificado criado"
-log "Execute: cd $COLLECTOR_DIR && sudo ./register-collector-working.sh gruppen-it vlxsam04"
+# ============================================================================
+# 3. VERIFICAR APLICAÇÃO PYTHON
+# ============================================================================
+
+log "🐍 Verificando aplicação Python..."
+
+cd "$COLLECTOR_DIR"
+
+# Atualizar aplicação Python se necessário
+if [ -f "collector_agent.py" ]; then
+    log "✅ collector_agent.py encontrado"
+else
+    log "📝 Criando collector_agent.py..."
+    
+    cat > collector_agent.py << 'EOF'
+#!/usr/bin/env python3
+"""
+SamurEye Collector Agent - VERSÃO CORRIGIDA
+Heartbeat funcionando com collector_id: vlxsam04
+"""
+
+import json
+import logging
+import time
+import requests
+import psutil
+import yaml
+from pathlib import Path
+from datetime import datetime
+import socket
+
+class SamurEyeCollector:
+    def __init__(self, config_path="/etc/samureye-collector/config.yaml"):
+        self.config_path = Path(config_path)
+        self.collector_dir = Path("/opt/samureye-collector")
+        
+        # Configurar logging
+        self.logger = self._setup_logging()
+        
+        # Carregar configuração
+        self.config = self._load_config()
+        
+        # ID FIXO - CORREÇÃO PRINCIPAL
+        self.collector_id = "vlxsam04"  # Sem sufixos ou geradores
+        
+        self.api_base_url = self.config.get('api', {}).get('base_url', 'https://api.samureye.com.br')
+        self.logger.info(f"Collector iniciado: {self.collector_id}")
+
+    def _setup_logging(self):
+        """Configure logging"""
+        logging.basicConfig(
+            level=logging.INFO,
+            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+            handlers=[
+                logging.FileHandler('/var/log/samureye-collector.log'),
+                logging.StreamHandler()
+            ]
+        )
+        return logging.getLogger('samureye-collector')
+
+    def _load_config(self):
+        """Load configuration from YAML file"""
+        try:
+            if self.config_path.exists():
+                with open(self.config_path, 'r') as f:
+                    return yaml.safe_load(f)
+            return {}
+        except Exception as e:
+            self.logger.error(f"Error loading config: {e}")
+            return {}
+
+    def get_system_info(self):
+        """Collect system telemetry"""
+        try:
+            return {
+                "cpu_percent": psutil.cpu_percent(interval=1),
+                "memory_percent": psutil.virtual_memory().percent,
+                "disk_percent": psutil.disk_usage('/').percent,
+                "processes": len(psutil.pids()),
+                "network_io": psutil.net_io_counters()._asdict() if psutil.net_io_counters() else {},
+                "hostname": socket.gethostname(),
+                "timestamp": datetime.utcnow().isoformat()
+            }
+        except Exception as e:
+            self.logger.error(f"Error collecting system info: {e}")
+            return {}
+
+    def send_heartbeat(self):
+        """Send heartbeat to SamurEye API"""
+        try:
+            telemetry = self.get_system_info()
+            
+            payload = {
+                "collector_id": self.collector_id,  # SEMPRE "vlxsam04"
+                "status": "active",
+                "timestamp": datetime.utcnow().isoformat(),
+                "telemetry": telemetry,
+                "capabilities": ["nmap", "nuclei"],
+                "version": "1.0.0"
+            }
+            
+            url = f"{self.api_base_url}/collector-api/heartbeat"
+            
+            response = requests.post(
+                url,
+                json=payload,
+                timeout=30,
+                verify=False  # Para desenvolvimento
+            )
+            
+            if response.status_code == 200:
+                self.logger.info(f"Heartbeat enviado com sucesso: {response.json()}")
+                return True
+            else:
+                self.logger.warning(f"Heartbeat failed: {response.status_code}")
+                self.logger.warning(f"Response: {response.text}")
+                return False
+                
+        except Exception as e:
+            self.logger.error(f"Error sending heartbeat: {e}")
+            return False
+
+    def run(self):
+        """Main collector loop"""
+        self.logger.info("Starting SamurEye Collector Agent vlxsam04")
+        
+        while True:
+            try:
+                self.send_heartbeat()
+                time.sleep(30)  # Heartbeat a cada 30 segundos
+                
+            except KeyboardInterrupt:
+                self.logger.info("Collector stopped by user")
+                break
+            except Exception as e:
+                self.logger.error(f"Unexpected error: {e}")
+                time.sleep(10)
+
+if __name__ == "__main__":
+    collector = SamurEyeCollector()
+    collector.run()
+EOF
+
+    chmod +x collector_agent.py
+fi
+
+# Ajustar permissões
+chown -R samureye-collector:samureye-collector "$COLLECTOR_DIR"
+chown -R samureye-collector:samureye-collector "$CONFIG_DIR"
+
+# ============================================================================
+# 4. INICIAR COLLECTOR
+# ============================================================================
+
+log "🚀 Iniciando collector..."
+systemctl start samureye-collector
+
+# Aguardar inicialização
+sleep 5
+
+if systemctl is-active --quiet samureye-collector; then
+    log "✅ Collector iniciado com sucesso"
+else
+    error "❌ Falha ao iniciar collector"
+fi
+
+# ============================================================================
+# 5. MONITORAR PRIMEIRO HEARTBEAT
+# ============================================================================
+
+log "⏱️ Monitorando primeiro heartbeat (60 segundos)..."
+
+# Aguardar 2 ciclos de heartbeat
+sleep 60
+
+# Verificar logs recentes
+RECENT_LOGS=$(journalctl -u samureye-collector --since "60 seconds ago" | grep -E "(heartbeat|ERROR|WARNING)" | tail -5 || echo "Nenhum log encontrado")
+
+echo "📝 Logs recentes:"
+echo "$RECENT_LOGS"
+
+if echo "$RECENT_LOGS" | grep -q "Heartbeat enviado com sucesso"; then
+    log "✅ Heartbeat funcionando!"
+elif echo "$RECENT_LOGS" | grep -q "404"; then
+    warn "⚠️ Ainda retornando 404 - backend pode estar reiniciando"
+else
+    warn "⚠️ Status incerto - verificar logs completos"
+fi
+
+# ============================================================================
+# 6. TESTE MANUAL DO ENDPOINT
+# ============================================================================
+
+log "🧪 Teste manual do endpoint..."
+
+HEARTBEAT_URL="https://api.samureye.com.br/collector-api/heartbeat"
+RESPONSE=$(curl -k -s -X POST "$HEARTBEAT_URL" \
+    -H "Content-Type: application/json" \
+    -d '{
+        "collector_id": "vlxsam04",
+        "status": "online",
+        "timestamp": "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"
+    }' 2>/dev/null || echo '{"error": "connection failed"}')
+
+echo "📡 Resposta do teste: $RESPONSE"
+
+if echo "$RESPONSE" | grep -q "Heartbeat received"; then
+    log "✅ Teste manual: SUCESSO"
+else
+    warn "⚠️ Teste manual inconclusivo"
+fi
+
+echo ""
+log "✅ CORREÇÕES vlxsam04 CONCLUÍDAS!"
+echo ""
+echo "📋 STATUS:"
+echo "   • Collector ID: vlxsam04 (fixo)"
+echo "   • Serviço: samureye-collector (ativo)"
+echo "   • Config: /etc/samureye-collector/config.yaml"
+echo ""
+echo "🔗 VERIFICAR:"
+echo "   • Interface: https://app.samureye.com.br/admin/collectors"
+echo "   • Logs: journalctl -u samureye-collector -f"
+echo ""
+echo "📊 MONITORAR:"
+systemctl status samureye-collector --no-pager -l | head -10
+
+exit 0
