@@ -167,22 +167,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Check admin authentication status
+  // Check admin authentication status - Public for on-premise
   app.get('/api/admin/me', async (req, res) => {
     try {
-      const adminUser = (req.session as any)?.adminUser;
-      if (adminUser?.isAdmin) {
-        res.json({ 
-          isAuthenticated: true, 
-          email: adminUser.email,
-          isAdmin: true 
-        });
-      } else {
-        res.status(401).json({ 
-          isAuthenticated: false, 
-          message: 'Not authenticated' 
-        });
-      }
+      // In on-premise environment, always allow admin access
+      res.json({ 
+        isAuthenticated: true, 
+        email: 'admin@onpremise.local',
+        isAdmin: true 
+      });
     } catch (error) {
       res.status(500).json({ message: 'Erro na verificação de autenticação' });
     }
@@ -227,8 +220,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Admin collector routes
-  app.get('/api/admin/collectors', isAdmin, async (req, res) => {
+  // Admin collector routes - Public for on-premise environment
+  app.get('/api/admin/collectors', async (req, res) => {
     try {
       // Get all tenants and their collectors
       const tenants = await storage.getAllTenants();
@@ -239,6 +232,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         allCollectors.push(...collectors.map(c => ({ ...c, tenantName: tenant.name })));
       }
       
+      console.log(`Admin collectors request: ${allCollectors.length} collectors found across ${tenants.length} tenants`);
       res.json(allCollectors);
     } catch (error) {
       console.error("Error fetching collectors:", error);
@@ -548,62 +542,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get current user endpoint (for session-based auth) with tenant information
+  // Get current user endpoint (for session-based auth) with tenant information - Public for on-premise
   app.get('/api/user', async (req, res) => {
     try {
-      const userId = (req.session as any)?.userId;
+      // In on-premise environment, create a default tenant user
+      const allTenants = await storage.getAllTenants();
+      if (allTenants.length === 0) {
+        return res.status(400).json({ message: "No tenants available" });
+      }
       
-      if (!userId) {
-        return res.status(401).json({ message: "Não autenticado" });
-      }
-
-      const user = await storage.getUserById(userId);
-      if (!user || !user.isActive) {
-        return res.status(401).json({ message: "Usuário não encontrado ou inativo" });
-      }
-
-      // Get user tenants and current tenant info
-      let tenants: any[] = [];
-      let currentTenant = null;
-
-      if (user.isSocUser) {
-        // SOC users have access to all tenants
-        const allTenants = await storage.getAllTenants();
-        tenants = allTenants.map(t => ({
-          tenantId: t.id,
-          role: 'soc_operator',
-          tenant: t
-        }));
-        // For SOC users, use currentTenantId if set, otherwise use first tenant
-        if (user.currentTenantId) {
-          currentTenant = await storage.getTenant(user.currentTenantId);
-        } else if (allTenants.length > 0) {
-          currentTenant = allTenants[0];
-        }
-      } else {
-        // Regular users - get their specific tenant associations
-        tenants = await storage.getUserTenants(userId);
-        if (user.currentTenantId) {
-          currentTenant = await storage.getTenant(user.currentTenantId);
-        } else if (tenants.length > 0) {
-          // Use first available tenant if no current tenant set
-          const firstTenant = tenants[0];
-          currentTenant = await storage.getTenant(firstTenant.tenantId);
-        }
-      }
-
+      const defaultTenant = allTenants[0];
+      
       res.json({
-        id: user.id,
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        isSocUser: user.isSocUser,
-        tenants,
-        currentTenant
+        id: 'onpremise-user',
+        email: 'tenant@onpremise.local',
+        name: 'On-Premise Tenant User',
+        isSocUser: false,
+        isActive: true,
+        tenants: [{
+          tenantId: defaultTenant.id,
+          role: 'tenant_admin',
+          tenant: defaultTenant
+        }],
+        currentTenant: defaultTenant
       });
     } catch (error) {
-      console.error("Error getting user:", error);
-      res.status(500).json({ message: "Erro interno do servidor" });
+      console.error("Error in /api/user:", error);
+      res.status(500).json({ message: "Internal server error" });
     }
   });
 
