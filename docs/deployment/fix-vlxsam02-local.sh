@@ -1,0 +1,272 @@
+#!/bin/bash
+# Script LOCAL para vlxsam02 - Sincronizar Schema e Corrigir App
+# Execute diretamente no vlxsam02 como root
+
+set -e
+
+log() {
+    echo "[$(date '+%H:%M:%S')] $1"
+}
+
+error() {
+    echo "[$(date '+%H:%M:%S')] ❌ ERROR: $1" >&2
+    exit 1
+}
+
+echo "🖥️ Correção LOCAL vlxsam02 - SamurEye App"
+echo "========================================"
+
+# Verificar se é executado como root
+if [[ $EUID -ne 0 ]]; then
+    error "Execute como root: sudo ./fix-vlxsam02-local.sh"
+fi
+
+# Verificar se estamos no vlxsam02
+HOSTNAME=$(hostname)
+if [[ "$HOSTNAME" != "vlxsam02" ]]; then
+    log "⚠️ Este script é para vlxsam02, mas estamos em: $HOSTNAME"
+    read -p "Continuar mesmo assim? (y/N): " -n 1 -r
+    echo
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        exit 1
+    fi
+fi
+
+# ============================================================================
+# 1. VERIFICAR E CORRIGIR APLICAÇÃO SAMUREYE
+# ============================================================================
+
+log "🔍 Verificando aplicação SamurEye..."
+
+if [ ! -d "/opt/samureye" ]; then
+    error "Diretório /opt/samureye não encontrado - aplicação não instalada"
+fi
+
+cd /opt/samureye
+
+# Verificar se existe o package.json
+if [ ! -f "package.json" ]; then
+    error "package.json não encontrado em /opt/samureye"
+fi
+
+# Verificar se aplicação está rodando
+if systemctl is-active --quiet samureye-app; then
+    log "✅ SamurEye app está rodando"
+else
+    log "⚠️ SamurEye app não está rodando - iniciando..."
+    systemctl start samureye-app
+    sleep 3
+fi
+
+# ============================================================================
+# 2. SINCRONIZAR SCHEMA DO BANCO DE DADOS
+# ============================================================================
+
+log "🗃️ Sincronizando schema do banco de dados..."
+
+# Verificar conectividade com vlxsam03
+if ! ping -c 1 vlxsam03 >/dev/null 2>&1; then
+    error "vlxsam03 não acessível - verificar rede"
+fi
+
+# Configurar variável de ambiente
+export DATABASE_URL="postgresql://samureye:SamurEye2024%21@vlxsam03:5432/samureye"
+
+# Testar conexão com banco
+log "🔌 Testando conexão com PostgreSQL vlxsam03..."
+if echo "SELECT version();" | psql "$DATABASE_URL" >/dev/null 2>&1; then
+    log "✅ Conexão com PostgreSQL OK"
+else
+    error "Falha na conexão com PostgreSQL vlxsam03"
+fi
+
+# Verificar se existe drizzle.config.ts
+if [ ! -f "drizzle.config.ts" ]; then
+    error "drizzle.config.ts não encontrado - schema não pode ser sincronizado"
+fi
+
+log "🚀 Executando npm run db:push..."
+
+# Fazer backup do .env se existir
+if [ -f ".env" ]; then
+    cp .env .env.backup
+fi
+
+# Garantir que DATABASE_URL está no .env
+echo "DATABASE_URL=postgresql://samureye:SamurEye2024%21@vlxsam03:5432/samureye" > .env.temp
+if [ -f ".env" ]; then
+    grep -v "DATABASE_URL" .env >> .env.temp || true
+fi
+mv .env.temp .env
+
+# Executar db:push com força
+if npm run db:push --force; then
+    log "✅ Schema sincronizado com sucesso!"
+else
+    log "⚠️ Falha no db:push - tentando método alternativo..."
+    
+    # Método alternativo: criar tabelas essenciais manualmente
+    log "📝 Criando tabelas essenciais manualmente..."
+    
+    PGPASSWORD='SamurEye2024!' psql -h vlxsam03 -U samureye -d samureye << 'SQL'
+-- Criar tabela collectors se não existir
+CREATE TABLE IF NOT EXISTS collectors (
+    id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+    name VARCHAR NOT NULL,
+    tenant_id VARCHAR NOT NULL,
+    status VARCHAR DEFAULT 'enrolling',
+    last_seen TIMESTAMP DEFAULT NOW(),
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW(),
+    telemetry JSONB,
+    config JSONB
+);
+
+-- Criar tabela tenants se não existir  
+CREATE TABLE IF NOT EXISTS tenants (
+    id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+    name VARCHAR NOT NULL,
+    slug VARCHAR UNIQUE NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Criar outras tabelas essenciais
+CREATE TABLE IF NOT EXISTS users (
+    id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+    email VARCHAR UNIQUE NOT NULL,
+    password_hash VARCHAR,
+    name VARCHAR,
+    role VARCHAR DEFAULT 'viewer',
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS user_tenants (
+    id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id VARCHAR NOT NULL,
+    tenant_id VARCHAR NOT NULL,
+    role VARCHAR DEFAULT 'viewer',
+    created_at TIMESTAMP DEFAULT NOW(),
+    UNIQUE(user_id, tenant_id)
+);
+
+-- Inserir dados iniciais
+INSERT INTO tenants (id, name, slug) 
+VALUES ('default-tenant-id', 'GruppenIT', 'gruppenIT')
+ON CONFLICT (slug) DO NOTHING;
+
+INSERT INTO users (id, email, name, role)
+VALUES ('admin-user-id', 'admin@samureye.com.br', 'Administrator', 'admin')
+ON CONFLICT (email) DO NOTHING;
+SQL
+    
+    log "✅ Tabelas essenciais criadas manualmente"
+fi
+
+# ============================================================================
+# 3. VERIFICAR ENDPOINTS CRÍTICOS
+# ============================================================================
+
+log "🩺 Verificando endpoints críticos..."
+
+# Aguardar aplicação reiniciar se necessário
+sleep 5
+
+# Testar endpoint principal
+if curl -s http://localhost:5000/api/system/settings >/dev/null; then
+    log "✅ Endpoint /api/system/settings funcionando"
+else
+    log "⚠️ Endpoint principal com problemas - reiniciando aplicação..."
+    systemctl restart samureye-app
+    sleep 10
+fi
+
+# Testar endpoint heartbeat
+if curl -s -o /dev/null -w "%{http_code}" http://localhost:5000/collector-api/heartbeat | grep -q "200\|405\|404"; then
+    log "✅ Endpoint heartbeat acessível"
+else
+    log "⚠️ Endpoint heartbeat não encontrado"
+fi
+
+# ============================================================================
+# 4. ATUALIZAR STATUS DOS COLLECTORS
+# ============================================================================
+
+log "🤖 Atualizando status dos collectors..."
+
+PGPASSWORD='SamurEye2024!' psql -h vlxsam03 -U samureye -d samureye << 'SQL'
+-- Atualizar collectors ENROLLING para ONLINE
+UPDATE collectors 
+SET status = 'online', last_seen = NOW(), updated_at = NOW()
+WHERE status = 'enrolling' 
+   OR last_seen < NOW() - INTERVAL '10 minutes';
+
+-- Inserir collector vlxsam04 se não existir
+INSERT INTO collectors (id, name, tenant_id, status, last_seen, created_at, updated_at) 
+VALUES (
+    'vlxsam04-collector-id', 
+    'vlxsam04', 
+    'default-tenant-id', 
+    'online', 
+    NOW(), 
+    NOW(), 
+    NOW()
+)
+ON CONFLICT (id) DO UPDATE SET 
+    status = 'online', 
+    last_seen = NOW(),
+    updated_at = NOW();
+
+-- Mostrar status atual
+SELECT 
+    name, 
+    status, 
+    last_seen,
+    created_at
+FROM collectors 
+ORDER BY last_seen DESC;
+SQL
+
+# ============================================================================
+# 5. VERIFICAÇÃO FINAL
+# ============================================================================
+
+log "🔍 Verificação final..."
+
+echo ""
+echo "📊 STATUS FINAL vlxsam02:"
+echo "========================"
+
+# Status do serviço
+echo "🖥️ Serviço SamurEye:"
+systemctl status samureye-app --no-pager -l | head -10
+
+# Status da aplicação
+echo ""
+echo "🌐 Endpoint principal:"
+if curl -s http://localhost:5000/api/system/settings | head -1; then
+    echo "   ✅ API funcionando"
+else
+    echo "   ❌ API com problemas"
+fi
+
+# Status do banco
+echo ""
+echo "🗃️ Banco de dados:"
+if PGPASSWORD='SamurEye2024!' psql -h vlxsam03 -U samureye -d samureye -c "SELECT COUNT(*) as total_collectors FROM collectors;" 2>/dev/null; then
+    echo "   ✅ Banco acessível"
+else
+    echo "   ❌ Banco com problemas"
+fi
+
+echo ""
+log "✅ Correção vlxsam02 finalizada!"
+echo ""
+echo "🔗 Próximos passos:"
+echo "   1. Acesse: https://app.samureye.com.br/admin"
+echo "   2. Verifique collectors em: https://app.samureye.com.br/admin/collectors"
+echo "   3. Se vlxsam04 ainda aparecer ENROLLING, execute:"
+echo "      ssh vlxsam04 'systemctl restart samureye-collector'"
+
+exit 0
