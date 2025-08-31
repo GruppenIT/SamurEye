@@ -38,11 +38,31 @@ fi
 
 log "🔍 Verificando aplicação SamurEye..."
 
-if [ ! -d "/opt/samureye" ]; then
-    error "Diretório /opt/samureye não encontrado - aplicação não instalada"
+# Primeiro, tentar encontrar a aplicação usando o resultado do script anterior
+POSSIBLE_DIRS=(
+    "/opt/samureye/SamurEye"  # Encontrado pelo script anterior
+    "/opt/samureye"
+    "/opt/SamurEye"
+    "/home/samureye"
+    "/opt/samureye-app"
+    "/var/www/samureye"
+)
+
+APP_DIR=""
+for dir in "${POSSIBLE_DIRS[@]}"; do
+    if [ -d "$dir" ] && [ -f "$dir/package.json" ]; then
+        APP_DIR="$dir"
+        log "✅ Aplicação encontrada em: $APP_DIR"
+        break
+    fi
+done
+
+if [ -z "$APP_DIR" ]; then
+    error "Diretório da aplicação SamurEye não encontrado"
 fi
 
-cd /opt/samureye
+cd "$APP_DIR"
+log "📁 Mudando para diretório: $APP_DIR"
 
 # Verificar se existe o package.json
 if [ ! -f "package.json" ]; then
@@ -119,6 +139,13 @@ fi
 export DATABASE_URL="postgresql://samureye:SamurEye2024%21@vlxsam03:5432/samureye"
 
 # Testar conexão com banco
+log "🔌 Instalando cliente PostgreSQL se necessário..."
+if ! command -v psql >/dev/null 2>&1; then
+    log "📦 Instalando postgresql-client..."
+    apt-get update >/dev/null 2>&1
+    apt-get install -y postgresql-client >/dev/null 2>&1
+fi
+
 log "🔌 Testando conexão com PostgreSQL vlxsam03..."
 if echo "SELECT version();" | psql "$DATABASE_URL" >/dev/null 2>&1; then
     log "✅ Conexão com PostgreSQL OK"

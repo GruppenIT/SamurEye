@@ -1,0 +1,39 @@
+root@vlxsam02:~# curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/find-samureye-app.sh | sudo bash
+🔍 Localizando SamurEye App no vlxsam02
+=====================================
+[14:09:44] 📂 Verificando diretórios comuns...
+[14:09:44] 🔍 Verificando via systemd...
+[14:09:44] ✅ Serviço samureye-app está rodando
+[14:09:44] 📄 Analisando /etc/systemd/system/samureye-app.service:
+   WorkingDirectory: /opt/samureye/SamurEye
+[14:09:44] ✅ Aplicação encontrada via systemd: /opt/samureye/SamurEye
+   ExecStart: /usr/bin/npm run build
+/usr/bin/npm start
+[14:09:44] ✅ Diretório do processo: /opt/samureye/SamurEye
+[14:09:44] 🔍 Procurando por arquivos package.json com 'samureye'...
+
+📊 RESUMO:
+==========
+[14:09:45] ✅ Instalações encontradas:
+   📂 /opt/samureye/SamurEye
+   📂 /opt/samureye/SamurEye
+[14:09:45] 🎯 Usando como principal: /opt/samureye/SamurEye
+
+🔧 Para sincronizar schema:
+   cd /opt/samureye/SamurEye
+   export DATABASE_URL="postgresql://samureye:SamurEye2024%21@vlxsam03:5432/samureye"
+   npm run db:push --force
+root@vlxsam02:~# curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/fix-vlxsam02-local.sh | sudo bash
+🖥️ Correção LOCAL vlxsam02 - SamurEye App
+========================================
+[14:10:08] 🔍 Verificando aplicação SamurEye...
+[14:10:08] ⚠️ package.json não encontrado em /opt/samureye - verificando outras localizações...
+[14:10:08] ❌ Aplicação SamurEye não encontrada. Verificando serviço systemd...
+[14:10:08] 📍 Serviço rodando: { path=/usr/bin/npm ; argv[]=/usr/bin/npm start ; ignore_errors=no ; start_time=[Sun 2025-08-31 13:29:19 -03] ; stop_time=[n/a] ; pid=368354 ; code=(null) ; status=0/0 }
+[14:10:08] 🔍 Aplicação não encontrada - continuando sem db:push...
+[14:10:08] ⚠️ Schema será sincronizado manualmente no PostgreSQL
+[14:10:08] ✅ SamurEye app está rodando
+[14:10:08] 🗃️ Sincronizando schema do banco de dados...
+[14:10:08] 🔌 Testando conexão com PostgreSQL vlxsam03...
+[14:10:08] ❌ ERROR: Falha na conexão com PostgreSQL vlxsam03
+root@vlxsam02:~#
