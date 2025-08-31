@@ -64,18 +64,24 @@ fi
 
 log "🌐 Verificando conectividade com a plataforma..."
 
-# Testar conectividade básica
-if ping -c 1 vlxsam02 >/dev/null 2>&1; then
-    log "✅ vlxsam02 (app server) acessível"
+# Testar conectividade HTTPS apenas (porta 443) - padrão para collectors
+log "🔒 Testando conectividade HTTPS (porta 443 apenas)..."
+
+# Testar domínio principal via HTTPS
+if curl -k -s --connect-timeout 10 -o /dev/null https://app.samureye.com.br; then
+    log "✅ app.samureye.com.br acessível via HTTPS"
 else
-    error "vlxsam02 não acessível - verificar rede"
+    log "⚠️ app.samureye.com.br não acessível via HTTPS"
 fi
 
-if ping -c 1 vlxsam01 >/dev/null 2>&1; then
-    log "✅ vlxsam01 (gateway) acessível"
+# Testar domínio API via HTTPS  
+if curl -k -s --connect-timeout 10 -o /dev/null https://api.samureye.com.br; then
+    log "✅ api.samureye.com.br acessível via HTTPS"
 else
-    log "⚠️ vlxsam01 não acessível via ping"
+    log "⚠️ api.samureye.com.br não acessível via HTTPS"
 fi
+
+# Não testar hostnames internos - collector deve usar apenas HTTPS público
 
 # Testar endpoints específicos
 API_BASE="https://api.samureye.com.br"
@@ -169,39 +175,11 @@ log "✅ Configuração atualizada"
 # 5. ATUALIZAR STATUS NO BANCO DE DADOS
 # ============================================================================
 
-log "🗃️ Atualizando status no banco de dados..."
+log "🗃️ Status será atualizado automaticamente via heartbeat..."
 
-# Conectar diretamente ao vlxsam03 e atualizar
-if ping -c 1 vlxsam03 >/dev/null 2>&1; then
-    PGPASSWORD='SamurEye2024!' psql -h vlxsam03 -U samureye -d samureye << 'SQL'
--- Inserir/atualizar collector vlxsam04
-INSERT INTO collectors (id, name, tenant_id, status, last_seen, created_at, updated_at) 
-VALUES (
-    'vlxsam04-collector-id', 
-    'vlxsam04', 
-    'default-tenant-id', 
-    'online', 
-    NOW(), 
-    NOW(), 
-    NOW()
-)
-ON CONFLICT (id) DO UPDATE SET 
-    status = 'online', 
-    last_seen = NOW(),
-    updated_at = NOW();
-
--- Mostrar status atual
-SELECT name, status, last_seen FROM collectors WHERE name LIKE '%vlxsam04%';
-SQL
-
-    if [ $? -eq 0 ]; then
-        log "✅ Status atualizado no banco de dados"
-    else
-        log "⚠️ Falha ao atualizar banco - será atualizado no próximo heartbeat"
-    fi
-else
-    log "⚠️ vlxsam03 não acessível - status será atualizado no próximo heartbeat"
-fi
+# Collectors não devem acessar banco diretamente
+# O status será atualizado quando o collector enviar heartbeat via API
+log "ℹ️ Collector enviará heartbeat para API e status será atualizado automaticamente"
 
 # ============================================================================
 # 6. REINICIAR COLLECTOR COM NOVA CONFIGURAÇÃO

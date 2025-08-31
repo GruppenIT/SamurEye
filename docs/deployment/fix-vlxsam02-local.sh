@@ -46,7 +46,53 @@ cd /opt/samureye
 
 # Verificar se existe o package.json
 if [ ! -f "package.json" ]; then
-    error "package.json não encontrado em /opt/samureye"
+    log "⚠️ package.json não encontrado em /opt/samureye - verificando outras localizações..."
+    
+    # Procurar em outros diretórios possíveis
+    POSSIBLE_DIRS=(
+        "/opt/SamurEye"
+        "/home/samureye"
+        "/opt/samureye-app"
+        "/var/www/samureye"
+    )
+    
+    FOUND_DIR=""
+    for dir in "${POSSIBLE_DIRS[@]}"; do
+        if [ -f "$dir/package.json" ]; then
+            FOUND_DIR="$dir"
+            log "✅ Aplicação encontrada em: $FOUND_DIR"
+            break
+        fi
+    done
+    
+    if [ -z "$FOUND_DIR" ]; then
+        log "❌ Aplicação SamurEye não encontrada. Verificando serviço systemd..."
+        
+        # Verificar onde o systemd está executando a aplicação
+        if systemctl is-active --quiet samureye-app; then
+            SERVICE_EXEC=$(systemctl show samureye-app -p ExecStart --value 2>/dev/null || echo "")
+            log "📍 Serviço rodando: $SERVICE_EXEC"
+            
+            # Tentar extrair diretório do ExecStart
+            if [[ "$SERVICE_EXEC" == *"WorkingDirectory"* ]]; then
+                WORKING_DIR=$(echo "$SERVICE_EXEC" | grep -o "WorkingDirectory=[^;]*" | cut -d= -f2)
+                if [ -d "$WORKING_DIR" ] && [ -f "$WORKING_DIR/package.json" ]; then
+                    FOUND_DIR="$WORKING_DIR"
+                    log "✅ Aplicação encontrada via systemd: $FOUND_DIR"
+                fi
+            fi
+        fi
+        
+        if [ -z "$FOUND_DIR" ]; then
+            log "🔍 Aplicação não encontrada - continuando sem db:push..."
+            log "⚠️ Schema será sincronizado manualmente no PostgreSQL"
+        fi
+    fi
+    
+    if [ -n "$FOUND_DIR" ]; then
+        cd "$FOUND_DIR"
+        log "📁 Mudando para diretório: $FOUND_DIR"
+    fi
 fi
 
 # Verificar se aplicação está rodando

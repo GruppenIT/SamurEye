@@ -27,6 +27,10 @@ Preferred communication style: Simple, everyday language.
 - **30/08/2025**: Sistema de backup automático de certificados antes de reinstalação
 - **30/08/2025**: Detecção inteligente de certificados válidos vs expirados
 - **30/08/2025**: Configuração dinâmica NGINX baseada em certificados disponíveis
+- **31/08/2025**: Scripts locais corrigidos para execução sem SSH entre servidores
+- **31/08/2025**: vlxsam04 configurado para usar apenas HTTPS/443 (sem acesso direto vlxsam02)
+- **31/08/2025**: fix-vlxsam03-local.sh funcionando - todas tabelas criadas com sucesso
+- **31/08/2025**: Scripts de correção específicos para cada servidor criados
 
 ## System Architecture
 

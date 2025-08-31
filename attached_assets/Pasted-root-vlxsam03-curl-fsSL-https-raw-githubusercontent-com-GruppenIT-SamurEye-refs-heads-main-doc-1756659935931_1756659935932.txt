@@ -1,0 +1,106 @@
+root@vlxsam03:~# curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/fix-vlxsam03-local.sh | sudo bash
+🗃️ Correção LOCAL vlxsam03 - PostgreSQL
+====================================
+[17:03:51] 🔍 Verificando PostgreSQL...
+[17:03:51] ✅ PostgreSQL está rodando
+[17:03:51] 🗃️ Verificando banco SamurEye...
+[17:03:51] ✅ Banco samureye acessível
+[17:03:51] ✅ Autenticação usuário samureye funcionando
+[17:03:51] 📝 Criando/corrigindo tabelas essenciais...
+NOTICE:  extension "uuid-ossp" already exists, skipping
+CREATE EXTENSION
+NOTICE:  extension "pgcrypto" already exists, skipping
+CREATE EXTENSION
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+ schemaname |     tablename
+------------+-------------------
+ public     | collectors
+ public     | credentials
+ public     | security_journeys
+ public     | tenants
+ public     | user_tenants
+ public     | users
+(6 rows)
+
+[17:03:51] ✅ Tabelas essenciais criadas/verificadas
+[17:03:51] 🤖 Corrigindo collectors em status ENROLLING...
+UPDATE 0
+   name   | status |         last_seen          | seconds_since_last_seen
+----------+--------+----------------------------+-------------------------
+ vlxsam04 | online | 2025-08-31 17:03:51.315201 |                       0
+(1 row)
+
+[17:03:51] ⏰ Configurando limpeza automática...
+[17:03:51] 🔄 Atualizando script de correção...
+[17:03:51] 🎯 Executando correção inicial...
+[17:03:51] ✅ 2 collectors atualizados de ENROLLING para ONLINE
+[17:03:51] 📊 Status: 1 online, 0 enrolling
+[17:03:51] 📊 Atualizando script de status...
+[17:03:51] 🔍 Executando verificação final...
+
+📊 STATUS FINAL vlxsam03:
+========================
+🗃️ Status PostgreSQL SamurEye
+=============================
+
+🖥️ Serviço PostgreSQL:
+● postgresql.service - PostgreSQL RDBMS
+     Loaded: loaded (/usr/lib/systemd/system/postgresql.service; enabled; preset: enabled)
+     Active: active (exited) since Sun 2025-08-31 16:26:25 UTC; 37min ago
+    Process: 242169 ExecStart=/bin/true (code=exited, status=0/SUCCESS)
+   Main PID: 242169 (code=exited, status=0/SUCCESS)
+        CPU: 835us
+
+Aug 31 16:26:25 vlxsam03 systemd[1]: Starting postgresql.service - PostgreSQL RDBMS...
+
+🔌 Conexões ativas:
+ conexoes_ativas
+-----------------
+               1
+(1 row)
+
+
+📋 Tabelas existentes:
+     tablename
+-------------------
+ collectors
+ credentials
+ security_journeys
+ tenants
+ user_tenants
+ users
+(6 rows)
+
+
+🤖 Status dos collectors:
+ status | count
+--------+-------
+ online |     1
+(1 row)
+
+
+📅 Últimos collectors registrados:
+   name   | status |         created_at         |         last_seen
+----------+--------+----------------------------+----------------------------
+ vlxsam04 | online | 2025-08-31 17:03:51.315201 | 2025-08-31 17:03:51.315201
+(1 row)
+
+
+[17:03:51] ✅ Correção vlxsam03 finalizada!
+
+🔗 Comandos úteis:
+   /usr/local/bin/postgres-status.sh      # Status completo
+   /usr/local/bin/fix-enrolling-collectors.sh  # Corrigir ENROLLING
+
+🌐 Teste a interface:
+   https://app.samureye.com.br/admin/collectors
+root@vlxsam03:~#
