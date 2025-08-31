@@ -1,0 +1,110 @@
+root@vlxsam02:~# curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/fix-vlxsam02-database-url.sh | sudo bash
+🔧 Correção DATABASE_URL vlxsam02
+=================================
+[14:41:05] 🔍 Detectando IP do vlxsam03...
+[14:41:05] 📍 IP detectado via ping: 172.24.1.153
+[14:41:05] 🎯 IP final do vlxsam03: 172.24.1.153
+[14:41:05] 🔌 Testando conectividade com 172.24.1.153:5432...
+[14:41:05] ✅ Porta 5432 acessível no IP 172.24.1.153
+[14:41:05] 🔐 Testando credenciais PostgreSQL...
+[14:41:05] 🧪 Testando: postgresql://samureye:SamurEye2024!@172.24.1.153:5432/samureye_prod
+[14:41:05] ✅ SUCESSO!
+[14:41:05] 🎯 URL funcional: postgresql://samureye:SamurEye2024!@172.24.1.153:5432/samureye_prod
+[14:41:05] 📁 Trabalhando em: /opt/samureye/SamurEye
+[14:41:05] 💾 Backup criado: .env.backup.144105
+[14:41:05] 📝 Atualizando DATABASE_URL no .env...
+[14:41:05] ✅ DATABASE_URL atualizada no .env
+[14:41:05] 📋 Nova configuração .env:
+DATABASE_URL=***
+[14:41:05] 🗃️ Sincronizando schema do banco...
+[14:41:05] 🔄 Executando npm run db:push...
+[14:41:06] ✅ Schema sincronizado com sucesso
+[14:41:06] 🔄 Reiniciando aplicação SamurEye...
+[14:41:22] ✅ Aplicação reiniciada com sucesso
+[14:41:22] 🌐 Testando aplicação...
+[14:41:32] ✅ Aplicação respondendo localmente
+[14:41:32] 📝 Logs recentes da aplicação:
+Aug 31 14:41:18 vlxsam02 samureye-app[369922]: 2:41:18 PM [express] serving on port 5000
+Aug 31 14:41:22 vlxsam02 samureye-app[369922]: WebSocket client connected
+Aug 31 14:41:22 vlxsam02 samureye-app[369922]: WebSocket client connected
+Aug 31 14:41:32 vlxsam02 samureye-app[369922]: Collector heartbeat: vlxsam04 (vlxsam04) - Status: active
+Aug 31 14:41:32 vlxsam02 samureye-app[369922]: 2:41:32 PM [express] GET /api/admin/me 401 in 2ms :: {"isAuthenticated":false,"message":"Not authent…
+
+[14:41:33] ✅ Correção DATABASE_URL finalizada!
+
+📋 RESUMO:
+   • IP vlxsam03: 172.24.1.153
+   • DATABASE_URL: postgresql://samureye:SamurEye2024!@172.24.1.153:5432/samureye_prod
+   • Schema sincronizado
+   • Aplicação reiniciada
+
+🔗 Testar interface:
+   https://app.samureye.com.br/admin/collectors
+
+📝 Monitorar logs:
+   journalctl -u samureye-app -f
+root@vlxsam02:~# curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/vlxsam02/install-fixed.sh | sudo bash
+🚀 SAMUREYE vlxsam02 - INSTALAÇÃO CORRIGIDA
+===========================================
+✅ Detecção automática de diretório da aplicação
+✅ DATABASE_URL com IP correto (172.24.1.153)
+✅ AdminLayout integrado para área administrativa
+✅ Correção do erro TenantProvider
+
+[2025-08-31 14:44:28] 🔍 Detectando IP do vlxsam03...
+[2025-08-31 14:44:28] 📍 IP detectado via ping: 172.24.1.153
+[2025-08-31 14:44:28] 🔌 Testando conectividade PostgreSQL 172.24.1.153:5432...
+[2025-08-31 14:44:28] 🔐 Testando credenciais PostgreSQL...
+[2025-08-31 14:44:28] ✅ URL funcional encontrada!
+[2025-08-31 14:44:28] 📦 Instalando dependências do sistema...
+Hit:1 https://deb.nodesource.com/node_20.x nodistro InRelease
+Hit:2 http://archive.ubuntu.com/ubuntu noble InRelease
+Get:3 http://security.ubuntu.com/ubuntu noble-security InRelease [126 kB]
+Get:4 http://archive.ubuntu.com/ubuntu noble-updates InRelease [126 kB]
+Get:5 http://archive.ubuntu.com/ubuntu noble-backports InRelease [126 kB]
+Get:6 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 Packages [1,379 kB]
+Get:7 http://security.ubuntu.com/ubuntu noble-security/main amd64 Components [21.5 kB]
+Get:8 http://security.ubuntu.com/ubuntu noble-security/restricted amd64 Components [212 B]
+Get:9 http://security.ubuntu.com/ubuntu noble-security/universe amd64 Components [52.3 kB]
+Get:10 http://security.ubuntu.com/ubuntu noble-security/multiverse amd64 Components [212 B]
+Get:11 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 Components [175 kB]
+Get:12 http://archive.ubuntu.com/ubuntu noble-updates/restricted amd64 Components [212 B]
+Get:13 http://archive.ubuntu.com/ubuntu noble-updates/universe amd64 Packages [1,471 kB]
+Get:14 http://archive.ubuntu.com/ubuntu noble-updates/universe amd64 Components [377 kB]
+Get:15 http://archive.ubuntu.com/ubuntu noble-updates/multiverse amd64 Components [940 B]
+Get:16 http://archive.ubuntu.com/ubuntu noble-backports/main amd64 Components [7,072 B]
+Get:17 http://archive.ubuntu.com/ubuntu noble-backports/restricted amd64 Components [216 B]
+Get:18 http://archive.ubuntu.com/ubuntu noble-backports/universe amd64 Components [19.2 kB]
+Get:19 http://archive.ubuntu.com/ubuntu noble-backports/multiverse amd64 Components [212 B]
+Fetched 3,882 kB in 3s (1,542 kB/s)
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+1 package can be upgraded. Run 'apt list --upgradable' to see it.
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+curl is already the newest version (8.5.0-2ubuntu10.6).
+wget is already the newest version (1.21.4-1ubuntu4.1).
+gnupg is already the newest version (2.4.4-2ubuntu17.3).
+software-properties-common is already the newest version (0.99.49.3).
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[2025-08-31 14:44:35] 📁 Configurando diretório da aplicação...
+[2025-08-31 14:44:35] 🔄 Atualizando repositório existente...
+fatal: detected dubious ownership in repository at '/opt/samureye/SamurEye'
+To add an exception for this directory, call:
+
+        git config --global --add safe.directory /opt/samureye/SamurEye
+root@vlxsam02:~# journalctl -u samureye-app -f
+Aug 31 14:41:32 vlxsam02 samureye-app[369922]: Collector heartbeat: vlxsam04 (vlxsam04) - Status: active
+Aug 31 14:41:32 vlxsam02 samureye-app[369922]: 2:41:32 PM [express] GET /api/admin/me 401 in 2ms :: {"isAuthenticated":false,"message":"Not authent…
+Aug 31 14:41:45 vlxsam02 samureye-app[369922]: Collector heartbeat: vlxsam04 (vlxsam04) - Status: active
+Aug 31 14:42:15 vlxsam02 samureye-app[369922]: Collector heartbeat: vlxsam04 (vlxsam04) - Status: active
+Aug 31 14:42:24 vlxsam02 samureye-app[369922]: Collector heartbeat: vlxsam04 (vlxsam04) - Status: online
+Aug 31 14:42:45 vlxsam02 samureye-app[369922]: Collector heartbeat: vlxsam04 (vlxsam04) - Status: active
+Aug 31 14:43:15 vlxsam02 samureye-app[369922]: Collector heartbeat: vlxsam04 (vlxsam04) - Status: active
+Aug 31 14:43:45 vlxsam02 samureye-app[369922]: Collector heartbeat: vlxsam04 (vlxsam04) - Status: active
+Aug 31 14:44:15 vlxsam02 samureye-app[369922]: Collector heartbeat: vlxsam04 (vlxsam04) - Status: active
+Aug 31 14:44:45 vlxsam02 samureye-app[369922]: Collector heartbeat: vlxsam04 (vlxsam04) - Status: active
+^C
+root@vlxsam02:~#

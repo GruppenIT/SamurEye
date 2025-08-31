@@ -1,0 +1,85 @@
+root@vlxsam04:/opt/samureye-collector# curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/fix-collector-id-mismatch.sh | sudo bash
+🔧 Correção collector_id vlxsam04
+================================
+[17:41:37] 🔍 Problema identificado: collector envia 'vlxsam04-collector-id' mas banco tem 'vlxsam04'
+[17:41:37] 📝 Corrigindo collector-id.txt...
+[17:41:37] ✅ Arquivo /opt/samureye-collector/collector-id.txt atualizado para: vlxsam04
+[17:41:37] 📝 Atualizando config.yaml...
+[17:41:37] ✅ Configuração atualizada - collector_id: vlxsam04
+[17:41:37] 🔄 Reiniciando collector com nova configuração...
+[17:41:49] ✅ Collector reiniciado com sucesso
+[17:41:49] 📊 Monitorando heartbeat por 30 segundos...
+[17:42:24] ✅ Heartbeat funcionando - sem erros 404 nos últimos 30 segundos
+[17:42:24] 🧪 Teste final do endpoint...
+[17:42:24] ✅ Teste manual do heartbeat: SUCESSO
+   Response: {"message":"Heartbeat received","collector_id":"07908b6e-45db-4811-8437-a458270498af","status":"online"}
+
+[17:42:24] ✅ Correção finalizada!
+
+📋 RESUMO:
+   • collector-id.txt: vlxsam04
+   • config.yaml atualizado
+   • Collector reiniciado
+
+🔗 Verificar na interface:
+   https://app.samureye.com.br/admin/collectors
+
+📝 Monitorar logs:
+   journalctl -u samureye-collector -f
+root@vlxsam04:/opt/samureye-collector# curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/vlxsam04/install-fixed.sh | sudo bash
+🚀 SAMUREYE vlxsam04 - INSTALAÇÃO CORRIGIDA
+===========================================
+✅ collector_id fixo: vlxsam04 (sem sufixo)
+✅ Heartbeat funcionando
+✅ Configuração simplificada
+
+[17:44:44] 📍 Servidor: 192.168.100.151
+[17:44:44] 📁 Diretório: /opt/samureye-collector
+[17:44:44] 📦 Atualizando sistema base...
+Hit:1 https://deb.nodesource.com/node_20.x nodistro InRelease
+Hit:2 http://archive.ubuntu.com/ubuntu noble InRelease
+Get:3 http://security.ubuntu.com/ubuntu noble-security InRelease [126 kB]
+Get:4 http://archive.ubuntu.com/ubuntu noble-updates InRelease [126 kB]
+Get:5 http://security.ubuntu.com/ubuntu noble-security/main amd64 Components [21.5 kB]
+Get:6 http://archive.ubuntu.com/ubuntu noble-backports InRelease [126 kB]
+Get:7 http://security.ubuntu.com/ubuntu noble-security/restricted amd64 Components [212 B]
+Get:8 http://security.ubuntu.com/ubuntu noble-security/universe amd64 Components [52.3 kB]
+Get:9 http://security.ubuntu.com/ubuntu noble-security/multiverse amd64 Components [212 B]
+Get:10 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 Packages [1,379 kB]
+Get:11 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 Components [175 kB]
+Get:12 http://archive.ubuntu.com/ubuntu noble-updates/restricted amd64 Components [212 B]
+Get:13 http://archive.ubuntu.com/ubuntu noble-updates/universe amd64 Packages [1,471 kB]
+Get:14 http://archive.ubuntu.com/ubuntu noble-updates/universe amd64 Components [377 kB]
+Get:15 http://archive.ubuntu.com/ubuntu noble-updates/multiverse amd64 Components [940 B]
+Get:16 http://archive.ubuntu.com/ubuntu noble-backports/main amd64 Components [7,072 B]
+Get:17 http://archive.ubuntu.com/ubuntu noble-backports/restricted amd64 Components [216 B]
+Get:18 http://archive.ubuntu.com/ubuntu noble-backports/universe amd64 Components [19.2 kB]
+Get:19 http://archive.ubuntu.com/ubuntu noble-backports/multiverse amd64 Components [212 B]
+Fetched 3,882 kB in 4s (1,021 kB/s)
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+All packages are up to date.
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+Calculating upgrade... Done
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+E: Unable to locate package python3.12-pip
+E: Couldn't find any package by glob 'python3.12-pip'
+root@vlxsam04:/opt/samureye-collector# journalctl -u samureye-collector -f
+Aug 31 17:40:32 vlxsam04 samureye-collector[121559]:   'timestamp': datetime.utcnow().isoformat(),
+Aug 31 17:41:37 vlxsam04 systemd[1]: Stopping samureye-collector.service - SamurEye Collector Agent - vlxsam04...
+Aug 31 17:41:37 vlxsam04 samureye-collector[121559]: 2025-08-31 17:41:37,342 - samureye-collector - INFO - Received signal 15, shutting down...
+Aug 31 17:41:42 vlxsam04 samureye-collector[121559]: 2025-08-31 17:41:42,568 - samureye-collector - INFO - Collector agent stopped
+Aug 31 17:41:42 vlxsam04 systemd[1]: samureye-collector.service: Deactivated successfully.
+Aug 31 17:41:42 vlxsam04 systemd[1]: Stopped samureye-collector.service - SamurEye Collector Agent - vlxsam04.
+Aug 31 17:41:44 vlxsam04 systemd[1]: Started samureye-collector.service - SamurEye Collector Agent - vlxsam04.
+Aug 31 17:41:45 vlxsam04 samureye-collector[121606]: 2025-08-31 17:41:45,153 - samureye-collector - INFO - Starting SamurEye Collector Agent vlxsam04
+Aug 31 17:41:45 vlxsam04 samureye-collector[121606]: /opt/samureye-collector/collector_agent.py:147: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+Aug 31 17:41:45 vlxsam04 samureye-collector[121606]:   'timestamp': datetime.utcnow().isoformat(),
+^C
+root@vlxsam04:/opt/samureye-collector#
