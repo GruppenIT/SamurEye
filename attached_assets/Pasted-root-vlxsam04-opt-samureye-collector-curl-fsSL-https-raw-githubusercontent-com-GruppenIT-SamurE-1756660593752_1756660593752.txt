@@ -1,0 +1,87 @@
+root@vlxsam04:/opt/samureye-collector# curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/debug-collector-heartbeat.sh | sudo bash
+🔍 Diagnóstico Heartbeat Collector vlxsam04
+==========================================
+[17:14:45] 📋 Verificando configuração do collector...
+[17:14:45] 🔍 Analisando collector_agent.py...
+37:        self.collector_id = self._get_collector_id()
+69:    def _get_collector_id(self) -> str:
+71:        collector_id_file = self.collector_dir / "collector-id.txt"
+73:        if collector_id_file.exists():
+74:            return collector_id_file.read_text().strip()
+
+[17:14:45] 🆔 Método de geração do collector_id:
+        self.collector_id = self._get_collector_id()
+        self.api_base_url = self.config.get('API_BASE_URL', 'https://api.samureye.com.br')
+
+    def _setup_logging(self) -> logging.Logger:
+        """Configure logging"""
+        logging.basicConfig(
+--
+    def _get_collector_id(self) -> str:
+        """Generate or load collector ID"""
+        collector_id_file = self.collector_dir / "collector-id.txt"
+
+        if collector_id_file.exists():
+            return collector_id_file.read_text().strip()
+[17:14:45] ⚙️ Configuração atual:
+# SamurEye Collector Configuration - vlxsam04
+collector:
+  id: "vlxsam04-collector-id"
+  name: "vlxsam04"
+  tenant_id: "default-tenant-id"
+
+api:
+  base_url: "https://api.samureye.com.br"
+  heartbeat_endpoint: "/collector-api/heartbeat"
+  telemetry_endpoint: "/collector-api/telemetry"
+  verify_ssl: false
+  timeout: 30
+
+logging:
+  level: "INFO"
+  file: "/var/log/samureye-collector.log"
+
+intervals:
+  heartbeat: 30
+  telemetry: 60
+  health_check: 300
+[17:14:45] 📝 Últimas tentativas de heartbeat nos logs:
+Aug 31 17:10:03 vlxsam04 samureye-collector[121236]: 2025-08-31 17:10:03,313 - samureye-collector - WARNING - Heartbeat failed: 404
+Aug 31 17:10:33 vlxsam04 samureye-collector[121236]: 2025-08-31 17:10:33,336 - samureye-collector - WARNING - Heartbeat failed: 404
+Aug 31 17:10:45 vlxsam04 samureye-collector[121410]: 2025-08-31 17:10:45,943 - samureye-collector - WARNING - Heartbeat failed: 404
+Aug 31 17:11:15 vlxsam04 samureye-collector[121410]: 2025-08-31 17:11:15,965 - samureye-collector - WARNING - Heartbeat failed: 404
+Aug 31 17:11:45 vlxsam04 samureye-collector[121410]: 2025-08-31 17:11:45,989 - samureye-collector - WARNING - Heartbeat failed: 404
+Aug 31 17:12:16 vlxsam04 samureye-collector[121410]: 2025-08-31 17:12:16,013 - samureye-collector - WARNING - Heartbeat failed: 404
+Aug 31 17:12:46 vlxsam04 samureye-collector[121410]: 2025-08-31 17:12:46,034 - samureye-collector - WARNING - Heartbeat failed: 404
+Aug 31 17:13:16 vlxsam04 samureye-collector[121410]: 2025-08-31 17:13:16,055 - samureye-collector - WARNING - Heartbeat failed: 404
+Aug 31 17:13:46 vlxsam04 samureye-collector[121410]: 2025-08-31 17:13:46,077 - samureye-collector - WARNING - Heartbeat failed: 404
+Aug 31 17:14:16 vlxsam04 samureye-collector[121410]: 2025-08-31 17:14:16,098 - samureye-collector - WARNING - Heartbeat failed: 404
+
+[17:14:45] 🔬 Teste manual do endpoint heartbeat...
+
+[17:14:45] 📡 Testando heartbeat com ID 'vlxsam04':
+{"message":"Heartbeat received","collector_id":"07908b6e-45db-4811-8437-a458270498af","status":"online"}
+HTTP Status: 200
+
+[17:14:45] 📡 Testando heartbeat com ID 'vlxsam04-collector-id':
+{"message":"Collector not found"}
+HTTP Status: 404
+
+[17:14:45] 🗃️ Verificando collectors registrados no banco...
+[17:14:45] ⚠️ vlxsam03 não acessível - não foi possível verificar banco
+
+[17:14:45] 💡 DICAS PARA RESOLVER:
+=====================
+1. Se não aparecer nenhum collector no banco:
+   - Execute: /usr/local/bin/fix-enrolling-collectors.sh no vlxsam03
+   - Ou insira manualmente no banco
+
+2. Se o collector_id não coincidir:
+   - Verifique o ID sendo enviado nos logs
+   - Atualize configuração em /etc/samureye-collector/config.yaml
+   - Reinicie o collector: systemctl restart samureye-collector
+
+3. Para forçar registro:
+   - POST para endpoint com collector_id correto
+   - Verificar se tenant_id existe no banco
+root@vlxsam04:/opt/samureye-collector#

@@ -38,31 +38,70 @@ fi
 
 log "🔍 Verificando aplicação SamurEye..."
 
-# Primeiro, tentar encontrar a aplicação usando o resultado do script anterior
-POSSIBLE_DIRS=(
-    "/opt/samureye/SamurEye"  # Encontrado pelo script anterior
-    "/opt/samureye"
-    "/opt/SamurEye"
-    "/home/samureye"
-    "/opt/samureye-app"
-    "/var/www/samureye"
-)
-
+# Detectar aplicação usando processo systemd ativo
 APP_DIR=""
-for dir in "${POSSIBLE_DIRS[@]}"; do
-    if [ -d "$dir" ] && [ -f "$dir/package.json" ]; then
-        APP_DIR="$dir"
-        log "✅ Aplicação encontrada em: $APP_DIR"
-        break
-    fi
-done
 
-if [ -z "$APP_DIR" ]; then
-    error "Diretório da aplicação SamurEye não encontrado"
+log "🔍 Detectando aplicação através do serviço em execução..."
+SERVICE_STATUS=$(systemctl show samureye-app --property=MainPID,ExecStart --no-pager 2>/dev/null || echo "")
+
+if [ -n "$SERVICE_STATUS" ]; then
+    # Extrair PID do serviço
+    MAIN_PID=$(echo "$SERVICE_STATUS" | grep "MainPID=" | cut -d'=' -f2)
+    
+    if [ "$MAIN_PID" != "0" ] && [ -n "$MAIN_PID" ]; then
+        # Usar PID para encontrar working directory
+        APP_DIR=$(readlink -f "/proc/$MAIN_PID/cwd" 2>/dev/null || echo "")
+        log "📁 Diretório detectado via PID $MAIN_PID: $APP_DIR"
+    fi
 fi
 
-cd "$APP_DIR"
-log "📁 Mudando para diretório: $APP_DIR"
+# Fallback: buscar em localizações comuns
+if [ -z "$APP_DIR" ] || [ ! -f "$APP_DIR/package.json" ]; then
+    log "🔍 Buscando em localizações padrão..."
+    
+    POSSIBLE_DIRS=(
+        "/opt/samureye/SamurEye"
+        "/opt/samureye"
+        "/opt/SamurEye"
+        "/home/samureye"
+        "/opt/samureye-app"
+        "/var/www/samureye"
+        "/root/SamurEye"
+        "/usr/local/samureye"
+    )
+    
+    for dir in "${POSSIBLE_DIRS[@]}"; do
+        if [ -d "$dir" ] && [ -f "$dir/package.json" ]; then
+            APP_DIR="$dir"
+            log "✅ Aplicação encontrada em: $APP_DIR"
+            break
+        fi
+    done
+fi
+
+# Último recurso: usar find
+if [ -z "$APP_DIR" ] || [ ! -f "$APP_DIR/package.json" ]; then
+    log "🔍 Buscando package.json no sistema..."
+    FOUND_DIRS=$(find /opt /home /root /var/www -name "package.json" -path "*/samureye*" -o -name "package.json" -path "*/SamurEye*" 2>/dev/null | head -5)
+    
+    for json_file in $FOUND_DIRS; do
+        dir=$(dirname "$json_file")
+        if grep -q "samureye\|SamurEye" "$json_file" 2>/dev/null; then
+            APP_DIR="$dir"
+            log "✅ Aplicação encontrada via find: $APP_DIR"
+            break
+        fi
+    done
+fi
+
+if [ -z "$APP_DIR" ] || [ ! -f "$APP_DIR/package.json" ]; then
+    log "⚠️ package.json não encontrado - continuando sem db:push..."
+    log "📍 Serviço rodando: $(systemctl show samureye-app --property=ExecStart --no-pager 2>/dev/null || echo 'Status não disponível')"
+    log "🔍 Aplicação não encontrada - continuando sem db:push..."
+else
+    cd "$APP_DIR"
+    log "📁 Mudando para diretório: $APP_DIR"
+fi
 
 # Verificar se existe o package.json
 if [ ! -f "package.json" ]; then
