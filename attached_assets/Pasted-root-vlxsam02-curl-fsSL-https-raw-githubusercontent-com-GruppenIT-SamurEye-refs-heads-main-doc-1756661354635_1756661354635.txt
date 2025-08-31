@@ -1,0 +1,46 @@
+root@vlxsam02:~# curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/fix-vlxsam02-database-url.sh | sudo bash
+🔧 Correção DATABASE_URL vlxsam02
+=================================
+[14:27:02] 🔍 Detectando IP do vlxsam03...
+[14:27:02] 📍 IP detectado via ping: 172.24.1.153
+[14:27:02] 🎯 IP final do vlxsam03: 172.24.1.153
+[14:27:02] 🔌 Testando conectividade com 172.24.1.153:5432...
+[14:27:02] ✅ Porta 5432 acessível no IP 172.24.1.153
+[14:27:02] 🔐 Testando credenciais PostgreSQL...
+[14:27:02] 🧪 Testando: postgresql://samureye:SamurEye2024!@172.24.1.153:5432/samureye_prod
+[14:27:03] ✅ SUCESSO!
+[14:27:03] 🎯 URL funcional: postgresql://samureye:SamurEye2024!@172.24.1.153:5432/samureye_prod
+[14:27:03] 📁 Trabalhando em: /opt/samureye/SamurEye
+[14:27:03] 💾 Backup criado: .env.backup.142703
+[14:27:03] 📝 Atualizando DATABASE_URL no .env...
+[14:27:03] ✅ DATABASE_URL atualizada no .env
+[14:27:03] 📋 Nova configuração .env:
+DATABASE_URL=***
+[14:27:03] 🗃️ Sincronizando schema do banco...
+[14:27:03] 🔄 Executando npm run db:push...
+[14:27:03] ✅ Schema sincronizado com sucesso
+[14:27:03] 🔄 Reiniciando aplicação SamurEye...
+[14:27:20] ✅ Aplicação reiniciada com sucesso
+[14:27:20] 🌐 Testando aplicação...
+[14:27:30] ✅ Aplicação respondendo localmente
+[14:27:30] 📝 Logs recentes da aplicação:
+Aug 31 14:27:16 vlxsam02 samureye-app[369744]: 2:27:16 PM [express] serving on port 5000
+Aug 31 14:27:19 vlxsam02 samureye-app[369744]: Collector heartbeat: vlxsam04 (vlxsam04) - Status: active
+Aug 31 14:27:19 vlxsam02 samureye-app[369744]: WebSocket client connected
+Aug 31 14:27:19 vlxsam02 samureye-app[369744]: WebSocket client connected
+Aug 31 14:27:30 vlxsam02 samureye-app[369744]: 2:27:30 PM [express] GET /api/admin/me 401 in 2ms :: {"isAuthenticated":false,"message":"Not authent…
+
+[14:27:30] ✅ Correção DATABASE_URL finalizada!
+
+📋 RESUMO:
+   • IP vlxsam03: 172.24.1.153
+   • DATABASE_URL: postgresql://samureye:SamurEye2024!@172.24.1.153:5432/samureye_prod
+   • Schema sincronizado
+   • Aplicação reiniciada
+
+🔗 Testar interface:
+   https://app.samureye.com.br/admin/collectors
+
+📝 Monitorar logs:
+   journalctl -u samureye-app -f
+root@vlxsam02:~#
