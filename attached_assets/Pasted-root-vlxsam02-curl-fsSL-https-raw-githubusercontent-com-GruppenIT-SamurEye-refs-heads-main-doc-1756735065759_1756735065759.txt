@@ -1,0 +1,47 @@
+root@vlxsam02:~# curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/vlxsam02/apply-collector-improvements.sh | sudo bash
+🔧 vlxsam02 - APLICAR MELHORIAS COLLECTORS
+==========================================
+1. Detecção automática de status offline (5min timeout)
+2. Telemetria real do collector vlxsam04
+3. Funcionalidade Update Packages
+4. Comando Deploy unificado
+
+[10:55:54] 📁 Aplicação encontrada em: /opt/samureye/SamurEye
+[10:55:54] ⏹️ Parando aplicação...
+[10:55:54] 💾 Criando backup...
+[10:55:54] 📥 Baixando atualizações do GitHub...
+[10:55:54] ✅ server/routes.ts atualizado
+[10:55:55] ✅ client/src/pages/Collectors.tsx atualizado
+[10:55:55] 🔧 Aplicando correções específicas...
+[10:55:55] 📦 Verificando dependências...
+[10:55:58] ✅ Dependências verificadas
+[10:55:58] 🔨 Fazendo rebuild da aplicação...
+
+> rest-express@1.0.0 build
+> vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+
+vite v5.4.19 building for production...
+transforming (3) src/main.tsxBrowserslist: browsers data (caniuse-lite) is 11 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+✓ 2692 modules transformed.
+../dist/public/index.html                   2.20 kB │ gzip:   0.86 kB
+../dist/public/assets/index-BzMs3bRP.css   68.82 kB │ gzip:  11.97 kB
+../dist/public/assets/index-DI20BVPr.js   666.31 kB │ gzip: 192.35 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 6.19s
+
+  dist/index.js  100.0kb
+
+⚡ Done in 10ms
+[10:56:05] ✅ Build concluído com sucesso
+[10:56:05] 🔧 Ajustando permissões...
+[10:56:05] 🚀 Iniciando aplicação...
+[10:56:28] 🧪 Testando melhorias implementadas...
+[10:56:28] WARNING: ❌ Teste 1/5: Telemetria não encontrada
+[10:56:28] ✅ Teste 2/5: Rota collectors tenant funcionando
+root@vlxsam02:~#

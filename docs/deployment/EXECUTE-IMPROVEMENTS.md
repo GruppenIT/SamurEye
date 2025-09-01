@@ -1,62 +1,62 @@
-# SamurEye Collectors - Comandos de Implementação
+# SamurEye Collectors - Comandos CORRIGIDOS de Implementação
 
-## Execução via Git/Curl (Recomendado)
+## Scripts Corrigidos baseado na Situação Real dos Servidores
 
 Execute os comandos abaixo na sequência para implementar todas as melhorias dos collectors:
 
-### 🔐 PASSO 1: vlxsam01 - Gateway SSL/NGINX
+### 🔐 PASSO 1: vlxsam01 - SSL/NGINX Corrigido
 
 ```bash
 # Conectar na VM vlxsam01
 ssh root@192.168.100.151
 
-# Baixar e executar script
-curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/vlxsam01/update-certificates.sh | sudo bash
+# Baixar e executar script corrigido
+curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/vlxsam01/fix-ssl-nginx.sh | sudo bash
 ```
 
-**Objetivo**: Otimizar NGINX e certificados SSL para APIs dos collectors
+**Correções**: Detecta certificados em qualquer local, configura NGINX do zero, suporte HTTP/HTTPS
 
 ---
 
-### 🗄️ PASSO 2: vlxsam03 - PostgreSQL Otimizado
+### 🗄️ PASSO 2: vlxsam03 - Banco Corrigido
 
 ```bash
 # Conectar na VM vlxsam03
 ssh root@192.168.100.153
 
-# Baixar e executar script
-curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/vlxsam03/optimize-database.sh | sudo bash
+# Baixar e executar script corrigido
+curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/vlxsam03/fix-database-collectors.sh | sudo bash
 ```
 
-**Objetivo**: Criar índices, limpeza automática e detecção offline no banco
+**Correções**: Cria tabela collector_telemetry, detecta PostgreSQL corretamente, manutenção automática
 
 ---
 
-### 🚀 PASSO 3: vlxsam02 - Aplicação Atualizada
+### 🚀 PASSO 3: vlxsam02 - Aplicação Corrigida
 
 ```bash
 # Conectar na VM vlxsam02
 ssh root@192.168.100.152
 
-# Baixar e executar script
-curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/vlxsam02/apply-collector-improvements.sh | sudo bash
+# Baixar e executar script corrigido
+curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/vlxsam02/fix-collector-improvements.sh | sudo bash
 ```
 
-**Objetivo**: Aplicar código atualizado com todas as funcionalidades dos collectors
+**Correções**: Adiciona endpoints de telemetria, storage atualizado, testes funcionais
 
 ---
 
-### 🧪 PASSO 4: vlxsam04 - Teste do Collector
+### 🧪 PASSO 4: vlxsam04 - Collector Corrigido
 
 ```bash
 # Conectar na VM vlxsam04
 ssh root@192.168.100.154
 
-# Baixar e executar script
-curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/vlxsam04/test-collector-improvements.sh | sudo bash
+# Baixar e executar script corrigido
+curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/vlxsam04/fix-collector-config.sh | sudo bash
 ```
 
-**Objetivo**: Testar telemetria, detecção offline e comandos Update Packages
+**Correções**: Recria configuração, agent atualizado, telemetria real, serviço systemd
 
 ---
 
