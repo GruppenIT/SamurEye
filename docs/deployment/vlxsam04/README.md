@@ -1,282 +1,387 @@
-# vlxsam04 - Collector Agent Installation
+# vlxsam04 - Collector Agent
 
-## ⚠️ IMPORTANTE: Ubuntu 24.04 Compatibility
+Agente coletor de dados com ferramentas de segurança para ambiente on-premise SamurEye.
 
-**O script foi totalmente atualizado para Ubuntu 24.04!** Se você encontrar erros como:
-- `E: Unable to locate package python3.11`
-- `E: Package 'netcat' has no installation candidate`
+## 📋 Informações do Servidor
 
-Significa que você está usando uma versão desatualizada do script. Use sempre o comando local abaixo.
+- **IP**: 192.168.100.154
+- **Função**: Collector Agent
+- **OS**: Ubuntu 24.04 LTS
+- **Serviços**: Python 3.11, Node.js 20, Security Tools
 
-## 🚀 Instalação Rápida
+## 🎯 Cenários de Instalação
 
-### Método Recomendado (Script Local Atualizado):
+### ✅ Instalação Padrão
 ```bash
-# Baixar e executar script local atualizado
-sudo bash /path/to/SamurEye/docs/deployment/vlxsam04/install.sh
+ssh root@192.168.100.154
+curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/vlxsam04/install.sh | bash
 ```
 
-### ❌ EVITAR (Script GitHub pode estar desatualizado):
+### 🔥 **HARD RESET (Recomendado para ambiente corrompido)**
 ```bash
-# NÃO USE - pode estar desatualizado
-curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/install.sh | bash
+ssh root@192.168.100.154
+curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/vlxsam04/install-hard-reset.sh | bash
 ```
 
-## 📋 Pré-requisitos
+**⚠️ O hard reset remove todas as ferramentas e dados coletados!**
 
-- **SO**: Ubuntu 24.04 LTS (Noble)
-- **Usuário**: root ou sudo
-- **Conectividade**: Internet para downloads
-- **Espaço**: ~2GB livre
-- **RAM**: Mínimo 2GB recomendado
-
-## 🏗️ O que o Script Instala
-
-### Componentes Base
-- ✅ **Python 3.12** (nativo Ubuntu 24.04)
-- ✅ **Node.js 20.x** (LTS)
-- ✅ **netcat-openbsd** (substitui netcat legacy)
-- ✅ **build-essential** para compilação
-- ✅ **Dependências do sistema**
-
-### Ferramentas de Segurança
-- ✅ **Nmap** (network scanning)
-- ✅ **Nuclei** (vulnerability scanner)
-- ✅ **Masscan** (port scanner)
-- ✅ **Gobuster** (directory brute-force)
-- ✅ **step-ca** (certificate authority)
-
-### Estrutura do Collector
-- ✅ **Multi-tenant support** (isolamento por tenant)
-- ✅ **mTLS communication** (certificados X.509)
-- ✅ **WebSocket real-time** streaming
-- ✅ **Object Storage** integration
-- ✅ **Logging e telemetria** por tenant
-
-## 🔧 Estrutura Criada
+## 🏗️ Arquitetura
 
 ```
-/opt/samureye-collector/
-├── agent/                  # Código do agente Python
-│   ├── main.py            # Agente principal
-│   ├── telemetry.py       # Coleta de telemetria
-│   └── executor.py        # Executor de comandos
-├── certs/                 # Certificados mTLS (modo 700)
-├── tools/                 # Ferramentas de segurança
-│   ├── nmap/
-│   ├── nuclei/
-│   ├── masscan/
-│   └── gobuster/
-├── logs/                  # Logs por tenant
-│   ├── system/
-│   └── tenant-{1..10}/
-├── temp/                  # Arquivos temporários por tenant
-│   └── tenant-{1..10}/
-├── uploads/               # Uploads por tenant
-│   └── tenant-{1..10}/
-└── scripts/               # Scripts de manutenção
-
-/etc/samureye-collector/
-└── .env                   # Configurações principais
-
-/var/log/samureye-collector/
-├── collector.log          # Log principal
-├── telemetry.log          # Log de telemetria
-├── ubuntu-24-04-compatibility.log  # Log de compatibilidade
-└── tenant-*.log           # Logs por tenant
+┌─────────────────────────────────────┐
+│            vlxsam02                 │
+│         (192.168.100.152)          │
+│        SamurEye API Server          │
+└─────────────┬───────────────────────┘
+              │ HTTPS API Calls
+              ↑ Heartbeat & Results
+┌─────────────────────────────────────┐
+│            vlxsam04                 │
+│         (192.168.100.154)          │
+│          Collector Agent            │
+│                                     │
+│  ┌─────────────────────────────────┐ │
+│  │     SamurEye Collector          │ │
+│  │       Python 3.11               │ │
+│  │    samureye-collector.service   │ │
+│  └─────────────────────────────────┘ │
+│                                     │
+│  ┌──────────┐  ┌─────────────────┐  │
+│  │Security  │  │   System        │  │
+│  │Tools     │  │   Telemetry     │  │
+│  │Nmap      │  │   CPU/Memory    │  │
+│  │Nuclei    │  │   Network       │  │
+│  │Masscan   │  │   Process       │  │
+│  │Gobuster  │  │   Monitoring    │  │
+│  └──────────┘  └─────────────────┘  │
+└─────────────────────────────────────┘
 ```
 
-## ⚙️ Próximos Passos Obrigatórios
+## 🛡️ Ferramentas de Segurança
 
-### 1. Configurar step-ca Connection
+### Network Scanning
+- **Nmap**: Port scanning, OS detection, service enumeration
+- **Masscan**: High-speed port scanner
+- **Gobuster**: Directory/file brute-forcer
+
+### Vulnerability Assessment
+- **Nuclei**: Vulnerability scanner com templates atualizados
+- **Templates**: Atualizados automaticamente
+
+### Runtime Environment
+- **Python 3.11**: Scanner engine e automação
+- **Node.js 20**: Ferramentas auxiliares e integração
+
+## 🤖 SamurEye Collector Agent
+
+### Serviço Principal
+- **Nome**: samureye-collector
+- **Usuário**: samureye-collector
+- **Diretório**: /opt/samureye/collector
+- **Logs**: /var/log/samureye-collector
+- **Configuração**: /etc/samureye-collector
+
+### Funcionalidades
+- **Heartbeat**: Envio de telemetria a cada 30 segundos
+- **Scan Execution**: Execução de scans Nmap e Nuclei
+- **System Monitoring**: CPU, Memory, Disk, Network
+- **Auto-registration**: Script de registro automático
+
+### Telemetria Coletada
+```json
+{
+  "timestamp": "2024-01-01T12:00:00Z",
+  "cpu_percent": 15.2,
+  "memory_total": 8589934592,
+  "memory_used": 2147483648,
+  "memory_percent": 25.0,
+  "disk_total": 107374182400,
+  "disk_used": 21474836480,
+  "disk_percent": 20.0,
+  "network_io": {
+    "bytes_sent": 1048576,
+    "bytes_recv": 2097152
+  },
+  "processes": 127
+}
+```
+
+## 📊 Monitoramento e Logs
+
+### Status do Collector
 ```bash
-# Editar configuração step-ca
-sudo nano /etc/samureye-collector/.env
+# Status do serviço
+systemctl status samureye-collector
 
-# Adicionar:
-STEP_CA_URL=https://ca.samureye.com.br
-STEP_CA_FINGERPRINT=<fingerprint_from_ca_server>
-COLLECTOR_ID=vlxsam04
+# Logs em tempo real
+tail -f /var/log/samureye-collector/collector.log
+
+# Logs de erro
+tail -f /var/log/samureye-collector/error.log
+
+# Verificar processo
+ps aux | grep collector
 ```
 
-### 2. Executar Setup step-ca
+### Teste de Funcionalidades
 ```bash
-sudo /opt/samureye-collector/scripts/setup-step-ca.sh
-```
+# Verificar ferramentas instaladas
+which nmap nuclei masscan gobuster
 
-### 3. Registrar Collector na Plataforma
-- Acessar interface web: https://app.samureye.com.br
-- Login como admin
-- Registrar novo collector vlxsam04
-- Copiar token de registro
-
-### 4. Iniciar Serviços
-```bash
-# Habilitar e iniciar serviços
-sudo systemctl enable samureye-collector samureye-telemetry
-sudo systemctl start samureye-collector samureye-telemetry
-
-# Verificar status
-sudo systemctl status samureye-collector
-sudo systemctl status samureye-telemetry
-```
-
-### 5. Verificar Health Check
-```bash
-sudo /opt/samureye-collector/scripts/health-check.sh
-```
-
-## 🧪 Validação e Testes
-
-### Testar Conectividade mTLS
-```bash
-sudo /opt/samureye-collector/scripts/test-mtls-connection.sh
-```
-
-### Verificar Logs
-```bash
-# Log principal
-sudo tail -f /var/log/samureye-collector/collector.log
-
-# Log de telemetria
-sudo tail -f /var/log/samureye-collector/telemetry.log
-
-# Compatibilidade Ubuntu 24.04
-sudo cat /var/log/samureye-collector/ubuntu-24-04-compatibility.log
-```
-
-### Testar Ferramentas de Segurança
-```bash
 # Testar Nmap
-sudo -u samureye-collector nmap -sV localhost
+nmap -sS -O 127.0.0.1
 
 # Testar Nuclei
-sudo -u samureye-collector nuclei -version
+nuclei -version
+nuclei -update-templates
 
-# Testar Masscan
-sudo -u samureye-collector masscan --version
+# Testar conectividade com API
+curl -k https://api.samureye.com.br/api/health
 ```
 
-## 🛠️ Troubleshooting
-
-### Problema: Python 3.11 não encontrado
-**Solução**: Use o script local atualizado, não o do GitHub
+### Logs de Sistema
 ```bash
-sudo bash docs/deployment/vlxsam04/install.sh  # Script local corrigido
+# Systemd journal
+journalctl -u samureye-collector -f
+
+# Application logs
+tail -f /var/log/samureye-collector/*.log
+
+# System logs
+tail -f /var/log/syslog | grep collector
 ```
 
-### Problema: netcat não encontrado
-**Solução**: Já corrigido no script local (usa netcat-openbsd)
+## 🔧 Comandos de Manutenção
 
-### Problema: Serviço não inicia
+### Controle do Serviço
 ```bash
-# Verificar logs detalhados
-sudo journalctl -u samureye-collector -f
+# Iniciar
+systemctl start samureye-collector
 
-# Verificar configuração
-sudo /opt/samureye-collector/scripts/health-check.sh
+# Parar
+systemctl stop samureye-collector
+
+# Reiniciar
+systemctl restart samureye-collector
+
+# Status
+systemctl status samureye-collector
+
+# Enable/Disable
+systemctl enable samureye-collector
+systemctl disable samureye-collector
 ```
 
-### Problema: Certificados mTLS
+### Registro no Servidor
 ```bash
-# Reconfigurar step-ca
-sudo /opt/samureye-collector/scripts/setup-step-ca.sh --force
+# Script automático de registro
+/opt/samureye/collector/scripts/register.sh
 
-# Verificar conexão CA
-curl -k https://ca.samureye.com.br/health
+# Verificar token salvo
+cat /etc/samureye-collector/token.conf
+
+# Aplicar token manualmente
+systemctl restart samureye-collector
 ```
 
-## 📊 Monitoramento
-
-### Logs em Tempo Real
+### Atualização de Ferramentas
 ```bash
-# Todos os logs
-sudo tail -f /var/log/samureye-collector/*.log
+# Atualizar Nuclei templates
+sudo -u samureye-collector nuclei -update-templates
 
-# Apenas erros
-sudo grep -i error /var/log/samureye-collector/*.log
+# Atualizar repositório Git (se aplicável)
+cd /opt/samureye/collector/agent
+git pull origin main
+
+# Reinstalar dependências Python
+pip3 install --upgrade psutil requests
 ```
 
-### Status dos Serviços
+### Limpeza Automática
 ```bash
-# Status completo
-sudo systemctl status samureye-collector samureye-telemetry
+# Script de limpeza (executado via cron)
+/opt/samureye/collector/scripts/cleanup.sh
 
-# Reiniciar se necessário
-sudo systemctl restart samureye-collector
+# Limpeza manual
+find /opt/samureye/collector/temp -type f -mtime +1 -delete
+find /var/log/samureye-collector -name "*.log" -mtime +7 -delete
 ```
 
-### Métricas de Sistema
+## 🚨 Resolução de Problemas
+
+### Problema: Collector não inicia
 ```bash
-# Uso de CPU/RAM do collector
-sudo ps aux | grep samureye
+# Verificar logs de inicialização
+journalctl -u samureye-collector -f
 
-# Espaço em disco
-sudo df -h /opt/samureye-collector
-sudo du -sh /var/log/samureye-collector
+# Verificar dependências Python
+python3 -c "import psutil, requests"
+
+# Verificar permissões
+ls -la /opt/samureye/collector/agent/
+
+# Testar manualmente
+sudo -u samureye-collector python3 /opt/samureye/collector/agent/collector.py
 ```
 
-## 🔐 Segurança
-
-### Permissões Importantes
-- `samureye-collector` user: Execução isolada
-- `/opt/samureye-collector/certs/`: Modo 700 (certificados privados)
-- Logs: Apenas root e samureye-collector
-
-### Certificados mTLS
-- Renovação automática via step-ca
-- Validação bidirecional client/server
-- Isolamento por tenant
-
-### Rede
-- Comunicação apenas HTTPS (porta 443)
-- Sem portas abertas para entrada
-- Outbound-only connectivity
-
-## 📈 Performance
-
-### Recursos Recomendados
-- **CPU**: 2+ cores
-- **RAM**: 4GB+ (2GB por tenant ativo)
-- **Disk**: SSD recomendado
-- **Network**: 100Mbps+ para scans grandes
-
-### Otimizações
-- Logs com rotação automática
-- Limpeza automática de arquivos temporários
-- Isolamento de processos por tenant
-- Cache inteligente de resultados
-
-## 📞 Suporte
-
-### Arquivos de Log para Suporte
+### Problema: Não conecta com API
 ```bash
-# Compactar logs para análise
-sudo tar -czf vlxsam04-logs-$(date +%Y%m%d).tar.gz \
-    /var/log/samureye-collector/ \
-    /etc/samureye-collector/.env \
-    /opt/samureye-collector/scripts/
+# Testar conectividade
+curl -k https://api.samureye.com.br/api/health
 
-# Enviar tar.gz para suporte
+# Verificar DNS
+nslookup api.samureye.com.br
+
+# Verificar certificados SSL
+openssl s_client -connect api.samureye.com.br:443
+
+# Verificar firewall
+ufw status
 ```
 
-### Informações do Sistema
+### Problema: Scanner tools não funcionam
 ```bash
-# Relatório completo do sistema
-sudo /opt/samureye-collector/scripts/system-report.sh
+# Verificar instalação
+which nmap nuclei masscan gobuster
+
+# Testar permissões
+sudo -u samureye-collector nmap -sS 127.0.0.1
+
+# Verificar templates Nuclei
+ls -la /home/samureye-collector/nuclei-templates/
+
+# Logs de execução
+grep -i "scan" /var/log/samureye-collector/collector.log
 ```
 
----
+### Problema: High CPU/Memory usage
+```bash
+# Verificar processos
+top -u samureye-collector
 
-## ✅ Status: Ubuntu 24.04 Compatível
+# Verificar scans em execução
+ps aux | grep -E 'nmap|nuclei|masscan'
 
-Este script foi **totalmente atualizado e testado** para Ubuntu 24.04 LTS (Noble).
+# Limpar processos antigos
+pkill -u samureye-collector nmap
+pkill -u samureye-collector nuclei
 
-**Correções aplicadas**:
-- ✅ Python 3.11 → Python 3.12
-- ✅ netcat → netcat-openbsd  
-- ✅ Validação automática de compatibilidade
-- ✅ Dependências testadas e funcionando
-- ✅ Log de compatibilidade gerado
+# Verificar logs
+tail -50 /var/log/samureye-collector/collector.log
+```
 
-**Data da última atualização**: 27/08/2025
+## 📋 Checklist Pós-Instalação
+
+### ✅ Validação de Ambiente
+- [ ] Python 3.11: `python3 --version`
+- [ ] Node.js 20: `node --version`
+- [ ] Collector ativo: `systemctl is-active samureye-collector`
+- [ ] Usuário criado: `id samureye-collector`
+
+### ✅ Ferramentas de Segurança
+- [ ] Nmap: `which nmap && nmap --version`
+- [ ] Nuclei: `which nuclei && nuclei -version`
+- [ ] Masscan: `which masscan && masscan --version`
+- [ ] Gobuster: `which gobuster && gobuster version`
+
+### ✅ Conectividade
+- [ ] API acessível: `curl -k https://api.samureye.com.br/api/health`
+- [ ] DNS resolve: `nslookup api.samureye.com.br`
+- [ ] Firewall configurado: `ufw status`
+
+### ✅ Funcionalidade
+- [ ] Logs sendo gerados: `ls -la /var/log/samureye-collector/`
+- [ ] Heartbeat funcionando: `grep heartbeat /var/log/samureye-collector/collector.log`
+- [ ] Telemetria coletada: Verificar logs recentes
+
+### ✅ Automação
+- [ ] Cron job ativo: `crontab -l | grep cleanup`
+- [ ] Auto-start configurado: `systemctl is-enabled samureye-collector`
+
+## 🔐 Segurança e Acesso
+
+### Firewall UFW
+- **SSH (22)**: Acesso administrativo
+- **HTTPS (443)**: Saída para API SamurEye
+- **Rede interna**: 192.168.100.0/24 liberada
+- **Regra padrão**: Deny incoming, Allow outgoing
+
+### Usuário de Serviço
+- **User**: samureye-collector
+- **Home**: /opt/samureye/collector
+- **Shell**: /bin/bash (para manutenção)
+- **Privilégios**: Limitados, sem sudo
+
+### Diretórios Protegidos
+- **Certs**: /opt/samureye/collector/certs (700)
+- **Config**: /etc/samureye-collector (750)
+- **Logs**: /var/log/samureye-collector (755)
+
+## 📁 Estrutura de Arquivos
+
+```
+/opt/samureye/collector/
+├── agent/
+│   └── collector.py            # Agente principal Python
+├── tools/
+│   ├── nmap/                   # Scripts Nmap
+│   ├── nuclei/                 # Configurações Nuclei
+│   ├── masscan/                # Configurações Masscan
+│   └── custom/                 # Ferramentas customizadas
+├── scripts/
+│   ├── register.sh             # Registro no servidor
+│   └── cleanup.sh              # Limpeza automática
+├── certs/                      # Certificados mTLS
+├── logs/                       # Logs locais
+├── temp/                       # Arquivos temporários
+├── uploads/                    # Resultados de scan
+├── config/                     # Configurações
+└── backups/                    # Backups locais
+
+/etc/samureye-collector/
+└── token.conf                  # Token de autenticação
+
+/var/log/samureye-collector/
+├── collector.log               # Logs principais
+├── error.log                   # Logs de erro
+├── cleanup.log                 # Logs de limpeza
+└── scan-*.log                  # Logs de scans específicos
+
+/etc/systemd/system/
+└── samureye-collector.service  # Serviço systemd
+```
+
+## 🔧 Scripts Personalizados
+
+### Registration Script
+```bash
+# /opt/samureye/collector/scripts/register.sh
+# Registra o collector no servidor SamurEye
+# Obtém token de enrollment
+# Salva configuração automaticamente
+```
+
+### Cleanup Script
+```bash
+# /opt/samureye/collector/scripts/cleanup.sh
+# Executa diariamente às 02:00 via cron
+# Remove logs antigos (>7 dias)
+# Remove arquivos temporários (>1 dia)
+# Remove uploads antigos (>3 dias)
+```
+
+### Health Check
+```bash
+# Verificação completa do collector
+curl -s http://localhost:8080/health 2>/dev/null || echo "Health endpoint not available"
+systemctl is-active samureye-collector
+ps aux | grep -c collector
+df -h /opt/samureye/collector | tail -1 | awk '{print $5}'
+```
+
+## 🔗 Links Relacionados
+
+- **Gateway**: [vlxsam01/README.md](../vlxsam01/README.md)
+- **Aplicação**: [vlxsam02/README.md](../vlxsam02/README.md)
+- **Banco de Dados**: [vlxsam03/README.md](../vlxsam03/README.md)
+- **Arquitetura**: [../NETWORK-ARCHITECTURE.md](../NETWORK-ARCHITECTURE.md)

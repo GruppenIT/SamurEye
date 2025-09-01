@@ -7,6 +7,16 @@ SamurEye is a cloud-based Breach & Attack Simulation (BAS) platform designed for
 Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
+- **01/09/2025**: Scripts de HARD RESET completos criados para ambiente corrompido
+- **01/09/2025**: hard-reset-all-servers.sh - script master para reset completo
+- **01/09/2025**: vlxsam01/install-hard-reset.sh - preserva certificados SSL válidos
+- **01/09/2025**: vlxsam02/install-hard-reset.sh - limpa aplicação e banco de dados
+- **01/09/2025**: vlxsam03/install-hard-reset.sh - reset completo PostgreSQL/Redis/MinIO/Grafana
+- **01/09/2025**: vlxsam04/install-hard-reset.sh - reinstala collector e security tools
+- **01/09/2025**: Documentação completa atualizada para cada servidor
+- **01/09/2025**: READMEs específicos criados para vlxsam01, vlxsam02, vlxsam03, vlxsam04
+- **01/09/2025**: Scripts incluem backup automático, validação e testes integrados
+- **01/09/2025**: Credenciais padrão documentadas para recuperação pós-reset
 - **29/08/2025**: Gateway vlxsam01 totalmente funcional com NGINX proxy SSL e step-ca CA
 - **29/08/2025**: URLs operacionais: https://app.samureye.com.br, https://api.samureye.com.br, https://ca.samureye.com.br
 - **29/08/2025**: Collector vlxsam04 instalado e registrado com sucesso usando método simplificado

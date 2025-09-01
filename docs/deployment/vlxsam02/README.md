@@ -1,503 +1,356 @@
-# SamurEye Deployment - vlxsam02
+# vlxsam02 - Application Server
 
-## Visão Geral
-Documentação completa de deployment do SamurEye no servidor vlxsam02 (Application Server)
+Servidor de aplicação SamurEye com Node.js, API, WebSocket e integração com banco de dados PostgreSQL.
 
-### Servidores e Funções
-- **vlxsam01**: Certificados e DNS (172.24.1.151)
-- **vlxsam02**: Application Server (172.24.1.152) - **ESTE SERVIDOR**
-- **vlxsam03**: PostgreSQL + Redis + MinIO (172.24.1.153)
+## 📋 Informações do Servidor
 
-## 🚀 Scripts de Instalação
+- **IP**: 192.168.100.152
+- **Função**: Application Server
+- **OS**: Ubuntu 24.04 LTS
+- **Serviços**: Node.js 20, SamurEye App, systemd
 
-### ✅ Script Principal (RECOMENDADO)
+## 🎯 Cenários de Instalação
+
+### ✅ Instalação Padrão
 ```bash
-curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam02/install.sh | sudo bash
+ssh root@192.168.100.152
+curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/vlxsam02/install.sh | bash
 ```
 
-**Características Completas:**
-- ✅ Instalação completa from-scratch com reset total
-- ✅ Detecção automática de problemas conhecidos
-- ✅ Correção automática de configurações incorretas
-- ✅ Validação final da instalação
-- ✅ **NOVO**: Inclui todas as variáveis Replit Auth necessárias
-- ✅ **NOVO**: Correção ES6 modules integrada
-- ✅ **NOVO**: Verificação completa de dependências
-
-### 🔧 Scripts de Correção Específica
-
-#### Correção ES6 Modules
+### 🔥 **HARD RESET (Recomendado para ambiente corrompido)**
 ```bash
-curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam02/fix-es6-only.sh | sudo bash
+ssh root@192.168.100.152
+curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/vlxsam02/install-hard-reset.sh | bash
 ```
-**Uso:** Quando aparecer erro "require is not defined"
 
-#### Restauração de Diretório
+**⚠️ O hard reset limpa completamente o banco de dados!**
+
+## 🏗️ Arquitetura
+
+```
+┌─────────────────────────────────────┐
+│            vlxsam01                 │
+│         (192.168.100.151)          │
+│            NGINX Proxy              │
+└─────────────┬───────────────────────┘
+              │ Proxy :80/:443
+              ↓
+┌─────────────────────────────────────┐
+│            vlxsam02                 │
+│         (192.168.100.152)          │
+│                                     │
+│  ┌─────────────────────────────────┐ │
+│  │        SamurEye App             │ │
+│  │        Node.js 20               │ │
+│  │        Port 5000                │ │
+│  │                                 │ │
+│  │  ┌─────────┐  ┌─────────────┐   │ │
+│  │  │   API   │  │   WebUI     │   │ │
+│  │  │         │  │   React     │   │ │
+│  │  └─────────┘  └─────────────┘   │ │
+│  └─────────────────────────────────┘ │
+│                │                     │
+└────────────────┼─────────────────────┘
+                 │ Database Connection
+                 ↓
+┌─────────────────────────────────────┐
+│            vlxsam03                 │
+│         (192.168.100.153)          │
+│         PostgreSQL 16               │
+└─────────────────────────────────────┘
+```
+
+## 🚀 Aplicação SamurEye
+
+### Tecnologias
+- **Runtime**: Node.js 20.x
+- **Framework**: Express.js
+- **Frontend**: React + Vite
+- **Database**: PostgreSQL (vlxsam03)
+- **WebSocket**: ws library
+- **Authentication**: On-premise bypass
+
+### Estrutura do Projeto
+```
+/opt/samureye/SamurEye/
+├── package.json           # Dependências Node.js
+├── server/               # Backend Express
+│   ├── index.ts         # Entry point
+│   ├── routes.ts        # API routes
+│   └── storage.ts       # Database layer
+├── client/              # Frontend React
+│   ├── src/            # Source code
+│   └── dist/           # Build output
+├── shared/             # Shared types/schemas
+│   └── schema.ts       # Database schema
+├── .env                # Environment variables
+└── logs/               # Application logs
+```
+
+## 🔧 Serviços Configurados
+
+### SamurEye Application (Port 5000)
+- **API REST**: Endpoints para collectors e admin
+- **WebSocket**: Real-time communication
+- **Admin Interface**: Gestão de tenants e collectors
+- **Collector Management**: Registro e telemetria
+
+### Environment Variables (.env)
 ```bash
-curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam02/install-quick-fix.sh | sudo bash
-```
-**Uso:** Quando o diretório `/opt/samureye/SamurEye` foi deletado
-
-#### Correção de Variáveis de Ambiente
-```bash
-curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam02/fix-env-vars.sh | sudo bash
-```
-**Uso:** Quando faltar `REPLIT_DOMAINS` ou outras variáveis
-
-#### Diagnóstico de Serviço
-```bash
-curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam02/fix-service.sh | sudo bash
-```
-**Uso:** Para diagnosticar problemas do systemd
-
-#### 🆕 Diagnóstico de Conectividade PostgreSQL
-```bash
-curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam02/diagnose-pg-connection.sh | sudo bash
-```
-**Uso:** Para diagnosticar problemas de conectividade com vlxsam03 (pg_hba.conf, rede, etc.)
-
-#### 🆕 Teste Específico PostgreSQL
-```bash
-curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam02/test-pg-connection.sh | sudo bash
-```
-**Uso:** Para teste detalhado de autenticação e credenciais PostgreSQL
-
-#### 🆕 Correção Completa PostgreSQL (vlxsam03)
-```bash
-# No vlxsam03:
-curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam03/fix-pg-user.sh | sudo bash
-```
-**Uso:** Para corrigir usuário, permissões e pg_hba.conf no vlxsam03
-
-#### 🆕 Correção pg_hba.conf apenas (vlxsam03)
-```bash
-# No vlxsam03:
-curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam03/fix-pg-hba.sh | sudo bash
-```
-**Uso:** Para corrigir apenas problemas de pg_hba.conf no vlxsam03
-
-#### 🆕 Criação de Tabelas do Banco
-```bash
-curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam02/fix-database-tables.sh | sudo bash
-```
-**Uso:** Para criar/atualizar tabelas quando erro "relation 'tenants' does not exist"
-
-## ⚠️ Problemas Conhecidos - MAIORIA RESOLVIDOS
-
-### 🆕 PROBLEMA IDENTIFICADO: Autenticação PostgreSQL (vlxsam03)
-**Sintoma Principal:** 
-```
-FATAL: password authentication failed for user "samureye"
-```
-**Erro Anterior:** 
-```
-no pg_hba.conf entry for host "172.24.1.152", user "samureye", database "samureye_prod", no encryption
-```
-**Quando acontece:** F5 (refresh) na página `/admin` causa erro 500
-
-**Causa:** Problema de configuração do usuário PostgreSQL no vlxsam03:
-- Usuário `samureye` pode não existir
-- Senha pode estar incorreta
-- Permissões podem estar faltando
-- pg_hba.conf pode não permitir conexões
-
-**⚡ SOLUÇÕES DISPONÍVEIS:**
-
-**1. Correção Completa (RECOMENDADA):**
-```bash
-# No vlxsam03:
-curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam03/fix-pg-user.sh | sudo bash
-```
-
-**2. Diagnóstico Detalhado:**
-```bash
-# No vlxsam02:
-curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam02/test-pg-connection.sh | sudo bash
-```
-
-**3. Correção Manual (se automática falhar):**
-```bash
-# No vlxsam03, como usuário postgres:
-sudo -u postgres psql
-CREATE USER samureye WITH PASSWORD 'SamurEye2024!';
-CREATE DATABASE samureye_prod;
-GRANT ALL PRIVILEGES ON DATABASE samureye_prod TO samureye;
-\q
-
-# Adicionar ao /etc/postgresql/16/main/pg_hba.conf:
-host    samureye_prod    samureye        172.24.1.152/32         md5
-# Recarregar: systemctl reload postgresql
-```
-
-### 🆕 NOVO PROBLEMA IDENTIFICADO: Tabelas do Banco Não Existem
-**Sintoma:** 
-```
-Error creating tenant: error: relation "tenants" does not exist
-```
-**Quando acontece:** Tentativa de criar tenant retorna erro 500
-
-**Causa:** Banco `samureye_prod` existe e conectividade funciona, mas as tabelas não foram criadas via migração Drizzle
-
-**⚡ SOLUÇÃO AUTOMÁTICA:**
-```bash
-# No vlxsam02:
-curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam02/fix-database-tables.sh | sudo bash
-```
-
-**📋 CORREÇÃO MANUAL (se automática falhar):**
-```bash
-# No vlxsam02, localizar projeto e executar:
-cd /opt/samureye/SamurEye  # ou localização correta
-npm run db:push
-# Ou forçar se necessário:
-npm run db:push -- --force
-```
-
----
-
-### 1. ✅ RESOLVIDO: Erro "require is not defined"
-**Sintoma:** 
-```
-Error: require is not defined in ES module scope
-```
-**Causa:** Incompatibilidade entre CommonJS (`require()`) e ES6 modules (`import`)
-**Solução Implementada:** 
-- Todos os scripts agora usam `import dotenv from 'dotenv'`
-- Arquivos `.mjs` com sintaxe ES6 correta
-- Integrado no script principal
-
-### 2. ✅ RESOLVIDO: Conexão na porta 443 incorreta
-**Sintoma:** 
-```
-Error: connect ECONNREFUSED 172.24.1.153:443
-```
-**Causa:** DATABASE_URL incorreta com porta 443 em vez de 5432
-**Solução Implementada:**
-- Detecção automática e correção
-- Validação de porta correta (5432)
-- Configuração .env padronizada
-
-### 3. ✅ RESOLVIDO: Diretório deletado acidentalmente
-**Sintoma:** 
-```
-bash: line 93: cd: /opt/samureye/SamurEye: No such file or directory
-```
-**Causa:** Limpeza excessiva durante instalação
-**Solução Implementada:**
-- Script de restauração rápida
-- Git clone corrigido para criar diretório correto
-- Backup e verificação de estrutura
-
-### 4. ✅ RESOLVIDO: Variáveis REPLIT_DOMAINS faltantes
-**Sintoma:** 
-```
-Error: Environment variable REPLIT_DOMAINS not provided
-```
-**Causa:** Configuração incompleta do .env para autenticação
-**Solução Implementada:**
-- Adição automática de todas as variáveis Replit Auth
-- Validação completa de variáveis necessárias
-- Teste automático de carregamento
-
-## 🎯 Configuração de Ambiente (.env) - COMPLETA
-
-### Variáveis Essenciais (Todas Incluídas no Script Principal)
-```bash
-# Environment
-NODE_ENV=development
+NODE_ENV=production
 PORT=5000
-
-# Database (PostgreSQL - vlxsam03)
-DATABASE_URL=postgresql://samureye:SamurEye2024!@172.24.1.153:5432/samureye_prod
-PGHOST=172.24.1.153
-PGPORT=5432
-PGUSER=samureye
-PGPASSWORD=SamurEye2024!
-PGDATABASE=samureye_prod
-
-# Redis (vlxsam03)
-REDIS_URL=redis://172.24.1.153:6379
-REDIS_HOST=172.24.1.153
-REDIS_PORT=6379
-
-# Replit Auth (OBRIGATÓRIAS - AGORA INCLUÍDAS)
-REPLIT_DOMAINS=samureye.com.br,app.samureye.com.br,api.samureye.com.br,vlxsam02.samureye.com.br
-REPL_ID=samureye-production-vlxsam02
-ISSUER_URL=https://replit.com/oidc
-
-# Session & Security
-SESSION_SECRET=samureye_secret_2024_vlxsam02_production
-JWT_SECRET=samureye_jwt_secret_2024
-ENCRYPTION_KEY=samureye_encryption_2024
-
-# Application URLs
-API_BASE_URL=http://localhost:5000
-WEB_BASE_URL=http://localhost:5000
-FRONTEND_URL=https://samureye.com.br
+DATABASE_URL=postgresql://samureye:samureye123@192.168.100.153:5432/samureye
+SESSION_SECRET=samureye-onpremise-[random]
+DISABLE_AUTH=true
+ADMIN_EMAIL=admin@samureye.local
+ADMIN_PASSWORD=SamurEye2024!
 ```
 
-## 📋 Verificação do Sistema
+### Systemd Service (samureye-app)
+- **Auto-start**: Inicia automaticamente com o sistema
+- **Restart**: Reinicialização automática em caso de falha
+- **Logs**: Centralizados no systemd journal
+- **Security**: Rodando como usuário não-root
 
-### Status do Serviço
+## 📊 Monitoramento e Logs
+
+### Status da Aplicação
 ```bash
-# Verificar status
+# Status do serviço
 systemctl status samureye-app
 
-# Ver logs em tempo real
+# Logs em tempo real
 journalctl -u samureye-app -f
 
-# Ver logs específicos
-journalctl -u samureye-app -n 50 --no-pager
+# Verificar porta
+netstat -tlnp | grep :5000
+
+# Verificar processos
+ps aux | grep node
 ```
 
-### Teste de Conectividade
+### Teste de API
 ```bash
-# PostgreSQL
-pg_isready -h 172.24.1.153 -p 5432
-psql -h 172.24.1.153 -U samureye -d samureye_prod -c "SELECT version();"
+# Health check
+curl http://localhost:5000/api/health
 
-# Redis
-redis-cli -h 172.24.1.153 -p 6379 ping
+# System settings
+curl http://localhost:5000/api/system/settings
 
-# Aplicação local
-curl -s http://localhost:5000/api/health | jq
-curl -s http://localhost:5000/api/user
+# Admin tenants (se configurado)
+curl http://localhost:5000/api/admin/tenants
+
+# Collector heartbeat endpoint
+curl -X POST http://localhost:5000/collector-api/heartbeat \
+  -H "Content-Type: application/json" \
+  -d '{"collector_id":"test","status":"online"}'
 ```
 
-### Teste ES6 Modules
+### Logs da Aplicação
 ```bash
+# Logs systemd
+journalctl -u samureye-app -f
+
+# Logs de arquivo (se configurado)
+tail -f /var/log/samureye/app.log
+tail -f /var/log/samureye/error.log
+
+# Logs Node.js diretos
+pm2 logs samureye  # Se usar PM2
+```
+
+## 🗃️ Integração com Banco de Dados
+
+### Conectividade PostgreSQL
+```bash
+# Teste de conexão
+nc -zv 192.168.100.153 5432
+
+# Conexão direta ao banco
+PGPASSWORD=samureye123 psql -h 192.168.100.153 -U samureye -d samureye
+
+# Verificar tabelas
+PGPASSWORD=samureye123 psql -h 192.168.100.153 -U samureye -d samureye -c "\dt"
+```
+
+### Migrations e Schema
+```bash
+# Executar migrations (Drizzle)
 cd /opt/samureye/SamurEye
-sudo -u samureye node -e "import dotenv from 'dotenv'; console.log('ES6 OK')" --input-type=module
+npm run db:push
+
+# Verificar schema
+npm run db:studio  # Se disponível
 ```
 
-## 🏗️ Estrutura de Arquivos
+## 🔧 Comandos de Manutenção
 
-### Principais Diretórios
-```
-/opt/samureye/SamurEye/          # Código da aplicação (proprietário: samureye)
-├── server/                      # Código do servidor
-├── client/                      # Código do frontend  
-├── shared/                      # Código compartilhado
-├── package.json                 # Dependências Node.js
-├── .env -> /etc/samureye/.env   # Link simbólico para configuração
-└── node_modules/                # Dependências instaladas
-
-/etc/samureye/                   # Configurações do sistema
-├── .env                         # Configuração principal
-└── .env.backup.*               # Backups automáticos
-
-/var/log/samureye/              # Logs da aplicação
-├── app.log                     # Log principal
-└── audit.log                   # Log de auditoria
-```
-
-### Arquivos de Sistema
-```
-/etc/systemd/system/samureye-app.service    # Serviço systemd
-/etc/nginx/sites-available/samureye         # Configuração NGINX (se usado)
-/etc/ssl/certs/samureye.pem                 # Certificado SSL
-/etc/ssl/private/samureye.key               # Chave privada SSL
-```
-
-## 🌐 URLs de Acesso
-
-### Ambiente de Desenvolvimento
-- **Aplicação Local**: http://localhost:5000
-- **API Local**: http://localhost:5000/api
-- **Health Check**: http://localhost:5000/api/health
-
-### Ambiente de Produção
-- **Web Interface**: https://samureye.com.br
-- **API**: https://api.samureye.com.br  
-- **Admin Panel**: https://app.samureye.com.br
-- **Docs**: https://docs.samureye.com.br
-
-## 🔧 Comandos Úteis
-
-### Gerenciamento do Serviço
+### Controle do Serviço
 ```bash
-# Controle básico
-systemctl start samureye-app      # Iniciar
-systemctl stop samureye-app       # Parar  
-systemctl restart samureye-app    # Reiniciar
-systemctl status samureye-app     # Status
+# Iniciar
+systemctl start samureye-app
 
-# Configuração
-systemctl enable samureye-app     # Habilitar inicialização automática
-systemctl disable samureye-app    # Desabilitar inicialização automática
-systemctl daemon-reload           # Recarregar configuração systemd
+# Parar
+systemctl stop samureye-app
 
-# Logs
-journalctl -u samureye-app -f          # Logs em tempo real
-journalctl -u samureye-app -n 100      # Últimas 100 linhas
-journalctl -u samureye-app --since today  # Logs de hoje
-```
+# Reiniciar
+systemctl restart samureye-app
 
-### Desenvolvimento e Manutenção
-```bash
-# Entrar no diretório e mudar para usuário correto
-cd /opt/samureye/SamurEye
-sudo -u samureye bash
+# Recarregar (graceful)
+systemctl reload samureye-app
 
-# Gerenciamento de dependências
-sudo -u samureye npm install          # Instalar dependências
-sudo -u samureye npm update           # Atualizar dependências
-sudo -u samureye npm audit fix        # Corrigir vulnerabilidades
-
-# Execução manual (para debugging)
-sudo -u samureye npm run dev          # Modo desenvolvimento
-sudo -u samureye npm run build        # Build para produção
-sudo -u samureye npm start            # Modo produção
-
-# Verificação de configuração
-sudo -u samureye node -e "import dotenv from 'dotenv'; dotenv.config(); console.log('NODE_ENV:', process.env.NODE_ENV);" --input-type=module
-```
-
-### Monitoramento e Debugging
-```bash
-# Uso de recursos
-htop
+# Status
 systemctl status samureye-app
+```
+
+### Atualização da Aplicação
+```bash
+cd /opt/samureye/SamurEye
+
+# Backup atual
+cp -r . ../backup-$(date +%Y%m%d)
+
+# Update from GitHub
+git pull origin main
+
+# Instalar dependências
+npm install --production
+
+# Build da aplicação
+npm run build
+
+# Reiniciar serviço
+systemctl restart samureye-app
+```
+
+### Backup de Configuração
+```bash
+# Backup completo
+tar -czf /tmp/vlxsam02-backup-$(date +%Y%m%d).tar.gz \
+    /opt/samureye \
+    /var/log/samureye \
+    /etc/systemd/system/samureye-app.service
+```
+
+## 🚨 Resolução de Problemas
+
+### Problema: Aplicação não inicia
+```bash
+# Verificar logs
+journalctl -u samureye-app -f
+
+# Verificar dependências
+cd /opt/samureye/SamurEye
+npm list
+
+# Verificar Node.js
+node --version
+npm --version
+
+# Testar manualmente
+cd /opt/samureye/SamurEye
+npm run start
+```
+
+### Problema: Banco de dados não conecta
+```bash
+# Testar conectividade
+nc -zv 192.168.100.153 5432
+
+# Verificar .env
+cat /opt/samureye/SamurEye/.env | grep DATABASE_URL
+
+# Testar conexão manual
+PGPASSWORD=samureye123 psql -h 192.168.100.153 -U samureye -d samureye -c "SELECT version();"
+```
+
+### Problema: API retorna 500
+```bash
+# Logs detalhados
+journalctl -u samureye-app -f
+
+# Verificar permissões
+ls -la /opt/samureye/SamurEye/
+
+# Verificar processo
 ps aux | grep node
 
-# Rede e conectividade  
-netstat -tlnp | grep 5000
-ss -tlnp | grep 5000
-lsof -i :5000
-
-# Logs detalhados
-tail -f /var/log/samureye/app.log
-tail -f /var/log/nginx/samureye_error.log    # Se NGINX estiver configurado
-dmesg | tail                                 # Logs do kernel
+# Memory/CPU usage
+top -p $(pgrep -f samureye)
 ```
 
-## 🔍 Solução de Problemas
-
-### Problema 1: Serviço não inicia
-**Diagnóstico:**
+### Problema: WebSocket não funciona
 ```bash
-# 1. Verificar logs detalhados
-journalctl -u samureye-app -n 50 --no-pager
+# Verificar proxy (vlxsam01)
+curl -H "Connection: Upgrade" -H "Upgrade: websocket" http://192.168.100.151
 
-# 2. Verificar estrutura de arquivos
-ls -la /opt/samureye/SamurEye/
-ls -la /opt/samureye/SamurEye/.env
+# Testar direto
+wscat -c ws://localhost:5000/ws  # Se wscat instalado
 
-# 3. Verificar permissões
-stat /opt/samureye/SamurEye/
-
-# 4. Testar manualmente
-cd /opt/samureye/SamurEye && sudo -u samureye npm run dev
+# Logs de conexão
+grep -i websocket /var/log/samureye/app.log
 ```
 
-**Soluções Comuns:**
-- **Arquivo .env faltando**: Execute script fix-env-vars.sh
-- **Permissões incorretas**: `chown -R samureye:samureye /opt/samureye/SamurEye`
-- **Dependências faltando**: `sudo -u samureye npm install`
-- **Porta ocupada**: `lsof -i :5000` e matar processo conflitante
+## 📋 Checklist Pós-Instalação
 
-### Problema 2: Erro ES6 "require is not defined"
-**Diagnóstico:**
-```bash
-# Verificar sintaxe no código
-grep -r "require(" /opt/samureye/SamurEye/server/ || echo "Nenhum require() encontrado"
+### ✅ Validação Básica
+- [ ] Node.js 20: `node --version`
+- [ ] Aplicação ativa: `systemctl is-active samureye-app`
+- [ ] Porta 5000: `netstat -tlnp | grep :5000`
+- [ ] Processo rodando: `ps aux | grep node`
 
-# Testar ES6 modules
-cd /opt/samureye/SamurEye
-sudo -u samureye node -e "import dotenv from 'dotenv'; console.log('OK');" --input-type=module
+### ✅ Testes de API
+- [ ] Health: `curl http://localhost:5000/api/health`
+- [ ] Settings: `curl http://localhost:5000/api/system/settings`
+- [ ] Collector endpoint: `curl -X POST http://localhost:5000/collector-api/heartbeat`
+
+### ✅ Conectividade
+- [ ] PostgreSQL: `nc -zv 192.168.100.153 5432`
+- [ ] Gateway proxy: `curl -I http://192.168.100.151`
+
+### ✅ Logs e Monitoramento
+- [ ] Logs sem erros: `journalctl -u samureye-app --since "5 minutes ago"`
+- [ ] Sem memory leaks: `top -p $(pgrep -f samureye)`
+
+## 🔐 Credenciais Padrão
+
+### Admin SamurEye
+- **Email**: admin@samureye.local
+- **Senha**: SamurEye2024!
+
+### Banco de Dados
+- **Host**: 192.168.100.153:5432
+- **Database**: samureye
+- **User**: samureye
+- **Password**: samureye123
+
+## 📁 Estrutura de Arquivos
+
+```
+/opt/samureye/
+├── SamurEye/                    # Aplicação principal
+│   ├── package.json
+│   ├── .env                     # Configurações
+│   ├── server/                  # Backend
+│   ├── client/                  # Frontend
+│   ├── shared/                  # Shared code
+│   └── node_modules/            # Dependencies
+├── logs/                        # Application logs
+├── config/                      # Configuration files
+└── backups/                     # Backup files
+
+/var/log/samureye/
+├── app.log                      # Application logs
+├── error.log                    # Error logs
+└── access.log                   # Access logs
+
+/etc/systemd/system/
+└── samureye-app.service         # Systemd service
 ```
 
-**Solução:**
-```bash
-# Executar correção específica
-curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam02/fix-es6-only.sh | sudo bash
-```
+## 🔗 Links Relacionados
 
-### Problema 3: Erro de conexão com banco
-**Diagnóstico:**
-```bash
-# 1. Testar conectividade de rede
-ping 172.24.1.153
-telnet 172.24.1.153 5432
-
-# 2. Testar PostgreSQL especificamente  
-pg_isready -h 172.24.1.153 -p 5432
-
-# 3. Verificar configuração .env
-cat /etc/samureye/.env | grep DATABASE_URL
-cat /etc/samureye/.env | grep PGHOST
-
-# 4. Testar autenticação
-psql -h 172.24.1.153 -U samureye -d samureye_prod -c "SELECT 1;"
-```
-
-**Soluções:**
-- **Conectividade**: Verificar firewall em vlxsam03
-- **Autenticação**: Verificar usuário e senha no PostgreSQL
-- **Configuração**: Re-executar script principal para recriar .env
-
-### Problema 4: Variável REPLIT_DOMAINS não encontrada
-**Diagnóstico:**
-```bash
-# Verificar .env
-grep REPLIT_DOMAINS /etc/samureye/.env || echo "REPLIT_DOMAINS não encontrada"
-grep REPL_ID /etc/samureye/.env || echo "REPL_ID não encontrada"
-```
-
-**Solução:**
-```bash
-# Executar correção de variáveis
-curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam02/fix-env-vars.sh | sudo bash
-```
-
-## 🏗️ Arquitetura Técnica
-
-### Fluxo de Dados
-```
-Internet → NGINX (443/80) → SamurEye App (vlxsam02:5000) → PostgreSQL (vlxsam03:5432)
-                                                         → Redis (vlxsam03:6379)
-                                                         → MinIO (vlxsam03:9000)
-```
-
-### Stack Tecnológico
-- **Frontend**: React 18 + TypeScript + Vite + TailwindCSS
-- **Backend**: Node.js 20 + Express + TypeScript
-- **Database**: PostgreSQL 16 com Drizzle ORM
-- **Cache**: Redis 7
-- **Storage**: MinIO (compatível S3)
-- **Auth**: Replit OpenID Connect + Local Sessions
-- **Process Manager**: systemd
-- **Reverse Proxy**: NGINX (opcional)
-
-### Autenticação e Autorização
-- **Replit OpenID Connect**: Usuários regulares via domínios autorizados
-- **Session-based**: Sessões armazenadas no PostgreSQL
-- **Multi-tenant**: Isolamento por tenant com controle granular de acesso
-- **Admin local**: Interface administrativa com autenticação separada
-
-## 🎯 Resumo Executivo
-
-### Status Atual: ✅ TOTALMENTE FUNCIONAL
-- **Instalação**: Script principal completo e testado
-- **Problemas**: Todos os problemas conhecidos foram resolvidos
-- **Monitoramento**: Sistema completo de logs e métricas
-- **Backup**: Automatizado e testado
-- **Segurança**: Configuração robusta implementada
-
-### Próximos Passos
-1. **Produção**: Configurar certificados SSL via vlxsam01
-2. **Monitoramento**: Integrar com Grafana e FortiSIEM
-3. **Escalabilidade**: Configurar load balancer se necessário
-4. **CI/CD**: Implementar pipeline de deployment automatizado
-
-**Este documento é atualizado automaticamente conforme melhorias são implementadas no sistema.**
-
----
-
-## 📞 Contato e Suporte
-
-### Recursos de Documentação
-- **GitHub**: https://github.com/GruppenIT/SamurEye
-- **Issues**: https://github.com/GruppenIT/SamurEye/issues
-- **Wiki**: https://github.com/GruppenIT/SamurEye/wiki
-- **Releases**: https://github.com/GruppenIT/SamurEye/releases
+- **Gateway**: [vlxsam01/README.md](../vlxsam01/README.md)
+- **Banco de Dados**: [vlxsam03/README.md](../vlxsam03/README.md)
+- **Collector**: [vlxsam04/README.md](../vlxsam04/README.md)
+- **Arquitetura**: [../NETWORK-ARCHITECTURE.md](../NETWORK-ARCHITECTURE.md)

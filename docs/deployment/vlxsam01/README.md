@@ -1,204 +1,291 @@
-# Configuração vlxsam01 - Proxy NGINX 
+# vlxsam01 - Gateway Server
 
-## 📋 Visão Geral
+Gateway NGINX com SSL termination, proxy reverso e step-ca Certificate Authority para ambiente on-premise SamurEye.
 
-O **vlxsam01** funciona como proxy reverso NGINX, roteando tráfego HTTPS para o backend vlxsam02:5000.
+## 📋 Informações do Servidor
 
-**Arquitetura:**
+- **IP**: 192.168.100.151
+- **Função**: Gateway/Proxy SSL
+- **OS**: Ubuntu 24.04 LTS
+- **Serviços**: NGINX, step-ca, Fail2ban, UFW
+
+## 🎯 Cenários de Instalação
+
+### ✅ Instalação Padrão
+```bash
+ssh root@192.168.100.151
+curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/vlxsam01/install.sh | bash
 ```
-Usuário (172.16.10.50) 
-    ↓ DNS interno
-172.24.1.151 (vlxsam01) 
-    ↓ NGINX proxy
-172.24.1.152:5000 (vlxsam02)
-    ↓ PostgreSQL
-172.24.1.153:5432 (vlxsam03)
+
+### 🔥 **HARD RESET (Recomendado para ambiente corrompido)**
+```bash
+ssh root@192.168.100.151
+curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/vlxsam01/install-hard-reset.sh | bash
 ```
+
+**⚠️ O hard reset preserva certificados SSL válidos automaticamente!**
+
+## 🏗️ Arquitetura
+
+```
+Internet
+    ↓
+┌─────────────────────────────────────┐
+│            vlxsam01                 │
+│         (192.168.100.151)          │
+│                                     │
+│  ┌─────────┐    ┌─────────────────┐ │
+│  │  NGINX  │────│    step-ca      │ │
+│  │  :80    │    │    :8443        │ │
+│  │  :443   │    │                 │ │
+│  └─────────┘    └─────────────────┘ │
+│      │                              │
+└──────┼──────────────────────────────┘
+       │
+       ↓ Proxy to
+┌─────────────────────────────────────┐
+│            vlxsam02                 │
+│         (192.168.100.152:5000)     │
+│        SamurEye Application         │
+└─────────────────────────────────────┘
+```
+
+## 🔧 Serviços Configurados
+
+### NGINX (Port 80/443)
+- **Proxy reverso** para vlxsam02:5000
+- **SSL termination** com certificados Let's Encrypt
+- **Rate limiting** para proteção contra DDoS
+- **Security headers** (HSTS, CSP, etc.)
+
+### step-ca (Port 8443)
+- **Certificate Authority** interno
+- **mTLS certificates** para collectors
+- **Integração com SamurEye** para autenticação
+
+### UFW Firewall
+- **SSH (22)**: Acesso de administração
+- **HTTP/HTTPS (80/443)**: Tráfego web público
+- **step-ca (8443)**: Certificate Authority
+- **Rede interna**: 192.168.100.0/24
+
+### Fail2ban
+- **Proteção SSH**: Bloqueio após tentativas falhas
+- **Proteção NGINX**: Rate limiting avançado
+- **Logs centralizados**: Monitoramento de ataques
 
 ## 🌐 Domínios Configurados
 
-Todos os domínios resolvem internamente para **172.24.1.151** (vlxsam01):
-- `app.samureye.com.br` - Aplicação principal
-- `api.samureye.com.br` - API endpoints  
-- `ca.samureye.com.br` - Certificate Authority
+### Produção
+- **app.samureye.com.br** → vlxsam02:5000 (Frontend)
+- **api.samureye.com.br** → vlxsam02:5000 (API)
+- **ca.samureye.com.br** → localhost:8443 (step-ca)
 
-## 🔒 Certificados TLS
-
-- **Let's Encrypt** com certificados válidos
-- **HTTPS obrigatório** com redirect automático do HTTP
-- **HSTS** habilitado para segurança
-
-## ⚠️ PROBLEMA IDENTIFICADO: Página em Branco no HTTPS
-
-### Sintomas:
-- ✅ `https://app.samureye.com.br` - Certificado válido, mas **página em branco**
-- ✅ `http://172.24.1.152:5000` - Funciona normalmente (acesso direto)
-- ✅ Certificados Let's Encrypt carregando corretamente
-
-### Causa Provável:
-Configuração nginx com problemas de proxy, headers ou buffering.
-
-## 🚀 Soluções Automatizadas
-
-### 1. Diagnóstico Rápido
-```bash
-# No vlxsam01:
-curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam01/diagnose-nginx.sh | sudo bash
+### Configuração DNS Necessária
 ```
-**Uso:** Identifica problemas de configuração nginx
-
-### 2. Correção Completa (RECOMENDADO)
-```bash
-# No vlxsam01:
-curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam01/fix-nginx-proxy.sh | sudo bash
-```
-**Uso:** Corrige configuração nginx com otimizações de proxy
-
-### 3. Correção Rápida (Mínima)
-```bash
-# No vlxsam01:
-curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam01/quick-fix-nginx.sh | sudo bash
-```
-**Uso:** Aplica configuração mínima funcional
-
-## 🔧 Correção Manual
-
-Se os scripts automáticos falharem:
-
-### 1. Verificar Status dos Serviços
-```bash
-# Status nginx
-systemctl status nginx
-
-# Teste configuração
-nginx -t
-
-# Logs
-tail -f /var/log/nginx/error.log
+Type    Name                Value
+A       app.samureye.com.br 192.168.100.151
+A       api.samureye.com.br 192.168.100.151
+A       ca.samureye.com.br  192.168.100.151
 ```
 
-### 2. Verificar Conectividade Backend
-```bash
-# Teste direto vlxsam02
-curl -I http://172.24.1.152:5000/api/system/settings
+## 🔐 Certificados SSL
 
-# Teste interno vlxsam01
-curl -I -k https://127.0.0.1/
+### Backup Automático (Hard Reset)
+O script de hard reset cria backup automático em:
+```
+/etc/nginx/ssl-backup-YYYYMMDD-HHMMSS/
+├── letsencrypt/     # Certificados Let's Encrypt
+├── ssl/             # Certificados NGINX
+├── step-ca/         # Certificações step-ca
+└── sites-available/ # Configurações NGINX
 ```
 
-### 3. Configuração Mínima Manual
+### Renovação Manual (se necessário)
 ```bash
-# Backup atual
-cp -r /etc/nginx/sites-enabled /root/nginx-backup
+# Certificado wildcard com DNS-01 challenge
+certbot --nginx -d samureye.com.br -d *.samureye.com.br
 
-# Criar configuração básica
-cat > /etc/nginx/sites-available/samureye.conf << 'EOF'
-upstream backend {
-    server 172.24.1.152:5000;
-}
-
-server {
-    listen 80;
-    server_name app.samureye.com.br api.samureye.com.br ca.samureye.com.br;
-    return 301 https://$server_name$request_uri;
-}
-
-server {
-    listen 443 ssl;
-    server_name app.samureye.com.br api.samureye.com.br ca.samureye.com.br;
-    
-    ssl_certificate /etc/letsencrypt/live/app.samureye.com.br/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/app.samureye.com.br/privkey.pem;
-    
-    location / {
-        proxy_pass http://backend;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_buffering off;
-    }
-}
-EOF
-
-# Ativar configuração
-rm -f /etc/nginx/sites-enabled/*
-ln -s /etc/nginx/sites-available/samureye.conf /etc/nginx/sites-enabled/
-
-# Testar e recarregar
-nginx -t && systemctl reload nginx
+# Verificar renovação automática
+certbot renew --dry-run
 ```
 
-## 🧪 Testes de Validação
+## 📊 Monitoramento e Logs
 
-### 1. Teste HTTPS Externo
+### Status dos Serviços
 ```bash
-# Da máquina Windows (172.16.10.50):
-# Navegador: https://app.samureye.com.br
+# Verificar todos os serviços
+systemctl status nginx step-ca fail2ban ufw
+
+# Verificar portas abertas
+netstat -tlnp | grep -E ':80|:443|:8443'
 ```
 
-### 2. Teste HTTPS Interno  
+### Logs Principais
 ```bash
-# No vlxsam01:
-curl -I -k https://127.0.0.1/
-curl -s https://127.0.0.1/api/system/settings
-```
-
-### 3. Teste Backend Direto
-```bash
-# Qualquer máquina da rede:
-curl -I http://172.24.1.152:5000/api/system/settings
-```
-
-## 📊 Status Esperado
-
-Após a correção:
-- ✅ `https://app.samureye.com.br` - Aplicação carregando normalmente
-- ✅ Proxy nginx funcionando
-- ✅ Headers corretos (X-Forwarded-Proto: https)
-- ✅ WebSockets funcionando se necessário
-
-## 🔍 Troubleshooting
-
-### Logs Úteis:
-```bash
-# Logs nginx
-tail -f /var/log/nginx/error.log
+# NGINX Access/Error
 tail -f /var/log/nginx/access.log
+tail -f /var/log/nginx/error.log
 
-# Teste configuração
-nginx -t
+# step-ca
+journalctl -u step-ca -f
 
-# Status serviços
-systemctl status nginx
+# Fail2ban
+tail -f /var/log/fail2ban.log
+
+# UFW
+tail -f /var/log/ufw.log
 ```
 
-### Problemas Comuns:
+### Testes de Conectividade
+```bash
+# Teste local
+curl -I http://localhost
+curl -I https://localhost
 
-1. **Certificado não encontrado**
-   - Verificar: `ls /etc/letsencrypt/live/`
-   - Ajustar path no nginx
+# Teste externo (do vlxsam02)
+curl -I http://192.168.100.151
+curl -I https://app.samureye.com.br
 
-2. **Backend não responde**
-   - Verificar: `systemctl status samureye-app` no vlxsam02
-   - Testar: `curl http://172.24.1.152:5000/health`
+# Teste step-ca
+curl -k https://localhost:8443/health
+```
 
-3. **Headers incorretos**
-   - Adicionar `proxy_set_header X-Forwarded-Proto $scheme`
-   - Verificar `proxy_buffering off` se página em branco
+## 🔧 Comandos de Manutenção
 
-4. **WebSocket problemas**
-   - Adicionar suporte WebSocket no nginx
-   - Headers `Upgrade` e `Connection`
+### Reiniciar Serviços
+```bash
+systemctl restart nginx
+systemctl restart step-ca
+systemctl restart fail2ban
+```
 
-## 🎯 Próximos Passos
+### Recarregar Configurações
+```bash
+# NGINX (sem parar o serviço)
+nginx -t && nginx -s reload
 
-1. **Execute script de correção** no vlxsam01
-2. **Teste https://app.samureye.com.br** da máquina Windows
-3. **Confirme que página não está mais em branco**
-4. **Execute criação de tenant** para teste final
+# Fail2ban
+fail2ban-client reload
+```
 
----
+### Backup Manual
+```bash
+# Backup completo de configurações
+tar -czf /tmp/vlxsam01-backup-$(date +%Y%m%d).tar.gz \
+    /etc/nginx \
+    /etc/letsencrypt \
+    /etc/step-ca \
+    /etc/fail2ban
+```
 
-**Documentação atualizada em:** 27/08/2025  
-**Status:** Problema identificado, soluções implementadas
+## 🚨 Resolução de Problemas
+
+### Problema: NGINX não inicia
+```bash
+# Verificar configuração
+nginx -t
+
+# Verificar conflitos de porta
+netstat -tlnp | grep :80
+netstat -tlnp | grep :443
+
+# Logs de erro
+tail -50 /var/log/nginx/error.log
+```
+
+### Problema: Certificados SSL expirados
+```bash
+# Verificar validade
+openssl x509 -in /etc/letsencrypt/live/samureye.com.br/fullchain.pem -enddate -noout
+
+# Forçar renovação
+certbot renew --force-renewal
+
+# Recarregar NGINX
+nginx -s reload
+```
+
+### Problema: step-ca não responde
+```bash
+# Verificar status
+systemctl status step-ca
+
+# Verificar configuração
+step ca health --ca-url https://localhost:8443
+
+# Logs detalhados
+journalctl -u step-ca -f
+```
+
+### Problema: Conectividade com vlxsam02
+```bash
+# Testar conectividade
+nc -zv 192.168.100.152 5000
+
+# Verificar roteamento
+ip route show
+
+# Testar proxy NGINX
+curl -H "Host: app.samureye.com.br" http://192.168.100.152:5000
+```
+
+## 📋 Checklist Pós-Instalação
+
+### ✅ Validação Básica
+- [ ] NGINX ativo: `systemctl is-active nginx`
+- [ ] step-ca ativo: `systemctl is-active step-ca`
+- [ ] Portas abertas: `netstat -tlnp | grep -E ':80|:443|:8443'`
+- [ ] Firewall ativo: `ufw status`
+
+### ✅ Testes de Conectividade
+- [ ] HTTP local: `curl -I http://localhost`
+- [ ] HTTPS local: `curl -I https://localhost`
+- [ ] Proxy para vlxsam02: `curl -I http://192.168.100.152:5000`
+
+### ✅ Certificados SSL
+- [ ] Certificados válidos: `openssl x509 -in /path/cert -enddate -noout`
+- [ ] Renovação automática: `certbot renew --dry-run`
+
+### ✅ Segurança
+- [ ] Fail2ban ativo: `systemctl is-active fail2ban`
+- [ ] UFW configurado: `ufw status numbered`
+- [ ] Headers de segurança: `curl -I https://app.samureye.com.br`
+
+## 📁 Estrutura de Arquivos
+
+```
+/etc/nginx/
+├── nginx.conf              # Configuração principal
+├── sites-available/
+│   └── samureye            # Configuração SamurEye
+├── sites-enabled/
+│   └── samureye -> ../sites-available/samureye
+└── ssl/                    # Certificados personalizados
+
+/etc/step-ca/
+├── config/
+│   ├── ca.json            # Configuração step-ca
+│   ├── password.txt       # Senha do CA
+│   └── defaults.json      # Configurações padrão
+├── certs/                 # Certificados emitidos
+├── secrets/               # Chaves privadas
+└── db/                    # Database step-ca
+
+/etc/letsencrypt/
+├── live/samureye.com.br/  # Certificados ativos
+├── archive/               # Histórico de certificados
+└── renewal/               # Configurações de renovação
+
+/var/log/
+├── nginx/                 # Logs NGINX
+├── fail2ban.log          # Logs Fail2ban
+└── ufw.log               # Logs UFW
+```
+
+## 🔗 Links Relacionados
+
+- **Aplicação**: [vlxsam02/README.md](../vlxsam02/README.md)
+- **Banco de Dados**: [vlxsam03/README.md](../vlxsam03/README.md)  
+- **Collector**: [vlxsam04/README.md](../vlxsam04/README.md)
+- **Arquitetura**: [../NETWORK-ARCHITECTURE.md](../NETWORK-ARCHITECTURE.md)

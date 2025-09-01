@@ -1,204 +1,236 @@
-# SamurEye - Guia de Deploy Produção
+# SamurEye On-Premise Deployment Guide
 
-Este guia fornece instruções completas para deploy da plataforma SamurEye em ambiente de produção com 4 servidores dedicados.
+Este diretório contém todos os scripts e documentação necessários para implementar o SamurEye em ambiente on-premise, incluindo scripts de **hard reset completo** para recuperação de ambiente corrompido.
 
-## Arquitetura de Produção
+## 🎯 Cenários de Uso
+
+### ✅ Instalação Nova (Fresh Install)
+Para novo ambiente, use os scripts de instalação padrão:
+- [vlxsam01/install.sh](vlxsam01/install.sh) - Gateway
+- [vlxsam02/install.sh](vlxsam02/install.sh) - Application  
+- [vlxsam03/install.sh](vlxsam03/install.sh) - Database
+- [vlxsam04/install.sh](vlxsam04/install.sh) - Collector
+
+### 🔥 **HARD RESET (Ambiente Corrompido)**
+Para ambiente corrompido ou reset completo, use os scripts de hard reset:
+- **[hard-reset-all-servers.sh](hard-reset-all-servers.sh)** - Reset completo
+- [vlxsam01/install-hard-reset.sh](vlxsam01/install-hard-reset.sh) - Gateway
+- [vlxsam02/install-hard-reset.sh](vlxsam02/install-hard-reset.sh) - Application
+- [vlxsam03/install-hard-reset.sh](vlxsam03/install-hard-reset.sh) - Database  
+- [vlxsam04/install-hard-reset.sh](vlxsam04/install-hard-reset.sh) - Collector
+
+## 🏗️ Arquitetura On-Premise
 
 ```
 ┌─────────────────┬─────────────────┬─────────────────┬─────────────────┐
 │   vlxsam01      │    vlxsam02     │    vlxsam03     │    vlxsam04     │
-│   (Gateway)     │  (Frontend +    │   (Database)    │  (Collector)    │
-│                 │   Backend)      │                 │                 │
-│ 172.24.1.151    │ 172.24.1.152    │ 172.24.1.153    │ 192.168.100.151 │
+│   (Gateway)     │  (Application)  │   (Database)    │  (Collector)    │
 │                 │                 │                 │                 │
-│ - NGINX         │ - Node.js App   │ - PostgreSQL    │ - Agent         │
-│ - SSL/TLS       │ - Scanner       │ - Redis         │ - Outbound only │
-│ - Rate Limit    │ - API           │ - MinIO         │ - Tools         │
-│ - Load Balance  │ - WebSocket     │ - Monitoring    │ - Telemetry     │
+│ 192.168.100.151 │ 192.168.100.152 │ 192.168.100.153 │ 192.168.100.154 │
+│                 │                 │                 │                 │
+│ - NGINX Proxy   │ - Node.js 20    │ - PostgreSQL 16 │ - Python 3.11   │
+│ - SSL/TLS       │ - SamurEye App  │ - Redis         │ - Node.js 20     │
+│ - step-ca       │ - Port 5000     │ - MinIO         │ - Security Tools │
+│ - Certificates  │ - API + WebUI   │ - Grafana       │ - Agent Service  │
 └─────────────────┴─────────────────┴─────────────────┴─────────────────┘
 ```
 
-## Pré-requisitos
+## 🚀 Quick Start - HARD RESET
 
-- **OS:** Ubuntu 22.04 LTS
-- **Domínio:** samureye.com.br (*.samureye.com.br)
-- **Certificado SSL:** Wildcard Let's Encrypt configurado
-- **Conectividade:** Todos os servidores com acesso à internet
-- **Credenciais:** Usuário com privilégios sudo em todos os servidores
+Se seu ambiente está corrompido e você precisa fazer reset completo:
 
-## Instalação por Servidor
-
-Execute os servidores na seguinte ordem para resolver dependências:
-
-### 1. vlxsam03 - Database Cluster (Primeiro)
-**IP:** 172.24.1.153 | **Documentação:** [vlxsam03/README.md](vlxsam03/README.md)
-
-PostgreSQL + Redis + MinIO + Grafana
 ```bash
-ssh root@172.24.1.153
-# Instalação manual - seguir README específico
+# Download e execução do script master
+curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/hard-reset-all-servers.sh | bash
 ```
 
-### 2. vlxsam01 - Gateway/NGINX  
-**IP:** 172.24.1.151 | **Documentação:** [vlxsam01/README.md](vlxsam01/README.md)
+**⚠️ ATENÇÃO**: Este script fará reset COMPLETO de todos os servidores!
 
-SSL Termination + Rate Limiting + Proxy Reverso
+## 📋 Ordem de Execução - Hard Reset
+
+Os scripts devem ser executados na seguinte ordem para respeitar dependências:
+
+### 1. vlxsam03 - Database Server (PRIMEIRO)
 ```bash
-ssh root@172.24.1.151
-./vlxsam01/install.sh
+ssh root@192.168.100.153
+curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/vlxsam03/install-hard-reset.sh | bash
 ```
+- Remove PostgreSQL, Redis, MinIO, Grafana completamente
+- **APAGA TODOS OS DADOS** do banco
+- Reinstala PostgreSQL 16 com configuração SamurEye
+- Cria banco `samureye` do zero
 
-### 3. vlxsam02 - Application Server
-**IP:** 172.24.1.152 | **Documentação:** [vlxsam02/README.md](vlxsam02/README.md)
-
-React Frontend + Node.js Backend + Scanner Service
+### 2. vlxsam02 - Application Server
 ```bash
-ssh root@172.24.1.152
-./vlxsam02/install.sh
+ssh root@192.168.100.152
+curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/vlxsam02/install-hard-reset.sh | bash
 ```
+- Remove Node.js e aplicação SamurEye completamente
+- Limpa dados da aplicação
+- Reinstala Node.js 20 e aplicação
+- Conecta ao banco limpo no vlxsam03
 
-### 4. vlxsam04 - Collector Agent
-**IP:** 192.168.100.151 | **Documentação:** [vlxsam04/README.md](vlxsam04/README.md)
-
-Agente Coletor (Outbound-only)
+### 3. vlxsam01 - Gateway
 ```bash
 ssh root@192.168.100.151
-# Instalação manual - seguir README específico
+curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/vlxsam01/install-hard-reset.sh | bash
 ```
+- Remove NGINX e step-ca completamente
+- **PRESERVA certificados SSL válidos**
+- Reinstala NGINX e step-ca
+- Configura proxy para vlxsam02
 
-## Verificação da Instalação
-
-Após completar todos os servidores, execute a verificação completa:
-
+### 4. vlxsam04 - Collector Agent
 ```bash
-# Script de verificação consolidada (execute de qualquer local)
-curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/scripts/verify-full-installation.sh | bash
-
-# OU clonar e executar localmente
-git clone https://github.com/GruppenIT/SamurEye.git
-cd SamurEye/docs/deployment/
-chmod +x scripts/verify-full-installation.sh
-./scripts/verify-full-installation.sh
+ssh root@192.168.100.154
+curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/vlxsam04/install-hard-reset.sh | bash
 ```
+- Remove Python, Node.js e ferramentas
+- Reinstala ambiente completo
+- Configura agente coletor
+- Instala Nmap, Nuclei, Masscan, Gobuster
 
-Este script verifica:
-- ✅ Conectividade entre todos os servidores
-- ✅ Status de todos os serviços  
-- ✅ Certificados SSL e HTTPS
-- ✅ Integrações e dependências
-- ✅ Performance básica dos endpoints
+## 🔧 Funcionalidades dos Scripts Hard Reset
 
-## Configuração Pós-Instalação
+### 🛡️ Preservação de Dados Críticos
+- **vlxsam01**: Backup automático de certificados SSL válidos
+- **Todos**: Logs de execução detalhados para auditoria
+- **Todos**: Validação de pré-requisitos antes de executar
 
-### 1. Configurar Variáveis de Ambiente
+### 🧹 Limpeza Completa
+- Remove usuários, serviços e diretórios completamente
+- Limpa cache de sistema e dependências
+- Remove repositórios e chaves antigas
+- Reset de configurações de firewall
+
+### ✅ Validação Pós-Reset
+- Testes de conectividade entre servidores
+- Verificação de serviços ativos
+- Validação de portas abertas
+- Teste de APIs e endpoints
+
+## 📊 Monitoramento Pós-Reset
+
+### Comandos Úteis
+
+**vlxsam03 - Database:**
 ```bash
-# Em cada servidor, editar as variáveis específicas
-nano /etc/samureye/.env
+# Testar todos os serviços
+/usr/local/bin/test-samureye-db.sh
+
+# Status individual
+systemctl status postgresql redis-server minio grafana-server
 ```
 
-### 2. Configurar Integração Delinea
+**vlxsam02 - Application:**
 ```bash
-# No vlxsam02, configurar API keys
-./scripts/configure-delinea.sh
+# Status da aplicação
+systemctl status samureye-app
+
+# Teste de API
+curl http://localhost:5000/api/health
+
+# Logs da aplicação
+journalctl -u samureye-app -f
 ```
 
-### 3. Testar Funcionalidades
+**vlxsam01 - Gateway:**
 ```bash
-# Executar testes de integração
-./scripts/integration-tests.sh
+# Status dos serviços
+systemctl status nginx step-ca
+
+# Teste de conectividade
+curl -I https://app.samureye.com.br
+
+# Logs do NGINX
+tail -f /var/log/nginx/access.log
 ```
 
-## Monitoramento e Logs
-
-### Verificar Status Geral
+**vlxsam04 - Collector:**
 ```bash
-# Status de todos os serviços
-systemctl status samureye-*
+# Status do collector
+systemctl status samureye-collector
 
-# Logs em tempo real
-tail -f /var/log/samureye/*.log
+# Registrar no servidor
+/opt/samureye/collector/scripts/register.sh
+
+# Logs do collector
+tail -f /var/log/samureye-collector/collector.log
 ```
+
+## 🔐 Credenciais Padrão Pós-Reset
+
+### Banco de Dados (vlxsam03)
+- **PostgreSQL**: `samureye` / `samureye123`
+- **Redis**: Senha `redis123`
+- **MinIO**: `minio` / `minio123`
+- **Grafana**: `admin` / `grafana123`
+
+### Aplicação (vlxsam02)
+- **Admin SamurEye**: `admin@samureye.local` / `SamurEye2024!`
 
 ### URLs de Acesso
-- **Frontend:** https://app.samureye.com.br
-- **API:** https://api.samureye.com.br
-- **Monitoring:** https://monitor.samureye.com.br
-- **Admin:** https://admin.samureye.com.br
+- **App**: https://app.samureye.com.br
+- **API**: https://api.samureye.com.br  
+- **Grafana**: http://192.168.100.153:3000
+- **MinIO**: http://192.168.100.153:9001
 
-## Troubleshooting
+## 🔧 Resolução de Problemas
 
-### Problemas Comuns
-
-1. **Certificado SSL inválido**
-   ```bash
-   ./scripts/renew-ssl.sh
-   ```
-
-2. **Banco de dados inacessível**
-   ```bash
-   ./scripts/check-database.sh
-   ```
-
-3. **Aplicação não responde**
-   ```bash
-   ./scripts/restart-app.sh
-   ```
-
-4. **Collector desconectado**
-   ```bash
-   ./scripts/check-collector.sh
-   ```
-
-### Logs de Debug
+### Problema: Certificados SSL Expirados
 ```bash
-# Gateway (vlxsam01)
-tail -f /var/log/nginx/error.log
-
-# Application (vlxsam02) 
-tail -f /var/log/samureye/app.log
-
-# Database (vlxsam03)
-tail -f /var/log/postgresql/postgresql-15-main.log
-
-# Collector (vlxsam04)
-tail -f /var/log/samureye/collector.log
+# No vlxsam01 após reset
+certbot --nginx -d samureye.com.br -d *.samureye.com.br
 ```
 
-## Backup e Recuperação
-
-### Backup Diário Automatizado
+### Problema: Banco de Dados Não Conecta
 ```bash
-# Configurar backup automático
-crontab -e
-# 0 2 * * * /opt/samureye/scripts/daily-backup.sh
+# No vlxsam03
+systemctl restart postgresql
+/usr/local/bin/test-samureye-db.sh
 ```
 
-### Recuperação de Emergência
+### Problema: Aplicação Não Inicia
 ```bash
-# Restaurar a partir de backup
-./scripts/restore-from-backup.sh [backup-date]
+# No vlxsam02
+systemctl restart samureye-app
+journalctl -u samureye-app -f
 ```
 
-## Manutenção
-
-### Updates Regulares
+### Problema: Collector Não Registra
 ```bash
-# Update da aplicação (vlxsam02)
-./scripts/update-app.sh
-
-# Update do sistema (todos os servidores)
-./scripts/system-update.sh
+# No vlxsam04
+/opt/samureye/collector/scripts/register.sh
+systemctl restart samureye-collector
 ```
 
-### Renovação de Certificados
-```bash
-# Renovar certificados SSL (automático via cron)
-./scripts/renew-ssl.sh --check
-```
+## 📚 Documentação Detalhada
 
-## Suporte
+Cada servidor possui documentação específica:
 
-Para suporte técnico:
-- **Email:** suporte@samureye.com.br  
-- **Documentação:** https://docs.samureye.com.br
-- **Status:** https://status.samureye.com.br
+- **[vlxsam01/README.md](vlxsam01/README.md)** - Gateway NGINX + SSL
+- **[vlxsam02/README.md](vlxsam02/README.md)** - Application Server
+- **[vlxsam03/README.md](vlxsam03/README.md)** - Database Cluster
+- **[vlxsam04/README.md](vlxsam04/README.md)** - Collector Agent
+- **[NETWORK-ARCHITECTURE.md](NETWORK-ARCHITECTURE.md)** - Arquitetura de Rede
+
+## ⚠️ Avisos Importantes
+
+1. **Backup**: Scripts de hard reset fazem backup automático de certificados, mas sempre verifique backups antes de executar
+
+2. **Ordem**: Sempre execute na ordem correta (vlxsam03 → vlxsam02 → vlxsam01 → vlxsam04)
+
+3. **Conectividade**: Certifique-se que todos os servidores têm acesso à internet
+
+4. **Firewall**: Scripts configuram firewall automaticamente para rede 192.168.100.0/24
+
+5. **DNS**: Configure DNS para apontar domínios para vlxsam01 (192.168.100.151)
+
+## 🆘 Suporte
+
+Em caso de problemas durante o reset:
+
+1. Verifique logs detalhados de cada script
+2. Execute testes de conectividade entre servidores  
+3. Consulte documentação específica de cada servidor
+4. Use scripts de diagnóstico incluídos em cada servidor
