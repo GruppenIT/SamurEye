@@ -265,17 +265,28 @@ fi
 # Verificar se diretório de dados existe e recriar cluster se necessário
 DATA_DIR="/var/lib/postgresql/$POSTGRES_VERSION/main"
 if [ ! -f "$DATA_DIR/PG_VERSION" ]; then
-    log "📁 Recriando cluster PostgreSQL..."
+    log "📁 Recriando cluster PostgreSQL usando método Ubuntu..."
     
-    # Garantir que o diretório de dados existe com as permissões corretas
+    # Parar PostgreSQL se estiver rodando
+    systemctl stop postgresql 2>/dev/null || true
+    
+    # Garantir que o diretório de dados existe mas está vazio
     mkdir -p "$DATA_DIR"
     chown postgres:postgres "$DATA_DIR"
     chmod 700 "$DATA_DIR"
     
-    # Inicializar cluster
-    sudo -u postgres /usr/lib/postgresql/$POSTGRES_VERSION/bin/initdb -D "$DATA_DIR" --locale=en_US.UTF-8
-    
-    log "✅ Cluster PostgreSQL recriado"
+    # Usar pg_createcluster (método oficial Ubuntu/Debian)
+    if command -v pg_createcluster &>/dev/null; then
+        # Remover cluster se existir
+        pg_dropcluster --stop $POSTGRES_VERSION main 2>/dev/null || true
+        # Criar novo cluster
+        pg_createcluster $POSTGRES_VERSION main --start
+        log "✅ Cluster PostgreSQL recriado usando pg_createcluster"
+    else
+        # Fallback para initdb manual
+        sudo -u postgres /usr/lib/postgresql/$POSTGRES_VERSION/bin/initdb -D "$DATA_DIR" --locale=en_US.UTF-8
+        log "✅ Cluster PostgreSQL recriado usando initdb"
+    fi
 fi
 
 # Iniciar PostgreSQL
@@ -348,6 +359,14 @@ systemctl restart postgresql
 sleep 5
 
 log "✅ PostgreSQL configurado para SamurEye"
+
+# Verificar se PostgreSQL está funcionando antes de criar usuários
+log "🔍 Verificando conectividade PostgreSQL..."
+if ! sudo -u postgres psql -c "SELECT version();" >/dev/null 2>&1; then
+    error "❌ PostgreSQL não está respondendo corretamente"
+fi
+
+log "✅ PostgreSQL respondendo, criando usuários..."
 
 # Criar usuário e banco SamurEye
 log "👤 Criando usuário e banco SamurEye..."

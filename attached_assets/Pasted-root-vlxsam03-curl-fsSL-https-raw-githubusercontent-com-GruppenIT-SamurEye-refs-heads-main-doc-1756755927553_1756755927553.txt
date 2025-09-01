@@ -1,0 +1,141 @@
+root@vlxsam03:~# curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/vlxsam03/install-hard-reset.sh | bash
+
+🔥 SAMUREYE HARD RESET - DATABASE SERVER vlxsam03
+===============================================
+⚠️  ATENÇÃO: Este script irá:
+   • Parar todos os serviços do banco de dados
+   • APAGAR TODOS OS DADOS do PostgreSQL, Redis, MinIO
+   • Reconfigurar pg_hba.conf e postgresql.conf
+   • Resetar senhas e configurações
+   • Recriar banco e usuários SamurEye
+   • Reconfigurar firewall e rede
+
+[19:44:16] WARNING: Modo não-interativo detectado (curl | bash)
+[19:44:16] INFO: Hard reset iniciará automaticamente em 5 segundos...
+[19:44:21] 🗑️ Iniciando hard reset do servidor de banco de dados...
+[19:44:21] 🔧 Reparando sistema de pacotes corrompido...
+[19:44:21] WARNING: Matando processos apt/dpkg em execução...
+[19:44:26] WARNING: Removendo locks do sistema de pacotes...
+[19:44:26] Executando reparos do dpkg...
+[19:44:26] Tentativa 1: dpkg --configure -a
+[19:44:31] Tentativa 1: apt-get -f install
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following package was automatically installed and is no longer required:
+  libllvm17t64
+Use 'apt autoremove' to remove it.
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+[19:44:37] ✅ dpkg funcionando na tentativa 1
+[19:44:37] Aguardando estabilização do sistema...
+[19:44:47] ✅ Reparo inicial do sistema de pacotes concluído
+[19:44:47] 📦 Instalando dependências básicas...
+[19:44:47] Tentativa 1 de atualização do sistema...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following package was automatically installed and is no longer required:
+  libllvm17t64
+Use 'apt autoremove' to remove it.
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+Hit:1 http://apt.postgresql.org/pub/repos/apt noble-pgdg InRelease
+Hit:2 https://packages.grafana.com/oss/deb stable InRelease
+Hit:3 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:4 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:5 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:6 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists... Done
+[19:44:56] ✅ Sistema atualizado
+[19:44:56] Tentativa 1 de instalação de dependências...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following package was automatically installed and is no longer required:
+  libllvm17t64
+Use 'apt autoremove' to remove it.
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+psmisc is already the newest version (23.7-1build1).
+lsof is already the newest version (4.95.0-1build3).
+procps is already the newest version (2:4.0.4-4ubuntu3.2).
+The following package was automatically installed and is no longer required:
+  libllvm17t64
+Use 'apt autoremove' to remove it.
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+[19:45:01] ✅ Dependências básicas instaladas
+[19:45:01] ⏹️ Parando todos os serviços...
+[19:45:01] ✅ postgresql parado
+[19:45:01] 💾 Criando backup dos dados atuais...
+[19:45:01] ✅ Backup PostgreSQL criado
+[19:45:01] 📂 Backup salvo em: /opt/backups/samureye-reset-20250901-194501
+[19:45:01] 🗑️ Removendo dados existentes...
+[19:45:01] ✅ Dados PostgreSQL removidos
+[19:45:01] ✅ Dados Redis removidos
+[19:45:01] ✅ Dados MinIO removidos
+[19:45:01] ✅ Dados Grafana removidos
+[19:45:01] 📦 Instalando dependências adicionais...
+[19:45:01] Tentativa 1 de instalação de dependências adicionais...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following package was automatically installed and is no longer required:
+  libllvm17t64
+Use 'apt autoremove' to remove it.
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+wget is already the newest version (1.21.4-1ubuntu4.1).
+curl is already the newest version (8.5.0-2ubuntu10.6).
+gnupg2 is already the newest version (2.4.4-2ubuntu17.3).
+software-properties-common is already the newest version (0.99.49.3).
+apt-transport-https is already the newest version (2.8.3).
+ca-certificates is already the newest version (20240203).
+The following package was automatically installed and is no longer required:
+  libllvm17t64
+Use 'apt autoremove' to remove it.
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+[19:45:06] ✅ Dependências adicionais instaladas
+[19:45:06] 🐘 Configurando PostgreSQL 16...
+[19:45:06] 📁 Recriando cluster PostgreSQL...
+The files belonging to this database system will be owned by user "postgres".
+This user must also own the server process.
+
+The database cluster will be initialized with locale "en_US.UTF-8".
+The default database encoding has accordingly been set to "UTF8".
+The default text search configuration will be set to "english".
+
+Data page checksums are disabled.
+
+fixing permissions on existing directory /var/lib/postgresql/16/main ... ok
+creating subdirectories ... ok
+selecting dynamic shared memory implementation ... posix
+selecting default max_connections ... 100
+selecting default shared_buffers ... 128MB
+selecting default time zone ... Etc/UTC
+creating configuration files ... ok
+running bootstrap script ... ok
+performing post-bootstrap initialization ... ok
+syncing data to disk ... ok
+
+initdb: warning: enabling "trust" authentication for local connections
+initdb: hint: You can change this by editing pg_hba.conf or using the option -A, or --auth-local and --auth-host, the next time you run initdb.
+
+Success. You can now start the database server using:
+
+    /usr/lib/postgresql/16/bin/pg_ctl -D /var/lib/postgresql/16/main -l logfile start
+
+[19:45:07] ✅ Cluster PostgreSQL recriado
+[19:45:07] 🚀 Iniciando PostgreSQL...
+Synchronizing state of postgresql.service with SysV service script with /usr/lib/systemd/systemd-sysv-install.
+Executing: /usr/lib/systemd/systemd-sysv-install enable postgresql
+[19:45:13] ✅ PostgreSQL iniciado com sucesso
+[19:45:13] ⚙️ Configurando postgresql.conf...
+[19:45:13] 🔐 Configurando pg_hba.conf...
+[19:45:13] 🔄 Reiniciando PostgreSQL para aplicar configurações...
+[19:45:18] ✅ PostgreSQL configurado para SamurEye
+[19:45:18] 👤 Criando usuário e banco SamurEye...
+Error: Invalid data directory for cluster 16 main
+root@vlxsam03:~#
