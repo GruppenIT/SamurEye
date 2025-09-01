@@ -1,32 +1,25 @@
-# EXECUÇÃO IMEDIATA - CORRIGIR IMPORTS
+# EXECUÇÃO IMEDIATA - CONECTAR COLLECTOR
 
-## PROBLEMA ATUAL: Imports incorretos após rebuild
+## SITUAÇÃO ATUAL: Backend vlxsam02 funcionando
 
-Execute ESTE comando no vlxsam02 para corrigir imports:
+✅ vlxsam02: Backend funcionando corretamente em http://localhost:5000  
+✅ vlxsam01: NGINX proxy funcionando  
+✅ vlxsam03: Banco funcionando  
+🔄 vlxsam04: AGORA conectar collector via HTTP
 
-```bash
-ssh root@192.168.100.152
-curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/vlxsam02/fix-imports.sh | sudo bash
-```
+## PRÓXIMO COMANDO
 
-## Depois execute no vlxsam04:
+Execute no vlxsam04 para conectar collector:
 
 ```bash
 ssh root@192.168.100.154  
 curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/vlxsam04/fix-http-connection.sh | sudo bash
 ```
 
-## SITUAÇÃO ATUAL
+## APIs FUNCIONAIS
 
-✅ vlxsam02: storage.ts reconstruído MAS imports incorretos  
-✅ vlxsam01: NGINX funcionando  
-✅ vlxsam03: Banco funcionando  
-❌ vlxsam04: Aguardando aplicação vlxsam02
+- http://192.168.100.152:5000/collector-api/health
+- http://192.168.100.152:5000/collector-api/heartbeat
+- http://192.168.100.152:5000/api/admin/collectors
 
-## PROBLEMA
-
-Arquivos tentam `import { storage }` mas agora é `export default storage`
-
-## SOLUÇÃO
-
-O fix-imports.sh corrige todos os imports e cria shared/schema.ts necessário.
+Sistema pronto para receber collectors!
