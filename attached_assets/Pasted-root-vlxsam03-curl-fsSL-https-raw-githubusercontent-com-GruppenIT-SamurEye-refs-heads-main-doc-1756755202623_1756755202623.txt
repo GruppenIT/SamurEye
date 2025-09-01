@@ -1,0 +1,267 @@
+root@vlxsam03:~# curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/vlxsam03/install-hard-reset.sh | bash
+
+🔥 SAMUREYE HARD RESET - DATABASE SERVER vlxsam03
+===============================================
+⚠️  ATENÇÃO: Este script irá:
+   • Parar todos os serviços do banco de dados
+   • APAGAR TODOS OS DADOS do PostgreSQL, Redis, MinIO
+   • Reconfigurar pg_hba.conf e postgresql.conf
+   • Resetar senhas e configurações
+   • Recriar banco e usuários SamurEye
+   • Reconfigurar firewall e rede
+
+[19:31:43] WARNING: Modo não-interativo detectado (curl | bash)
+[19:31:43] INFO: Hard reset iniciará automaticamente em 5 segundos...
+[19:31:48] 🗑️ Iniciando hard reset do servidor de banco de dados...
+[19:31:48] 🔧 Reparando sistema de pacotes corrompido...
+[19:31:48] WARNING: Matando processos apt/dpkg em execução...
+[19:31:53] WARNING: Removendo locks do sistema de pacotes...
+[19:31:53] Executando reparos do dpkg...
+[19:31:53] Tentativa 1: dpkg --configure -a
+[19:31:58] Tentativa 1: apt-get -f install
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following packages were automatically installed and are no longer required:
+  libcommon-sense-perl libjson-perl libjson-xs-perl libllvm17t64 libllvm19 libpq5 libtypes-serialiser-perl ssl-cert
+Use 'apt autoremove' to remove them.
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+[19:32:04] ✅ dpkg funcionando na tentativa 1
+[19:32:04] Aguardando estabilização do sistema...
+[19:32:14] ✅ Reparo inicial do sistema de pacotes concluído
+[19:32:14] 📦 Instalando dependências básicas...
+[19:32:14] Tentativa 1 de atualização do sistema...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following packages were automatically installed and are no longer required:
+  libcommon-sense-perl libjson-perl libjson-xs-perl libllvm17t64 libllvm19 libpq5 libtypes-serialiser-perl ssl-cert
+Use 'apt autoremove' to remove them.
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+Hit:1 https://packages.grafana.com/oss/deb stable InRelease
+Hit:2 http://apt.postgresql.org/pub/repos/apt noble-pgdg InRelease
+Hit:3 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:4 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:5 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:6 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists... Done
+[19:32:23] ✅ Sistema atualizado
+[19:32:23] Tentativa 1 de instalação de dependências...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following packages were automatically installed and are no longer required:
+  libcommon-sense-perl libjson-perl libjson-xs-perl libllvm17t64 libllvm19 libpq5 libtypes-serialiser-perl ssl-cert
+Use 'apt autoremove' to remove them.
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+psmisc is already the newest version (23.7-1build1).
+psmisc set to manually installed.
+lsof is already the newest version (4.95.0-1build3).
+lsof set to manually installed.
+procps is already the newest version (2:4.0.4-4ubuntu3.2).
+procps set to manually installed.
+The following packages were automatically installed and are no longer required:
+  libcommon-sense-perl libjson-perl libjson-xs-perl libllvm17t64 libllvm19 libpq5 libtypes-serialiser-perl ssl-cert
+Use 'apt autoremove' to remove them.
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+[19:32:28] ✅ Dependências básicas instaladas
+[19:32:28] ⏹️ Parando todos os serviços...
+[19:32:28] 💾 Criando backup dos dados atuais...
+[19:32:28] ✅ Backup PostgreSQL criado
+[19:32:28] 📂 Backup salvo em: /opt/backups/samureye-reset-20250901-193228
+[19:32:28] 🗑️ Removendo dados existentes...
+[19:32:28] ✅ Dados PostgreSQL removidos
+[19:32:28] ✅ Dados Redis removidos
+[19:32:28] ✅ Dados MinIO removidos
+[19:32:28] ✅ Dados Grafana removidos
+[19:32:28] 📦 Instalando dependências adicionais...
+[19:32:28] Tentativa 1 de instalação de dependências adicionais...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following packages were automatically installed and are no longer required:
+  libcommon-sense-perl libjson-perl libjson-xs-perl libllvm17t64 libllvm19 libpq5 libtypes-serialiser-perl ssl-cert
+Use 'apt autoremove' to remove them.
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+wget is already the newest version (1.21.4-1ubuntu4.1).
+curl is already the newest version (8.5.0-2ubuntu10.6).
+software-properties-common is already the newest version (0.99.49.3).
+apt-transport-https is already the newest version (2.8.3).
+ca-certificates is already the newest version (20240203).
+The following packages were automatically installed and are no longer required:
+  libcommon-sense-perl libjson-perl libjson-xs-perl libllvm17t64 libllvm19 libpq5 libtypes-serialiser-perl ssl-cert
+Use 'apt autoremove' to remove them.
+The following NEW packages will be installed:
+  gnupg2
+0 upgraded, 1 newly installed, 0 to remove and 0 not upgraded.
+Need to get 4,748 B of archives.
+After this operation, 32.8 kB of additional disk space will be used.
+Get:1 http://archive.ubuntu.com/ubuntu noble-updates/universe amd64 gnupg2 all 2.4.4-2ubuntu17.3 [4,748 B]
+Fetched 4,748 B in 0s (10.6 kB/s)
+Selecting previously unselected package gnupg2.
+(Reading database ... 138308 files and directories currently installed.)
+Preparing to unpack .../gnupg2_2.4.4-2ubuntu17.3_all.deb ...
+Unpacking gnupg2 (2.4.4-2ubuntu17.3) ...
+Setting up gnupg2 (2.4.4-2ubuntu17.3) ...
+Processing triggers for man-db (2.12.0-4build2) ...
+
+Pending kernel upgrade!
+Running kernel version:
+  6.8.0-41-generic
+Diagnostics:
+  The currently running kernel version is not the expected kernel version 6.8.0-79-generic.
+
+Restarting the system to load the new kernel will not be handled automatically, so you should consider rebooting.
+
+Restarting services...
+
+Service restarts being deferred:
+ /etc/needrestart/restart.d/dbus.service
+ systemctl restart getty@tty1.service
+ systemctl restart systemd-logind.service
+
+No containers need to be restarted.
+
+No user sessions are running outdated binaries.
+
+No VM guests are running outdated hypervisor (qemu) binaries on this host.
+[19:32:37] ✅ Dependências adicionais instaladas
+[19:32:37] 🐘 Configurando PostgreSQL 16...
+[19:32:37] Instalando PostgreSQL 16...
+OK
+[19:32:38] Tentativa 1 de instalação PostgreSQL...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following packages were automatically installed and are no longer required:
+  libcommon-sense-perl libjson-perl libjson-xs-perl libllvm17t64 libllvm19 libpq5 libtypes-serialiser-perl ssl-cert
+Use 'apt autoremove' to remove them.
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+Hit:1 http://apt.postgresql.org/pub/repos/apt noble-pgdg InRelease
+Hit:2 https://packages.grafana.com/oss/deb stable InRelease
+Hit:3 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:4 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:5 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:6 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists... Done
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following package was automatically installed and is no longer required:
+  libllvm17t64
+Use 'apt autoremove' to remove it.
+The following additional packages will be installed:
+  libio-pty-perl libipc-run-perl postgresql-client-common postgresql-common postgresql-common-dev
+Suggested packages:
+  postgresql-doc-16
+The following NEW packages will be installed:
+  libio-pty-perl libipc-run-perl postgresql-16 postgresql-client-16 postgresql-client-common postgresql-common postgresql-common-dev
+0 upgraded, 7 newly installed, 0 to remove and 0 not upgraded.
+Need to get 355 kB/18.6 MB of archives.
+After this operation, 68.0 MB of additional disk space will be used.
+Get:1 http://apt.postgresql.org/pub/repos/apt noble-pgdg/main amd64 postgresql-client-common all 281.pgdg24.04+1 [47.3 kB]
+Get:2 http://apt.postgresql.org/pub/repos/apt noble-pgdg/main amd64 postgresql-common-dev all 281.pgdg24.04+1 [72.5 kB]
+Get:3 http://apt.postgresql.org/pub/repos/apt noble-pgdg/main amd64 postgresql-common all 281.pgdg24.04+1 [112 kB]
+Get:4 http://archive.ubuntu.com/ubuntu noble/main amd64 libio-pty-perl amd64 1:1.20-1build2 [31.2 kB]
+Get:5 http://archive.ubuntu.com/ubuntu noble/main amd64 libipc-run-perl all 20231003.0-1 [92.1 kB]
+Fetched 355 kB in 1s (250 kB/s)
+Preconfiguring packages ...
+Selecting previously unselected package postgresql-client-common.
+(Reading database ... 138314 files and directories currently installed.)
+Preparing to unpack .../0-postgresql-client-common_281.pgdg24.04+1_all.deb ...
+Unpacking postgresql-client-common (281.pgdg24.04+1) ...
+Selecting previously unselected package libio-pty-perl.
+Preparing to unpack .../1-libio-pty-perl_1%3a1.20-1build2_amd64.deb ...
+Unpacking libio-pty-perl (1:1.20-1build2) ...
+Selecting previously unselected package libipc-run-perl.
+Preparing to unpack .../2-libipc-run-perl_20231003.0-1_all.deb ...
+Unpacking libipc-run-perl (20231003.0-1) ...
+Selecting previously unselected package postgresql-common-dev.
+Preparing to unpack .../3-postgresql-common-dev_281.pgdg24.04+1_all.deb ...
+Unpacking postgresql-common-dev (281.pgdg24.04+1) ...
+Selecting previously unselected package postgresql-common.
+Preparing to unpack .../4-postgresql-common_281.pgdg24.04+1_all.deb ...
+Adding 'diversion of /usr/bin/pg_config to /usr/bin/pg_config.libpq-dev by postgresql-common'
+Unpacking postgresql-common (281.pgdg24.04+1) ...
+Selecting previously unselected package postgresql-client-16.
+Preparing to unpack .../5-postgresql-client-16_16.10-1.pgdg24.04+1_amd64.deb ...
+Unpacking postgresql-client-16 (16.10-1.pgdg24.04+1) ...
+Selecting previously unselected package postgresql-16.
+Preparing to unpack .../6-postgresql-16_16.10-1.pgdg24.04+1_amd64.deb ...
+Unpacking postgresql-16 (16.10-1.pgdg24.04+1) ...
+Setting up postgresql-client-common (281.pgdg24.04+1) ...
+Setting up libio-pty-perl (1:1.20-1build2) ...
+Setting up postgresql-client-16 (16.10-1.pgdg24.04+1) ...
+update-alternatives: using /usr/share/postgresql/16/man/man1/psql.1.gz to provide /usr/share/man/man1/psql.1.gz (psql.1.gz) in auto mode
+Setting up libipc-run-perl (20231003.0-1) ...
+Setting up postgresql-common-dev (281.pgdg24.04+1) ...
+Setting up postgresql-common (281.pgdg24.04+1) ...
+Installing new version of config file /etc/postgresql-common/pg_upgradecluster.d/analyze ...
+Replacing config file /etc/postgresql-common/createcluster.conf with new version
+postgresql.service is a disabled or a static unit, not starting it.
+Setting up postgresql-16 (16.10-1.pgdg24.04+1) ...
+pg_controldata: error: could not open file "/var/lib/postgresql/16/main/global/pg_control" for reading: No such file or directory
+Processing triggers for man-db (2.12.0-4build2) ...
+
+Pending kernel upgrade!
+Running kernel version:
+  6.8.0-41-generic
+Diagnostics:
+  The currently running kernel version is not the expected kernel version 6.8.0-79-generic.
+
+Restarting the system to load the new kernel will not be handled automatically, so you should consider rebooting.
+
+Restarting services...
+
+Service restarts being deferred:
+ /etc/needrestart/restart.d/dbus.service
+ systemctl restart getty@tty1.service
+ systemctl restart systemd-logind.service
+
+No containers need to be restarted.
+
+No user sessions are running outdated binaries.
+
+No VM guests are running outdated hypervisor (qemu) binaries on this host.
+[19:32:59] ✅ PostgreSQL instalado
+The files belonging to this database system will be owned by user "postgres".
+This user must also own the server process.
+
+The database cluster will be initialized with locale "en_US.UTF-8".
+The default database encoding has accordingly been set to "UTF8".
+The default text search configuration will be set to "english".
+
+Data page checksums are disabled.
+
+fixing permissions on existing directory /var/lib/postgresql/16/main ... ok
+creating subdirectories ... ok
+selecting dynamic shared memory implementation ... posix
+selecting default max_connections ... 100
+selecting default shared_buffers ... 128MB
+selecting default time zone ... Etc/UTC
+creating configuration files ... ok
+running bootstrap script ... ok
+performing post-bootstrap initialization ... ok
+syncing data to disk ... ok
+
+initdb: warning: enabling "trust" authentication for local connections
+initdb: hint: You can change this by editing pg_hba.conf or using the option -A, or --auth-local and --auth-host, the next time you run initdb.
+
+Success. You can now start the database server using:
+
+    /usr/lib/postgresql/16/bin/pg_ctl -D /var/lib/postgresql/16/main -l logfile start
+
+[19:33:00] ⚙️ Configurando postgresql.conf...
+[19:33:00] 🔐 Configurando pg_hba.conf...
+Synchronizing state of postgresql.service with SysV service script with /usr/lib/systemd/systemd-sysv-install.
+Executing: /usr/lib/systemd/systemd-sysv-install enable postgresql
+Created symlink /etc/systemd/system/multi-user.target.wants/postgresql.service → /usr/lib/systemd/system/postgresql.service.
+[19:33:06] 👤 Criando usuário e banco SamurEye...
+Error: Invalid data directory for cluster 16 main
+root@vlxsam03:~#

@@ -35,7 +35,7 @@ fi
 POSTGRES_VERSION="16"
 POSTGRES_USER="samureye"
 POSTGRES_DB="samureye"
-POSTGRES_PASSWORD="samureye123"
+POSTGRES_PASSWORD="SamurEye2024!"
 REDIS_PASSWORD="redis123"
 MINIO_USER="minio"
 MINIO_PASSWORD="minio123"
@@ -262,10 +262,8 @@ if ! command -v psql &> /dev/null; then
     done
 fi
 
-# Inicializar cluster se necessário
-if [ ! -f "/var/lib/postgresql/$POSTGRES_VERSION/main/PG_VERSION" ]; then
-    sudo -u postgres /usr/lib/postgresql/$POSTGRES_VERSION/bin/initdb -D /var/lib/postgresql/$POSTGRES_VERSION/main
-fi
+# O PostgreSQL 16 cria o cluster automaticamente durante a instalação
+# Não precisamos inicializar manualmente
 
 # Configurar postgresql.conf
 log "⚙️ Configurando postgresql.conf..."
@@ -355,23 +353,37 @@ sleep 5
 
 # Criar usuário e banco SamurEye
 log "👤 Criando usuário e banco SamurEye..."
-sudo -u postgres psql << EOF
+sudo -u postgres psql << 'EOF'
 -- Remover usuário e banco se existirem
-DROP DATABASE IF EXISTS $POSTGRES_DB;
+DROP DATABASE IF EXISTS samureye;
 DROP DATABASE IF EXISTS grafana;
-DROP USER IF EXISTS $POSTGRES_USER;
+DROP USER IF EXISTS samureye;
 DROP USER IF EXISTS grafana;
 
 -- Criar usuário SamurEye
-CREATE USER $POSTGRES_USER WITH PASSWORD '$POSTGRES_PASSWORD';
-ALTER USER $POSTGRES_USER CREATEDB;
+CREATE USER samureye WITH ENCRYPTED PASSWORD 'SamurEye2024!';
+ALTER USER samureye CREATEDB;
 
 -- Criar banco SamurEye
-CREATE DATABASE $POSTGRES_DB OWNER $POSTGRES_USER;
-GRANT ALL PRIVILEGES ON DATABASE $POSTGRES_DB TO $POSTGRES_USER;
+CREATE DATABASE samureye OWNER samureye;
+GRANT ALL PRIVILEGES ON DATABASE samureye TO samureye;
+
+-- Conectar ao banco samureye
+\c samureye
+
+-- Criar extensões necessárias
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+
+-- Conceder privilégios nas extensões
+GRANT ALL ON SCHEMA public TO samureye;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO samureye;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO samureye;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON FUNCTIONS TO samureye;
 
 -- Criar usuário e banco Grafana
-CREATE USER grafana WITH PASSWORD '$GRAFANA_PASSWORD';
+\c postgres
+CREATE USER grafana WITH ENCRYPTED PASSWORD 'grafana123';
 CREATE DATABASE grafana OWNER grafana;
 GRANT ALL PRIVILEGES ON DATABASE grafana TO grafana;
 
@@ -644,7 +656,7 @@ echo ""
 echo "🧪 TESTES DE CONECTIVIDADE:"
 
 # PostgreSQL
-test_service "PostgreSQL" "PGPASSWORD=samureye123 psql -h localhost -U samureye -d samureye -c 'SELECT version();'" "PostgreSQL SamurEye"
+test_service "PostgreSQL" "PGPASSWORD=SamurEye2024! psql -h localhost -U samureye -d samureye -c 'SELECT version();'" "PostgreSQL SamurEye"
 
 # Redis
 test_service "Redis" "redis-cli -a redis123 ping" "Redis"
@@ -659,7 +671,7 @@ echo ""
 echo "============================================="
 echo "CREDENCIAIS DE ACESSO:"
 echo "============================================="
-echo "PostgreSQL: samureye / samureye123 @ localhost:5432"
+echo "PostgreSQL: samureye / SamurEye2024! @ localhost:5432"
 echo "Redis: redis123 @ localhost:6379"
 echo "MinIO: minio / minio123 @ localhost:9000"
 echo "Grafana: admin / grafana123 @ localhost:3000"
@@ -676,7 +688,7 @@ log "✅ Executando testes finais..."
 sleep 10
 
 # Testar PostgreSQL
-if PGPASSWORD="$POSTGRES_PASSWORD" psql -h localhost -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "SELECT version();" &>/dev/null; then
+if PGPASSWORD="SamurEye2024!" psql -h localhost -U samureye -d samureye -c "SELECT version();" &>/dev/null; then
     log "✅ PostgreSQL funcionando"
 else
     error "❌ PostgreSQL com problemas"
@@ -712,7 +724,7 @@ echo "🎉 HARD RESET CONCLUÍDO COM SUCESSO!"
 echo "====================================="
 echo ""
 echo "📊 SERVIÇOS CONFIGURADOS:"
-echo "• PostgreSQL 16: samureye/samureye123 @ :5432"
+echo "• PostgreSQL 16: samureye/SamurEye2024! @ :5432"
 echo "• Redis: redis123 @ :6379"
 echo "• MinIO: minio/minio123 @ :9000"
 echo "• Grafana: admin/grafana123 @ :3000"
@@ -721,7 +733,7 @@ echo "🔧 COMANDOS ÚTEIS:"
 echo "• Testar tudo: /usr/local/bin/test-samureye-db.sh"
 echo "• Status: systemctl status postgresql redis-server minio grafana-server"
 echo "• Logs PostgreSQL: tail -f /var/log/postgresql/postgresql-*.log"
-echo "• Conectar DB: PGPASSWORD=samureye123 psql -h localhost -U samureye -d samureye"
+echo "• Conectar DB: PGPASSWORD=SamurEye2024! psql -h localhost -U samureye -d samureye"
 echo ""
 echo "📂 Backup dos dados antigos: $BACKUP_DIR"
 echo ""
