@@ -1,0 +1,236 @@
+root@vlxsam02:~# curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye                                                                                                                                    /refs/heads/main/docs/deployment/vlxsam02/rebuild-storage.sh | sudo bash
+🔧 vlxsam02 - RECONSTRUIR STORAGE.TS
+====================================
+[12:04:31] 📁 Trabalhando em: /opt/samureye/SamurEye
+[12:04:31] 💾 Fazendo backup do storage.ts corrompido...
+[12:04:31] 🔧 Reconstruindo storage.ts do zero...
+[12:04:31] ✅ storage.ts reconstruído completamente
+[12:04:31] 🔍 Verificando routes.ts...
+[12:04:31] 🧪 Testando sintaxe TypeScript...
+[12:04:37] ✅ storage.ts sintaxe OK
+node_modules/@google-cloud/storage/build/cjs/src/crc32c.d.ts:6:39 - error TS2315: Type 'Int32Array' is not generic.
+
+6 declare const CRC32C_EXTENSION_TABLE: Int32Array<ArrayBuffer>;
+                                        ~~~~~~~~~~~~~~~~~~~~~~~
+
+node_modules/@google-cloud/storage/build/cjs/src/crc32c.d.ts:66:5 - error TS18028: Private identifiers are only available when targeting ECMAScript 2015 and higher.
+
+66     #private;
+       ~~~~~~~~
+
+node_modules/@google-cloud/storage/build/cjs/src/crc32c.d.ts:115:45 - error TS2315: Type 'Int32Array' is not generic.
+
+115     static readonly CRC32C_EXTENSION_TABLE: Int32Array<ArrayBuffer>;
+                                                ~~~~~~~~~~~~~~~~~~~~~~~
+
+node_modules/@google-cloud/storage/build/cjs/src/file.d.ts:327:5 - error TS18028: Private identifiers are only available when targeting ECMAScript 2015 and higher.
+
+327     #private;
+        ~~~~~~~~
+
+node_modules/@google-cloud/storage/build/cjs/src/hash-stream-validator.d.ts:20:5 - error TS18028: Private identifiers are only available when targeting ECMAScript 2015 and higher.
+
+20     #private;
+       ~~~~~~~~
+
+node_modules/@google-cloud/storage/build/cjs/src/resumable-upload.d.ts:200:5 - error TS18028: Private identifiers are only available when targeting ECMAScript 2015 and higher.
+
+200     #private;
+        ~~~~~~~~
+
+node_modules/@google-cloud/storage/node_modules/google-auth-library/build/src/auth/awsclient.d.ts:84:5 - error TS18028: Private identifiers are only available when targeting ECMAScript 2015 and higher.
+
+84     #private;
+       ~~~~~~~~
+
+node_modules/@google-cloud/storage/node_modules/google-auth-library/build/src/auth/baseexternalclient.d.ts:176:5 - error TS18028: Private identifiers are only available when targeting ECMAScript 2015 and higher.
+
+176     #private;
+        ~~~~~~~~
+
+node_modules/@google-cloud/storage/node_modules/google-auth-library/build/src/auth/googleauth.d.ts:90:5 - error TS18028: Private identifiers are only available when targeting ECMAScript 2015 and higher.
+
+90     #private;
+       ~~~~~~~~
+
+node_modules/@google-cloud/storage/node_modules/google-auth-library/build/src/util.d.ts:134:5 - error TS18028: Private identifiers are only available when targeting ECMAScript 2015 and higher.
+
+134     #private;
+        ~~~~~~~~
+
+node_modules/@google-cloud/storage/node_modules/gtoken/build/src/index.d.ts:38:5 - error TS18028: Private identifiers are only available when targeting ECMAScript 2015 and higher.
+
+38     #private;
+       ~~~~~~~~
+
+node_modules/gaxios/build/src/gaxios.d.ts:6:5 - error TS18028: Private identifiers are only available when targeting ECMAScript 2015 and higher.
+
+6     #private;
+      ~~~~~~~~
+
+node_modules/memorystore/index.d.ts:1:8 - error TS1259: Module '"/opt/samureye/SamurEye/node_modules/@types/express-session/index"' can only be default-imported using the 'esModuleInterop' flag
+
+1 import expressSession, {
+         ~~~~~~~~~~~~~~
+
+  node_modules/@types/express-session/index.d.ts:35:1
+    35 export = session;
+       ~~~~~~~~~~~~~~~~~
+    This module is declared with 'export =', and can only be used with a default import when using the 'esModuleInterop' flag.
+
+node_modules/zod/lib/types.d.ts:772:5 - error TS18028: Private identifiers are only available when targeting ECMAScript 2015 and higher.
+
+772     #private;
+        ~~~~~~~~
+
+node_modules/zod/lib/types.d.ts:791:5 - error TS18028: Private identifiers are only available when targeting ECMAScript 2015 and higher.
+
+791     #private;
+        ~~~~~~~~
+
+server/replitAuth.ts:2:47 - error TS2307: Cannot find module 'openid-client/passport' or its corresponding type declarations.
+  There are types at '/opt/samureye/SamurEye/node_modules/openid-client/build/passport.d.ts', but this result could not be resolved under your current 'moduleResolution' setting. Consider updating to 'node16', 'nodenext', or 'bundler'.
+
+2 import { Strategy, type VerifyFunction } from "openid-client/passport";
+                                                ~~~~~~~~~~~~~~~~~~~~~~~~
+
+server/replitAuth.ts:4:8 - error TS1259: Module '"/opt/samureye/SamurEye/node_modules/@types/passport/index"' can only be default-imported using the 'esModuleInterop' flag
+
+4 import passport from "passport";
+         ~~~~~~~~
+
+  node_modules/@types/passport/index.d.ts:925:1
+    925 export = passport;
+        ~~~~~~~~~~~~~~~~~~
+    This module is declared with 'export =', and can only be used with a default import when using the 'esModuleInterop' flag.
+
+server/replitAuth.ts:5:8 - error TS1259: Module '"/opt/samureye/SamurEye/node_modules/@types/express-session/index"' can only be default-imported using the 'esModuleInterop' flag
+
+5 import session from "express-session";
+         ~~~~~~~
+
+  node_modules/@types/express-session/index.d.ts:35:1
+    35 export = session;
+       ~~~~~~~~~~~~~~~~~
+    This module is declared with 'export =', and can only be used with a default import when using the 'esModuleInterop' flag.
+
+server/replitAuth.ts:7:8 - error TS1259: Module '"/opt/samureye/SamurEye/node_modules/@types/memoizee/index"' can only be default-imported using the 'esModuleInterop' flag
+
+7 import memoize from "memoizee";
+         ~~~~~~~
+
+  node_modules/@types/memoizee/index.d.ts:27:1
+    27 export = memoizee;
+       ~~~~~~~~~~~~~~~~~~
+    This module is declared with 'export =', and can only be used with a default import when using the 'esModuleInterop' flag.
+
+server/replitAuth.ts:8:8 - error TS1259: Module '"/opt/samureye/SamurEye/node_modules/@types/connect-pg-simple/index"' can only be default-imported using the 'esModuleInterop' flag
+
+8 import connectPg from "connect-pg-simple";
+         ~~~~~~~~~
+
+  node_modules/@types/connect-pg-simple/index.d.ts:34:1
+    34 export = connectPgSimple;
+       ~~~~~~~~~~~~~~~~~~~~~~~~~
+    This module is declared with 'export =', and can only be used with a default import when using the 'esModuleInterop' flag.
+
+server/replitAuth.ts:9:10 - error TS2724: '"./storage"' has no exported member named 'storage'. Did you mean 'IStorage'?
+
+9 import { storage } from "./storage";
+           ~~~~~~~
+
+server/routes.ts:4:10 - error TS2724: '"./storage"' has no exported member named 'storage'. Did you mean 'IStorage'?
+
+4 import { storage } from "./storage";
+           ~~~~~~~
+
+server/routes.ts:13:8 - error TS2307: Cannot find module '@shared/schema' or its corresponding type declarations.
+
+13 } from "@shared/schema";
+          ~~~~~~~~~~~~~~~~
+
+server/routes.ts:17:8 - error TS1259: Module '"/opt/samureye/SamurEye/node_modules/@types/express-session/index"' can only be default-imported using the 'esModuleInterop' flag
+
+17 import session from "express-session";
+          ~~~~~~~
+
+  node_modules/@types/express-session/index.d.ts:35:1
+    35 export = session;
+       ~~~~~~~~~~~~~~~~~
+    This module is declared with 'export =', and can only be used with a default import when using the 'esModuleInterop' flag.
+
+server/routes.ts:18:8 - error TS1259: Module '"/opt/samureye/SamurEye/node_modules/memorystore/index"' can only be default-imported using the 'esModuleInterop' flag
+
+18 import createMemoryStore from "memorystore";
+          ~~~~~~~~~~~~~~~~~
+
+  node_modules/memorystore/index.d.ts:81:1
+    81 export = createMemoryStore;
+       ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    This module is declared with 'export =', and can only be used with a default import when using the 'esModuleInterop' flag.
+
+server/seedSimpleData.ts:1:10 - error TS2724: '"./storage"' has no exported member named 'storage'. Did you mean 'IStorage'?
+
+1 import { storage } from "./storage";
+           ~~~~~~~
+
+
+Found 26 errors in 15 files.
+
+Errors  Files
+     3  node_modules/@google-cloud/storage/build/cjs/src/crc32c.d.ts:6
+     1  node_modules/@google-cloud/storage/build/cjs/src/file.d.ts:327
+     1  node_modules/@google-cloud/storage/build/cjs/src/hash-stream-validator.d.ts:20
+     1  node_modules/@google-cloud/storage/build/cjs/src/resumable-upload.d.ts:200
+     1  node_modules/@google-cloud/storage/node_modules/google-auth-library/build/src/auth/awsclient.d.ts:84
+     1  node_modules/@google-cloud/storage/node_modules/google-auth-library/build/src/auth/baseexternalclient.d.ts:176
+     1  node_modules/@google-cloud/storage/node_modules/google-auth-library/build/src/auth/googleauth.d.ts:90
+     1  node_modules/@google-cloud/storage/node_modules/google-auth-library/build/src/util.d.ts:134
+     1  node_modules/@google-cloud/storage/node_modules/gtoken/build/src/index.d.ts:38
+     1  node_modules/gaxios/build/src/gaxios.d.ts:6
+     1  node_modules/memorystore/index.d.ts:1
+     2  node_modules/zod/lib/types.d.ts:772
+     6  server/replitAuth.ts:2
+     4  server/routes.ts:4
+     1  server/seedSimpleData.ts:1
+[12:04:44] WARNING: ⚠️ Possível problema em routes.ts
+[12:04:44] 🔨 Fazendo build...
+
+> rest-express@1.0.0 build
+> vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+
+vite v5.4.19 building for production...
+transforming (3) src/main.tsxBrowserslist: browsers data (caniuse-lite) is 11 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+✓ 2692 modules transformed.
+../dist/public/index.html                   2.20 kB │ gzip:   0.86 kB
+../dist/public/assets/index-BzMs3bRP.css   68.82 kB │ gzip:  11.97 kB
+../dist/public/assets/index-DI20BVPr.js   666.31 kB │ gzip: 192.35 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 6.80s
+✘ [ERROR] No matching export in "server/storage.ts" for import "storage"
+
+    server/replitAuth.ts:9:9:
+      9 │ import { storage } from "./storage";
+        ╵          ~~~~~~~
+
+✘ [ERROR] No matching export in "server/storage.ts" for import "storage"
+
+    server/seedSimpleData.ts:1:9:
+      1 │ import { storage } from "./storage";
+        ╵          ~~~~~~~
+
+✘ [ERROR] No matching export in "server/storage.ts" for import "storage"
+
+    server/routes.ts:4:9:
+      4 │ import { storage } from "./storage";
+        ╵          ~~~~~~~
+
+3 errors
+[12:04:51] ERROR: ❌ Build falhou
+root@vlxsam02:~#
