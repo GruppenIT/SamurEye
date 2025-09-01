@@ -262,7 +262,23 @@ if ! command -v psql &> /dev/null; then
     done
 fi
 
-# Iniciar PostgreSQL primeiro (como no install.sh original)
+# Verificar se diretório de dados existe e recriar cluster se necessário
+DATA_DIR="/var/lib/postgresql/$POSTGRES_VERSION/main"
+if [ ! -f "$DATA_DIR/PG_VERSION" ]; then
+    log "📁 Recriando cluster PostgreSQL..."
+    
+    # Garantir que o diretório de dados existe com as permissões corretas
+    mkdir -p "$DATA_DIR"
+    chown postgres:postgres "$DATA_DIR"
+    chmod 700 "$DATA_DIR"
+    
+    # Inicializar cluster
+    sudo -u postgres /usr/lib/postgresql/$POSTGRES_VERSION/bin/initdb -D "$DATA_DIR" --locale=en_US.UTF-8
+    
+    log "✅ Cluster PostgreSQL recriado"
+fi
+
+# Iniciar PostgreSQL
 log "🚀 Iniciando PostgreSQL..."
 systemctl enable postgresql
 systemctl start postgresql
