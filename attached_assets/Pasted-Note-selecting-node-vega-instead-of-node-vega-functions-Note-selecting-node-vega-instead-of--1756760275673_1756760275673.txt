@@ -1,0 +1,2083 @@
+Note, selecting 'node-vega' instead of 'node-vega-functions'
+Note, selecting 'node-vega' instead of 'node-vega-geo'
+Note, selecting 'node-vega' instead of 'node-vega-hierarchy'
+Note, selecting 'node-vega' instead of 'node-vega-interpreter'
+Note, selecting 'node-vega' instead of 'node-vega-label'
+Note, selecting 'node-vega' instead of 'node-vega-loader'
+Note, selecting 'node-vega' instead of 'node-vega-parser'
+Note, selecting 'node-vega' instead of 'node-vega-projection'
+Note, selecting 'node-vega' instead of 'node-vega-projection-extended'
+Note, selecting 'node-vega' instead of 'node-vega-regression'
+Note, selecting 'node-vega' instead of 'node-vega-runtime'
+Note, selecting 'node-vega' instead of 'node-vega-scale'
+Note, selecting 'node-vega' instead of 'node-vega-scenegraph'
+Note, selecting 'node-vega' instead of 'node-vega-schema'
+Note, selecting 'node-vega' instead of 'node-vega-schema-url-parser'
+Note, selecting 'node-vega' instead of 'node-vega-selections'
+Note, selecting 'node-vega' instead of 'node-vega-statistics'
+Note, selecting 'node-vega' instead of 'node-vega-time'
+Note, selecting 'node-vega' instead of 'node-vega-transforms'
+Note, selecting 'node-vega' instead of 'node-vega-typings'
+Note, selecting 'node-vega' instead of 'node-vega-util'
+Note, selecting 'node-vega' instead of 'node-vega-view'
+Note, selecting 'node-vega' instead of 'node-vega-view-transforms'
+Note, selecting 'node-vega' instead of 'node-vega-voronoi'
+Note, selecting 'node-vega' instead of 'node-vega-wordcloud'
+Note, selecting 'node-vega-lite' instead of 'node-json-stringify-pretty-compact'
+Note, selecting 'node-verror' instead of 'node-types-verror'
+Note, selecting 'node-vinyl' instead of 'node-types-vinyl'
+Note, selecting 'node-vinyl-fs' instead of 'node-types-vinyl-fs'
+Note, selecting 'node-vue' instead of 'node-vue-template-compiler'
+Note, selecting 'node-vue' instead of 'node-vue-server-renderer'
+Note, selecting 'node-vue' instead of 'node-weex-template-compiler'
+Note, selecting 'node-vue' instead of 'node-weex-vue-framework'
+Note, selecting 'node-vue-resource' instead of 'node-types-vue-resource'
+Note, selecting 'node-warning' instead of 'node-types-warning'
+Note, selecting 'node-watchpack' instead of 'node-glob-to-regexp'
+Note, selecting 'node-watchpack' instead of 'node-types-watchpack'
+Note, selecting 'node-webassemblyjs' instead of 'node-eslint-plugin-webassembly'
+Note, selecting 'node-webassemblyjs' instead of 'node-webassemblyjs-ast'
+Note, selecting 'node-webassemblyjs' instead of 'node-webassemblyjs-cli'
+Note, selecting 'node-webassemblyjs' instead of 'node-webassemblyjs-floating-point-hex-parser'
+Note, selecting 'node-webassemblyjs' instead of 'node-webassemblyjs-helper-api-error'
+Note, selecting 'node-webassemblyjs' instead of 'node-webassemblyjs-helper-buffer'
+Note, selecting 'node-webassemblyjs' instead of 'node-webassemblyjs-helper-code-frame'
+Note, selecting 'node-webassemblyjs' instead of 'node-webassemblyjs-helper-compiler'
+Note, selecting 'node-webassemblyjs' instead of 'node-webassemblyjs-helper-flatten-ast'
+Note, selecting 'node-webassemblyjs' instead of 'node-webassemblyjs-helper-fsm'
+Note, selecting 'node-webassemblyjs' instead of 'node-webassemblyjs-helper-numbers'
+Note, selecting 'node-webassemblyjs' instead of 'node-webassemblyjs-helper-test-framework'
+Note, selecting 'node-webassemblyjs' instead of 'node-webassemblyjs-helper-testsuite-runner'
+Note, selecting 'node-webassemblyjs' instead of 'node-webassemblyjs-helper-wasm-bytecode'
+Note, selecting 'node-webassemblyjs' instead of 'node-webassemblyjs-helper-wasm-section'
+Note, selecting 'node-webassemblyjs' instead of 'node-webassemblyjs-ieee754'
+Note, selecting 'node-webassemblyjs' instead of 'node-webassemblyjs-leb128'
+Note, selecting 'node-webassemblyjs' instead of 'node-webassemblyjs-repl'
+Note, selecting 'node-webassemblyjs' instead of 'node-webassemblyjs-utf8'
+Note, selecting 'node-webassemblyjs' instead of 'node-webassemblyjs-validation'
+Note, selecting 'node-webassemblyjs' instead of 'node-webassemblyjs-wasm-edit'
+Note, selecting 'node-webassemblyjs' instead of 'node-webassemblyjs-wasm-gen'
+Note, selecting 'node-webassemblyjs' instead of 'node-webassemblyjs-wasm-opt'
+Note, selecting 'node-webassemblyjs' instead of 'node-webassemblyjs-wasm-parser'
+Note, selecting 'node-webassemblyjs' instead of 'node-webassemblyjs-wasm-text-gen'
+Note, selecting 'node-webassemblyjs' instead of 'node-webassemblyjs-wast-parser'
+Note, selecting 'node-webassemblyjs' instead of 'node-webassemblyjs-wast-printer'
+Note, selecting 'node-webassemblyjs' instead of 'node-webassemblyjs-wast-refmt'
+Note, selecting 'node-webfont' instead of 'node-b3b'
+Note, selecting 'node-webfont' instead of 'node-fast-xml-parser'
+Note, selecting 'node-webfont' instead of 'node-is-eot'
+Note, selecting 'node-webfont' instead of 'node-is-svg'
+Note, selecting 'node-webfont' instead of 'node-is-ttf'
+Note, selecting 'node-webfont' instead of 'node-is-woff'
+Note, selecting 'node-webfont' instead of 'node-is-woff2'
+Note, selecting 'node-webfont' instead of 'node-neatequal'
+Note, selecting 'node-webfont' instead of 'node-strnum'
+Note, selecting 'node-webfont' instead of 'node-svg-pathdata'
+Note, selecting 'node-webfont' instead of 'node-svgicons2svgfont'
+Note, selecting 'node-webfont' instead of 'node-ttf2eot'
+Note, selecting 'node-webfont' instead of 'node-ttf2woff'
+Note, selecting 'node-webfont' instead of 'node-varstream'
+Note, selecting 'node-webfont' instead of 'node-wawoff2'
+Note, selecting 'node-webidl-conversions' instead of 'node-types-webidl-conversions'
+Note, selecting 'node-webpack-env' instead of 'node-types-webpack-env'
+Note, selecting 'node-webpack-merge' instead of 'node-wildcard'
+Note, selecting 'node-webpack-sources' instead of 'node-types-webpack-sources'
+Note, selecting 'node-websocket' instead of 'node-bufferutil'
+Note, selecting 'node-websocket' instead of 'node-types-websocket'
+Note, selecting 'node-websocket' instead of 'node-utf-8-validate'
+Note, selecting 'node-websocket' instead of 'node-yaeti'
+Note, selecting 'node-websocket-driver' instead of 'node-http-parser-js'
+Note, selecting 'node-websocket-driver' instead of 'node-websocket-extensions'
+Note, selecting 'node-which' instead of 'node-types-which'
+Note, selecting 'node-with' instead of 'node-assert-never'
+Note, selecting 'node-with' instead of 'node-babel-walk'
+Note, selecting 'node-wrap-ansi' instead of 'node-types-wrap-ansi'
+Note, selecting 'node-write' instead of 'node-add-filename-increment'
+Note, selecting 'node-write' instead of 'node-strip-filename-increment'
+Note, selecting 'node-write-file-atomic' instead of 'node-types-write-file-atomic'
+Note, selecting 'node-ws' instead of 'node-types-ws'
+Note, selecting 'node-ws' instead of 'node-wscat'
+Note, selecting 'node-ws-iconv' instead of 'node-bluelovers-array-buffer-to-string'
+Note, selecting 'node-ws-iconv' instead of 'node-bluelovers-fs-json'
+Note, selecting 'node-ws-iconv' instead of 'node-bom-encoding'
+Note, selecting 'node-ws-iconv' instead of 'node-fs-stat'
+Note, selecting 'node-ws-iconv' instead of 'node-fs-stream-sync'
+Note, selecting 'node-ws-iconv' instead of 'node-fs-symlink-extra'
+Note, selecting 'node-ws-iconv' instead of 'node-fs-target-file'
+Note, selecting 'node-ws-iconv' instead of 'node-lazy-iconv-html-encoding-sniffer'
+Note, selecting 'node-ws-iconv' instead of 'node-lazy-node-is-writeable-path'
+Note, selecting 'node-ws-iconv' instead of 'node-lazy-node-readlines'
+Note, selecting 'node-ws-iconv' instead of 'node-lazy-node-windows-unsafe-filename'
+Note, selecting 'node-ws-iconv' instead of 'node-path-dir-normalize'
+Note, selecting 'node-ws-iconv' instead of 'node-path-in-dir'
+Note, selecting 'node-ws-iconv' instead of 'node-path-is-network-drive'
+Note, selecting 'node-ws-iconv' instead of 'node-path-is-same'
+Note, selecting 'node-ws-iconv' instead of 'node-path-parents'
+Note, selecting 'node-ws-iconv' instead of 'node-path-strip-sep'
+Note, selecting 'node-ws-iconv' instead of 'node-upath2'
+Note, selecting 'node-xml2js' instead of 'node-xmlbuilder'
+Note, selecting 'node-xmldom' instead of 'node-xmldom-xmldom'
+Note, selecting 'node-xterm' instead of 'node-xterm-addon-attach'
+Note, selecting 'node-xterm' instead of 'node-xterm-addon-canvas'
+Note, selecting 'node-xterm' instead of 'node-xterm-addon-fit'
+Note, selecting 'node-xterm' instead of 'node-xterm-addon-image'
+Note, selecting 'node-xterm' instead of 'node-xterm-addon-search'
+Note, selecting 'node-xterm' instead of 'node-xterm-addon-serialize'
+Note, selecting 'node-xterm' instead of 'node-xterm-addon-unicode11'
+Note, selecting 'node-xterm' instead of 'node-xterm-addon-web-links'
+Note, selecting 'node-xterm' instead of 'node-xterm-addon-webgl'
+Note, selecting 'node-xterm' instead of 'node-xterm-wasm-parts'
+Note, selecting 'node-xxhashjs' instead of 'node-types-xxhashjs'
+Package 'node-y-leveldb' is not installed, so not removed
+Note, selecting 'node-y18n' instead of 'node-types-y18n'
+Note, selecting 'node-yallist' instead of 'node-types-yallist'
+Note, selecting 'node-yargs' instead of 'node-types-yargs'
+Note, selecting 'node-yargs-parser' instead of 'node-types-yargs-parser'
+Note, selecting 'node-ytdl-core' instead of 'node-m3u8stream'
+Note, selecting 'node-ytdl-core' instead of 'node-miniget'
+Note, selecting 'nodeunit' instead of 'node-nodeunit'
+Note, selecting 'npm' instead of 'node-libnpmaccess'
+Note, selecting 'npm' instead of 'node-libnpmdiff'
+Note, selecting 'npm' instead of 'node-libnpmexec'
+Note, selecting 'npm' instead of 'node-libnpmfund'
+Note, selecting 'npm' instead of 'node-libnpmhook'
+Note, selecting 'npm' instead of 'node-libnpmorg'
+Note, selecting 'npm' instead of 'node-libnpmpack'
+Note, selecting 'npm' instead of 'node-libnpmpublish'
+Note, selecting 'npm' instead of 'node-libnpmsearch'
+Note, selecting 'npm' instead of 'node-libnpmteam'
+Note, selecting 'npm' instead of 'node-libnpmversion'
+Note, selecting 'npm' instead of 'node-npm'
+Note, selecting 'npm' instead of 'node-npm-packlist'
+Note, selecting 'npm' instead of 'node-npmcli-arborist'
+Note, selecting 'npm' instead of 'node-npmcli-config'
+Note, selecting 'npm' instead of 'node-npmcli-disparity-colors'
+Note, selecting 'npm' instead of 'node-npmcli-git'
+Note, selecting 'npm' instead of 'node-npmcli-installed-package-contents'
+Note, selecting 'npm' instead of 'node-npmcli-map-workspaces'
+Note, selecting 'npm' instead of 'node-npmcli-metavuln-calculator'
+Note, selecting 'npm' instead of 'node-npmcli-mock-registry'
+Note, selecting 'npm' instead of 'node-npmcli-name-from-folder'
+Note, selecting 'npm' instead of 'node-npmcli-node-gyp'
+Note, selecting 'npm' instead of 'node-npmcli-package-json'
+Note, selecting 'npm' instead of 'node-npmcli-promise-spawn'
+Note, selecting 'npm' instead of 'node-npmcli-query'
+Note, selecting 'npm' instead of 'node-npmcli-run-script'
+Note, selecting 'npm' instead of 'node-npmcli-smoke-tests'
+Note, selecting 'npm' instead of 'node-pacote'
+Note, selecting 'npm' instead of 'node-qrcode-terminal'
+Note, selecting 'perlnavigator' instead of 'node-perlnavigator'
+Note, selecting 'perlnavigator' instead of 'node-perlnavigator-server'
+Note, selecting 'python3-widgetsnbextension' instead of 'node-jupyter-widgets-html-manager'
+Note, selecting 'python3-widgetsnbextension' instead of 'node-'
+Note, selecting 'python3-widgetsnbextension' instead of 'node-jupyter-widgets-base'
+Note, selecting 'python3-widgetsnbextension' instead of 'node-jupyter-widgets-base-manager'
+Note, selecting 'python3-widgetsnbextension' instead of 'node-jupyter-widgets-controls'
+Note, selecting 'python3-widgetsnbextension' instead of 'node-jupyter-widgets-example-web1'
+Note, selecting 'python3-widgetsnbextension' instead of 'node-jupyter-widgets-example-web2'
+Note, selecting 'python3-widgetsnbextension' instead of 'node-jupyter-widgets-example-web3'
+Note, selecting 'python3-widgetsnbextension' instead of 'node-jupyter-widgets-example-web4'
+Note, selecting 'python3-widgetsnbextension' instead of 'node-jupyter-widgets-jupyterlab-manager'
+Note, selecting 'python3-widgetsnbextension' instead of 'node-jupyter-widgets-notebook-manager'
+Note, selecting 'python3-widgetsnbextension' instead of 'node-jupyter-widgets-output'
+Note, selecting 'python3-widgetsnbextension' instead of 'node-jupyter-widgets-schema'
+Note, selecting 'rollup' instead of 'node-rollup'
+Note, selecting 'ruby-actioncable' instead of 'node-rails-actioncable'
+Note, selecting 'ruby-task-list' instead of 'node-deckar01-task-list'
+Note, selecting 'tad' instead of 'node-cli-color'
+Note, selecting 'tad' instead of 'node-deferred'
+Note, selecting 'tad' instead of 'node-esniff'
+Note, selecting 'tad' instead of 'node-essentials'
+Note, selecting 'tad' instead of 'node-find-requires'
+Note, selecting 'tad' instead of 'node-fs2'
+Note, selecting 'tad' instead of 'node-lru-queue'
+Note, selecting 'tad' instead of 'node-memoizee'
+Note, selecting 'tad' instead of 'node-ncjsm'
+Note, selecting 'tad' instead of 'node-path2'
+Note, selecting 'tad' instead of 'node-tad'
+Note, selecting 'tad' instead of 'node-timers-ext'
+Note, selecting 'tad' instead of 'node-uni-global'
+Note, selecting 'ts-jest' instead of 'node-bs-logger'
+Note, selecting 'ts-node' instead of 'node-cspotcode-source-map-support'
+Note, selecting 'ts-node' instead of 'node-ts-node'
+Note, selecting 'ts-node' instead of 'node-tsconfig-node10'
+Note, selecting 'ts-node' instead of 'node-tsconfig-node12'
+Note, selecting 'ts-node' instead of 'node-tsconfig-node14'
+Note, selecting 'ts-node' instead of 'node-tsconfig-node16'
+Note, selecting 'ts-node' instead of 'node-tsconfig-node18'
+Note, selecting 'ts-node' instead of 'node-v8-compile-cache-lib'
+Note, selecting 'uvu' instead of 'node-dequal'
+Note, selecting 'uvu' instead of 'node-sade'
+Note, selecting 'uvu' instead of 'node-uvu'
+Note, selecting 'wabt' instead of 'node-wabt'
+Note, selecting 'webpack' instead of 'node-discoveryjs-json-ext'
+Note, selecting 'webpack' instead of 'node-envinfo'
+Note, selecting 'webpack' instead of 'node-terser-webpack-plugin'
+Note, selecting 'webpack' instead of 'node-webpack-cli'
+Note, selecting 'webpack' instead of 'node-webpack-cli-configtest'
+Note, selecting 'webpack' instead of 'node-webpack-cli-generators'
+Note, selecting 'webpack' instead of 'node-webpack-cli-info'
+Note, selecting 'webpack' instead of 'node-webpack-cli-serve'
+Note, selecting 'window-size' instead of 'node-types-window-size'
+Note, selecting 'window-size' instead of 'node-window-size'
+Note, selecting 'yarnpkg' instead of 'node-yarn'
+Note, selecting 'zx' instead of 'node-event-stream'
+Note, selecting 'zx' instead of 'node-from'
+Note, selecting 'zx' instead of 'node-map-stream'
+Note, selecting 'zx' instead of 'node-pause-stream'
+Note, selecting 'zx' instead of 'node-ps-tree'
+Note, selecting 'zx' instead of 'node-stream-combiner'
+Note, selecting 'zx' instead of 'node-types-ps-tree'
+Note, selecting 'zx' instead of 'node-zx'
+Package 'npm' is not installed, so not removed
+Package 'node-less' is not installed, so not removed
+Package 'node-normalize.css' is not installed, so not removed
+Package 'node-d3' is not installed, so not removed
+Package 'node-acorn' is not installed, so not removed
+Package 'node-ansi-styles' is not installed, so not removed
+Package 'node-arrify' is not installed, so not removed
+Package 'node-cbor' is not installed, so not removed
+Package 'node-chalk' is not installed, so not removed
+Package 'node-chokidar' is not installed, so not removed
+Package 'node-ci-info' is not installed, so not removed
+Package 'node-clean-yaml-object' is not installed, so not removed
+Package 'node-cli-truncate' is not installed, so not removed
+Package 'node-cliui' is not installed, so not removed
+Package 'node-concordance' is not installed, so not removed
+Package 'node-currently-unhandled' is not installed, so not removed
+Package 'node-debug' is not installed, so not removed
+Package 'node-del' is not installed, so not removed
+Package 'node-emittery' is not installed, so not removed
+Package 'node-escape-string-regexp' is not installed, so not removed
+Package 'node-execa' is not installed, so not removed
+Package 'node-find-up' is not installed, so not removed
+Package 'node-globby' is not installed, so not removed
+Package 'node-ignore-by-default' is not installed, so not removed
+Package 'node-indent-string' is not installed, so not removed
+Package 'node-inquirer' is not installed, so not removed
+Package 'node-is-plain-object' is not installed, so not removed
+Package 'node-is-promise' is not installed, so not removed
+Package 'node-js-yaml' is not installed, so not removed
+Package 'node-load-json-file' is not installed, so not removed
+Package 'node-matcher' is not installed, so not removed
+Package 'node-mem' is not installed, so not removed
+Package 'node-ms' is not installed, so not removed
+Package 'node-p-map' is not installed, so not removed
+Package 'node-p-timeout' is not installed, so not removed
+Package 'node-plur' is not installed, so not removed
+Package 'node-pretty-ms' is not installed, so not removed
+Package 'node-read-pkg' is not installed, so not removed
+Package 'node-resolve-cwd' is not installed, so not removed
+Package 'node-resolve-from' is not installed, so not removed
+Package 'node-slash' is not installed, so not removed
+Package 'node-stack-utils' is not installed, so not removed
+Package 'node-strip-ansi' is not installed, so not removed
+Package 'node-write-file-atomic' is not installed, so not removed
+Package 'node-yargs' is not installed, so not removed
+Package 'node-define-properties' is not installed, so not removed
+Package 'node-es-abstract' is not installed, so not removed
+Package 'node-esutils' is not installed, so not removed
+Package 'node-fs-readdir-recursive' is not installed, so not removed
+Package 'node-lodash' is not installed, so not removed
+Package 'node-mkdirp' is not installed, so not removed
+Package 'node-plugin-error' is not installed, so not removed
+Package 'node-tape' is not installed, so not removed
+Package 'node-through2' is not installed, so not removed
+Package 'node-vinyl-sourcemaps-apply' is not installed, so not removed
+Package 'node-yargs-parser' is not installed, so not removed
+Package 'node-core-js' is not installed, so not removed
+Package 'node-html5shiv' is not installed, so not removed
+Package 'node-dompurify' is not installed, so not removed
+Package 'node-ua-parser-js' is not installed, so not removed
+Package 'node-assertion-error' is not installed, so not removed
+Package 'node-check-error' is not installed, so not removed
+Package 'node-deep-eql' is not installed, so not removed
+Package 'node-get-func-name' is not installed, so not removed
+Package 'node-pathval' is not installed, so not removed
+Package 'node-type-detect' is not installed, so not removed
+Package 'node-clean-css' is not installed, so not removed
+Package 'node-commander' is not installed, so not removed
+Package 'node-glob' is not installed, so not removed
+Package 'node-cson-parser' is not installed, so not removed
+Package 'node-grunt-contrib-coffee' is not installed, so not removed
+Package 'node-turbolinks' is not installed, so not removed
+Package 'node-xml2js' is not installed, so not removed
+Package 'node-d3-dsv' is not installed, so not removed
+Package 'node-rollup-plugin-commonjs' is not installed, so not removed
+Package 'node-rollup-plugin-node-resolve' is not installed, so not removed
+Package 'node-ajv' is not installed, so not removed
+Package 'node-concat-stream' is not installed, so not removed
+Package 'node-doctrine' is not installed, so not removed
+Package 'node-eslint-visitor-keys' is not installed, so not removed
+Package 'node-eslint-scope' is not installed, so not removed
+Package 'node-espree' is not installed, so not removed
+Package 'node-esquery' is not installed, so not removed
+Package 'node-estraverse' is not installed, so not removed
+Package 'node-eslint-utils' is not installed, so not removed
+Package 'node-file-entry-cache' is not installed, so not removed
+Package 'node-functional-red-black-tree' is not installed, so not removed
+Package 'node-glob-parent' is not installed, so not removed
+Package 'node-globals' is not installed, so not removed
+Package 'node-imurmurhash' is not installed, so not removed
+Package 'node-ignore' is not installed, so not removed
+Package 'node-is-glob' is not installed, so not removed
+Package 'node-json-stable-stringify' is not installed, so not removed
+Package 'node-levn' is not installed, so not removed
+Package 'node-memfs' is not installed, so not removed
+Package 'node-optionator' is not installed, so not removed
+Package 'node-progress' is not installed, so not removed
+Package 'node-regenerate-unicode-properties' is not installed, so not removed
+Package 'node-regexpp' is not installed, so not removed
+Package 'node-semver' is not installed, so not removed
+Package 'node-strip-json-comments' is not installed, so not removed
+Package 'node-v8-compile-cache' is not installed, so not removed
+Package 'node-mysticatea-eslint-plugin' is not installed, so not removed
+Package 'node-text-table' is not installed, so not removed
+Package 'node-esprima' is not installed, so not removed
+Package 'node-esprima-fb' is not installed, so not removed
+Package 'node-jquery' is not installed, so not removed
+Package 'node-knockout' is not installed, so not removed
+Package 'node-js-cookie' is not installed, so not removed
+Package 'node-pako' is not installed, so not removed
+Package 'node-dateformat' is not installed, so not removed
+Package 'node-eventemitter2' is not installed, so not removed
+Package 'node-exit' is not installed, so not removed
+Package 'node-findup-sync' is not installed, so not removed
+Package 'node-grunt-cli' is not installed, so not removed
+Package 'node-grunt-known-options' is not installed, so not removed
+Package 'node-grunt-legacy-log' is not installed, so not removed
+Package 'node-grunt-legacy-util' is not installed, so not removed
+Package 'node-iconv-lite' is not installed, so not removed
+Package 'node-minimatch' is not installed, so not removed
+Package 'node-nopt' is not installed, so not removed
+Package 'node-ansi-colors' is not installed, so not removed
+Package 'node-anymatch' is not installed, so not removed
+Package 'node-archy' is not installed, so not removed
+Package 'node-arr-flatten' is not installed, so not removed
+Package 'node-end-of-stream' is not installed, so not removed
+Package 'node-es6-iterator' is not installed, so not removed
+Package 'node-es6-symbol' is not installed, so not removed
+Package 'node-es6-weak-map' is not installed, so not removed
+Package 'node-expand-tilde' is not installed, so not removed
+Package 'node-fancy-log' is not installed, so not removed
+Package 'node-fast-levenshtein' is not installed, so not removed
+Package 'node-fined' is not installed, so not removed
+Package 'node-for-own' is not installed, so not removed
+Package 'node-get-value' is not installed, so not removed
+Package 'node-gulplog' is not installed, so not removed
+Package 'node-interpret' is not installed, so not removed
+Package 'node-is-negated-glob' is not installed, so not removed
+Package 'node-is-number' is not installed, so not removed
+Package 'node-is-unc-path' is not installed, so not removed
+Package 'node-is-windows' is not installed, so not removed
+Package 'node-isobject' is not installed, so not removed
+Package 'node-kind-of' is not installed, so not removed
+Package 'node-liftoff' is not installed, so not removed
+Package 'node-micromatch' is not installed, so not removed
+Package 'node-minimist' is not installed, so not removed
+Package 'node-normalize-path' is not installed, so not removed
+Package 'node-object-inspect' is not installed, so not removed
+Package 'node-once' is not installed, so not removed
+Package 'node-pretty-hrtime' is not installed, so not removed
+Package 'node-process-nextick-args' is not installed, so not removed
+Package 'node-remove-trailing-separator' is not installed, so not removed
+Package 'node-resolve' is not installed, so not removed
+Package 'node-stack-trace' is not installed, so not removed
+Package 'node-v8flags' is not installed, so not removed
+Package 'node-vinyl-fs' is not installed, so not removed
+Package 'node-neo-async' is not installed, so not removed
+Package 'node-optimist' is not installed, so not removed
+Package 'node-source-map' is not installed, so not removed
+Package 'node-wordwrap' is not installed, so not removed
+Package 'node-inwasm-runtime' is not installed, so not removed
+Package 'node-ansi-escapes' is not installed, so not removed
+Package 'node-ansi-regex' is not installed, so not removed
+Package 'node-camelcase' is not installed, so not removed
+Package 'node-cjs-module-lexer' is not installed, so not removed
+Package 'node-co' is not installed, so not removed
+Package 'node-convert-source-map' is not installed, so not removed
+Package 'node-cosmiconfig' is not installed, so not removed
+Package 'node-deepmerge' is not installed, so not removed
+Package 'node-detect-newline' is not installed, so not removed
+Package 'node-fast-json-stable-stringify' is not installed, so not removed
+Package 'node-graceful-fs' is not installed, so not removed
+Package 'node-is-generator-fn' is not installed, so not removed
+Package 'node-istanbul' is not installed, so not removed
+Package 'node-jest-debbundle' is not installed, so not removed
+Package 'node-jest-worker' is not installed, so not removed
+Package 'node-jsdom' is not installed, so not removed
+Package 'node-leven' is not installed, so not removed
+Package 'node-p-limit' is not installed, so not removed
+Package 'node-parse-json' is not installed, so not removed
+Package 'node-prompts' is not installed, so not removed
+Package 'node-pure-rand' is not installed, so not removed
+Package 'node-react' is not installed, so not removed
+Package 'node-react-dom' is not installed, so not removed
+Package 'node-react-is' is not installed, so not removed
+Package 'node-react-test-renderer' is not installed, so not removed
+Package 'node-rimraf' is not installed, so not removed
+Package 'node-sane' is not installed, so not removed
+Package 'node-sinclair-typebox' is not installed, so not removed
+Package 'node-sinon' is not installed, so not removed
+Package 'node-source-map-support' is not installed, so not removed
+Package 'node-strip-bom' is not installed, so not removed
+Package 'node-which' is not installed, so not removed
+Package 'node-cjson' is not installed, so not removed
+Package 'node-ebnf-parser' is not installed, so not removed
+Package 'node-escodegen' is not installed, so not removed
+Package 'node-jison-lex' is not installed, so not removed
+Package 'node-jsonselect' is not installed, so not removed
+Package 'node-lex-parser' is not installed, so not removed
+Package 'node-nomnom' is not installed, so not removed
+Package 'node-configurable-http-proxy' is not installed, so not removed
+Package 'node-bootstrap' is not installed, so not removed
+Package 'node-browserify-lite' is not installed, so not removed
+Package 'node-d3-collection' is not installed, so not removed
+Package 'node-d3-selection' is not installed, so not removed
+Package 'node-jed' is not installed, so not removed
+Package 'node-requirejs' is not installed, so not removed
+Package 'node-nouislider-doc' is not installed, so not removed
+Package 'node-xtend' is not installed, so not removed
+Package 'node-terser' is not installed, so not removed
+Package 'node-deep-equal' is not installed, so not removed
+Package 'node-inherits' is not installed, so not removed
+Package 'node-undici' is not installed, so not removed
+Package 'node-modern-syslog' is not installed, so not removed
+Package 'node-mathjax-full' is not installed, so not removed
+Package 'node-prelude-ls' is not installed, so not removed
+Package 'node-clipboard' is not installed, so not removed
+Package 'node-browser-stdout' is not installed, so not removed
+Package 'node-decamelize' is not installed, so not removed
+Package 'node-diff' is not installed, so not removed
+Package 'node-growl' is not installed, so not removed
+Package 'node-he' is not installed, so not removed
+Package 'node-is-plain-obj' is not installed, so not removed
+Package 'node-serialize-javascript' is not installed, so not removed
+Package 'node-supports-color' is not installed, so not removed
+Package 'node-wide-align' is not installed, so not removed
+Package 'node-abab' is not installed, so not removed
+Package 'node-abbrev' is not installed, so not removed
+Package 'node-abstract-leveldown' is not installed, so not removed
+Package 'node-immediate' is not installed, so not removed
+Package 'node-accepts' is not installed, so not removed
+Package 'node-mime-types' is not installed, so not removed
+Package 'node-negotiator' is not installed, so not removed
+Package 'node-debbundle-acorn' is not installed, so not removed
+Package 'node-falafel' is not installed, so not removed
+Package 'node-active-x-obfuscator' is not installed, so not removed
+Package 'node-zeparser' is not installed, so not removed
+Package 'node-addon-api' is not installed, so not removed
+Package 'node-address' is not installed, so not removed
+Package 'node-addressparser' is not installed, so not removed
+Package 'node-after' is not installed, so not removed
+Package 'node-agent-base' is not installed, so not removed
+Package 'node-fast-deep-equal' is not installed, so not removed
+Package 'node-json-schema-traverse' is not installed, so not removed
+Package 'node-uri-js' is not installed, so not removed
+Package 'node-ajv-keywords' is not installed, so not removed
+Package 'node-har-schema' is not installed, so not removed
+Package 'node-har-validator' is not installed, so not removed
+Package 'node-schema-utils' is not installed, so not removed
+Package 'node-re2' is not installed, so not removed
+Package 'node-require-from-string' is not installed, so not removed
+Package 'node-almond' is not installed, so not removed
+Package 'node-requirejs-text' is not installed, so not removed
+Package 'node-amdefine' is not installed, so not removed
+Package 'node-ampproject-remapping' is not installed, so not removed
+Package 'node-ansi' is not installed, so not removed
+Package 'node-ansi-align' is not installed, so not removed
+Package 'node-string-width' is not installed, so not removed
+Package 'node-ansi-color-table' is not installed, so not removed
+Package 'node-ansi-font' is not installed, so not removed
+Package 'node-color-convert' is not installed, so not removed
+Package 'node-ansi-up' is not installed, so not removed
+Package 'node-ansistyles' is not installed, so not removed
+Package 'node-any-promise' is not installed, so not removed
+Package 'node-ap' is not installed, so not removed
+Package 'node-applause' is not installed, so not removed
+Package 'node-aproba' is not installed, so not removed
+Package 'node-are-we-there-yet' is not installed, so not removed
+Package 'node-delegates' is not installed, so not removed
+Package 'node-readable-stream' is not installed, so not removed
+Package 'node-arg' is not installed, so not removed
+Package 'node-argparse' is not installed, so not removed
+Package 'node-sprintf-js' is not installed, so not removed
+Package 'node-args' is not installed, so not removed
+Package 'node-argv' is not installed, so not removed
+Package 'node-arr-diff' is not installed, so not removed
+Package 'node-arr-exclude' is not installed, so not removed
+Package 'node-arr-union' is not installed, so not removed
+Package 'node-array-differ' is not installed, so not removed
+Package 'node-array-equal' is not installed, so not removed
+Package 'node-array-find-index' is not installed, so not removed
+Package 'node-array-flatten' is not installed, so not removed
+Package 'node-array-from' is not installed, so not removed
+Package 'node-array-union' is not installed, so not removed
+Package 'node-array-uniq' is not installed, so not removed
+Package 'node-array-unique' is not installed, so not removed
+Package 'node-asap' is not installed, so not removed
+Package 'node-asn1' is not installed, so not removed
+Package 'node-safe-buffer' is not installed, so not removed
+Package 'node-asn1.js' is not installed, so not removed
+Package 'node-assert' is not installed, so not removed
+Package 'node-bn.js' is not installed, so not removed
+Package 'node-object-assign' is not installed, so not removed
+Package 'node-util' is not installed, so not removed
+Package 'node-assert-plus' is not installed, so not removed
+Package 'node-assertive' is not installed, so not removed
+Package 'node-lodash-packages' is not installed, so not removed
+Package 'node-assume' is not installed, so not removed
+Package 'node-fn-name' is not installed, so not removed
+Package 'node-is-buffer' is not installed, so not removed
+Package 'node-propget' is not installed, so not removed
+Package 'node-pruddy-error' is not installed, so not removed
+Package 'node-ast-types' is not installed, so not removed
+Package 'node-tslib' is not installed, so not removed
+Package 'node-recast' is not installed, so not removed
+Package 'node-ast-util' is not installed, so not removed
+Package 'node-private' is not installed, so not removed
+Package 'node-astw' is not installed, so not removed
+Package 'node-async' is not installed, so not removed
+Package 'node-async-each' is not installed, so not removed
+Package 'node-async-limiter' is not installed, so not removed
+Package 'node-async-stacktrace' is not installed, so not removed
+Package 'node-asynckit' is not installed, so not removed
+Package 'node-atomico-rollup-plugin-sizes' is not installed, so not removed
+Package 'node-simple-string-table' is not installed, so not removed
+Package 'node-brotli-size' is not installed, so not removed
+Package 'node-gzip-size' is not installed, so not removed
+Package 'node-auth-header' is not installed, so not removed
+Package 'node-auto-bind' is not installed, so not removed
+Package 'node-autolinker' is not installed, so not removed
+Package 'node-autoprefixer' is not installed, so not removed
+Package 'node-browserslist' is not installed, so not removed
+Package 'node-caniuse-lite' is not installed, so not removed
+Package 'node-normalize-range' is not installed, so not removed
+Package 'node-picocolors' is not installed, so not removed
+Package 'node-postcss' is not installed, so not removed
+Package 'node-postcss-value-parser' is not installed, so not removed
+Package 'node-autosize' is not installed, so not removed
+Package 'node-aws-sign2' is not installed, so not removed
+Package 'node-aws4' is not installed, so not removed
+Package 'node-axios' is not installed, so not removed
+Package 'node-follow-redirects' is not installed, so not removed
+Package 'node-form-data' is not installed, so not removed
+Package 'node-proxy-from-env' is not installed, so not removed
+Package 'node-babel-helper-define-polyfill-provider' is not installed, so not removed
+Package 'node-babel7' is not installed, so not removed
+Package 'node-babel-loader' is not installed, so not removed
+Package 'node-find-cache-dir' is not installed, so not removed
+Package 'node-babel-plugin-add-module-exports' is not installed, so not removed
+Package 'node-babel-plugin-array-includes' is not installed, so not removed
+Package 'node-babel-plugin-lodash' is not installed, so not removed
+Package 'node-babel-plugin-macros' is not installed, so not removed
+Package 'node-babel-plugin-polyfill-corejs2' is not installed, so not removed
+Package 'node-babel-plugin-polyfill-corejs3' is not installed, so not removed
+Package 'node-core-js-compat' is not installed, so not removed
+Package 'node-babel-plugin-polyfill-es-shims' is not installed, so not removed
+Package 'node-babel-plugin-polyfill-regenerator' is not installed, so not removed
+Package 'node-babel-plugin-transform-vue-jsx' is not installed, so not removed
+Package 'node-babel7-runtime' is not installed, so not removed
+Package 'node-clone-deep' is not installed, so not removed
+Package 'node-core-js-pure' is not installed, so not removed
+Package 'node-js-tokens' is not installed, so not removed
+Package 'node-jsesc' is not installed, so not removed
+Package 'node-json5' is not installed, so not removed
+Package 'node-make-dir' is not installed, so not removed
+Package 'node-quick-lru' is not installed, so not removed
+Package 'node-regenerator-transform' is not installed, so not removed
+Package 'node-regexpu-core' is not installed, so not removed
+Package 'node-to-fast-properties' is not installed, so not removed
+Package 'node-babel7-debug' is not installed, so not removed
+Package 'node-babel7-standalone' is not installed, so not removed
+Package 'node-regenerator-runtime' is not installed, so not removed
+Package 'node-babylon' is not installed, so not removed
+Package 'node-backbone' is not installed, so not removed
+Package 'node-underscore' is not installed, so not removed
+Package 'node-backoff' is not installed, so not removed
+Package 'node-balanced-match' is not installed, so not removed
+Package 'node-base' is not installed, so not removed
+Package 'node-cache-base' is not installed, so not removed
+Package 'node-define-property' is not installed, so not removed
+Package 'node-mixin-deep' is not installed, so not removed
+Package 'node-pascalcase' is not installed, so not removed
+Package 'node-base16' is not installed, so not removed
+Package 'node-base62' is not installed, so not removed
+Package 'node-base64-js' is not installed, so not removed
+Package 'node-base64id' is not installed, so not removed
+Package 'node-base64url' is not installed, so not removed
+Package 'node-bash' is not installed, so not removed
+Package 'node-bash-color' is not installed, so not removed
+Package 'node-bash-match' is not installed, so not removed
+Package 'node-extend-shallow' is not installed, so not removed
+Package 'node-fs-exists-sync' is not installed, so not removed
+Package 'node-is-extglob' is not installed, so not removed
+Package 'node-basic-auth' is not installed, so not removed
+Package 'node-basic-auth-parser' is not installed, so not removed
+Package 'node-basic-ftp' is not installed, so not removed
+Package 'node-batch' is not installed, so not removed
+Package 'node-bcrypt-pbkdf' is not installed, so not removed
+Package 'node-tweetnacl' is not installed, so not removed
+Package 'node-beeper' is not installed, so not removed
+Package 'node-benchmark' is not installed, so not removed
+Package 'node-platform' is not installed, so not removed
+Package 'node-big-integer' is not installed, so not removed
+Package 'node-big.js' is not installed, so not removed
+Package 'node-bignumber' is not installed, so not removed
+Package 'node-binary-extensions' is not installed, so not removed
+Package 'node-bindings' is not installed, so not removed
+Package 'node-bl' is not installed, so not removed
+Package 'node-blacklist' is not installed, so not removed
+Package 'node-blob' is not installed, so not removed
+Package 'node-block-stream' is not installed, so not removed
+Package 'node-bluebird' is not installed, so not removed
+Package 'node-blueimp-md5' is not installed, so not removed
+Package 'node-blueprintjs-colors' is not installed, so not removed
+Package 'node-blueprintjs-core' is not installed, so not removed
+Package 'node-change-case' is not installed, so not removed
+Package 'node-classnames' is not installed, so not removed
+Package 'node-dom4' is not installed, so not removed
+Package 'node-juggle-resize-observer' is not installed, so not removed
+Package 'node-react-popper' is not installed, so not removed
+Package 'node-react-transition-group' is not installed, so not removed
+Package 'node-blueprintjs-popover2' is not installed, so not removed
+Package 'node-blueprintjs-select' is not installed, so not removed
+Package 'node-body-parser' is not installed, so not removed
+Package 'node-bytes' is not installed, so not removed
+Package 'node-content-type' is not installed, so not removed
+Package 'node-depd' is not installed, so not removed
+Package 'node-http-errors' is not installed, so not removed
+Package 'node-on-finished' is not installed, so not removed
+Package 'node-qs' is not installed, so not removed
+Package 'node-raw-body' is not installed, so not removed
+Package 'node-type-is' is not installed, so not removed
+Package 'node-unpipe' is not installed, so not removed
+Package 'node-boolbase' is not installed, so not removed
+Package 'node-boom' is not installed, so not removed
+Package 'node-hoek' is not installed, so not removed
+Package 'node-bootstrap-sass' is not installed, so not removed
+Package 'node-bootstrap-switch' is not installed, so not removed
+Package 'node-boxen' is not installed, so not removed
+Package 'node-cli-boxes' is not installed, so not removed
+Package 'node-widest-line' is not installed, so not removed
+Package 'node-wrap-ansi' is not installed, so not removed
+Package 'node-brace-expansion' is not installed, so not removed
+Package 'node-braces' is not installed, so not removed
+Package 'node-fill-range' is not installed, so not removed
+Package 'node-brfs' is not installed, so not removed
+Package 'node-quote-stream' is not installed, so not removed
+Package 'node-static-module' is not installed, so not removed
+Package 'node-brorand' is not installed, so not removed
+Package 'node-duplexer' is not installed, so not removed
+Package 'node-browser-pack' is not installed, so not removed
+Package 'node-combine-source-map' is not installed, so not removed
+Package 'node-defined' is not installed, so not removed
+Package 'node-jsonstream' is not installed, so not removed
+Package 'node-umd' is not installed, so not removed
+Package 'node-browser-resolve' is not installed, so not removed
+Package 'node-browser-unpack' is not installed, so not removed
+Package 'node-browserify' is not installed, so not removed
+Package 'node-browserify-zlib' is not installed, so not removed
+Package 'node-buffer' is not installed, so not removed
+Package 'node-cached-path-relative' is not installed, so not removed
+Package 'node-console-browserify' is not installed, so not removed
+Package 'node-constants-browserify' is not installed, so not removed
+Package 'node-crypto-browserify' is not installed, so not removed
+Package 'node-deps-sort' is not installed, so not removed
+Package 'node-domain-browser' is not installed, so not removed
+Package 'node-events' is not installed, so not removed
+Package 'node-htmlescape' is not installed, so not removed
+Package 'node-https-browserify' is not installed, so not removed
+Package 'node-labeled-stream-splicer' is not installed, so not removed
+Package 'node-module-deps' is not installed, so not removed
+Package 'node-os-browserify' is not installed, so not removed
+Package 'node-parents' is not installed, so not removed
+Package 'node-path-browserify' is not installed, so not removed
+Package 'node-process' is not installed, so not removed
+Package 'node-punycode' is not installed, so not removed
+Package 'node-querystring-es3' is not installed, so not removed
+Package 'node-read-only-stream' is not installed, so not removed
+Package 'node-shasum' is not installed, so not removed
+Package 'node-shell-quote' is not installed, so not removed
+Package 'node-stream-browserify' is not installed, so not removed
+Package 'node-stream-http' is not installed, so not removed
+Package 'node-string-decoder' is not installed, so not removed
+Package 'node-subarg' is not installed, so not removed
+Package 'node-syntax-error' is not installed, so not removed
+Package 'node-timers-browserify' is not installed, so not removed
+Package 'node-tty-browserify' is not installed, so not removed
+Package 'node-url' is not installed, so not removed
+Package 'node-vm-browserify' is not installed, so not removed
+Package 'node-browserify-aes' is not installed, so not removed
+Package 'node-create-hash' is not installed, so not removed
+Package 'node-evp-bytestokey' is not installed, so not removed
+Package 'node-cipher-base' is not installed, so not removed
+Package 'node-buffer-xor' is not installed, so not removed
+Package 'node-browserify-cipher' is not installed, so not removed
+Package 'node-browserify-des' is not installed, so not removed
+Package 'node-des.js' is not installed, so not removed
+Package 'node-pend' is not installed, so not removed
+Package 'node-browserify-rsa' is not installed, so not removed
+Package 'node-randombytes' is not installed, so not removed
+Package 'node-browserify-sign' is not installed, so not removed
+Package 'node-create-hmac' is not installed, so not removed
+Package 'node-elliptic' is not installed, so not removed
+Package 'node-parse-asn1' is not installed, so not removed
+Package 'node-electron-to-chromium' is not installed, so not removed
+Package 'node-caniuse-api' is not installed, so not removed
+Package 'node-buble' is not installed, so not removed
+Package 'node-magic-string' is not installed, so not removed
+Package 'node-buf-compare' is not installed, so not removed
+Package 'node-ieee754' is not installed, so not removed
+Package 'node-buffer-crc32' is not installed, so not removed
+Package 'node-buffer-equal' is not installed, so not removed
+Package 'node-bufferjs' is not installed, so not removed
+Package 'node-bufferlist' is not installed, so not removed
+Package 'node-buffers' is not installed, so not removed
+Package 'node-builtin-modules' is not installed, so not removed
+Package 'node-builtin-status-codes' is not installed, so not removed
+Package 'node-builtins' is not installed, so not removed
+Package 'node-validate-npm-package-name' is not installed, so not removed
+Package 'node-bunyan' is not installed, so not removed
+Package 'node-dtrace-provider' is not installed, so not removed
+Package 'node-moment' is not installed, so not removed
+Package 'node-ncp' is not installed, so not removed
+Package 'node-busboy' is not installed, so not removed
+Package 'node-cacache' is not installed, so not removed
+Package 'node-chownr' is not installed, so not removed
+Package 'node-lru-cache' is not installed, so not removed
+Package 'node-minipass' is not installed, so not removed
+Package 'node-move-concurrently' is not installed, so not removed
+Package 'node-promise-inflight' is not installed, so not removed
+Package 'node-ssri' is not installed, so not removed
+Package 'node-unique-filename' is not installed, so not removed
+Package 'node-collection-visit' is not installed, so not removed
+Package 'node-sellside-emitter' is not installed, so not removed
+Package 'node-set-value' is not installed, so not removed
+Package 'node-union-value' is not installed, so not removed
+Package 'node-unset-value' is not installed, so not removed
+Package 'node-cache-loader' is not installed, so not removed
+Package 'node-loader-utils' is not installed, so not removed
+Package 'node-call-limit' is not installed, so not removed
+Package 'node-callback-stream' is not installed, so not removed
+Package 'node-caller' is not installed, so not removed
+Package 'node-camelcase-keys' is not installed, so not removed
+Package 'node-map-obj' is not installed, so not removed
+Package 'node-caniuse-db' is not installed, so not removed
+Package 'node-canvas-confetti' is not installed, so not removed
+Package 'node-carto' is not installed, so not removed
+Package 'node-chroma-js' is not installed, so not removed
+Package 'node-hsluv' is not installed, so not removed
+Package 'node-caseless' is not installed, so not removed
+Package 'node-catty' is not installed, so not removed
+Package 'node-chai-as-promised' is not installed, so not removed
+Package 'node-chainsaw' is not installed, so not removed
+Package 'node-traverse' is not installed, so not removed
+Package 'node-chance' is not installed, so not removed
+Package 'node-channels' is not installed, so not removed
+Package 'node-character-parser' is not installed, so not removed
+Package 'node-charm' is not installed, so not removed
+Package 'node-chart.js' is not installed, so not removed
+Package 'node-cheerio' is not installed, so not removed
+Package 'node-css-select' is not installed, so not removed
+Package 'node-css-what' is not installed, so not removed
+Package 'node-dom-serializer' is not installed, so not removed
+Package 'node-domelementtype' is not installed, so not removed
+Package 'node-domhandler' is not installed, so not removed
+Package 'node-domutils' is not installed, so not removed
+Package 'node-entities' is not installed, so not removed
+Package 'node-htmlparser2' is not installed, so not removed
+Package 'node-parse5' is not installed, so not removed
+Package 'node-parse5-htmlparser2-tree-adapter' is not installed, so not removed
+Package 'node-is-binary-path' is not installed, so not removed
+Package 'node-path-is-absolute' is not installed, so not removed
+Package 'node-readdirp' is not installed, so not removed
+Package 'node-chrome-trace-event' is not installed, so not removed
+Package 'node-chrono' is not installed, so not removed
+Package 'node-json-parse-helpfulerror' is not installed, so not removed
+Package 'node-clarinet' is not installed, so not removed
+Package 'node-class-utils' is not installed, so not removed
+Package 'node-lazy-cache' is not installed, so not removed
+Package 'node-static-extend' is not installed, so not removed
+Package 'node-cli-cursor' is not installed, so not removed
+Package 'node-restore-cursor' is not installed, so not removed
+Package 'node-cli-spinners' is not installed, so not removed
+Package 'node-cli-table' is not installed, so not removed
+Package 'node-colors' is not installed, so not removed
+Package 'node-slice-ansi' is not installed, so not removed
+Package 'node-cli-width' is not installed, so not removed
+Package 'node-client-sessions' is not installed, so not removed
+Package 'node-cookies' is not installed, so not removed
+Package 'node-clipanion' is not installed, so not removed
+Package 'node-clone' is not installed, so not removed
+Package 'node-clone-buffer' is not installed, so not removed
+Package 'node-is-extendable' is not installed, so not removed
+Package 'node-clone-stats' is not installed, so not removed
+Package 'node-cloneable-readable' is not installed, so not removed
+Package 'node-coa' is not installed, so not removed
+Package 'node-q' is not installed, so not removed
+Package 'node-code' is not installed, so not removed
+Package 'node-codemirror-autocomplete' is not installed, so not removed
+Package 'node-codemirror-language' is not installed, so not removed
+Package 'node-codemirror-state' is not installed, so not removed
+Package 'node-codemirror-view' is not installed, so not removed
+Package 'node-lezer-common' is not installed, so not removed
+Package 'node-codemirror-commands' is not installed, so not removed
+Package 'node-codemirror-lang-cpp' is not installed, so not removed
+Package 'node-lezer-cpp' is not installed, so not removed
+Package 'node-codemirror-lang-css' is not installed, so not removed
+Package 'node-lezer-css' is not installed, so not removed
+Package 'node-codemirror-lang-html' is not installed, so not removed
+Package 'node-codemirror-lang-javascript' is not installed, so not removed
+Package 'node-codemirror-lang-java' is not installed, so not removed
+Package 'node-lezer-java' is not installed, so not removed
+Package 'node-codemirror-lint' is not installed, so not removed
+Package 'node-lezer-javascript' is not installed, so not removed
+Package 'node-codemirror-lang-json' is not installed, so not removed
+Package 'node-lezer-json' is not installed, so not removed
+Package 'node-codemirror-lang-markdown' is not installed, so not removed
+Package 'node-lezer-markdown' is not installed, so not removed
+Package 'node-codemirror-lang-php' is not installed, so not removed
+Package 'node-lezer-php' is not installed, so not removed
+Package 'node-codemirror-lang-python' is not installed, so not removed
+Package 'node-lezer-python' is not installed, so not removed
+Package 'node-codemirror-lang-rust' is not installed, so not removed
+Package 'node-lezer-rust' is not installed, so not removed
+Package 'node-codemirror-lang-sql' is not installed, so not removed
+Package 'node-codemirror-lang-wast' is not installed, so not removed
+Package 'node-codemirror-lang-xml' is not installed, so not removed
+Package 'node-lezer-xml' is not installed, so not removed
+Package 'node-style-mod' is not installed, so not removed
+Package 'node-codemirror-legacy-modes' is not installed, so not removed
+Package 'node-crelt' is not installed, so not removed
+Package 'node-codemirror-search' is not installed, so not removed
+Package 'node-w3c-keyname' is not installed, so not removed
+Package 'node-coffee-loader' is not installed, so not removed
+Package 'node-coffeeify' is not installed, so not removed
+Package 'node-object-visit' is not installed, so not removed
+Package 'node-map-visit' is not installed, so not removed
+Package 'node-color' is not installed, so not removed
+Package 'node-color-string' is not installed, so not removed
+Package 'node-color-name' is not installed, so not removed
+Package 'node-simple-swizzle' is not installed, so not removed
+Package 'node-colormin' is not installed, so not removed
+Package 'node-css-color-names' is not installed, so not removed
+Package 'node-function-bind' is not installed, so not removed
+Package 'node-colorspace' is not installed, so not removed
+Package 'node-text-hex' is not installed, so not removed
+Package 'node-columnify' is not installed, so not removed
+Package 'node-wcwidth.js' is not installed, so not removed
+Package 'node-inline-source-map' is not installed, so not removed
+Package 'node-combined-stream' is not installed, so not removed
+Package 'node-delayed-stream' is not installed, so not removed
+Package 'node-commist' is not installed, so not removed
+Package 'node-commondir' is not installed, so not removed
+Package 'node-commoner' is not installed, so not removed
+Package 'node-detective' is not installed, so not removed
+Package 'node-compare-versions' is not installed, so not removed
+Package 'node-component-consoler' is not installed, so not removed
+Package 'node-component-emitter' is not installed, so not removed
+Package 'node-compressible' is not installed, so not removed
+Package 'node-mime' is not installed, so not removed
+Package 'node-compression' is not installed, so not removed
+Package 'node-on-headers' is not installed, so not removed
+Package 'node-vary' is not installed, so not removed
+Package 'node-compression-webpack-plugin' is not installed, so not removed
+Package 'node-concat-map' is not installed, so not removed
+Package 'node-typedarray' is not installed, so not removed
+Package 'node-concat-with-sourcemaps' is not installed, so not removed
+Package 'node-date-time' is not installed, so not removed
+Package 'node-md5-hex' is not installed, so not removed
+Package 'node-config' is not installed, so not removed
+Package 'node-config-chain' is not installed, so not removed
+Package 'node-ini' is not installed, so not removed
+Package 'node-proto-list' is not installed, so not removed
+Package 'node-configstore' is not installed, so not removed
+Package 'node-dot-prop' is not installed, so not removed
+Package 'node-unique-string' is not installed, so not removed
+Package 'node-xdg-basedir' is not installed, so not removed
+Package 'node-http-proxy' is not installed, so not removed
+Package 'node-lynx' is not installed, so not removed
+Package 'node-strftime' is not installed, so not removed
+Package 'node-winston' is not installed, so not removed
+Package 'node-connect' is not installed, so not removed
+Package 'node-finalhandler' is not installed, so not removed
+Package 'node-parseurl' is not installed, so not removed
+Package 'node-utils-merge' is not installed, so not removed
+Package 'node-console-control-strings' is not installed, so not removed
+Package 'node-console-group' is not installed, so not removed
+Package 'node-consolidate' is not installed, so not removed
+Package 'node-constantinople' is not installed, so not removed
+Package 'node-content-disposition' is not installed, so not removed
+Package 'node-cookie' is not installed, so not removed
+Package 'node-cookie-jar' is not installed, so not removed
+Package 'node-cookie-parser' is not installed, so not removed
+Package 'node-cookie-signature' is not installed, so not removed
+Package 'node-cookiejar' is not installed, so not removed
+Package 'node-keygrip' is not installed, so not removed
+Package 'node-copy-concurrently' is not installed, so not removed
+Package 'node-fs-write-stream-atomic' is not installed, so not removed
+Package 'node-iferr' is not installed, so not removed
+Package 'node-run-queue' is not installed, so not removed
+Package 'node-copy-descriptor' is not installed, so not removed
+Package 'node-copy-paste' is not installed, so not removed
+Package 'node-copy-webpack-plugin' is not installed, so not removed
+Package 'node-jszip' is not installed, so not removed
+Package 'node-core-js-builder' is not installed, so not removed
+Package 'node-core-js-bundle' is not installed, so not removed
+Package 'node-core-util-is' is not installed, so not removed
+Package 'node-cors' is not installed, so not removed
+Package 'node-path-type' is not installed, so not removed
+Package 'node-yaml' is not installed, so not removed
+Package 'node-coveralls' is not installed, so not removed
+Package 'node-lcov-parse' is not installed, so not removed
+Package 'node-log-driver' is not installed, so not removed
+Package 'node-fetch' is not installed, so not removed
+Package 'node-cpr' is not installed, so not removed
+Package 'node-crc' is not installed, so not removed
+Package 'node-crc32' is not installed, so not removed
+Package 'node-create-ecdh' is not installed, so not removed
+Package 'node-md5.js' is not installed, so not removed
+Package 'node-ripemd160' is not installed, so not removed
+Package 'node-sha.js' is not installed, so not removed
+Package 'node-create-react-class' is not installed, so not removed
+Package 'node-loose-envify' is not installed, so not removed
+Package 'node-create-require' is not installed, so not removed
+Package 'node-cron-validator' is not installed, so not removed
+Package 'node-cronstrue' is not installed, so not removed
+Package 'node-cross-fetch' is not installed, so not removed
+Package 'node-whatwg-fetch' is not installed, so not removed
+Package 'node-cryptiles' is not installed, so not removed
+Package 'node-pbkdf2' is not installed, so not removed
+Package 'node-public-encrypt' is not installed, so not removed
+Package 'node-randomfill' is not installed, so not removed
+Package 'node-crypto-random-string' is not installed, so not removed
+Package 'node-css' is not installed, so not removed
+Package 'node-source-map-resolve' is not installed, so not removed
+Package 'node-css-initials' is not installed, so not removed
+Package 'node-css-jss' is not installed, so not removed
+Package 'node-jss' is not installed, so not removed
+Package 'node-jss-preset-default' is not installed, so not removed
+Package 'node-css-loader' is not installed, so not removed
+Package 'node-icss-utils' is not installed, so not removed
+Package 'node-postcss-modules-extract-imports' is not installed, so not removed
+Package 'node-postcss-modules-values' is not installed, so not removed
+Package 'node-util-deprecate' is not installed, so not removed
+Package 'node-nth-check' is not installed, so not removed
+Package 'node-css-selector-tokenizer' is not installed, so not removed
+Package 'node-css-tree' is not installed, so not removed
+Package 'node-mdn-data' is not installed, so not removed
+Package 'node-css-vendor' is not installed, so not removed
+Package 'node-cssom' is not installed, so not removed
+Package 'node-cssstyle' is not installed, so not removed
+Package 'node-csstype' is not installed, so not removed
+Package 'node-csv-spectrum' is not installed, so not removed
+Package 'node-cuint' is not installed, so not removed
+Package 'node-cycle' is not installed, so not removed
+Package 'node-cyclist' is not installed, so not removed
+Package 'node-d' is not installed, so not removed
+Package 'node-es5-ext' is not installed, so not removed
+Package 'node-d3-array' is not installed, so not removed
+Package 'node-d3-axis' is not installed, so not removed
+Package 'node-d3-brush' is not installed, so not removed
+Package 'node-d3-chord' is not installed, so not removed
+Package 'node-d3-color' is not installed, so not removed
+Package 'node-d3-contour' is not installed, so not removed
+Package 'node-d3-dispatch' is not installed, so not removed
+Package 'node-d3-drag' is not installed, so not removed
+Package 'node-d3-ease' is not installed, so not removed
+Package 'node-d3-fetch' is not installed, so not removed
+Package 'node-d3-force' is not installed, so not removed
+Package 'node-d3-format' is not installed, so not removed
+Package 'node-d3-geo' is not installed, so not removed
+Package 'node-d3-hierarchy' is not installed, so not removed
+Package 'node-d3-interpolate' is not installed, so not removed
+Package 'node-d3-path' is not installed, so not removed
+Package 'node-d3-polygon' is not installed, so not removed
+Package 'node-d3-quadtree' is not installed, so not removed
+Package 'node-d3-random' is not installed, so not removed
+Package 'node-d3-scale' is not installed, so not removed
+Package 'node-d3-scale-chromatic' is not installed, so not removed
+Package 'node-d3-shape' is not installed, so not removed
+Package 'node-d3-time' is not installed, so not removed
+Package 'node-d3-time-format' is not installed, so not removed
+Package 'node-d3-timer' is not installed, so not removed
+Package 'node-d3-transition' is not installed, so not removed
+Package 'node-d3-voronoi' is not installed, so not removed
+Package 'node-d3-zoom' is not installed, so not removed
+Package 'node-d3-delaunay' is not installed, so not removed
+Package 'node-rw' is not installed, so not removed
+Package 'node-d3-geo-projection' is not installed, so not removed
+Package 'node-d3-queue' is not installed, so not removed
+Package 'node-dabh-diagnostics' is not installed, so not removed
+Package 'node-enabled' is not installed, so not removed
+Package 'node-kuler' is not installed, so not removed
+Package 'node-daemon' is not installed, so not removed
+Package 'node-dagre-d3-renderer' is not installed, so not removed
+Package 'node-dagre-layout' is not installed, so not removed
+Package 'node-graphlibrary' is not installed, so not removed
+Package 'node-dargs' is not installed, so not removed
+Package 'node-dashdash' is not installed, so not removed
+Package 'node-data-uri-to-buffer' is not installed, so not removed
+Package 'node-date-now' is not installed, so not removed
+Package 'node-time-zone' is not installed, so not removed
+Package 'node-gulp-util' is not installed, so not removed
+Package 'node-de-indent' is not installed, so not removed
+Package 'node-death' is not installed, so not removed
+Package 'node-debbundle-es-to-primitive' is not installed, so not removed
+Package 'node-debbundle-insert-module-globals' is not installed, so not removed
+Package 'node-debug-fabulous' is not installed, so not removed
+Package 'node-decko' is not installed, so not removed
+Package 'node-decompress-response' is not installed, so not removed
+Package 'node-mimic-response' is not installed, so not removed
+Package 'node-isarray' is not installed, so not removed
+Package 'node-deep-extend' is not installed, so not removed
+Package 'node-deep-for-each' is not installed, so not removed
+Package 'node-deep-is' is not installed, so not removed
+Package 'node-defaults' is not installed, so not removed
+Package 'node-define-lazy-prop' is not installed, so not removed
+Package 'node-is-descriptor' is not installed, so not removed
+Package 'node-deflate-js' is not installed, so not removed
+Package 'node-degenerator' is not installed, so not removed
+Package 'node-is-path-cwd' is not installed, so not removed
+Package 'node-is-path-inside' is not installed, so not removed
+Package 'node-delve' is not installed, so not removed
+Package 'node-deprecated' is not installed, so not removed
+Package 'node-dequeue' is not installed, so not removed
+Package 'node-detect-file' is not installed, so not removed
+Package 'node-detect-indent' is not installed, so not removed
+Package 'node-devtools-protocol' is not installed, so not removed
+Package 'node-diacritics' is not installed, so not removed
+Package 'node-difflet' is not installed, so not removed
+Package 'node-dirty' is not installed, so not removed
+Package 'node-dom-helpers' is not installed, so not removed
+Package 'node-domino' is not installed, so not removed
+Package 'node-dommatrix' is not installed, so not removed
+Package 'node-dot' is not installed, so not removed
+Package 'node-is-obj' is not installed, so not removed
+Package 'node-dottie' is not installed, so not removed
+Package 'node-dryice' is not installed, so not removed
+Package 'node-nan' is not installed, so not removed
+Package 'node-duplexer3' is not installed, so not removed
+Package 'node-duplexify' is not installed, so not removed
+Package 'node-stream-shift' is not installed, so not removed
+Package 'node-duration' is not installed, so not removed
+Package 'node-ecc-jsbn' is not installed, so not removed
+Package 'node-jsbn' is not installed, so not removed
+Package 'node-editor' is not installed, so not removed
+Package 'node-ejs' is not installed, so not removed
+Package 'node-jake' is not installed, so not removed
+Package 'node-hash.js' is not installed, so not removed
+Package 'node-hmac-drbg' is not installed, so not removed
+Package 'node-minimalistic-crypto-utils' is not installed, so not removed
+Package 'node-emoji' is not installed, so not removed
+Package 'node-emojis-list' is not installed, so not removed
+Package 'node-emotion' is not installed, so not removed
+Package 'node-find-root' is not installed, so not removed
+Package 'node-hoist-non-react-statics' is not installed, so not removed
+Package 'node-stylis' is not installed, so not removed
+Package 'node-through' is not installed, so not removed
+Package 'node-encodeurl' is not installed, so not removed
+Package 'node-encoding' is not installed, so not removed
+Package 'node-enhanced-resolve' is not installed, so not removed
+Package 'node-memory-fs' is not installed, so not removed
+Package 'node-tapable' is not installed, so not removed
+Package 'node-enquirer' is not installed, so not removed
+Package 'node-markdown-it' is not installed, so not removed
+Package 'node-err-code' is not installed, so not removed
+Package 'node-errno' is not installed, so not removed
+Package 'node-prr' is not installed, so not removed
+Package 'node-error-ex' is not installed, so not removed
+Package 'node-is-arrayish' is not installed, so not removed
+Package 'node-errorhandler' is not installed, so not removed
+Package 'node-escape-html' is not installed, so not removed
+Package 'node-errs' is not installed, so not removed
+Package 'node-es-module-lexer' is not installed, so not removed
+Package 'node-es5-shim' is not installed, so not removed
+Package 'node-es6-error' is not installed, so not removed
+Package 'node-es6-map' is not installed, so not removed
+Package 'node-es6-set' is not installed, so not removed
+Package 'node-event-emitter' is not installed, so not removed
+Package 'node-es6-promise' is not installed, so not removed
+Package 'node-es6-shim' is not installed, so not removed
+Package 'node-escope' is not installed, so not removed
+Package 'node-esrecurse' is not installed, so not removed
+Package 'node-eslint-plugin-es' is not installed, so not removed
+Package 'node-eslint-plugin-eslint-plugin' is not installed, so not removed
+Package 'node-eslint-plugin-flowtype' is not installed, so not removed
+Package 'node-eslint-plugin-html' is not installed, so not removed
+Package 'node-eslint-plugin-node' is not installed, so not removed
+Package 'node-eslint-plugin-react-hooks' is not installed, so not removed
+Package 'node-eslint-plugin-requirejs' is not installed, so not removed
+Package 'node-estree-walker' is not installed, so not removed
+Package 'node-etag' is not installed, so not removed
+Package 'node-eventemitter3' is not installed, so not removed
+Package 'node-eventsource' is not installed, so not removed
+Package 'node-original' is not installed, so not removed
+Package 'node-everything.js' is not installed, so not removed
+Package 'node-get-stream' is not installed, so not removed
+Package 'node-is-stream' is not installed, so not removed
+Package 'node-merge-stream' is not installed, so not removed
+Package 'node-mimic-fn' is not installed, so not removed
+Package 'node-npm-run-path' is not installed, so not removed
+Package 'node-shebang-command' is not installed, so not removed
+Package 'node-signal-exit' is not installed, so not removed
+Package 'node-strip-eof' is not installed, so not removed
+Package 'node-exit-hook' is not installed, so not removed
+Package 'node-expand-brackets' is not installed, so not removed
+Package 'node-posix-character-classes' is not installed, so not removed
+Package 'node-regex-not' is not installed, so not removed
+Package 'node-snapdragon' is not installed, so not removed
+Package 'node-to-regex' is not installed, so not removed
+Package 'node-extglob' is not installed, so not removed
+Package 'node-expect.js' is not installed, so not removed
+Package 'node-exports-loader' is not installed, so not removed
+Package 'node-express' is not installed, so not removed
+Package 'node-fresh' is not installed, so not removed
+Package 'node-merge-descriptors' is not installed, so not removed
+Package 'node-methods' is not installed, so not removed
+Package 'node-path-to-regexp' is not installed, so not removed
+Package 'node-proxy-addr' is not installed, so not removed
+Package 'node-range-parser' is not installed, so not removed
+Package 'node-send' is not installed, so not removed
+Package 'node-serve-static' is not installed, so not removed
+Package 'node-setprototypeof' is not installed, so not removed
+Package 'node-statuses' is not installed, so not removed
+Package 'node-extend' is not installed, so not removed
+Package 'node-external-editor' is not installed, so not removed
+Package 'node-jschardet' is not installed, so not removed
+Package 'node-tmp' is not installed, so not removed
+Package 'node-fragment-cache' is not installed, so not removed
+Package 'node-extract-zip' is not installed, so not removed
+Package 'node-yauzl' is not installed, so not removed
+Package 'node-extsprintf' is not installed, so not removed
+Package 'node-time-stamp' is not installed, so not removed
+Package 'node-fast-json-patch' is not installed, so not removed
+Package 'node-fast-safe-stringify' is not installed, so not removed
+Package 'node-superagent' is not installed, so not removed
+Package 'node-fastcgi' is not installed, so not removed
+Package 'node-fastcgi-stream' is not installed, so not removed
+Package 'node-faye-websocket' is not installed, so not removed
+Package 'node-websocket-driver' is not installed, so not removed
+Package 'node-fbjs' is not installed, so not removed
+Package 'node-isomorphic-fetch' is not installed, so not removed
+Package 'node-promise' is not installed, so not removed
+Package 'node-setimmediate' is not installed, so not removed
+Package 'node-fd-slicer' is not installed, so not removed
+Package 'node-fecha' is not installed, so not removed
+Package 'node-flat-cache' is not installed, so not removed
+Package 'node-file-loader' is not installed, so not removed
+Package 'node-file-sync-cmp' is not installed, so not removed
+Package 'node-file-uri-to-path' is not installed, so not removed
+Package 'node-filename-regex' is not installed, so not removed
+Package 'node-filesize' is not installed, so not removed
+Package 'node-to-regex-range' is not installed, so not removed
+Package 'node-pkg-dir' is not installed, so not removed
+Package 'node-locate-path' is not installed, so not removed
+Package 'node-path-exists' is not installed, so not removed
+Package 'node-findit2' is not installed, so not removed
+Package 'node-resolve-dir' is not installed, so not removed
+Package 'node-parse-filepath' is not installed, so not removed
+Package 'node-first-chunk-stream' is not installed, so not removed
+Package 'node-flagged-respawn' is not installed, so not removed
+Package 'node-flatted' is not installed, so not removed
+Package 'node-write' is not installed, so not removed
+Package 'node-flow-remove-types' is not installed, so not removed
+Package 'node-vlq' is not installed, so not removed
+Package 'node-flush-write-stream' is not installed, so not removed
+Package 'node-fn.name' is not installed, so not removed
+Package 'node-for-in' is not installed, so not removed
+Package 'node-foreground-child' is not installed, so not removed
+Package 'node-forever-agent' is not installed, so not removed
+Package 'node-formidable' is not installed, so not removed
+Package 'node-wrappy' is not installed, so not removed
+Package 'node-fortawesome-fontawesome-common-types' is not installed, so not removed
+Package 'node-fortawesome-fontawesome-free' is not installed, so not removed
+Package 'node-fortawesome-fontawesome-svg-core' is not installed, so not removed
+Package 'node-fortawesome-free-brands-svg-icons' is not installed, so not removed
+Package 'node-fortawesome-free-regular-svg-icons' is not installed, so not removed
+Package 'node-fortawesome-free-solid-svg-icons' is not installed, so not removed
+Package 'node-map-cache' is not installed, so not removed
+Package 'node-free-style' is not installed, so not removed
+Package 'node-from2' is not installed, so not removed
+Package 'node-fs-extra' is not installed, so not removed
+Package 'node-jsonfile' is not installed, so not removed
+Package 'node-klaw' is not installed, so not removed
+Package 'node-universalify' is not installed, so not removed
+Package 'node-fs.realpath' is not installed, so not removed
+Package 'node-fstream' is not installed, so not removed
+Package 'node-fstream-ignore' is not installed, so not removed
+Package 'node-fuzzaldrin-plus' is not installed, so not removed
+Package 'node-fuzzysort' is not installed, so not removed
+Package 'node-gauge' is not installed, so not removed
+Package 'node-has-unicode' is not installed, so not removed
+Package 'node-generator-supported' is not installed, so not removed
+Package 'node-generic-pool' is not installed, so not removed
+Package 'node-genfun' is not installed, so not removed
+Package 'node-geojson' is not installed, so not removed
+Package 'node-get' is not installed, so not removed
+Package 'node-get-caller-file' is not installed, so not removed
+Package 'node-get-stdin' is not installed, so not removed
+Package 'node-pump' is not installed, so not removed
+Package 'node-get-uri' is not installed, so not removed
+Package 'node-getobject' is not installed, so not removed
+Package 'node-getpass' is not installed, so not removed
+Package 'node-gettext-parser' is not installed, so not removed
+Package 'node-gettext.js' is not installed, so not removed
+Package 'node-github-url-from-git' is not installed, so not removed
+Package 'node-gitlab-favicon-overlay' is not installed, so not removed
+Package 'node-inflight' is not installed, so not removed
+Package 'node-glob-base' is not installed, so not removed
+Package 'node-path-dirname' is not installed, so not removed
+Package 'node-glob-stream' is not installed, so not removed
+Package 'node-ordered-read-streams' is not installed, so not removed
+Package 'node-pumpify' is not installed, so not removed
+Package 'node-to-absolute-glob' is not installed, so not removed
+Package 'node-unique-stream' is not installed, so not removed
+Package 'node-help-me' is not installed, so not removed
+Package 'node-global' is not installed, so not removed
+Package 'node-min-document' is not installed, so not removed
+Package 'node-global-modules' is not installed, so not removed
+Package 'node-global-prefix' is not installed, so not removed
+Package 'node-globule' is not installed, so not removed
+Package 'node-glogg' is not installed, so not removed
+Package 'node-sparkles' is not installed, so not removed
+Package 'node-googlediff' is not installed, so not removed
+Package 'node-got' is not installed, so not removed
+Package 'node-lowercase-keys' is not installed, so not removed
+Package 'node-json-buffer' is not installed, so not removed
+Package 'node-p-cancelable' is not installed, so not removed
+Package 'node-graphql' is not installed, so not removed
+Package 'node-grunt-babel' is not installed, so not removed
+Package 'node-rechoir' is not installed, so not removed
+Package 'node-grunt-contrib-clean' is not installed, so not removed
+Package 'node-uri-path' is not installed, so not removed
+Package 'node-grunt-contrib-concat' is not installed, so not removed
+Package 'node-grunt-contrib-copy' is not installed, so not removed
+Package 'node-grunt-contrib-internal' is not installed, so not removed
+Package 'node-read-package-json' is not installed, so not removed
+Package 'node-grunt-contrib-nodeunit' is not installed, so not removed
+Package 'node-grunt-contrib-requirejs' is not installed, so not removed
+Package 'node-grunt-contrib-uglify' is not installed, so not removed
+Package 'node-uglify-js' is not installed, so not removed
+Package 'node-grunt-legacy-log-utils' is not installed, so not removed
+Package 'node-hooker' is not installed, so not removed
+Package 'node-underscore.string' is not installed, so not removed
+Package 'node-grunt-replace' is not installed, so not removed
+Package 'node-grunt-sass' is not installed, so not removed
+Package 'node-node-sass' is not installed, so not removed
+Package 'node-grunt-webpack' is not installed, so not removed
+Package 'node-gulp-babel' is not installed, so not removed
+Package 'node-replace-ext' is not installed, so not removed
+Package 'node-gulp-changed' is not installed, so not removed
+Package 'node-gulp-coffee' is not installed, so not removed
+Package 'node-merge' is not installed, so not removed
+Package 'node-gulp-concat' is not installed, so not removed
+Package 'node-vinyl' is not installed, so not removed
+Package 'node-gulp-flatten' is not installed, so not removed
+Package 'node-gulp-load-plugins' is not installed, so not removed
+Package 'node-has-gulplog' is not installed, so not removed
+Package 'node-gulp-mocha' is not installed, so not removed
+Package 'node-gulp-newer' is not installed, so not removed
+Package 'node-kew' is not installed, so not removed
+Package 'node-gulp-plumber' is not installed, so not removed
+Package 'node-gulp-postcss' is not installed, so not removed
+Package 'node-postcss-load-config' is not installed, so not removed
+Package 'node-gulp-rename' is not installed, so not removed
+Package 'node-gulp-sass' is not installed, so not removed
+Package 'node-gulp-sourcemaps' is not installed, so not removed
+Package 'node-gulp-tap' is not installed, so not removed
+Package 'node-gulp-tsb' is not installed, so not removed
+Package 'node-typescript' is not installed, so not removed
+Package 'node-istextorbinary' is not installed, so not removed
+Package 'node-gyp' is not installed, so not removed
+Package 'node-https-proxy-agent' is not installed, so not removed
+Package 'node-npmlog' is not installed, so not removed
+Package 'node-osenv' is not installed, so not removed
+Package 'node-tar' is not installed, so not removed
+Package 'node-has-ansi' is not installed, so not removed
+Package 'node-has-binary' is not installed, so not removed
+Package 'node-has-cors' is not installed, so not removed
+Package 'node-has-flag' is not installed, so not removed
+Package 'node-has-symbol-support-x' is not installed, so not removed
+Package 'node-has-to-string-tag-x' is not installed, so not removed
+Package 'node-has-value' is not installed, so not removed
+Package 'node-has-values' is not installed, so not removed
+Package 'node-has-yarn' is not installed, so not removed
+Package 'node-hash-base' is not installed, so not removed
+Package 'node-hash-sum' is not installed, so not removed
+Package 'node-hash-test-vectors' is not installed, so not removed
+Package 'node-hashish' is not installed, so not removed
+Package 'node-hawk' is not installed, so not removed
+Package 'node-highlight.js' is not installed, so not removed
+Package 'node-hook-std' is not installed, so not removed
+Package 'node-hosted-git-info' is not installed, so not removed
+Package 'node-html-comment-regex' is not installed, so not removed
+Package 'node-html-loader' is not installed, so not removed
+Package 'node-html-minifier-terser' is not installed, so not removed
+Package 'node-relateurl' is not installed, so not removed
+Package 'node-html-webpack-plugin' is not installed, so not removed
+Package 'node-html5-qrcode' is not installed, so not removed
+Package 'node-toidentifier' is not installed, so not removed
+Package 'node-requires-port' is not installed, so not removed
+Package 'node-http-proxy-agent' is not installed, so not removed
+Package 'node-http-server' is not installed, so not removed
+Package 'node-http-signature' is not installed, so not removed
+Package 'node-jsprim' is not installed, so not removed
+Package 'node-sshpk' is not installed, so not removed
+Package 'node-pre-gyp' is not installed, so not removed
+Package 'node-ws' is not installed, so not removed
+Package 'node-i18next' is not installed, so not removed
+Package 'node-i18next-browser-languagedetector' is not installed, so not removed
+Package 'node-i18next-http-backend' is not installed, so not removed
+Package 'node-iconv' is not installed, so not removed
+Package 'node-icss-replace-symbols' is not installed, so not removed
+Package 'node-imagemagick' is not installed, so not removed
+Package 'node-immutable' is not installed, so not removed
+Package 'node-immutable-tuple' is not installed, so not removed
+Package 'node-import-lazy' is not installed, so not removed
+Package 'node-imports-loader' is not installed, so not removed
+Package 'node-inflected' is not installed, so not removed
+Package 'node-inflection' is not installed, so not removed
+Package 'node-mute-stream' is not installed, so not removed
+Package 'node-run-async' is not installed, so not removed
+Package 'node-invariant' is not installed, so not removed
+Package 'node-invert-kv' is not installed, so not removed
+Package 'node-ip' is not installed, so not removed
+Package 'node-ip-address' is not installed, so not removed
+Package 'node-ip-regex' is not installed, so not removed
+Package 'node-ipaddr.js' is not installed, so not removed
+Package 'node-irregular-plurals' is not installed, so not removed
+Package 'node-is-accessor-descriptor' is not installed, so not removed
+Package 'node-is-builtin-module' is not installed, so not removed
+Package 'node-is-data-descriptor' is not installed, so not removed
+Package 'node-is-directory' is not installed, so not removed
+Package 'node-is-docker' is not installed, so not removed
+Package 'node-is-dotfile' is not installed, so not removed
+Package 'node-is-equal-shallow' is not installed, so not removed
+Package 'node-is-primitive' is not installed, so not removed
+Package 'node-is-finite' is not installed, so not removed
+Package 'node-is-module' is not installed, so not removed
+Package 'node-is-node' is not installed, so not removed
+Package 'node-is-npm' is not installed, so not removed
+Package 'node-is-object' is not installed, so not removed
+Package 'node-is-path-in-cwd' is not installed, so not removed
+Package 'node-path-is-inside' is not installed, so not removed
+Package 'node-is-redirect' is not installed, so not removed
+Package 'node-is-reference' is not installed, so not removed
+Package 'node-is-retry-allowed' is not installed, so not removed
+Package 'node-is-typedarray' is not installed, so not removed
+Package 'node-unc-path-regex' is not installed, so not removed
+Package 'node-is-valid-glob' is not installed, so not removed
+Package 'node-is-wsl' is not installed, so not removed
+Package 'node-iscroll' is not installed, so not removed
+Package 'node-isexe' is not installed, so not removed
+Package 'node-ismobilejs' is not installed, so not removed
+Package 'node-isomorphic.js' is not installed, so not removed
+Package 'node-isstream' is not installed, so not removed
+Package 'node-uuid' is not installed, so not removed
+Package 'node-isurl' is not installed, so not removed
+Package 'node-jasmine' is not installed, so not removed
+Package 'node-jest-react' is not installed, so not removed
+Package 'node-react-shallow-renderer' is not installed, so not removed
+Package 'node-scheduler' is not installed, so not removed
+Package 'node-rollup-plugin-terser' is not installed, so not removed
+Package 'node-jju' is not installed, so not removed
+Package 'node-jmespath' is not installed, so not removed
+Package 'node-jose' is not installed, so not removed
+Package 'node-jose-browser-runtime' is not installed, so not removed
+Package 'node-jquery-mousewheel' is not installed, so not removed
+Package 'node-jquery-textcomplete' is not installed, so not removed
+Package 'node-jquery-ui' is not installed, so not removed
+Package 'node-jquery-ujs' is not installed, so not removed
+Package 'node-js-beautify' is not installed, so not removed
+Package 'node-sigmund' is not installed, so not removed
+Package 'node-js-sdsl' is not installed, so not removed
+Package 'node-number-allocator' is not installed, so not removed
+Package 'node-tap' is not installed, so not removed
+Package 'node-tap-parser' is not installed, so not removed
+Package 'node-jsan' is not installed, so not removed
+Package 'node-jsdoc2' is not installed, so not removed
+Package 'node-tough-cookie' is not installed, so not removed
+Package 'node-webidl-conversions' is not installed, so not removed
+Package 'node-json-loader' is not installed, so not removed
+Package 'node-json-localizer' is not installed, so not removed
+Package 'node-json-parse-better-errors' is not installed, so not removed
+Package 'node-json-schema' is not installed, so not removed
+Package 'node-json-schema-merge-allof' is not installed, so not removed
+Package 'node-jsonify' is not installed, so not removed
+Package 'node-json-stringify-safe' is not installed, so not removed
+Package 'node-json2module' is not installed, so not removed
+Package 'node-jsonminify' is not installed, so not removed
+Package 'node-jsonparse' is not installed, so not removed
+Package 'node-verror' is not installed, so not removed
+Package 'node-tiny-warning' is not installed, so not removed
+Package 'node-jss-plugin-cache' is not installed, so not removed
+Package 'node-jss-plugin-camel-case' is not installed, so not removed
+Package 'node-jss-plugin-compose' is not installed, so not removed
+Package 'node-jss-plugin-default-unit' is not installed, so not removed
+Package 'node-jss-plugin-expand' is not installed, so not removed
+Package 'node-jss-plugin-extend' is not installed, so not removed
+Package 'node-jss-plugin-global' is not installed, so not removed
+Package 'node-jss-plugin-isolate' is not installed, so not removed
+Package 'node-jss-plugin-nested' is not installed, so not removed
+Package 'node-jss-plugin-props-sort' is not installed, so not removed
+Package 'node-jss-plugin-rule-value-function' is not installed, so not removed
+Package 'node-jss-plugin-rule-value-observable' is not installed, so not removed
+Package 'node-symbol-observable' is not installed, so not removed
+Package 'node-jss-plugin-template' is not installed, so not removed
+Package 'node-jss-plugin-vendor-prefixer' is not installed, so not removed
+Package 'node-jss-starter-kit' is not installed, so not removed
+Package 'node-react-jss' is not installed, so not removed
+Package 'node-jstimezonedetect' is not installed, so not removed
+Package 'node-lie' is not installed, so not removed
+Package 'node-jszip-utils' is not installed, so not removed
+Package 'node-keese' is not installed, so not removed
+Package 'node-keypress' is not installed, so not removed
+Package 'node-knockout-sortable' is not installed, so not removed
+Package 'node-stream-splicer' is not installed, so not removed
+Package 'node-lastfm' is not installed, so not removed
+Package 'node-latest-version' is not installed, so not removed
+Package 'node-package-json' is not installed, so not removed
+Package 'node-set-getter' is not installed, so not removed
+Package 'node-lazy-debug-legacy' is not installed, so not removed
+Package 'node-lazy-property' is not installed, so not removed
+Package 'node-lazystream' is not installed, so not removed
+Package 'node-lcid' is not installed, so not removed
+Package 'node-ldapjs' is not installed, so not removed
+Package 'node-vasync' is not installed, so not removed
+Package 'node-leaflet' is not installed, so not removed
+Package 'node-leaflet.markercluster' is not installed, so not removed
+Package 'node-leche' is not installed, so not removed
+Package 'node-less-loader' is not installed, so not removed
+Package 'node-less-plugin-clean-css' is not installed, so not removed
+Package 'node-leveldown' is not installed, so not removed
+Package 'node-type-check' is not installed, so not removed
+Package 'node-lexical-scope' is not installed, so not removed
+Package 'node-lezer-generator' is not installed, so not removed
+Package 'node-lezer-html' is not installed, so not removed
+Package 'node-lib0' is not installed, so not removed
+Package 'node-libpq' is not installed, so not removed
+Package 'node-libravatar' is not installed, so not removed
+Package 'node-libs-browser' is not installed, so not removed
+Package 'node-license-webpack-plugin' is not installed, so not removed
+Package 'node-webpack-sources' is not installed, so not removed
+Package 'node-lightgallery' is not installed, so not removed
+Package 'node-llhttp' is not installed, so not removed
+Package 'node-load-grunt-tasks' is not installed, so not removed
+Package 'node-multimatch' is not installed, so not removed
+Package 'node-pkg-up' is not installed, so not removed
+Package 'node-resolve-pkg' is not installed, so not removed
+Package 'node-pify' is not installed, so not removed
+Package 'node-loader-runner' is not installed, so not removed
+Package 'node-locate-character' is not installed, so not removed
+Package 'node-p-locate' is not installed, so not removed
+Package 'node-lockfile' is not installed, so not removed
+Package 'node-lodash-reescape' is not installed, so not removed
+Package 'node-lodash-reevaluate' is not installed, so not removed
+Package 'node-log4js' is not installed, so not removed
+Package 'node-logform' is not installed, so not removed
+Package 'node-triple-beam' is not installed, so not removed
+Package 'node-long' is not installed, so not removed
+Package 'node-loud-rejection' is not installed, so not removed
+Package 'node-yallist' is not installed, so not removed
+Package 'node-lumino' is not installed, so not removed
+Package 'node-lunr' is not installed, so not removed
+Package 'node-luxon' is not installed, so not removed
+Package 'node-mersenne' is not installed, so not removed
+Package 'node-statsd-parser' is not installed, so not removed
+Package 'node-macaddress' is not installed, so not removed
+Package 'node-make-error' is not installed, so not removed
+Package 'node-map2tree' is not installed, so not removed
+Package 'node-markdown-to-jsx' is not installed, so not removed
+Package 'node-marked' is not installed, so not removed
+Package 'node-marked-man' is not installed, so not removed
+Package 'node-read-pkg-up' is not installed, so not removed
+Package 'node-match-at' is not installed, so not removed
+Package 'node-mj-context-menu' is not installed, so not removed
+Package 'node-speech-rule-engine' is not installed, so not removed
+Package 'node-matrix-js-sdk' is not installed, so not removed
+Package 'node-request' is not installed, so not removed
+Package 'node-md5-o-matic' is not installed, so not removed
+Package 'node-mdn-browser-compat-data' is not installed, so not removed
+Package 'node-media-typer' is not installed, so not removed
+Package 'node-os-locale' is not installed, so not removed
+Package 'node-meow' is not installed, so not removed
+Package 'node-normalize-package-data' is not installed, so not removed
+Package 'node-redent' is not installed, so not removed
+Package 'node-trim-newlines' is not installed, so not removed
+Package 'node-mess' is not installed, so not removed
+Package 'node-miller-rabin' is not installed, so not removed
+Package 'node-mini-css-extract-plugin' is not installed, so not removed
+Package 'node-miragejs' is not installed, so not removed
+Package 'node-route-recognizer' is not installed, so not removed
+Package 'node-mississippi' is not installed, so not removed
+Package 'node-parallel-transform' is not installed, so not removed
+Package 'node-stream-each' is not installed, so not removed
+Package 'node-mithril' is not installed, so not removed
+Package 'node-multiparty' is not installed, so not removed
+Package 'node-mkdirp-classic' is not installed, so not removed
+Package 'node-mocha-lcov-reporter' is not installed, so not removed
+Package 'node-mock-fs' is not installed, so not removed
+Package 'node-mocks-http' is not installed, so not removed
+Package 'node-stream-combiner2' is not installed, so not removed
+Package 'node-moment-timezone' is not installed, so not removed
+Package 'node-mongodb' is not installed, so not removed
+Package 'node-morgan' is not installed, so not removed
+Package 'node-mousetrap' is not installed, so not removed
+Package 'node-mqtt' is not installed, so not removed
+Package 'node-mqtt-packet' is not installed, so not removed
+Package 'node-reinterval' is not installed, so not removed
+Package 'node-split2' is not installed, so not removed
+Package 'node-mqtt-connection' is not installed, so not removed
+Package 'node-uid-safe' is not installed, so not removed
+Package 'node-multipipe' is not installed, so not removed
+Package 'node-music-library-index' is not installed, so not removed
+Package 'node-mustache' is not installed, so not removed
+Package 'node-mutate-fs' is not installed, so not removed
+Package 'node-mysql' is not installed, so not removed
+Package 'node-mz' is not installed, so not removed
+Package 'node-thenify-all' is not installed, so not removed
+Package 'node-n3' is not installed, so not removed
+Package 'node-natural-sort' is not installed, so not removed
+Package 'node-netmask' is not installed, so not removed
+Package 'node-nock' is not installed, so not removed
+Package 'node-propagate' is not installed, so not removed
+Package 'node-node-dir' is not installed, so not removed
+Package 'node-node-pty' is not installed, so not removed
+Package 'node-node-rest-client' is not installed, so not removed
+Package 'node-node-rsa' is not installed, so not removed
+Package 'node-nodemailer' is not installed, so not removed
+Package 'node-normalize-git-url' is not installed, so not removed
+Package 'node-validate-npm-package-license' is not installed, so not removed
+Package 'node-nouislider' is not installed, so not removed
+Package 'node-prismjs' is not installed, so not removed
+Package 'node-npm-bundled' is not installed, so not removed
+Package 'node-npm-package-arg' is not installed, so not removed
+Package 'node-set-blocking' is not installed, so not removed
+Package 'node-npmrc' is not installed, so not removed
+Package 'node-number-is-nan' is not installed, so not removed
+Package 'node-nunjucks' is not installed, so not removed
+Package 'node-nwmatcher' is not installed, so not removed
+Package 'node-oauth-1.0a' is not installed, so not removed
+Package 'node-oauth-sign' is not installed, so not removed
+Package 'node-obj-util' is not installed, so not removed
+Package 'node-object-copy' is not installed, so not removed
+Package 'node-object-key' is not installed, so not removed
+Package 'node-object-path' is not installed, so not removed
+Package 'node-object.omit' is not installed, so not removed
+Package 'node-one-time' is not installed, so not removed
+Package 'node-open' is not installed, so not removed
+Package 'node-opencv' is not installed, so not removed
+Package 'node-opener' is not installed, so not removed
+Package 'node-openpgp-asmcrypto.js' is not installed, so not removed
+Package 'node-openpgp-seek-bzip' is not installed, so not removed
+Package 'node-opentip' is not installed, so not removed
+Package 'node-orchestrator' is not installed, so not removed
+Package 'node-sequencify' is not installed, so not removed
+Package 'node-stream-consume' is not installed, so not removed
+Package 'node-url-parse' is not installed, so not removed
+Package 'node-os-tmpdir' is not installed, so not removed
+Package 'node-output-file-sync' is not installed, so not removed
+Package 'node-p-finally' is not installed, so not removed
+Package 'node-p-is-promise' is not installed, so not removed
+Package 'node-pac-proxy-agent' is not installed, so not removed
+Package 'node-pac-resolver' is not installed, so not removed
+Package 'node-quickjs-emscripten' is not installed, so not removed
+Package 'node-socks-proxy-agent' is not installed, so not removed
+Package 'node-package' is not installed, so not removed
+Package 'node-registry-auth-token' is not installed, so not removed
+Package 'node-registry-url' is not installed, so not removed
+Package 'node-package-preamble' is not installed, so not removed
+Package 'node-parse-base64vlq-mappings' is not installed, so not removed
+Package 'node-path-root' is not installed, so not removed
+Package 'node-parse-glob' is not installed, so not removed
+Package 'node-parse-ms' is not installed, so not removed
+Package 'node-parse-srcset' is not installed, so not removed
+Package 'node-parse5-html-rewriting-stream' is not installed, so not removed
+Package 'node-parse5-sax-parser' is not installed, so not removed
+Package 'node-parse5-parser-stream' is not installed, so not removed
+Package 'node-parse5-plain-text-conversion-stream' is not installed, so not removed
+Package 'node-passport' is not installed, so not removed
+Package 'node-pause' is not installed, so not removed
+Package 'node-path-root-regex' is not installed, so not removed
+Package 'node-peek-readable' is not installed, so not removed
+Package 'node-pegjs' is not installed, so not removed
+Package 'node-performance-now' is not installed, so not removed
+Package 'node-pg' is not installed, so not removed
+Package 'node-pg-hstore' is not installed, so not removed
+Package 'node-pikaday' is not installed, so not removed
+Package 'node-pinkie' is not installed, so not removed
+Package 'node-pinkie-promise' is not installed, so not removed
+Package 'node-pinkyswear' is not installed, so not removed
+Package 'node-playwright' is not installed, so not removed
+Package 'node-po2json' is not installed, so not removed
+Package 'node-policyfile' is not installed, so not removed
+Package 'node-popper2' is not installed, so not removed
+Package 'node-posix-getopt' is not installed, so not removed
+Package 'node-postcss-cli' is not installed, so not removed
+Package 'node-postcss-reporter' is not installed, so not removed
+Package 'node-postcss-load-options' is not installed, so not removed
+Package 'node-postcss-load-plugins' is not installed, so not removed
+Package 'node-postcss-loader' is not installed, so not removed
+Package 'node-postcss-modules' is not installed, so not removed
+Package 'node-postcss-preset-evergreen' is not installed, so not removed
+Package 'node-thenby' is not installed, so not removed
+Package 'node-preact' is not installed, so not removed
+Package 'node-prepend-http' is not installed, so not removed
+Package 'node-preserve' is not installed, so not removed
+Package 'node-pretty-bytes' is not installed, so not removed
+Package 'node-promise-retry' is not installed, so not removed
+Package 'node-retry' is not installed, so not removed
+Package 'node-promzard' is not installed, so not removed
+Package 'node-read' is not installed, so not removed
+Package 'node-prop-types' is not installed, so not removed
+Package 'node-warning' is not installed, so not removed
+Package 'node-proper-lockfile' is not installed, so not removed
+Package 'node-prosemirror-markdown' is not installed, so not removed
+Package 'node-prosemirror-model' is not installed, so not removed
+Package 'node-prosemirror-schema-basic' is not installed, so not removed
+Package 'node-prosemirror-schema-list' is not installed, so not removed
+Package 'node-prosemirror-transform' is not installed, so not removed
+Package 'node-prosemirror-state' is not installed, so not removed
+Package 'node-prosemirror-test-builder' is not installed, so not removed
+Package 'node-prosemirror-view' is not installed, so not removed
+Package 'node-proxy' is not installed, so not removed
+Package 'node-proxy-agent' is not installed, so not removed
+Package 'node-proxyquire' is not installed, so not removed
+Package 'node-pseudomap' is not installed, so not removed
+Package 'node-pseudorandombytes' is not installed, so not removed
+Package 'node-psl' is not installed, so not removed
+Package 'node-puka' is not installed, so not removed
+Package 'node-puppeteer' is not installed, so not removed
+Package 'node-tar-fs' is not installed, so not removed
+Package 'node-unbzip2-stream' is not installed, so not removed
+Package 'node-qrcode-generator' is not installed, so not removed
+Package 'node-querystring' is not installed, so not removed
+Package 'node-querystringify' is not installed, so not removed
+Package 'node-queue-async' is not installed, so not removed
+Package 'node-qw' is not installed, so not removed
+Package 'node-rai' is not installed, so not removed
+Package 'node-ramda' is not installed, so not removed
+Package 'node-random-bytes' is not installed, so not removed
+Package 'node-raven-js' is not installed, so not removed
+Package 'node-raw-loader' is not installed, so not removed
+Package 'node-rc' is not installed, so not removed
+Package 'node-rdf-canonize' is not installed, so not removed
+Package 'node-react-base16-styling' is not installed, so not removed
+Package 'node-react-display-name' is not installed, so not removed
+Package 'node-react-dock' is not installed, so not removed
+Package 'node-react-fast-compare' is not installed, so not removed
+Package 'node-react-highlight-words' is not installed, so not removed
+Package 'node-react-highlighter' is not installed, so not removed
+Package 'node-react-hot-loader' is not installed, so not removed
+Package 'node-react-lifecycles-compat' is not installed, so not removed
+Package 'node-shallowequal' is not installed, so not removed
+Package 'node-react-json-tree' is not installed, so not removed
+Package 'node-shallow-equal' is not installed, so not removed
+Package 'node-theming' is not installed, so not removed
+Package 'node-react-paginate' is not installed, so not removed
+Package 'node-react-reconciler' is not installed, so not removed
+Package 'node-react-redux' is not installed, so not removed
+Package 'node-redux' is not installed, so not removed
+Package 'node-react-refresh' is not installed, so not removed
+Package 'node-react-toastify' is not installed, so not removed
+Package 'node-read-file' is not installed, so not removed
+Package 'node-set-immediate-shim' is not installed, so not removed
+Package 'node-strip-indent' is not installed, so not removed
+Package 'node-redis' is not installed, so not removed
+Package 'node-redux-devtools-core' is not installed, so not removed
+Package 'node-redux-devtools-extension' is not installed, so not removed
+Package 'node-redux-devtools-serialize' is not installed, so not removed
+Package 'node-regenerate' is not installed, so not removed
+Package 'node-regenerator' is not installed, so not removed
+Package 'node-regenerator-preset' is not installed, so not removed
+Package 'node-regex-cache' is not installed, so not removed
+Package 'node-regexp-match-indices' is not installed, so not removed
+Package 'node-regjsgen' is not installed, so not removed
+Package 'node-regjsparser' is not installed, so not removed
+Package 'node-unicode-match-property-ecmascript' is not installed, so not removed
+Package 'node-unicode-match-property-value-ecmascript' is not installed, so not removed
+Package 'node-remark-slide' is not installed, so not removed
+Package 'node-repeat-element' is not installed, so not removed
+Package 'node-repeat-string' is not installed, so not removed
+Package 'node-repeating' is not installed, so not removed
+Package 'node-tunnel-agent' is not installed, so not removed
+Package 'node-request-capture-har' is not installed, so not removed
+Package 'node-require-all' is not installed, so not removed
+Package 'node-require-dir' is not installed, so not removed
+Package 'node-require-directory' is not installed, so not removed
+Package 'node-require-inject' is not installed, so not removed
+Package 'node-require-main-filename' is not installed, so not removed
+Package 'node-require-relative' is not installed, so not removed
+Package 'node-reserved' is not installed, so not removed
+Package 'node-resize-observer-polyfill' is not installed, so not removed
+Package 'node-response-time' is not installed, so not removed
+Package 'node-resumer' is not installed, so not removed
+Package 'node-retape' is not installed, so not removed
+Package 'node-test' is not installed, so not removed
+Package 'node-rewire' is not installed, so not removed
+Package 'node-rjsf' is not installed, so not removed
+Package 'node-rollup-plugin-alias' is not installed, so not removed
+Package 'node-rollup-plugin-babel' is not installed, so not removed
+Package 'node-rollup-pluginutils' is not installed, so not removed
+Package 'node-rollup-plugin-buble' is not installed, so not removed
+Package 'node-rollup-plugin-inject' is not installed, so not removed
+Package 'node-rollup-plugin-json' is not installed, so not removed
+Package 'node-rollup-plugin-node-polyfills' is not installed, so not removed
+Package 'node-rollup-plugin-replace' is not installed, so not removed
+Package 'node-rollup-plugin-sass' is not installed, so not removed
+Package 'node-rollup-plugin-sourcemaps' is not installed, so not removed
+Package 'node-rollup-plugin-string' is not installed, so not removed
+Package 'node-rollup-plugin-strip' is not installed, so not removed
+Package 'node-rollup-plugin-typescript' is not installed, so not removed
+Package 'node-rollup-plugin-typescript2' is not installed, so not removed
+Package 'node-yarn-tool-resolve-package' is not installed, so not removed
+Package 'node-rollup-plugin-uglify' is not installed, so not removed
+Package 'node-rx' is not installed, so not removed
+Package 'node-sanitize-html' is not installed, so not removed
+Package 'node-sax' is not installed, so not removed
+Package 'node-style-loader' is not installed, so not removed
+Package 'node-url-loader' is not installed, so not removed
+Package 'node-schlock' is not installed, so not removed
+Package 'node-sdp-jingle-json' is not installed, so not removed
+Package 'node-security' is not installed, so not removed
+Package 'node-seedrandom' is not installed, so not removed
+Package 'node-select2' is not installed, so not removed
+Package 'node-semver-diff' is not installed, so not removed
+Package 'node-seq' is not installed, so not removed
+Package 'node-serve-favicon' is not installed, so not removed
+Package 'node-serve-index' is not installed, so not removed
+Package 'node-to-object-path' is not installed, so not removed
+Package 'node-sha' is not installed, so not removed
+Package 'node-shebang-regex' is not installed, so not removed
+Package 'node-shelljs' is not installed, so not removed
+Package 'node-shiny-server-client' is not installed, so not removed
+Package 'node-should' is not installed, so not removed
+Package 'node-should-sinon' is not installed, so not removed
+Package 'node-single-line-log' is not installed, so not removed
+Package 'node-sink-test' is not installed, so not removed
+Package 'node-sinon-chai' is not installed, so not removed
+Package 'node-sixel' is not installed, so not removed
+Package 'node-slide' is not installed, so not removed
+Package 'node-smart-buffer' is not installed, so not removed
+Package 'node-smash' is not installed, so not removed
+Package 'node-use' is not installed, so not removed
+Package 'node-snapdragon-node' is not installed, so not removed
+Package 'node-snapdragon-util' is not installed, so not removed
+Package 'node-sntp' is not installed, so not removed
+Package 'node-socket.io-parser' is not installed, so not removed
+Package 'node-sockjs' is not installed, so not removed
+Package 'node-sockjs-client' is not installed, so not removed
+Package 'node-socks' is not installed, so not removed
+Package 'node-solid-rest' is not installed, so not removed
+Package 'node-sort-keys' is not installed, so not removed
+Package 'node-sort-package-json' is not installed, so not removed
+Package 'node-sorted-object' is not installed, so not removed
+Package 'node-source-list-map' is not installed, so not removed
+Package 'node-source-map-loader' is not installed, so not removed
+Package 'node-sourcemap-codec' is not installed, so not removed
+Package 'node-spdx-correct' is not installed, so not removed
+Package 'node-spdx-license-ids' is not installed, so not removed
+Package 'node-spdx-expression-parse' is not installed, so not removed
+Package 'node-spdx-exceptions' is not installed, so not removed
+Package 'node-split' is not installed, so not removed
+Package 'node-split-string' is not installed, so not removed
+Package 'node-sqlite3' is not installed, so not removed
+Package 'node-stable' is not installed, so not removed
+Package 'node-standard-error' is not installed, so not removed
+Package 'node-standard-http-error' is not installed, so not removed
+Package 'node-starttls' is not installed, so not removed
+Package 'node-static' is not installed, so not removed
+Package 'node-static-eval' is not installed, so not removed
+Package 'node-stats-webpack-plugin' is not installed, so not removed
+Package 'node-std-mocks' is not installed, so not removed
+Package 'node-stdlib' is not installed, so not removed
+Package 'node-vdom-to-html' is not installed, so not removed
+Package 'node-stealthy-require' is not installed, so not removed
+Package 'node-step' is not installed, so not removed
+Package 'node-stream-array' is not installed, so not removed
+Package 'node-stream-assert' is not installed, so not removed
+Package 'node-to-arraybuffer' is not installed, so not removed
+Package 'node-stream-iterate' is not installed, so not removed
+Package 'node-stream-to-observable' is not installed, so not removed
+Package 'node-zen-observable' is not installed, so not removed
+Package 'node-streamtest' is not installed, so not removed
+Package 'node-strict-uri-encode' is not installed, so not removed
+Package 'node-string.prototype.codepointat' is not installed, so not removed
+Package 'node-stringmap' is not installed, so not removed
+Package 'node-stringstream' is not installed, so not removed
+Package 'node-strip-bom-stream' is not installed, so not removed
+Package 'node-stylus' is not installed, so not removed
+Package 'node-supertest' is not installed, so not removed
+Package 'node-svg2ttf' is not installed, so not removed
+Package 'node-xmldom' is not installed, so not removed
+Package 'node-tacks' is not installed, so not removed
+Package 'node-tap-mocha-reporter' is not installed, so not removed
+Package 'node-tar-stream' is not installed, so not removed
+Package 'node-telegram-bot-api' is not installed, so not removed
+Package 'node-temp' is not installed, so not removed
+Package 'node-term-size' is not installed, so not removed
+Package 'node-text-encoding' is not installed, so not removed
+Package 'node-thenify' is not installed, so not removed
+Package 'node-three-orbit-controls' is not installed, so not removed
+Package 'node-three-stl-loader' is not installed, so not removed
+Package 'node-throttleit' is not installed, so not removed
+Package 'node-through2-filter' is not installed, so not removed
+Package 'node-tildify' is not installed, so not removed
+Package 'node-tilejson' is not installed, so not removed
+Package 'node-timeago.js' is not installed, so not removed
+Package 'node-timed-out' is not installed, so not removed
+Package 'node-tinycolor' is not installed, so not removed
+Package 'node-tippex' is not installed, so not removed
+Package 'node-tldjs' is not installed, so not removed
+Package 'node-tmatch' is not installed, so not removed
+Package 'node-token-types' is not installed, so not removed
+Package 'node-transformers' is not installed, so not removed
+Package 'node-trust-json-document' is not installed, so not removed
+Package 'node-trust-keyto' is not installed, so not removed
+Package 'node-trysound-sax' is not installed, so not removed
+Package 'node-ts-loader' is not installed, so not removed
+Package 'node-tunein' is not installed, so not removed
+Package 'node-turndown' is not installed, so not removed
+Package 'node-typanion' is not installed, so not removed
+Package 'node-typedarray-to-buffer' is not installed, so not removed
+Package 'node-typestyle' is not installed, so not removed
+Package 'node-uglify' is not installed, so not removed
+Package 'node-uglify-save-license' is not installed, so not removed
+Package 'node-uid-number' is not installed, so not removed
+Package 'node-ultron' is not installed, so not removed
+Package 'node-unicode-15.0.0' is not installed, so not removed
+Package 'node-unicode-canonical-property-names-ecmascript' is not installed, so not removed
+Package 'node-unicode-loose-match' is not installed, so not removed
+Package 'node-unicode-property-aliases-ecmascript' is not installed, so not removed
+Package 'node-unicode-property-aliases' is not installed, so not removed
+Package 'node-unicode-property-value-aliases' is not installed, so not removed
+Package 'node-unicode-property-value-aliases-ecmascript' is not installed, so not removed
+Package 'node-uniq' is not installed, so not removed
+Package 'node-uniqid' is not installed, so not removed
+Package 'node-uniqs' is not installed, so not removed
+Package 'node-unorm' is not installed, so not removed
+Package 'node-url-join' is not installed, so not removed
+Package 'node-url-parse-lax' is not installed, so not removed
+Package 'node-url-to-options' is not installed, so not removed
+Package 'node-urlgrey' is not installed, so not removed
+Package 'node-utilities' is not installed, so not removed
+Package 'node-utml' is not installed, so not removed
+Package 'node-vali-date' is not installed, so not removed
+Package 'node-vega' is not installed, so not removed
+Package 'node-vega-embed' is not installed, so not removed
+Package 'node-vega-lite' is not installed, so not removed
+Package 'node-vega-themes' is not installed, so not removed
+Package 'node-vega-tooltip' is not installed, so not removed
+Package 'node-vhost' is not installed, so not removed
+Package 'node-vows' is not installed, so not removed
+Package 'node-vscode-debugprotocol' is not installed, so not removed
+Package 'node-vscode-jsonrpc' is not installed, so not removed
+Package 'node-vscode-languageserver' is not installed, so not removed
+Package 'node-vscode-languageserver-protocol' is not installed, so not removed
+Package 'node-vscode-languageserver-types' is not installed, so not removed
+Package 'node-vscode-languageserver-textdocument' is not installed, so not removed
+Package 'node-vscode-languageserver-tools' is not installed, so not removed
+Package 'node-vscode-ws-jsonrpc' is not installed, so not removed
+Package 'node-vue' is not installed, so not removed
+Package 'node-vue-hot-reload-api' is not installed, so not removed
+Package 'node-vue-resource' is not installed, so not removed
+Package 'node-vue-style-loader' is not installed, so not removed
+Package 'node-watchpack' is not installed, so not removed
+Package 'node-webassemblyjs' is not installed, so not removed
+Package 'node-webfinger' is not installed, so not removed
+Package 'node-webfont' is not installed, so not removed
+Package 'node-webpack-env' is not installed, so not removed
+Package 'node-webpack-merge' is not installed, so not removed
+Package 'node-webpack-stats-plugin' is not installed, so not removed
+Package 'node-webrtc-adapter' is not installed, so not removed
+Package 'node-websocket' is not installed, so not removed
+Package 'node-websocket-stream' is not installed, so not removed
+Package 'node-when' is not installed, so not removed
+Package 'node-which-module' is not installed, so not removed
+Package 'node-wikibase-cli' is not installed, so not removed
+Package 'node-wikibase-edit' is not installed, so not removed
+Package 'node-wikibase-sdk' is not installed, so not removed
+Package 'node-wikidata-lang' is not installed, so not removed
+Package 'node-wildemitter' is not installed, so not removed
+Package 'node-winston-compat' is not installed, so not removed
+Package 'node-winston-transport' is not installed, so not removed
+Package 'node-with' is not installed, so not removed
+Package 'node-worker-loader' is not installed, so not removed
+Package 'node-write-file-promise' is not installed, so not removed
+Package 'node-ws-iconv' is not installed, so not removed
+Package 'node-xmlhttprequest' is not installed, so not removed
+Package 'node-xoauth2' is not installed, so not removed
+Package 'node-xregexp' is not installed, so not removed
+Package 'node-xterm' is not installed, so not removed
+Package 'node-xxhashjs' is not installed, so not removed
+Package 'node-y-codemirror' is not installed, so not removed
+Package 'node-yjs' is not installed, so not removed
+Package 'node-y-protocols' is not installed, so not removed
+Package 'node-y-websocket' is not installed, so not removed
+Package 'node-y18n' is not installed, so not removed
+Package 'node-yajsml' is not installed, so not removed
+Package 'node-yamlish' is not installed, so not removed
+Package 'node-yazl' is not installed, so not removed
+Package 'node-yn' is not installed, so not removed
+Package 'node-ytdl-core' is not installed, so not removed
+Package 'node-zkochan-cmd-shim' is not installed, so not removed
+Package 'node-zrender' is not installed, so not removed
+The following packages will be REMOVED:
+  nodejs*
+0 upgraded, 0 newly installed, 1 to remove and 1 not upgraded.
+After this operation, 199 MB disk space will be freed.
+(Reading database ... 133277 files and directories currently installed.)
+Removing nodejs (20.19.4-1nodesource1) ...
+dpkg: warning: while removing nodejs, directory '/usr/lib/node_modules' not empty so not removed
+Processing triggers for man-db (2.12.0-4build2) ...
+[17:52:20] 🗃️ Limpando banco de dados...
+[17:54:34] WARNING: ⚠️ PostgreSQL não acessível em 172.24.1.153:5432
+[17:54:34] WARNING:    Execute primeiro o reset no vlxsam03
+[17:56:49] 🔄 Atualizando sistema...
+Hit:1 https://deb.nodesource.com/node_20.x nodistro InRelease
+Hit:2 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:3 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:4 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:5 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists... Done
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+Calculating upgrade... Done
+The following packages have been kept back:
+  sosreport
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[17:56:53] 📦 Instalando dependências básicas...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+curl is already the newest version (8.5.0-2ubuntu10.6).
+wget is already the newest version (1.21.4-1ubuntu4.1).
+git is already the newest version (1:2.43.0-1ubuntu7.3).
+unzip is already the newest version (6.0-28ubuntu4.1).
+build-essential is already the newest version (12.10ubuntu1).
+python3 is already the newest version (3.12.3-0ubuntu2).
+python3-pip is already the newest version (24.0+dfsg-1ubuntu1.2).
+postgresql-client is already the newest version (16+257build1.1).
+netcat-openbsd is already the newest version (1.226-1ubuntu2).
+jq is already the newest version (1.7.1-3ubuntu0.24.04.1).
+htop is already the newest version (3.3.0-4build1).
+nano is already the newest version (7.2-2ubuntu0.1).
+systemd is already the newest version (255.4-1ubuntu8.10).
+ca-certificates is already the newest version (20240203).
+gnupg is already the newest version (2.4.4-2ubuntu17.3).
+lsb-release is already the newest version (12.0-2).
+software-properties-common is already the newest version (0.99.49.3).
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[17:56:54] 📦 Instalando Node.js 20...
+2025-09-01 17:56:54 - Installing pre-requisites
+Hit:1 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:2 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:3 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:4 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists... Done
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+apt-transport-https is already the newest version (2.8.3).
+ca-certificates is already the newest version (20240203).
+curl is already the newest version (8.5.0-2ubuntu10.6).
+gnupg is already the newest version (2.4.4-2ubuntu17.3).
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+Get:1 https://deb.nodesource.com/node_20.x nodistro InRelease [12.1 kB]
+Get:2 https://deb.nodesource.com/node_20.x nodistro/main amd64 Packages [12.2 kB]
+Hit:3 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:4 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:5 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:6 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Fetched 24.4 kB in 1s (28.1 kB/s)
+Reading package lists... Done
+2025-09-01 17:56:59 - Repository configured successfully.
+2025-09-01 17:56:59 - To install Node.js, run: apt-get install nodejs -y
+2025-09-01 17:56:59 - You can use N|solid Runtime as a node.js alternative
+2025-09-01 17:56:59 - To install N|solid Runtime, run: apt-get install nsolid -y
+
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following NEW packages will be installed:
+  nodejs
+0 upgraded, 1 newly installed, 0 to remove and 1 not upgraded.
+Need to get 0 B/32.0 MB of archives.
+After this operation, 199 MB of additional disk space will be used.
+Selecting previously unselected package nodejs.
+(Reading database ... 127914 files and directories currently installed.)
+Preparing to unpack .../nodejs_20.19.4-1nodesource1_amd64.deb ...
+Unpacking nodejs (20.19.4-1nodesource1) ...
+Setting up nodejs (20.19.4-1nodesource1) ...
+Processing triggers for man-db (2.12.0-4build2) ...
+Scanning processes...
+Scanning candidates...
+Scanning linux images...
+
+Pending kernel upgrade!
+Running kernel version:
+  6.8.0-41-generic
+Diagnostics:
+  The currently running kernel version is not the expected kernel version 6.8.0-79-generic.
+
+Restarting the system to load the new kernel will not be handled automatically, so you should consider rebooting.
+
+Restarting services...
+
+Service restarts being deferred:
+ /etc/needrestart/restart.d/dbus.service
+ systemctl restart getty@tty1.service
+ systemctl restart systemd-logind.service
+ systemctl restart unattended-upgrades.service
+
+No containers need to be restarted.
+
+No user sessions are running outdated binaries.
+
+No VM guests are running outdated hypervisor (qemu) binaries on this host.
+[17:57:05] ✅ Node.js instalado: v20.19.4
+[17:57:05] ✅ npm instalado: 10.8.2
+[17:57:05] 👤 Criando usuário e estrutura de diretórios...
+[17:57:05] ✅ Estrutura de diretórios criada
+[17:57:05] 📥 Baixando aplicação SamurEye...
+Cloning into 'SamurEye'...
+remote: Enumerating objects: 2467, done.
+remote: Counting objects: 100% (394/394), done.
+remote: Compressing objects: 100% (227/227), done.
+remote: Total 2467 (delta 246), reused 269 (delta 126), pack-reused 2073 (from 1)
+Receiving objects: 100% (2467/2467), 2.38 MiB | 14.78 MiB/s, done.
+Resolving deltas: 100% (1682/1682), done.
+[17:57:06] ✅ Aplicação baixada com sucesso
+[17:57:06] ⚙️ Configurando ambiente...
+[17:57:06] ✅ Arquivo .env criado
+[17:57:06] 📦 Instalando dependências npm...
+npm warn config production Use `--omit=dev` instead.
+npm warn deprecated node-domexception@1.0.0: Use your platform's native DOMException instead
+
+added 526 packages, and audited 527 packages in 9s
+
+75 packages are looking for funding
+  run `npm fund` for details
+
+3 low severity vulnerabilities
+
+To address all issues, run:
+  npm audit fix
+
+Run `npm audit` for details.
+npm notice
+npm notice New major version of npm available! 10.8.2 -> 11.5.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.5.2
+npm notice To update run: npm install -g npm@11.5.2
+npm notice
+[17:57:16] ✅ Dependências npm instaladas
+[17:57:16] 🔨 Fazendo build da aplicação...
+
+> rest-express@1.0.0 build
+> vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+
+sh: 1: vite: not found
+root@vlxsam02:~#

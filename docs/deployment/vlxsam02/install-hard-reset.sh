@@ -177,7 +177,7 @@ timedatectl set-timezone America/Sao_Paulo
 # ============================================================================
 
 log "📦 Instalando dependências básicas..."
-apt-get install -y \
+DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     curl \
     wget \
     git \
@@ -190,11 +190,11 @@ apt-get install -y \
     jq \
     htop \
     nano \
-    systemd \
     ca-certificates \
     gnupg \
-    lsb-release \
-    software-properties-common
+    lsb-release
+
+log "✅ Dependências básicas instaladas"
 
 # ============================================================================
 # 6. INSTALAÇÃO NODE.JS
@@ -202,23 +202,41 @@ apt-get install -y \
 
 log "📦 Instalando Node.js $NODE_VERSION..."
 
-# Remover repositórios Node.js antigos
-rm -f /etc/apt/sources.list.d/nodesource.list
-rm -f /etc/apt/trusted.gpg.d/nodesource.gpg
+# Remover Node.js antigo completamente
+apt-get remove -y nodejs npm node 2>/dev/null || true
+apt-get purge -y nodejs npm node 2>/dev/null || true
+apt-get autoremove -y 2>/dev/null || true
 
-# Instalar NodeSource repository
-curl -fsSL https://deb.nodesource.com/setup_${NODE_VERSION}.x | bash -
+# Limpar repositórios e caches
+rm -f /etc/apt/sources.list.d/nodesource.list*
+rm -f /etc/apt/trusted.gpg.d/nodesource.gpg*
+apt-get clean
 
-# Instalar Node.js
-apt-get install -y nodejs
+# Instalar NodeSource repository (método mais direto)
+log "🔧 Configurando repositório NodeSource..."
+curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/trusted.gpg.d/nodesource.gpg
+echo "deb [signed-by=/etc/apt/trusted.gpg.d/nodesource.gpg] https://deb.nodesource.com/node_${NODE_VERSION}.x nodistro main" > /etc/apt/sources.list.d/nodesource.list
+
+# Atualizar repositórios
+apt-get update
+
+# Instalar apenas Node.js essencial
+DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends nodejs
 
 # Verificar instalação
+sleep 2
 node_version=$(node --version 2>/dev/null || echo "not found")
 npm_version=$(npm --version 2>/dev/null || echo "not found")
 
-if [[ "$node_version" == v${NODE_VERSION}* ]]; then
+log "🔍 Verificando instalação Node.js..."
+if [[ "$node_version" != "not found" ]] && [[ "$npm_version" != "not found" ]]; then
     log "✅ Node.js instalado: $node_version"
     log "✅ npm instalado: $npm_version"
+    
+    # Instalar ferramentas globais essenciais
+    log "🔧 Instalando ferramentas globais..."
+    npm install -g pm2 tsx --silent
+    log "✅ Ferramentas globais instaladas"
 else
     error "❌ Falha na instalação do Node.js"
 fi
