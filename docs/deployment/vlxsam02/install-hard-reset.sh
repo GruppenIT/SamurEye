@@ -322,6 +322,11 @@ REPL_ID=samureye-onpremise
 REPL_SLUG=samureye
 REPL_OWNER=onpremise
 
+# Admin Authentication (On-premise)
+ADMIN_EMAIL=admin@samureye.com.br
+ADMIN_PASSWORD=SamurEye2024!
+ADMIN_AUTO_LOGIN=true
+
 # Logging
 LOG_LEVEL=info
 LOG_DIR=/var/log/samureye
@@ -501,6 +506,54 @@ else
         log "❌ Aplicação também falha quando executada manualmente"
         error "Verificar dependências e configuração do banco de dados"
     fi
+fi
+
+# ============================================================================
+# 15. CONFIGURAÇÃO DE AUTENTICAÇÃO ADMIN
+# ============================================================================
+
+log "🔐 Configurando autenticação admin..."
+
+# Aguardar aplicação estar completamente pronta
+sleep 5
+
+# Testar se aplicação está respondendo
+if curl -s -f http://localhost:5000/api/health >/dev/null 2>&1; then
+    log "✅ Aplicação respondendo - configurando admin..."
+    
+    # Fazer login admin automaticamente
+    ADMIN_LOGIN=$(curl -s -X POST "http://localhost:5000/api/admin/login" \
+        -H "Content-Type: application/json" \
+        -d '{"email":"admin@samureye.com.br","password":"SamurEye2024!"}' \
+        -w "%{http_code}" 2>/dev/null || echo "000")
+    
+    if [[ "$ADMIN_LOGIN" =~ 200 ]]; then
+        log "✅ Sessão admin configurada com sucesso"
+    else
+        warn "⚠️ Sessão admin não configurada automaticamente"
+    fi
+    
+    log "📋 INFORMAÇÕES DE ACESSO ADMIN:"
+    echo "════════════════════════════════════════"
+    echo "🌐 URL Admin: http://172.24.1.152:5000/admin"
+    echo "👤 Email: admin@samureye.com.br"
+    echo "🔑 Senha: SamurEye2024!"
+    echo ""
+    echo "📝 Para ativar admin (se necessário):"
+    echo "No console do navegador (F12), execute:"
+    echo ""
+    echo "fetch('/api/admin/login', {"
+    echo "  method: 'POST',"
+    echo "  headers: {'Content-Type': 'application/json'},"
+    echo "  body: JSON.stringify({"
+    echo "    email: 'admin@samureye.com.br',"
+    echo "    password: 'SamurEye2024!'"
+    echo "  })"
+    echo "}).then(() => location.reload())"
+    echo ""
+    echo "════════════════════════════════════════"
+else
+    warn "⚠️ Aplicação não está respondendo - admin não configurado"
 fi
 
 # ============================================================================
