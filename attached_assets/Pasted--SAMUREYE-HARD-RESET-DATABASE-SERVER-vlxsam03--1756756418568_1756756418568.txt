@@ -1,0 +1,103 @@
+
+🔥 SAMUREYE HARD RESET - DATABASE SERVER vlxsam03
+===============================================
+⚠️  ATENÇÃO: Este script irá:
+   • Parar todos os serviços do banco de dados
+   • APAGAR TODOS OS DADOS do PostgreSQL, Redis, MinIO
+   • Reconfigurar pg_hba.conf e postgresql.conf
+   • Resetar senhas e configurações
+   • Recriar banco e usuários SamurEye
+   • Reconfigurar firewall e rede
+
+[19:52:49] WARNING: Modo não-interativo detectado (curl | bash)
+[19:52:49] INFO: Hard reset iniciará automaticamente em 5 segundos...
+[19:52:54] 🗑️ Iniciando hard reset do servidor de banco de dados...
+[19:52:54] 🔧 Reparando sistema de pacotes corrompido...
+[19:52:54] WARNING: Matando processos apt/dpkg em execução...
+[19:52:59] WARNING: Removendo locks do sistema de pacotes...
+[19:52:59] Executando reparos do dpkg...
+[19:52:59] Tentativa 1: dpkg --configure -a
+[19:53:04] Tentativa 1: apt-get -f install
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following package was automatically installed and is no longer required:
+  libllvm17t64
+Use 'apt autoremove' to remove it.
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+[19:53:10] ✅ dpkg funcionando na tentativa 1
+[19:53:10] Aguardando estabilização do sistema...
+[19:53:20] ✅ Reparo inicial do sistema de pacotes concluído
+[19:53:20] 📦 Instalando dependências básicas...
+[19:53:20] Tentativa 1 de atualização do sistema...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following package was automatically installed and is no longer required:
+  libllvm17t64
+Use 'apt autoremove' to remove it.
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+Hit:1 https://packages.grafana.com/oss/deb stable InRelease
+Hit:2 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:3 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:4 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:5 http://apt.postgresql.org/pub/repos/apt noble-pgdg InRelease
+Hit:6 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists... Done
+[19:53:29] ✅ Sistema atualizado
+[19:53:29] Tentativa 1 de instalação de dependências...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following package was automatically installed and is no longer required:
+  libllvm17t64
+Use 'apt autoremove' to remove it.
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+psmisc is already the newest version (23.7-1build1).
+lsof is already the newest version (4.95.0-1build3).
+procps is already the newest version (2:4.0.4-4ubuntu3.2).
+The following package was automatically installed and is no longer required:
+  libllvm17t64
+Use 'apt autoremove' to remove it.
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+[19:53:35] ✅ Dependências básicas instaladas
+[19:53:35] ⏹️ Parando todos os serviços...
+[19:53:35] ✅ postgresql parado
+[19:53:35] 💾 Criando backup dos dados atuais...
+[19:53:36] ✅ Backup PostgreSQL criado
+[19:53:36] 📂 Backup salvo em: /opt/backups/samureye-reset-20250901-195335
+[19:53:36] 🗑️ Removendo dados existentes...
+[19:53:36] ✅ Dados PostgreSQL removidos
+[19:53:36] ✅ Dados Redis removidos
+[19:53:36] ✅ Dados MinIO removidos
+[19:53:36] ✅ Dados Grafana removidos
+[19:53:36] 📦 Instalando dependências adicionais...
+[19:53:36] Tentativa 1 de instalação de dependências adicionais...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following package was automatically installed and is no longer required:
+  libllvm17t64
+Use 'apt autoremove' to remove it.
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+wget is already the newest version (1.21.4-1ubuntu4.1).
+curl is already the newest version (8.5.0-2ubuntu10.6).
+gnupg2 is already the newest version (2.4.4-2ubuntu17.3).
+software-properties-common is already the newest version (0.99.49.3).
+apt-transport-https is already the newest version (2.8.3).
+ca-certificates is already the newest version (20240203).
+The following package was automatically installed and is no longer required:
+  libllvm17t64
+Use 'apt autoremove' to remove it.
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+[19:53:41] ✅ Dependências adicionais instaladas
+[19:53:41] 🐘 Configurando PostgreSQL 16...
+[19:53:41] 📁 Recriando cluster PostgreSQL usando método Ubuntu...
+Error: cluster configuration already exists
+root@vlxsam03:~#

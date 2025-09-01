@@ -201,10 +201,16 @@ log "📂 Backup salvo em: $BACKUP_DIR"
 
 log "🗑️ Removendo dados existentes..."
 
-# Reset PostgreSQL - remover dados mas manter instalação
+# Reset PostgreSQL - remover dados E configurações para reset completo
 if [ -d "/var/lib/postgresql/$POSTGRES_VERSION/main" ]; then
-    rm -rf /var/lib/postgresql/$POSTGRES_VERSION/main/*
+    rm -rf /var/lib/postgresql/$POSTGRES_VERSION/main
     log "✅ Dados PostgreSQL removidos"
+fi
+
+# Remover também configurações de cluster
+if [ -d "/etc/postgresql/$POSTGRES_VERSION/main" ]; then
+    rm -rf /etc/postgresql/$POSTGRES_VERSION/main
+    log "✅ Configurações PostgreSQL removidas"
 fi
 
 # Reset Redis
@@ -277,9 +283,20 @@ if [ ! -f "$DATA_DIR/PG_VERSION" ]; then
     
     # Usar pg_createcluster (método oficial Ubuntu/Debian)
     if command -v pg_createcluster &>/dev/null; then
-        # Remover cluster se existir
+        # Parar PostgreSQL completamente
+        systemctl stop postgresql 2>/dev/null || true
+        
+        # Remover configuração de cluster completamente
         pg_dropcluster --stop $POSTGRES_VERSION main 2>/dev/null || true
-        # Criar novo cluster
+        
+        # Remover diretórios de configuração se existirem
+        rm -rf /etc/postgresql/$POSTGRES_VERSION/main 2>/dev/null || true
+        rm -rf /var/lib/postgresql/$POSTGRES_VERSION/main 2>/dev/null || true
+        
+        # Aguardar limpeza
+        sleep 3
+        
+        # Criar novo cluster limpo
         pg_createcluster $POSTGRES_VERSION main --start
         log "✅ Cluster PostgreSQL recriado usando pg_createcluster"
     else
