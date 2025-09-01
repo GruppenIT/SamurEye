@@ -91,7 +91,11 @@ force_apt_unlock() {
         sleep 5
     fi
     
-    # Verificar se ainda há locks
+    # Sempre executar dpkg --configure -a primeiro
+    log "Reparando configuração do dpkg..."
+    dpkg --configure -a 2>/dev/null || true
+    
+    # Verificar e remover locks se necessário
     local locks_found=false
     for lock_file in "/var/lib/dpkg/lock-frontend" "/var/lib/dpkg/lock" "/var/cache/apt/archives/lock"; do
         if [ -f "$lock_file" ]; then
@@ -103,9 +107,9 @@ force_apt_unlock() {
         fi
     done
     
-    # Se removeu locks, configurar dpkg
+    # Se removeu locks, tentar reparar novamente
     if [ "$locks_found" = true ]; then
-        log "Reparando configuração do dpkg..."
+        log "Executando reparos adicionais..."
         dpkg --configure -a 2>/dev/null || true
         apt-get -f install -y 2>/dev/null || true
     fi
@@ -115,8 +119,25 @@ force_apt_unlock() {
 
 # Forçar liberação e instalar dependências críticas
 force_apt_unlock
-apt-get update -y || true
-apt-get install -y psmisc lsof procps || true
+
+# Tentar instalar dependências com várias tentativas
+for attempt in 1 2 3; do
+    log "Tentativa $attempt de atualização do sistema..."
+    if apt-get update -y 2>/dev/null; then
+        break
+    fi
+    force_apt_unlock
+    sleep 5
+done
+
+for attempt in 1 2 3; do
+    log "Tentativa $attempt de instalação de dependências..."
+    if apt-get install -y psmisc lsof procps 2>/dev/null; then
+        break
+    fi
+    force_apt_unlock
+    sleep 5
+done
 
 # ============================================================================
 # 3. PARAR TODOS OS SERVIÇOS
@@ -189,8 +210,16 @@ log "✅ Dados Grafana removidos"
 # ============================================================================
 
 log "📦 Instalando dependências adicionais..."
-force_apt_unlock
-apt-get install -y wget curl gnupg2 software-properties-common apt-transport-https ca-certificates
+
+# Tentar instalar dependências com várias tentativas
+for attempt in 1 2 3; do
+    log "Tentativa $attempt de instalação de dependências adicionais..."
+    force_apt_unlock
+    if apt-get install -y wget curl gnupg2 software-properties-common apt-transport-https ca-certificates 2>/dev/null; then
+        break
+    fi
+    sleep 5
+done
 
 # ============================================================================
 # 7. CONFIGURAR POSTGRESQL 16
@@ -201,11 +230,20 @@ log "🐘 Configurando PostgreSQL $POSTGRES_VERSION..."
 # Verificar se PostgreSQL está instalado
 if ! command -v psql &> /dev/null; then
     log "Instalando PostgreSQL $POSTGRES_VERSION..."
-    wait_for_apt
-    wget -qO- https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
+    
+    # Configurar repositório PostgreSQL
+    wget -qO- https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add - 2>/dev/null || true
     echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/postgresql.list
-    apt-get update -y
-    apt-get install -y postgresql-$POSTGRES_VERSION postgresql-client-$POSTGRES_VERSION
+    
+    # Tentar instalar com várias tentativas
+    for attempt in 1 2 3; do
+        log "Tentativa $attempt de instalação PostgreSQL..."
+        force_apt_unlock
+        if apt-get update -y 2>/dev/null && apt-get install -y postgresql-$POSTGRES_VERSION postgresql-client-$POSTGRES_VERSION 2>/dev/null; then
+            break
+        fi
+        sleep 10
+    done
 fi
 
 # Inicializar cluster se necessário
@@ -334,8 +372,14 @@ log "🔴 Configurando Redis..."
 
 # Instalar Redis se necessário
 if ! command -v redis-server &> /dev/null; then
-    wait_for_apt
-    apt-get install -y redis-server
+    for attempt in 1 2 3; do
+        log "Tentativa $attempt de instalação Redis..."
+        force_apt_unlock
+        if apt-get install -y redis-server 2>/dev/null; then
+            break
+        fi
+        sleep 5
+    done
 fi
 
 # Configurar Redis
@@ -452,11 +496,19 @@ log "📊 Configurando Grafana..."
 
 # Instalar Grafana se necessário
 if ! command -v grafana-server &> /dev/null; then
-    wait_for_apt
-    wget -q -O - https://packages.grafana.com/gpg.key | apt-key add -
+    # Configurar repositório Grafana
+    wget -q -O - https://packages.grafana.com/gpg.key | apt-key add - 2>/dev/null || true
     echo "deb https://packages.grafana.com/oss/deb stable main" > /etc/apt/sources.list.d/grafana.list
-    apt-get update -y
-    apt-get install -y grafana
+    
+    # Tentar instalar com várias tentativas
+    for attempt in 1 2 3; do
+        log "Tentativa $attempt de instalação Grafana..."
+        force_apt_unlock
+        if apt-get update -y 2>/dev/null && apt-get install -y grafana 2>/dev/null; then
+            break
+        fi
+        sleep 10
+    done
 fi
 
 # Configurar Grafana
