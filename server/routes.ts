@@ -105,8 +105,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Collector not found" });
       }
 
-      // Update collector status to online
-      await storage.updateCollectorStatus(collector.id, 'online');
+      // Update collector status to online with timestamp
+      await storage.updateCollectorStatus(collector.id, 'online', new Date());
 
       // Store telemetry if provided
       if (telemetry) {
@@ -229,7 +229,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       for (const tenant of tenants) {
         const collectors = await storage.getCollectorsByTenant(tenant.id);
-        allCollectors.push(...collectors.map(c => ({ ...c, tenantName: tenant.name })));
+        
+        // Update status based on last heartbeat (consider offline if no heartbeat in 5 minutes)
+        const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+        
+        for (const collector of collectors) {
+          let status = collector.status;
+          if (collector.lastSeen && new Date(collector.lastSeen) < fiveMinutesAgo && status === 'online') {
+            status = 'offline';
+            // Update status in database
+            await storage.updateCollectorStatus(collector.id, 'offline');
+          }
+          
+          // Get latest telemetry
+          const latestTelemetry = await storage.getLatestCollectorTelemetry(collector.id);
+          
+          allCollectors.push({ 
+            ...collector, 
+            status,
+            tenantName: tenant.name,
+            tenantSlug: tenant.slug,
+            latestTelemetry 
+          });
+        }
       }
       
       console.log(`Admin collectors request: ${allCollectors.length} collectors found across ${tenants.length} tenants`);
@@ -237,6 +259,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching collectors:", error);
       res.status(500).json({ message: "Failed to fetch collectors" });
+    }
+  });
+
+  // Collector management routes
+  app.post('/api/collectors/:id/update-packages', async (req, res) => {
+    try {
+      const collector = await storage.getCollector(req.params.id);
+      if (!collector) {
+        return res.status(404).json({ message: "Collector not found" });
+      }
+
+      // In a real implementation, this would send a command to the collector
+      // For now, we'll simulate the response
+      console.log(`Package update requested for collector ${collector.name}`);
+      
+      res.json({ 
+        message: "Package update initiated", 
+        collectorId: collector.id,
+        warning: "Any running jobs that depend on packages will be interrupted"
+      });
+    } catch (error) {
+      console.error("Error updating packages:", error);
+      res.status(500).json({ message: "Failed to update packages" });
+    }
+  });
+
+  app.get('/api/collectors/:id/deploy-command', async (req, res) => {
+    try {
+      const collector = await storage.getCollector(req.params.id);
+      if (!collector) {
+        return res.status(404).json({ message: "Collector not found" });
+      }
+
+      // Get tenant info for the deploy command
+      const tenant = await storage.getTenant(collector.tenantId);
+      if (!tenant) {
+        return res.status(404).json({ message: "Tenant not found" });
+      }
+
+      // Generate the complete deploy + register command
+      const deployCommand = `curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/install-collector.sh | sudo bash -s -- --tenant-slug="${tenant.slug}" --collector-name="${collector.name}" --server-url="https://app.samureye.com.br"`;
+      
+      res.json({ 
+        deployCommand,
+        description: "Execute este comando no servidor Ubuntu para instalar e registrar o collector automaticamente"
+      });
+    } catch (error) {
+      console.error("Error generating deploy command:", error);
+      res.status(500).json({ message: "Failed to generate deploy command" });
     }
   });
 
