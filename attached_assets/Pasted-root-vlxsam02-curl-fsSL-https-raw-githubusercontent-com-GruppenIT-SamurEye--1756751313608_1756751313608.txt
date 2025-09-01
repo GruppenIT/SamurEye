@@ -1,0 +1,51 @@
+root@vlxsam02:~# curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye                                                                                                                                    /refs/heads/main/docs/deployment/vlxsam02/start-simple-app.sh | sudo bash
+🚀 vlxsam02 - INICIAR APLICAÇÃO SIMPLES
+======================================
+[15:28:05] 🛑 Parando aplicação...
+[15:28:08] 🔧 Ajustando permissões...
+[15:28:09] 🚀 Iniciando aplicação...
+[15:28:29] 🧪 Verificando aplicação...
+[15:28:29] ✅ Serviço ativo
+[15:28:39] ⚠️ Aplicação ainda iniciando, aguardando...
+[15:28:49] ❌ Aplicação não responde, verificar logs
+[15:28:49] 📝 Logs mais recentes:
+Sep 01 15:28:42 vlxsam02 systemd[1]: samureye-app.service: Consumed 2.214s CPU t                                                                                                                                    ime.
+Sep 01 15:28:48 vlxsam02 systemd[1]: samureye-app.service: Scheduled restart job                                                                                                                                    , restart counter is at 348.
+Sep 01 15:28:48 vlxsam02 systemd[1]: Started samureye-app.service - SamurEye App                                                                                                                                    lication Server.
+Sep 01 15:28:48 vlxsam02 samureye-app[391858]: > rest-express@1.0.0 dev
+Sep 01 15:28:48 vlxsam02 samureye-app[391858]: > NODE_ENV=development tsx server                                                                                                                                    /index.ts
+
+[15:28:49] ⚠️ APLICAÇÃO COM PROBLEMAS
+==========================
+
+❌ Verificar logs para identificar problema:
+   journalctl -u samureye-app -f
+
+💡 Comandos úteis para debug:
+   systemctl status samureye-app
+   curl http://localhost:5000/
+root@vlxsam02:~# journalctl -u samureye-app -f
+Sep 01 15:28:55 vlxsam02 samureye-app[391924]:     at async ModuleLoader.import (node:internal/modules/esm/loader:540:24)
+Sep 01 15:28:55 vlxsam02 samureye-app[391924]:     at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+Sep 01 15:28:55 vlxsam02 samureye-app[391924]: Node.js v20.19.4
+Sep 01 15:28:55 vlxsam02 systemd[1]: samureye-app.service: Main process exited, code=exited, status=1/FAILURE
+Sep 01 15:28:55 vlxsam02 systemd[1]: samureye-app.service: Failed with result 'exit-code'.
+Sep 01 15:28:55 vlxsam02 systemd[1]: samureye-app.service: Consumed 2.120s CPU time.
+Sep 01 15:29:01 vlxsam02 systemd[1]: samureye-app.service: Scheduled restart job, restart counter is at 350.
+Sep 01 15:29:01 vlxsam02 systemd[1]: Started samureye-app.service - SamurEye Application Server.
+Sep 01 15:29:01 vlxsam02 samureye-app[391938]: > rest-express@1.0.0 dev
+Sep 01 15:29:01 vlxsam02 samureye-app[391938]: > NODE_ENV=development tsx server/index.ts
+Sep 01 15:29:02 vlxsam02 samureye-app[391962]: /opt/samureye/SamurEye/server/routes.ts:3
+Sep 01 15:29:02 vlxsam02 samureye-app[391962]: import { storage } from "./storage";
+Sep 01 15:29:02 vlxsam02 samureye-app[391962]:          ^
+Sep 01 15:29:02 vlxsam02 samureye-app[391962]: SyntaxError: The requested module './storage' does not provide an export named 'storage'
+Sep 01 15:29:02 vlxsam02 samureye-app[391962]:     at ModuleJob._instantiate (node:internal/modules/esm/module_job:175:21)
+Sep 01 15:29:02 vlxsam02 samureye-app[391962]:     at async ModuleJob.run (node:internal/modules/esm/module_job:258:5)
+Sep 01 15:29:02 vlxsam02 samureye-app[391962]:     at async ModuleLoader.import (node:internal/modules/esm/loader:540:24)
+Sep 01 15:29:02 vlxsam02 samureye-app[391962]:     at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+Sep 01 15:29:02 vlxsam02 samureye-app[391962]: Node.js v20.19.4
+Sep 01 15:29:02 vlxsam02 systemd[1]: samureye-app.service: Main process exited, code=exited, status=1/FAILURE
+Sep 01 15:29:02 vlxsam02 systemd[1]: samureye-app.service: Failed with result 'exit-code'.
+Sep 01 15:29:02 vlxsam02 systemd[1]: samureye-app.service: Consumed 2.176s CPU time.
+^C
+root@vlxsam02:~#
