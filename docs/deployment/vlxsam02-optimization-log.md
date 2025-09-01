@@ -70,3 +70,11 @@ DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends nodejs
 2. **Permissões de arquivos**: Proprietário incorreto dos arquivos
 3. **Variáveis de ambiente**: Configuração .env pode ter problemas
 4. **Dependências**: Alguma dependência pode estar faltando
+
+## Problema de Autenticação Admin
+**Problema**: Interface admin abre sem login, mas operações negam acesso
+**Causa**: Middleware `isAdmin` verifica sessão, mas `/api/admin/me` sempre retorna autenticado
+**Solução**: 
+- Script `fix-admin-simple.sh` com instruções para login via console
+- Login programático: admin@samureye.com.br / SamurEye2024!
+- Após login via API, interface admin funciona completamente
