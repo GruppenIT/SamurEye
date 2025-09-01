@@ -74,43 +74,57 @@ fi
 log "🗑️ Iniciando hard reset do servidor de banco de dados..."
 
 # ============================================================================
-# 2. REPARAR SISTEMA DE PACOTES PRIMEIRO
+# 2. REPARAR SISTEMA DE PACOTES PRIMEIRO  
 # ============================================================================
 
 log "🔧 Reparando sistema de pacotes corrompido..."
 
-# Função para reparar dpkg aggressivamente
+# Parar todos os processos apt imediatamente
+warn "Matando processos apt/dpkg em execução..."
+pkill -9 -f "apt-get" 2>/dev/null || true
+pkill -9 -f "dpkg" 2>/dev/null || true  
+pkill -9 -f "unattended-upgrade" 2>/dev/null || true
+sleep 5
+
+# Remover locks imediatamente
+warn "Removendo locks do sistema de pacotes..."
+rm -f /var/lib/dpkg/lock-frontend 2>/dev/null || true
+rm -f /var/lib/dpkg/lock 2>/dev/null || true
+rm -f /var/cache/apt/archives/lock 2>/dev/null || true
+
+# Executar reparo dpkg múltiplas vezes com verificação
+log "Executando reparos do dpkg..."
+for i in 1 2 3 4 5; do
+    log "Tentativa $i: dpkg --configure -a"
+    DEBIAN_FRONTEND=noninteractive dpkg --configure -a 2>/dev/null || true
+    sleep 5
+    
+    log "Tentativa $i: apt-get -f install"
+    DEBIAN_FRONTEND=noninteractive apt-get -f install -y 2>/dev/null || true
+    sleep 5
+    
+    # Testar se dpkg está funcionando
+    if dpkg --get-selections >/dev/null 2>&1; then
+        log "✅ dpkg funcionando na tentativa $i"
+        break
+    fi
+done
+
+# Aguardar mais tempo para garantir que tudo estabilizou
+log "Aguardando estabilização do sistema..."
+sleep 10
+
+# Função para reparar dpkg (para usar depois)
 repair_dpkg() {
-    log "Executando reparo agressivo do dpkg..."
-    
-    # Matar todos os processos relacionados
     pkill -9 -f "apt|dpkg|unattended" 2>/dev/null || true
-    sleep 3
-    
-    # Remover todos os locks
     rm -f /var/lib/dpkg/lock-frontend /var/lib/dpkg/lock /var/cache/apt/archives/lock 2>/dev/null || true
-    
-    # Reparar dpkg múltiplas vezes
-    for i in 1 2 3 4 5; do
-        log "Tentativa $i de reparo dpkg..."
-        dpkg --configure -a 2>/dev/null || true
-        sleep 2
-        apt-get -f install -y 2>/dev/null || true
-        sleep 2
-        
-        # Verificar se dpkg está funcionando
-        if dpkg --get-selections >/dev/null 2>&1; then
-            log "✅ dpkg reparado com sucesso"
-            return 0
-        fi
-    done
-    
-    warn "dpkg ainda com problemas - continuando mesmo assim"
+    DEBIAN_FRONTEND=noninteractive dpkg --configure -a 2>/dev/null || true
+    DEBIAN_FRONTEND=noninteractive apt-get -f install -y 2>/dev/null || true
+    sleep 3
     return 0
 }
 
-# Executar reparo agressivo
-repair_dpkg
+log "✅ Reparo inicial do sistema de pacotes concluído"
 
 # ============================================================================
 # 3. INSTALAR DEPENDÊNCIAS BÁSICAS
