@@ -25,7 +25,7 @@ Para ambiente corrompido ou reset completo, execute os scripts individualmente:
 │   vlxsam01      │    vlxsam02     │    vlxsam03     │    vlxsam04     │
 │   (Gateway)     │  (Application)  │   (Database)    │  (Collector)    │
 │                 │                 │                 │                 │
-│ 192.168.100.151 │ 192.168.100.152 │ 192.168.100.153 │ 192.168.100.154 │
+│ 172.24.1.151    │ 172.24.1.152    │ 172.24.1.153    │ 172.24.1.154    │
 │                 │                 │                 │                 │
 │ - NGINX Proxy   │ - Node.js 20    │ - PostgreSQL 16 │ - Python 3.11   │
 │ - SSL/TLS       │ - SamurEye App  │ - Redis         │ - Node.js 20     │
@@ -48,7 +48,7 @@ Os scripts devem ser executados na seguinte ordem para respeitar dependências:
 
 ### 1. vlxsam03 - Database Server (PRIMEIRO)
 ```bash
-ssh root@192.168.100.153
+ssh root@172.24.1.153
 curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/vlxsam03/install-hard-reset.sh | bash
 ```
 - Remove PostgreSQL, Redis, MinIO, Grafana completamente
@@ -58,7 +58,7 @@ curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/
 
 ### 2. vlxsam02 - Application Server
 ```bash
-ssh root@192.168.100.152
+ssh root@172.24.1.152
 curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/vlxsam02/install-hard-reset.sh | bash
 ```
 - Remove Node.js e aplicação SamurEye completamente
@@ -68,7 +68,7 @@ curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/
 
 ### 3. vlxsam01 - Gateway
 ```bash
-ssh root@192.168.100.151
+ssh root@172.24.1.151
 curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/vlxsam01/install-hard-reset.sh | bash
 ```
 - Remove NGINX e step-ca completamente
@@ -78,7 +78,7 @@ curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/
 
 ### 4. vlxsam04 - Collector Agent
 ```bash
-ssh root@192.168.100.154
+ssh root@172.24.1.154
 curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/vlxsam04/install-hard-reset.sh | bash
 ```
 - Remove Python, Node.js e ferramentas
@@ -168,8 +168,8 @@ tail -f /var/log/samureye-collector/collector.log
 ### URLs de Acesso
 - **App**: https://app.samureye.com.br
 - **API**: https://api.samureye.com.br  
-- **Grafana**: http://192.168.100.153:3000
-- **MinIO**: http://192.168.100.153:9001
+- **Grafana**: http://172.24.1.153:3000
+- **MinIO**: http://172.24.1.153:9001
 
 ## 🔧 Resolução de Problemas
 

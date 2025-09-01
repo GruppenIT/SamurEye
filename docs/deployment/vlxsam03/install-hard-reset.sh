@@ -366,17 +366,17 @@ cat >> "$PG_HBA" << 'EOF'
 
 # SamurEye On-Premise Access
 # vlxsam01 - Gateway
-host    samureye        samureye        192.168.100.151/32      md5
+host    samureye        samureye        172.24.1.151/32         md5
 # vlxsam02 - Application Server  
-host    samureye        samureye        192.168.100.152/32      md5
+host    samureye        samureye        172.24.1.152/32         md5
 # vlxsam03 - Database (local)
 host    samureye        samureye        127.0.0.1/32            md5
-host    samureye        samureye        192.168.100.153/32      md5
+host    samureye        samureye        172.24.1.153/32         md5
 # vlxsam04 - Collector
-host    samureye        samureye        192.168.100.154/32      md5
+host    samureye        samureye        172.24.1.154/32         md5
 # Rede local SamurEye (backup)
-host    samureye        samureye        192.168.100.0/24        md5
-host    grafana         grafana         192.168.100.153/32      md5
+host    samureye        samureye        172.24.1.0/24           md5
+host    grafana         grafana         172.24.1.153/32         md5
 EOF
 
 # Reiniciar PostgreSQL para aplicar configurações

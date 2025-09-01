@@ -6,7 +6,7 @@
 # Sistema completo de reset e reinstalação do Servidor de Aplicação SamurEye
 # Inclui: Node.js + SamurEye App + Configurações + Banco de Dados Reset
 #
-# Servidor: vlxsam02 (192.168.100.152)
+# Servidor: vlxsam02 (172.24.1.152)
 # Função: Servidor de Aplicação SamurEye
 # Dependências: vlxsam03 (PostgreSQL), vlxsam01 (Gateway), vlxsam04 (Collector)
 # ============================================================================
@@ -37,7 +37,7 @@ APP_DIR="/opt/samureye"
 APP_NAME="SamurEye"
 WORKING_DIR="$APP_DIR/$APP_NAME"
 SERVICE_NAME="samureye-app"
-POSTGRES_HOST="192.168.100.153"  # vlxsam03
+POSTGRES_HOST="172.24.1.153"  # vlxsam03
 POSTGRES_PORT="5432"
 POSTGRES_DB="samureye"
 POSTGRES_USER="samureye"
