@@ -1,0 +1,69 @@
+root@vlxsam02:~# curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/vlxsam02/check-logs-and-fix.sh | sudo bash
+🔍 vlxsam02 - VERIFICAR LOGS E CORRIGIR
+=====================================
+[15:06:24] 📝 Verificando logs de erro...
+🔴 Logs mais recentes do systemd:
+Sep 01 15:06:15 vlxsam02 samureye-app[386854]: Node.js v20.19.4
+Sep 01 15:06:15 vlxsam02 systemd[1]: samureye-app.service: Main process exited, code=exited, status=1/FAILURE
+Sep 01 15:06:15 vlxsam02 systemd[1]: samureye-app.service: Failed with result 'exit-code'.
+Sep 01 15:06:15 vlxsam02 systemd[1]: samureye-app.service: Consumed 2.253s CPU time.
+Sep 01 15:06:20 vlxsam02 systemd[1]: samureye-app.service: Scheduled restart job, restart counter is at 219.
+Sep 01 15:06:20 vlxsam02 systemd[1]: Started samureye-app.service - SamurEye Application Server.
+Sep 01 15:06:20 vlxsam02 samureye-app[386867]: > rest-express@1.0.0 dev
+Sep 01 15:06:20 vlxsam02 samureye-app[386867]: > NODE_ENV=development tsx server/index.ts
+Sep 01 15:06:21 vlxsam02 samureye-app[386890]: /opt/samureye/SamurEye/server/index.ts:3
+Sep 01 15:06:21 vlxsam02 samureye-app[386890]: import { registerRoutes } from "./routes";
+Sep 01 15:06:21 vlxsam02 samureye-app[386890]:          ^
+Sep 01 15:06:21 vlxsam02 samureye-app[386890]: SyntaxError: The requested module './routes' does not provide an export named 'registerRoutes'
+Sep 01 15:06:21 vlxsam02 samureye-app[386890]:     at ModuleJob._instantiate (node:internal/modules/esm/module_job:175:21)
+Sep 01 15:06:21 vlxsam02 samureye-app[386890]:     at async ModuleJob.run (node:internal/modules/esm/module_job:258:5)
+Sep 01 15:06:21 vlxsam02 samureye-app[386890]:     at async ModuleLoader.import (node:internal/modules/esm/loader:540:24)
+Sep 01 15:06:21 vlxsam02 samureye-app[386890]:     at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+Sep 01 15:06:21 vlxsam02 samureye-app[386890]: Node.js v20.19.4
+Sep 01 15:06:21 vlxsam02 systemd[1]: samureye-app.service: Main process exited, code=exited, status=1/FAILURE
+Sep 01 15:06:21 vlxsam02 systemd[1]: samureye-app.service: Failed with result 'exit-code'.
+Sep 01 15:06:21 vlxsam02 systemd[1]: samureye-app.service: Consumed 2.258s CPU time.
+
+🔴 Status do serviço:
+● samureye-app.service - SamurEye Application Server
+     Loaded: loaded (/etc/systemd/system/samureye-app.service; enabled; preset: enabled)
+     Active: activating (auto-restart) (Result: exit-code) since Mon 2025-09-01 15:06:21 -03; 2s ago
+    Process: 386867 ExecStart=/usr/bin/npm run dev (code=exited, status=1/FAILURE)
+   Main PID: 386867 (code=exited, status=1/FAILURE)
+        CPU: 2.258s
+[15:06:24] 🔍 Verificando porta 5000...
+[15:06:24] 🔍 Verificando arquivos essenciais...
+[15:06:24] ✅ Arquivos essenciais encontrados
+[15:06:24] 🔍 Verificando node_modules...
+[15:06:24] 🧪 Testando execução direta...
+
+> rest-express@1.0.0 dev
+> NODE_ENV=development tsx server/index.ts
+
+/opt/samureye/SamurEye/server/index.ts:3
+import { registerRoutes } from "./routes";
+         ^
+
+SyntaxError: The requested module './routes' does not provide an export named 'registerRoutes'
+    at ModuleJob._instantiate (node:internal/modules/esm/module_job:175:21)
+    at async ModuleJob.run (node:internal/modules/esm/module_job:258:5)
+    at async ModuleLoader.import (node:internal/modules/esm/loader:540:24)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+
+Node.js v20.19.4
+[15:06:32] WARNING: ❌ Aplicação não executa diretamente
+Tentando descobrir o erro...
+
+> rest-express@1.0.0 dev
+> NODE_ENV=development tsx server/index.ts
+
+/opt/samureye/SamurEye/server/index.ts:3
+import { registerRoutes } from "./routes";
+         ^
+
+SyntaxError: The requested module './routes' does not provide an export named 'registerRoutes'
+    at ModuleJob._instantiate (node:internal/modules/esm/module_job:175:21)
+[15:06:33] 🔧 Corrigindo permissões completas...
+[15:06:33] 🚀 Tentando iniciar novamente...
+[15:06:44] ERROR: ❌ Aplicação ainda não iniciou - logs detalhados acima
+root@vlxsam02:~#

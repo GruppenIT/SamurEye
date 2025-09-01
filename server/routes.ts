@@ -48,7 +48,7 @@ const requireTenant: RequestHandler = async (req: any, res, next) => {
 
 // Removed Delinea integration - credentials now stored locally with encryption
 
-export async function registerRoutes(app: Express): Promise<Server> {
+async function registerRoutes(app: Express): Promise<Server> {
   // Create memory store for session
   const MemoryStore = createMemoryStore(session);
   
@@ -1671,3 +1671,5 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   return httpServer;
 }
+
+export { registerRoutes };
