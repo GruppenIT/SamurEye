@@ -316,6 +316,12 @@ APP_NAME=SamurEye
 APP_URL=https://app.samureye.com.br
 API_URL=https://api.samureye.com.br
 
+# Replit Environment Variables (Required for on-premise)
+REPLIT_DOMAINS=app.samureye.com.br,api.samureye.com.br,ca.samureye.com.br
+REPL_ID=samureye-onpremise
+REPL_SLUG=samureye
+REPL_OWNER=onpremise
+
 # Logging
 LOG_LEVEL=info
 LOG_DIR=/var/log/samureye

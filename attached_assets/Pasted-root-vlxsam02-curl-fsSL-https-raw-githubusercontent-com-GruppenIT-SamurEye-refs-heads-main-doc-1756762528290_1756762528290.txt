@@ -1,0 +1,150 @@
+root@vlxsam02:~# curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/vlxsam02/debug-app.sh | bash
+🔍 DIAGNÓSTICO DA APLICAÇÃO SAMUREYE
+====================================
+[18:33:38] 1. Verificando status do serviço...
+● samureye-app.service - SamurEye Application Server
+     Loaded: loaded (/etc/systemd/system/samureye-app.service; enabled; preset: enabled)
+     Active: activating (auto-restart) (Result: exit-code) since Mon 2025-09-01 18:33:35 -03; 2s ago
+    Process: 420610 ExecStart=/usr/bin/npm run start (code=exited, status=1/FAILURE)
+   Main PID: 420610 (code=exited, status=1/FAILURE)
+        CPU: 1.028s
+[18:33:38] 2. Verificando logs de erro da aplicação...
+=== ÚLTIMOS ERROS (error.log) ===
+
+Error: Environment variable REPLIT_DOMAINS not provided
+    at file:///opt/samureye/SamurEye/dist/index.js:922:9
+    at ModuleJob.run (node:internal/modules/esm/module_job:263:25)
+    at async ModuleLoader.import (node:internal/modules/esm/loader:540:24)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+
+Node.js v20.19.4
+file:///opt/samureye/SamurEye/dist/index.js:922
+  throw new Error("Environment variable REPLIT_DOMAINS not provided");
+        ^
+
+Error: Environment variable REPLIT_DOMAINS not provided
+    at file:///opt/samureye/SamurEye/dist/index.js:922:9
+    at ModuleJob.run (node:internal/modules/esm/module_job:263:25)
+    at async ModuleLoader.import (node:internal/modules/esm/loader:540:24)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+
+Node.js v20.19.4
+file:///opt/samureye/SamurEye/dist/index.js:922
+  throw new Error("Environment variable REPLIT_DOMAINS not provided");
+        ^
+
+Error: Environment variable REPLIT_DOMAINS not provided
+    at file:///opt/samureye/SamurEye/dist/index.js:922:9
+    at ModuleJob.run (node:internal/modules/esm/module_job:263:25)
+    at async ModuleLoader.import (node:internal/modules/esm/loader:540:24)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+
+Node.js v20.19.4
+=================================
+[18:33:38] 3. Verificando logs de aplicação...
+=== ÚLTIMOS LOGS (app.log) ===
+> NODE_ENV=production node dist/index.js
+
+
+> rest-express@1.0.0 start
+> NODE_ENV=production node dist/index.js
+
+
+> rest-express@1.0.0 start
+> NODE_ENV=production node dist/index.js
+
+
+> rest-express@1.0.0 start
+> NODE_ENV=production node dist/index.js
+
+
+> rest-express@1.0.0 start
+> NODE_ENV=production node dist/index.js
+
+
+> rest-express@1.0.0 start
+> NODE_ENV=production node dist/index.js
+
+
+> rest-express@1.0.0 start
+> NODE_ENV=production node dist/index.js
+
+
+> rest-express@1.0.0 start
+> NODE_ENV=production node dist/index.js
+
+==============================
+[18:33:38] 4. Verificando logs do systemd...
+=== LOGS SYSTEMD ===
+Sep 01 18:33:10 vlxsam02 systemd[1]: samureye-app.service: Scheduled restart job, restart counter is at 25.
+Sep 01 18:33:10 vlxsam02 systemd[1]: Started samureye-app.service - SamurEye Application Server.
+Sep 01 18:33:11 vlxsam02 systemd[1]: samureye-app.service: Main process exited, code=exited, status=1/FAILURE
+Sep 01 18:33:11 vlxsam02 systemd[1]: samureye-app.service: Failed with result 'exit-code'.
+Sep 01 18:33:11 vlxsam02 systemd[1]: samureye-app.service: Consumed 1.086s CPU time.
+Sep 01 18:33:16 vlxsam02 systemd[1]: samureye-app.service: Scheduled restart job, restart counter is at 26.
+Sep 01 18:33:16 vlxsam02 systemd[1]: Started samureye-app.service - SamurEye Application Server.
+Sep 01 18:33:17 vlxsam02 systemd[1]: samureye-app.service: Main process exited, code=exited, status=1/FAILURE
+Sep 01 18:33:17 vlxsam02 systemd[1]: samureye-app.service: Failed with result 'exit-code'.
+Sep 01 18:33:17 vlxsam02 systemd[1]: samureye-app.service: Consumed 1.084s CPU time.
+Sep 01 18:33:22 vlxsam02 systemd[1]: samureye-app.service: Scheduled restart job, restart counter is at 27.
+Sep 01 18:33:22 vlxsam02 systemd[1]: Started samureye-app.service - SamurEye Application Server.
+Sep 01 18:33:23 vlxsam02 systemd[1]: samureye-app.service: Main process exited, code=exited, status=1/FAILURE
+Sep 01 18:33:23 vlxsam02 systemd[1]: samureye-app.service: Failed with result 'exit-code'.
+Sep 01 18:33:23 vlxsam02 systemd[1]: samureye-app.service: Consumed 1.104s CPU time.
+Sep 01 18:33:28 vlxsam02 systemd[1]: samureye-app.service: Scheduled restart job, restart counter is at 28.
+Sep 01 18:33:28 vlxsam02 systemd[1]: Started samureye-app.service - SamurEye Application Server.
+Sep 01 18:33:29 vlxsam02 systemd[1]: samureye-app.service: Main process exited, code=exited, status=1/FAILURE
+Sep 01 18:33:29 vlxsam02 systemd[1]: samureye-app.service: Failed with result 'exit-code'.
+Sep 01 18:33:29 vlxsam02 systemd[1]: samureye-app.service: Consumed 1.046s CPU time.
+Sep 01 18:33:34 vlxsam02 systemd[1]: samureye-app.service: Scheduled restart job, restart counter is at 29.
+Sep 01 18:33:34 vlxsam02 systemd[1]: Started samureye-app.service - SamurEye Application Server.
+Sep 01 18:33:35 vlxsam02 systemd[1]: samureye-app.service: Main process exited, code=exited, status=1/FAILURE
+Sep 01 18:33:35 vlxsam02 systemd[1]: samureye-app.service: Failed with result 'exit-code'.
+Sep 01 18:33:35 vlxsam02 systemd[1]: samureye-app.service: Consumed 1.028s CPU time.
+Sep 01 18:33:40 vlxsam02 systemd[1]: samureye-app.service: Scheduled restart job, restart counter is at 30.
+Sep 01 18:33:40 vlxsam02 systemd[1]: Started samureye-app.service - SamurEye Application Server.
+Sep 01 18:33:41 vlxsam02 systemd[1]: samureye-app.service: Main process exited, code=exited, status=1/FAILURE
+Sep 01 18:33:41 vlxsam02 systemd[1]: samureye-app.service: Failed with result 'exit-code'.
+Sep 01 18:33:41 vlxsam02 systemd[1]: samureye-app.service: Consumed 1.060s CPU time.
+===================
+[18:33:42] 5. Verificando conectividade PostgreSQL...
+psql: error: connection to server at "172.24.1.153", port 5432 failed: Connection timed out
+        Is the server running on that host and accepting TCP/IP connections?
+[18:35:56] WARNING: Falha na conexão PostgreSQL
+[18:35:56] 6. Verificando arquivos da aplicação...
+Diretório de trabalho: /opt/samureye/SamurEye
+✅ Diretório existe
+✅ Build existe (dist/index.js)
+✅ Arquivo .env existe
+✅ package.json existe
+[18:35:56] 7. Verificando permissões...
+total 588
+drwxr-x---  10 samureye samureye   4096 Sep  1 18:30 .
+drwxr-xr-x   7 samureye samureye   4096 Sep  1 18:30 ..
+drwxrwxr-x   2 samureye samureye  36864 Sep  1 18:30 attached_assets
+drwxrwxr-x   3 samureye samureye   4096 Sep  1 18:30 client
+-rw-rw-r--   1 samureye samureye    459 Sep  1 18:30 components.json
+-rw-rw-r--   1 samureye samureye    275 Sep  1 18:30 cookies10.txt
+-rw-rw-r--   1 samureye samureye    271 Sep  1 18:30 cookies2.txt
+-rw-rw-r--   1 samureye samureye    273 Sep  1 18:30 cookies3.txt
+-rw-rw-r--   1 samureye samureye    273 Sep  1 18:30 cookies4.txt
+total 40
+drwxr-xr-x  2 samureye samureye  4096 Sep  1 18:30 .
+drwxrwxr-x 15 root     syslog    4096 Sep  1 18:30 ..
+-rw-r--r--  1 root     root      3710 Sep  1 18:35 app.log
+-rw-r--r--  1 root     root     25811 Sep  1 18:35 error.log
+[18:35:56] 8. Testando execução manual...
+[18:35:56] INFO: Tentando executar: NODE_ENV=production node dist/index.js
+Pressione Ctrl+C após alguns segundos para parar...
+file:///opt/samureye/SamurEye/dist/index.js:922
+  throw new Error("Environment variable REPLIT_DOMAINS not provided");
+        ^
+
+Error: Environment variable REPLIT_DOMAINS not provided
+    at file:///opt/samureye/SamurEye/dist/index.js:922:9
+    at ModuleJob.run (node:internal/modules/esm/module_job:263:25)
+    at async ModuleLoader.import (node:internal/modules/esm/loader:540:24)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+
+Node.js v20.19.4
+root@vlxsam02:~#
