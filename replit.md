@@ -7,19 +7,6 @@ SamurEye is a cloud-based Breach & Attack Simulation (BAS) platform designed for
 Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
-- **01/09/2025**: Melhorias dos Collectors implementadas completamente
-- **01/09/2025**: Detecção automática de status offline baseada em heartbeat (timeout 5min)
-- **01/09/2025**: Telemetria real implementada - CPU, memória, disco do collector vlxsam04
-- **01/09/2025**: Botão "Update Packages" funcional com alertas sobre interrupção de jobs
-- **01/09/2025**: Comando Deploy unificado criado para instalação copy-paste
-- **01/09/2025**: Interface Collectors.tsx completamente reescrita com dados reais
-- **01/09/2025**: Scripts específicos por VM criados para implementação das melhorias:
-  - vlxsam01/update-certificates.sh - SSL e NGINX otimizado
-  - vlxsam02/apply-collector-improvements.sh - Código atualizado
-  - vlxsam03/optimize-database.sh - Banco otimizado com índices
-  - vlxsam04/test-collector-improvements.sh - Testes funcionais
-- **01/09/2025**: install-collector.sh atualizado com instalação e registro automático
-- **01/09/2025**: Rotas de autenticação ajustadas para ambiente on-premise
 - **29/08/2025**: Gateway vlxsam01 totalmente funcional com NGINX proxy SSL e step-ca CA
 - **29/08/2025**: URLs operacionais: https://app.samureye.com.br, https://api.samureye.com.br, https://ca.samureye.com.br
 - **29/08/2025**: Collector vlxsam04 instalado e registrado com sucesso usando método simplificado
