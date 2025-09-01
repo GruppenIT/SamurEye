@@ -58,9 +58,18 @@ echo ""
 # 1. CONFIRMAÇÃO DE HARD RESET
 # ============================================================================
 
-read -p "🚨 CONTINUAR COM HARD RESET? (digite 'CONFIRMO' para continuar): " confirm
-if [ "$confirm" != "CONFIRMO" ]; then
-    error "Reset cancelado pelo usuário"
+# Detectar se está sendo executado via pipe (curl | bash)
+if [ -t 0 ]; then
+    # Terminal interativo - pedir confirmação
+    read -p "🚨 CONTINUAR COM HARD RESET? (digite 'CONFIRMO' para continuar): " confirm
+    if [ "$confirm" != "CONFIRMO" ]; then
+        error "Reset cancelado pelo usuário"
+    fi
+else
+    # Não-interativo (curl | bash) - continuar automaticamente após delay
+    warn "Modo não-interativo detectado (curl | bash)"
+    info "Hard reset iniciará automaticamente em 5 segundos..."
+    sleep 5
 fi
 
 log "🗑️ Iniciando hard reset do agente coletor..."

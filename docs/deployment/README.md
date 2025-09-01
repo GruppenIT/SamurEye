@@ -12,11 +12,10 @@ Para novo ambiente, use os scripts de instalação padrão:
 - [vlxsam04/install.sh](vlxsam04/install.sh) - Collector
 
 ### 🔥 **HARD RESET (Ambiente Corrompido)**
-Para ambiente corrompido ou reset completo, use os scripts de hard reset:
-- **[hard-reset-all-servers.sh](hard-reset-all-servers.sh)** - Reset completo
-- [vlxsam01/install-hard-reset.sh](vlxsam01/install-hard-reset.sh) - Gateway
+Para ambiente corrompido ou reset completo, execute os scripts individualmente:
+- [vlxsam03/install-hard-reset.sh](vlxsam03/install-hard-reset.sh) - Database (PRIMEIRO)
 - [vlxsam02/install-hard-reset.sh](vlxsam02/install-hard-reset.sh) - Application
-- [vlxsam03/install-hard-reset.sh](vlxsam03/install-hard-reset.sh) - Database  
+- [vlxsam01/install-hard-reset.sh](vlxsam01/install-hard-reset.sh) - Gateway
 - [vlxsam04/install-hard-reset.sh](vlxsam04/install-hard-reset.sh) - Collector
 
 ## 🏗️ Arquitetura On-Premise
@@ -37,14 +36,11 @@ Para ambiente corrompido ou reset completo, use os scripts de hard reset:
 
 ## 🚀 Quick Start - HARD RESET
 
-Se seu ambiente está corrompido e você precisa fazer reset completo:
+Se seu ambiente está corrompido e você precisa fazer reset completo, execute os scripts **NA ORDEM CORRETA**:
 
-```bash
-# Download e execução do script master
-curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/hard-reset-all-servers.sh | bash
-```
+**⚠️ IMPORTANTE**: Execute cada script em seu respectivo servidor, respeitando a ordem de dependências!
 
-**⚠️ ATENÇÃO**: Este script fará reset COMPLETO de todos os servidores!
+**⚠️ ATENÇÃO**: Os scripts fazem reset COMPLETO removendo todos os dados!
 
 ## 📋 Ordem de Execução - Hard Reset
 
