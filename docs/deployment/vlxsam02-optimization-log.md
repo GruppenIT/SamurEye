@@ -54,3 +54,19 @@ DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends nodejs
 - Instalar dependências completas (`npm install` sem `--production`)
 - Fallback para `npx vite build` se `npm run build` falhar
 - Usar script `start` correto do package.json
+
+## Diagnóstico de Problemas na Inicialização
+**Problema**: Aplicação falha ao iniciar via systemd (exit code 1)
+**Ferramentas implementadas**:
+- Script de diagnóstico detalhado (`debug-app.sh`)
+- Verificação automática de logs de erro
+- Teste de conexão PostgreSQL manual
+- Teste de execução manual da aplicação
+- Correção automática de permissões
+- Logs detalhados do systemd
+
+## Possíveis Causas do Erro
+1. **Conexão PostgreSQL**: Embora vlxsam03 esteja funcionando
+2. **Permissões de arquivos**: Proprietário incorreto dos arquivos
+3. **Variáveis de ambiente**: Configuração .env pode ter problemas
+4. **Dependências**: Alguma dependência pode estar faltando

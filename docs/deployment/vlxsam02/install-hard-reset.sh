@@ -444,11 +444,57 @@ systemctl start "$SERVICE_NAME"
 # Aguardar inicialização
 sleep 15
 
-# Verificar status
+# Verificar status com diagnóstico detalhado
 if systemctl is-active --quiet "$SERVICE_NAME"; then
     log "✅ Aplicação iniciada com sucesso"
 else
-    error "❌ Falha ao iniciar aplicação - verificar logs: journalctl -u $SERVICE_NAME -f"
+    warn "❌ Aplicação falhou ao iniciar - realizando diagnóstico..."
+    
+    # Verificar logs de erro específicos
+    log "🔍 Verificando logs de erro:"
+    if [ -f "/var/log/samureye/error.log" ]; then
+        echo "=== ÚLTIMOS ERROS ==="
+        tail -20 /var/log/samureye/error.log
+        echo "===================="
+    fi
+    
+    log "🔍 Verificando logs do systemd:"
+    journalctl -u "$SERVICE_NAME" --no-pager -l | tail -20
+    
+    log "🔍 Testando conexão PostgreSQL manualmente:"
+    PGPASSWORD="SamurEye2024!" psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "SELECT version();" 2>&1 || true
+    
+    log "🔍 Testando execução manual da aplicação:"
+    cd "$WORKING_DIR"
+    sudo -u "$APP_USER" NODE_ENV=production node dist/index.js &
+    MANUAL_PID=$!
+    sleep 5
+    
+    if kill -0 $MANUAL_PID 2>/dev/null; then
+        log "✅ Aplicação funciona quando executada manualmente"
+        kill $MANUAL_PID
+        
+        log "🔧 Problema pode ser no serviço systemd - verificando configuração..."
+        log "🔧 Tentando corrigir permissões e reiniciar..."
+        
+        # Corrigir permissões
+        chown -R "$APP_USER:$APP_USER" "$WORKING_DIR"
+        chown -R "$APP_USER:$APP_USER" /var/log/samureye
+        
+        # Reiniciar serviço
+        systemctl daemon-reload
+        systemctl restart "$SERVICE_NAME"
+        sleep 10
+        
+        if systemctl is-active --quiet "$SERVICE_NAME"; then
+            log "✅ Aplicação iniciada com sucesso após correção"
+        else
+            error "❌ Aplicação ainda falha - verificar configuração manual"
+        fi
+    else
+        log "❌ Aplicação também falha quando executada manualmente"
+        error "Verificar dependências e configuração do banco de dados"
+    fi
 fi
 
 # ============================================================================
