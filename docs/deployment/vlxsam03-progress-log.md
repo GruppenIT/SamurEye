@@ -45,5 +45,26 @@ O script deve agora:
 5. ✅ Configurar PostgreSQL corretamente
 6. ✅ Criar usuários e bancos sem erros
 
-## Status
-**PRÓXIMO TESTE**: Script deve funcionar completamente sem erros de cluster
+## Status Atual
+
+### ✅ POSTGRESQL FUNCIONANDO COMPLETAMENTE!
+**Último teste**: Script funcionou perfeitamente
+- Cluster criado com sucesso usando pg_createcluster
+- Usuários criados: samureye, grafana
+- Bancos criados: samureye, grafana
+- Extensões instaladas: uuid-ossp, pgcrypto
+- Conectividade testada e funcionando
+
+### 🔄 REDIS EM CORREÇÃO
+**Problema atual**: Falha na inicialização do Redis
+**Correções aplicadas**:
+- Configuração simplificada (bind apenas 127.0.0.1)
+- Senha fixa: redis123
+- Removida variável $REDIS_PASSWORD problemática
+- Adicionada verificação robusta com logs
+
+### ⏳ PRÓXIMOS SERVIÇOS
+- MinIO
+- Grafana
+
+**SOLUÇÃO CRÍTICA**: SEMPRE recria cluster (sem verificações condicionais)

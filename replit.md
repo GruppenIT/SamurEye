@@ -7,6 +7,7 @@ SamurEye is a cloud-based Breach & Attack Simulation (BAS) platform designed for
 Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
+- **01/09/2025**: ✅ vlxsam03 MÉTODO UBUNTU - usando pg_createcluster em vez de initdb manual
 - **01/09/2025**: ✅ vlxsam03 LIMPEZA AGRESSIVA - remove TODOS diretórios PostgreSQL e sempre recria cluster
 - **01/09/2025**: ✅ vlxsam03 LIMPEZA COMPLETA - remove dados E configurações antes de recriar cluster
 - **01/09/2025**: ✅ vlxsam03 MÉTODO UBUNTU - usando pg_createcluster em vez de initdb manual

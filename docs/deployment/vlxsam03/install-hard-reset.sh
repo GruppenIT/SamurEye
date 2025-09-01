@@ -465,7 +465,7 @@ cat > "$REDIS_CONF" << EOF
 # ============================================================================
 
 # Network
-bind 127.0.0.1 192.168.100.153
+bind 127.0.0.1
 port 6379
 timeout 300
 tcp-keepalive 60
@@ -478,7 +478,7 @@ loglevel notice
 logfile /var/log/redis/redis-server.log
 
 # Security
-requireauth $REDIS_PASSWORD
+requirepass redis123
 
 # Memory Management
 maxmemory 512mb
@@ -498,8 +498,24 @@ rename-command CONFIG "CONFIG_SAMUREYE_ONLY"
 EOF
 
 # Iniciar Redis
-systemctl start redis-server
+log "🚀 Iniciando Redis..."
 systemctl enable redis-server
+systemctl start redis-server
+
+# Verificar se Redis está funcionando
+sleep 3
+if systemctl is-active redis-server >/dev/null 2>&1; then
+    log "✅ Redis iniciado com sucesso"
+    # Testar conexão Redis
+    if redis-cli -a redis123 ping 2>/dev/null | grep -q PONG; then
+        log "✅ Redis respondendo corretamente"
+    else
+        log "⚠️ Redis iniciado mas não responde a ping"
+    fi
+else
+    log "❌ Falha ao iniciar Redis - verificando logs..."
+    journalctl -u redis-server --no-pager -l | tail -10
+fi
 
 # ============================================================================
 # 10. CONFIGURAR MINIO
