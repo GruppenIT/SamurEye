@@ -26,10 +26,13 @@ export default function Collectors() {
   const [showCollectorForm, setShowCollectorForm] = useState(false);
   const [showJourneyForm, setShowJourneyForm] = useState(false);
 
-  const { data: collectors, isLoading } = useQuery({
-    queryKey: ['/api/admin/collectors'],
+  const { data: collectorsData, isLoading } = useQuery({
+    queryKey: [isAdminRoute ? '/api/admin/collectors' : '/api/collectors'],
     refetchInterval: 10000,
   });
+
+  // Ensure collectors is always an array
+  const collectors = Array.isArray(collectorsData) ? collectorsData : [];
 
   const regenerateTokenMutation = useMutation({
     mutationFn: async (collectorId: string) => {
@@ -41,7 +44,7 @@ export default function Collectors() {
         title: "Token regenerado",
         description: "Novo token de enrollment gerado com sucesso",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/collectors'] });
+      queryClient.invalidateQueries({ queryKey: [isAdminRoute ? '/api/admin/collectors' : '/api/collectors'] });
     },
     onError: (error) => {
       toast({
@@ -149,7 +152,7 @@ export default function Collectors() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {collectors?.map((collector: any, index: number) => {
+              {collectors.map((collector: any, index: number) => {
                 const telemetry = mockTelemetry(index);
                 
                 return (
@@ -350,7 +353,7 @@ export default function Collectors() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {collectors?.map((collector: any, index: number) => {
+              {collectors.map((collector: any, index: number) => {
                 const telemetry = mockTelemetry(index);
                 
                 return (
