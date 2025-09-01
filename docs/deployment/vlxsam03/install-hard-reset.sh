@@ -74,73 +74,73 @@ fi
 log "🗑️ Iniciando hard reset do servidor de banco de dados..."
 
 # ============================================================================
-# 2. INSTALAR DEPENDÊNCIAS BÁSICAS PRIMEIRO
+# 2. REPARAR SISTEMA DE PACOTES PRIMEIRO
+# ============================================================================
+
+log "🔧 Reparando sistema de pacotes corrompido..."
+
+# Função para reparar dpkg aggressivamente
+repair_dpkg() {
+    log "Executando reparo agressivo do dpkg..."
+    
+    # Matar todos os processos relacionados
+    pkill -9 -f "apt|dpkg|unattended" 2>/dev/null || true
+    sleep 3
+    
+    # Remover todos os locks
+    rm -f /var/lib/dpkg/lock-frontend /var/lib/dpkg/lock /var/cache/apt/archives/lock 2>/dev/null || true
+    
+    # Reparar dpkg múltiplas vezes
+    for i in 1 2 3 4 5; do
+        log "Tentativa $i de reparo dpkg..."
+        dpkg --configure -a 2>/dev/null || true
+        sleep 2
+        apt-get -f install -y 2>/dev/null || true
+        sleep 2
+        
+        # Verificar se dpkg está funcionando
+        if dpkg --get-selections >/dev/null 2>&1; then
+            log "✅ dpkg reparado com sucesso"
+            return 0
+        fi
+    done
+    
+    warn "dpkg ainda com problemas - continuando mesmo assim"
+    return 0
+}
+
+# Executar reparo agressivo
+repair_dpkg
+
+# ============================================================================
+# 3. INSTALAR DEPENDÊNCIAS BÁSICAS
 # ============================================================================
 
 log "📦 Instalando dependências básicas..."
 
-# Função para forçar liberação do apt
-force_apt_unlock() {
-    log "Forçando liberação do sistema de pacotes..."
-    
-    # Identificar e matar processos específicos
-    local apt_pids=$(pgrep -f "apt-get|dpkg|unattended-upgrade" 2>/dev/null || true)
-    if [ -n "$apt_pids" ]; then
-        warn "Matando processos apt/dpkg: $apt_pids"
-        echo "$apt_pids" | xargs -r kill -9 2>/dev/null || true
-        sleep 5
-    fi
-    
-    # Sempre executar dpkg --configure -a primeiro
-    log "Reparando configuração do dpkg..."
-    dpkg --configure -a 2>/dev/null || true
-    
-    # Verificar e remover locks se necessário
-    local locks_found=false
-    for lock_file in "/var/lib/dpkg/lock-frontend" "/var/lib/dpkg/lock" "/var/cache/apt/archives/lock"; do
-        if [ -f "$lock_file" ]; then
-            if fuser "$lock_file" >/dev/null 2>&1; then
-                warn "Removendo lock: $lock_file"
-                rm -f "$lock_file"
-                locks_found=true
-            fi
-        fi
-    done
-    
-    # Se removeu locks, tentar reparar novamente
-    if [ "$locks_found" = true ]; then
-        log "Executando reparos adicionais..."
-        dpkg --configure -a 2>/dev/null || true
-        apt-get -f install -y 2>/dev/null || true
-    fi
-    
-    return 0
-}
-
-# Forçar liberação e instalar dependências críticas
-force_apt_unlock
-
-# Tentar instalar dependências com várias tentativas
+# Tentar instalar dependências críticas
 for attempt in 1 2 3; do
     log "Tentativa $attempt de atualização do sistema..."
+    repair_dpkg
     if apt-get update -y 2>/dev/null; then
+        log "✅ Sistema atualizado"
         break
     fi
-    force_apt_unlock
     sleep 5
 done
 
 for attempt in 1 2 3; do
     log "Tentativa $attempt de instalação de dependências..."
-    if apt-get install -y psmisc lsof procps 2>/dev/null; then
+    repair_dpkg
+    if DEBIAN_FRONTEND=noninteractive apt-get install -y psmisc lsof procps 2>/dev/null; then
+        log "✅ Dependências básicas instaladas"
         break
     fi
-    force_apt_unlock
     sleep 5
 done
 
 # ============================================================================
-# 3. PARAR TODOS OS SERVIÇOS
+# 4. PARAR TODOS OS SERVIÇOS
 # ============================================================================
 
 log "⏹️ Parando todos os serviços..."
@@ -154,7 +154,7 @@ for service in "${services_to_stop[@]}"; do
 done
 
 # ============================================================================
-# 4. BACKUP E RESET DOS DADOS
+# 5. BACKUP E RESET DOS DADOS
 # ============================================================================
 
 log "💾 Criando backup dos dados atuais..."
@@ -182,7 +182,7 @@ fi
 log "📂 Backup salvo em: $BACKUP_DIR"
 
 # ============================================================================
-# 5. RESET COMPLETO DOS DADOS
+# 6. RESET COMPLETO DOS DADOS
 # ============================================================================
 
 log "🗑️ Removendo dados existentes..."
@@ -206,7 +206,7 @@ rm -rf /var/lib/grafana/grafana.db /var/lib/grafana/sessions/* 2>/dev/null || tr
 log "✅ Dados Grafana removidos"
 
 # ============================================================================
-# 6. CONFIGURAR DEPENDÊNCIAS ADICIONAIS
+# 7. CONFIGURAR DEPENDÊNCIAS ADICIONAIS
 # ============================================================================
 
 log "📦 Instalando dependências adicionais..."
@@ -214,15 +214,16 @@ log "📦 Instalando dependências adicionais..."
 # Tentar instalar dependências com várias tentativas
 for attempt in 1 2 3; do
     log "Tentativa $attempt de instalação de dependências adicionais..."
-    force_apt_unlock
-    if apt-get install -y wget curl gnupg2 software-properties-common apt-transport-https ca-certificates 2>/dev/null; then
+    repair_dpkg
+    if DEBIAN_FRONTEND=noninteractive apt-get install -y wget curl gnupg2 software-properties-common apt-transport-https ca-certificates 2>/dev/null; then
+        log "✅ Dependências adicionais instaladas"
         break
     fi
     sleep 5
 done
 
 # ============================================================================
-# 7. CONFIGURAR POSTGRESQL 16
+# 8. CONFIGURAR POSTGRESQL 16
 # ============================================================================
 
 log "🐘 Configurando PostgreSQL $POSTGRES_VERSION..."
@@ -238,8 +239,9 @@ if ! command -v psql &> /dev/null; then
     # Tentar instalar com várias tentativas
     for attempt in 1 2 3; do
         log "Tentativa $attempt de instalação PostgreSQL..."
-        force_apt_unlock
-        if apt-get update -y 2>/dev/null && apt-get install -y postgresql-$POSTGRES_VERSION postgresql-client-$POSTGRES_VERSION 2>/dev/null; then
+        repair_dpkg
+        if apt-get update -y 2>/dev/null && DEBIAN_FRONTEND=noninteractive apt-get install -y postgresql-$POSTGRES_VERSION postgresql-client-$POSTGRES_VERSION 2>/dev/null; then
+            log "✅ PostgreSQL instalado"
             break
         fi
         sleep 10
@@ -365,7 +367,7 @@ GRANT ALL PRIVILEGES ON DATABASE grafana TO grafana;
 EOF
 
 # ============================================================================
-# 8. CONFIGURAR REDIS
+# 9. CONFIGURAR REDIS
 # ============================================================================
 
 log "🔴 Configurando Redis..."
@@ -374,8 +376,9 @@ log "🔴 Configurando Redis..."
 if ! command -v redis-server &> /dev/null; then
     for attempt in 1 2 3; do
         log "Tentativa $attempt de instalação Redis..."
-        force_apt_unlock
-        if apt-get install -y redis-server 2>/dev/null; then
+        repair_dpkg
+        if DEBIAN_FRONTEND=noninteractive apt-get install -y redis-server 2>/dev/null; then
+            log "✅ Redis instalado"
             break
         fi
         sleep 5
@@ -430,7 +433,7 @@ systemctl start redis-server
 systemctl enable redis-server
 
 # ============================================================================
-# 9. CONFIGURAR MINIO
+# 10. CONFIGURAR MINIO
 # ============================================================================
 
 log "📦 Configurando MinIO..."
@@ -489,7 +492,7 @@ systemctl start minio
 systemctl enable minio
 
 # ============================================================================
-# 10. CONFIGURAR GRAFANA
+# 11. CONFIGURAR GRAFANA
 # ============================================================================
 
 log "📊 Configurando Grafana..."
@@ -503,8 +506,9 @@ if ! command -v grafana-server &> /dev/null; then
     # Tentar instalar com várias tentativas
     for attempt in 1 2 3; do
         log "Tentativa $attempt de instalação Grafana..."
-        force_apt_unlock
-        if apt-get update -y 2>/dev/null && apt-get install -y grafana 2>/dev/null; then
+        repair_dpkg
+        if apt-get update -y 2>/dev/null && DEBIAN_FRONTEND=noninteractive apt-get install -y grafana 2>/dev/null; then
+            log "✅ Grafana instalado"
             break
         fi
         sleep 10
@@ -555,7 +559,7 @@ systemctl start grafana-server
 systemctl enable grafana-server
 
 # ============================================================================
-# 11. CONFIGURAR FIREWALL
+# 12. CONFIGURAR FIREWALL
 # ============================================================================
 
 log "🔥 Configurando firewall UFW..."
@@ -581,7 +585,7 @@ ufw allow from 192.168.100.0/24 to any port 3000   # Grafana
 ufw --force enable
 
 # ============================================================================
-# 12. CRIAR SCRIPT DE TESTE
+# 13. CRIAR SCRIPT DE TESTE
 # ============================================================================
 
 log "🧪 Criando script de teste..."
@@ -651,7 +655,7 @@ EOF
 chmod +x /usr/local/bin/test-samureye-db.sh
 
 # ============================================================================
-# 13. VALIDAÇÃO FINAL
+# 14. VALIDAÇÃO FINAL
 # ============================================================================
 
 log "✅ Executando testes finais..."
@@ -686,7 +690,7 @@ else
 fi
 
 # ============================================================================
-# 14. RESUMO FINAL
+# 15. RESUMO FINAL
 # ============================================================================
 
 echo ""

@@ -1,0 +1,39 @@
+root@vlxsam03:~# curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/vlxsam03/install-hard-reset.sh | bash
+
+🔥 SAMUREYE HARD RESET - DATABASE SERVER vlxsam03
+===============================================
+⚠️  ATENÇÃO: Este script irá:
+   • Parar todos os serviços do banco de dados
+   • APAGAR TODOS OS DADOS do PostgreSQL, Redis, MinIO
+   • Reconfigurar pg_hba.conf e postgresql.conf
+   • Resetar senhas e configurações
+   • Recriar banco e usuários SamurEye
+   • Reconfigurar firewall e rede
+
+[19:26:57] WARNING: Modo não-interativo detectado (curl | bash)
+[19:26:57] INFO: Hard reset iniciará automaticamente em 5 segundos...
+[19:27:02] 🗑️ Iniciando hard reset do servidor de banco de dados...
+[19:27:02] 📦 Instalando dependências básicas...
+[19:27:02] Forçando liberação do sistema de pacotes...
+Hit:1 http://apt.postgresql.org/pub/repos/apt noble-pgdg InRelease
+Hit:2 https://packages.grafana.com/oss/deb stable InRelease
+Hit:3 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:4 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:5 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:6 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists... Done
+W: http://apt.postgresql.org/pub/repos/apt/dists/noble-pgdg/InRelease: Key is stored in legacy trusted.gpg keyring (/etc/apt/trusted.gpg), see the DEPRECATION section in apt-key(8) for details.
+E: dpkg was interrupted, you must manually run 'dpkg --configure -a' to correct the problem.
+[19:27:04] ⏹️ Parando todos os serviços...
+[19:27:04] 💾 Criando backup dos dados atuais...
+[19:27:04] ✅ Backup PostgreSQL criado
+[19:27:04] 📂 Backup salvo em: /opt/backups/samureye-reset-20250901-192704
+[19:27:04] 🗑️ Removendo dados existentes...
+[19:27:04] ✅ Dados PostgreSQL removidos
+[19:27:04] ✅ Dados Redis removidos
+[19:27:04] ✅ Dados MinIO removidos
+[19:27:04] ✅ Dados Grafana removidos
+[19:27:04] 📦 Instalando dependências adicionais...
+[19:27:04] Forçando liberação do sistema de pacotes...
+E: dpkg was interrupted, you must manually run 'dpkg --configure -a' to correct the problem.
+root@vlxsam03:~#
