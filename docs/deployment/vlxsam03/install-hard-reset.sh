@@ -262,94 +262,76 @@ if ! command -v psql &> /dev/null; then
     done
 fi
 
-# O PostgreSQL 16 cria o cluster automaticamente durante a instalação
-# Não precisamos inicializar manualmente
+# Iniciar PostgreSQL primeiro (como no install.sh original)
+log "🚀 Iniciando PostgreSQL..."
+systemctl enable postgresql
+systemctl start postgresql
 
-# Configurar postgresql.conf
+# Aguardar PostgreSQL estar pronto
+sleep 5
+if ! systemctl is-active --quiet postgresql; then
+    error "❌ PostgreSQL falhou ao iniciar"
+fi
+
+log "✅ PostgreSQL iniciado com sucesso"
+
+# Configurar postgresql.conf (como no install.sh original)
 log "⚙️ Configurando postgresql.conf..."
 POSTGRES_CONF="/etc/postgresql/$POSTGRES_VERSION/main/postgresql.conf"
 
-# Configurações básicas
-cat > "$POSTGRES_CONF" << EOF
-# ============================================================================
-# SAMUREYE ON-PREMISE - POSTGRESQL CONFIGURATION
-# ============================================================================
+# Backup da configuração original
+cp "$POSTGRES_CONF" "$POSTGRES_CONF.backup" 2>/dev/null || true
 
-# Configurações de Conexão
+# Adicionar configurações SamurEye (append)
+cat >> "$POSTGRES_CONF" << EOF
+# SamurEye Configuration
 listen_addresses = '*'
 port = 5432
 max_connections = 200
-
-# Configurações de Memória
 shared_buffers = 256MB
 effective_cache_size = 1GB
-work_mem = 4MB
 maintenance_work_mem = 64MB
-
-# Configurações de Log
-log_line_prefix = '%t [%p]: [%l-1] user=%u,db=%d,app=%a,client=%h '
-log_min_duration_statement = 1000
-log_checkpoints = on
-log_connections = on
-log_disconnections = on
-log_lock_waits = on
-
-# Configurações de Localização
-datestyle = 'iso, dmy'
-timezone = 'America/Sao_Paulo'
-lc_messages = 'pt_BR.UTF-8'
-lc_monetary = 'pt_BR.UTF-8'
-lc_numeric = 'pt_BR.UTF-8'
-lc_time = 'pt_BR.UTF-8'
-
-# Configurações de Performance
-checkpoint_segments = 32
-checkpoint_completion_target = 0.7
+checkpoint_completion_target = 0.9
 wal_buffers = 16MB
-
-# Configurações de Autenticação
-ssl = on
-ssl_cert_file = '/etc/ssl/certs/ssl-cert-snakeoil.pem'
-ssl_key_file = '/etc/ssl/private/ssl-cert-snakeoil.key'
+default_statistics_target = 100
+random_page_cost = 1.1
+effective_io_concurrency = 200
+work_mem = 4MB
+min_wal_size = 1GB
+max_wal_size = 4GB
 EOF
 
-# Configurar pg_hba.conf
+# Configurar pg_hba.conf (como no install.sh original)  
 log "🔐 Configurando pg_hba.conf..."
 PG_HBA="/etc/postgresql/$POSTGRES_VERSION/main/pg_hba.conf"
 
-cat > "$PG_HBA" << EOF
-# ============================================================================
-# SAMUREYE ON-PREMISE - POSTGRESQL HOST-BASED AUTHENTICATION
-# ============================================================================
+# Backup da configuração original
+cp "$PG_HBA" "$PG_HBA.backup" 2>/dev/null || true
 
-# TYPE  DATABASE        USER            ADDRESS                 METHOD
+# Adicionar configurações SamurEye (append)
+cat >> "$PG_HBA" << 'EOF'
 
-# Local connections
-local   all             postgres                                peer
-local   all             all                                     peer
-
-# IPv4 local connections
-host    all             all             127.0.0.1/32            md5
-host    all             all             ::1/128                 md5
-
-# SamurEye On-Premise Network Access
-host    samureye        samureye        192.168.100.151/32      md5  # vlxsam01 - Gateway
-host    samureye        samureye        192.168.100.152/32      md5  # vlxsam02 - Application
-host    samureye        samureye        192.168.100.153/32      md5  # vlxsam03 - Database (local)
-host    samureye        samureye        192.168.100.154/32      md5  # vlxsam04 - Collector
-
-# Backup network access
-host    samureye        samureye        192.168.100.0/24        md5  # Full network backup
-
-# Grafana database access
-host    grafana         grafana         127.0.0.1/32            md5
+# SamurEye On-Premise Access
+# vlxsam01 - Gateway
+host    samureye        samureye        192.168.100.151/32      md5
+# vlxsam02 - Application Server  
+host    samureye        samureye        192.168.100.152/32      md5
+# vlxsam03 - Database (local)
+host    samureye        samureye        127.0.0.1/32            md5
+host    samureye        samureye        192.168.100.153/32      md5
+# vlxsam04 - Collector
+host    samureye        samureye        192.168.100.154/32      md5
+# Rede local SamurEye (backup)
+host    samureye        samureye        192.168.100.0/24        md5
 host    grafana         grafana         192.168.100.153/32      md5
 EOF
 
-# Iniciar PostgreSQL
-systemctl start postgresql
-systemctl enable postgresql
+# Reiniciar PostgreSQL para aplicar configurações
+log "🔄 Reiniciando PostgreSQL para aplicar configurações..."
+systemctl restart postgresql
 sleep 5
+
+log "✅ PostgreSQL configurado para SamurEye"
 
 # Criar usuário e banco SamurEye
 log "👤 Criando usuário e banco SamurEye..."
