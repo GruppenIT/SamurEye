@@ -268,42 +268,51 @@ if ! command -v psql &> /dev/null; then
     done
 fi
 
-# Verificar se diretório de dados existe e recriar cluster se necessário
-DATA_DIR="/var/lib/postgresql/$POSTGRES_VERSION/main"
-if [ ! -f "$DATA_DIR/PG_VERSION" ]; then
-    log "📁 Recriando cluster PostgreSQL usando método Ubuntu..."
+# SEMPRE recriar cluster PostgreSQL após hard reset
+log "📁 Recriando cluster PostgreSQL usando método Ubuntu..."
+
+# Parar PostgreSQL completamente
+systemctl stop postgresql 2>/dev/null || true
+sleep 2
+
+# Limpeza AGRESSIVA de qualquer configuração existente
+if command -v pg_dropcluster &>/dev/null; then
+    # Tentar remover cluster de todas as formas possíveis
+    pg_dropcluster --stop $POSTGRES_VERSION main 2>/dev/null || true
+    pg_dropcluster $POSTGRES_VERSION main 2>/dev/null || true
+fi
+
+# Remover fisicamente todos os diretórios
+rm -rf /etc/postgresql/$POSTGRES_VERSION 2>/dev/null || true
+rm -rf /var/lib/postgresql/$POSTGRES_VERSION 2>/dev/null || true
+rm -rf /var/run/postgresql/$POSTGRES_VERSION-main.pg_stat_tmp 2>/dev/null || true
+
+# Aguardar limpeza completa
+sleep 5
+
+# Verificar se pg_createcluster está disponível
+if command -v pg_createcluster &>/dev/null; then
+    log "🔧 Criando novo cluster PostgreSQL..."
     
-    # Parar PostgreSQL se estiver rodando
-    systemctl stop postgresql 2>/dev/null || true
+    # Criar cluster limpo
+    pg_createcluster $POSTGRES_VERSION main --start
     
-    # Garantir que o diretório de dados existe mas está vazio
-    mkdir -p "$DATA_DIR"
-    chown postgres:postgres "$DATA_DIR"
-    chmod 700 "$DATA_DIR"
+    # Aguardar cluster estar pronto
+    sleep 5
     
-    # Usar pg_createcluster (método oficial Ubuntu/Debian)
-    if command -v pg_createcluster &>/dev/null; then
-        # Parar PostgreSQL completamente
-        systemctl stop postgresql 2>/dev/null || true
-        
-        # Remover configuração de cluster completamente
-        pg_dropcluster --stop $POSTGRES_VERSION main 2>/dev/null || true
-        
-        # Remover diretórios de configuração se existirem
-        rm -rf /etc/postgresql/$POSTGRES_VERSION/main 2>/dev/null || true
-        rm -rf /var/lib/postgresql/$POSTGRES_VERSION/main 2>/dev/null || true
-        
-        # Aguardar limpeza
-        sleep 3
-        
-        # Criar novo cluster limpo
-        pg_createcluster $POSTGRES_VERSION main --start
-        log "✅ Cluster PostgreSQL recriado usando pg_createcluster"
-    else
-        # Fallback para initdb manual
-        sudo -u postgres /usr/lib/postgresql/$POSTGRES_VERSION/bin/initdb -D "$DATA_DIR" --locale=en_US.UTF-8
-        log "✅ Cluster PostgreSQL recriado usando initdb"
-    fi
+    log "✅ Cluster PostgreSQL recriado usando pg_createcluster"
+else
+    log "🔧 Criando cluster usando initdb..."
+    
+    # Garantir que diretórios existem
+    mkdir -p "/var/lib/postgresql/$POSTGRES_VERSION/main"
+    chown postgres:postgres "/var/lib/postgresql/$POSTGRES_VERSION/main"
+    chmod 700 "/var/lib/postgresql/$POSTGRES_VERSION/main"
+    
+    # Inicializar cluster
+    sudo -u postgres /usr/lib/postgresql/$POSTGRES_VERSION/bin/initdb -D "/var/lib/postgresql/$POSTGRES_VERSION/main" --locale=en_US.UTF-8
+    
+    log "✅ Cluster PostgreSQL recriado usando initdb"
 fi
 
 # Iniciar PostgreSQL
