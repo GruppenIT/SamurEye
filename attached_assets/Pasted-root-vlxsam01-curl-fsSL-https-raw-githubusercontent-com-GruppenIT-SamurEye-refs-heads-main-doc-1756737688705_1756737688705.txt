@@ -1,0 +1,44 @@
+root@vlxsam01:~# curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/vlxsam01/fix-ssl-nginx.sh | sudo bash
+🔐 vlxsam01 - CORRIGIR SSL E NGINX (SITUAÇÃO REAL)
+=================================================
+
+[11:38:02] 🔍 Verificando situação atual do servidor...
+[11:38:02] WARNING: ⚠️ Certificados SSL não encontrados. Configurando para HTTP apenas
+[11:38:02] ⚙️ Configurando NGINX...
+[11:38:02] 🌐 Criando configuração NGINX apenas HTTP...
+[11:38:02] 🧪 Testando configuração NGINX...
+2025/09/01 11:38:02 [warn] 425821#425821: "ssl_stapling" ignored, no OCSP responder URL in the certificate "/etc/letsencrypt/live/samureye.com.br/fullchain.pem"
+2025/09/01 11:38:02 [warn] 425821#425821: conflicting server name "app.samureye.com.br" on 0.0.0.0:80, ignored
+2025/09/01 11:38:02 [warn] 425821#425821: conflicting server name "api.samureye.com.br" on 0.0.0.0:80, ignored
+2025/09/01 11:38:02 [warn] 425821#425821: conflicting server name "*.samureye.com.br" on 0.0.0.0:80, ignored
+nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+nginx: configuration file /etc/nginx/nginx.conf test is successful
+[11:38:02] ✅ Configuração NGINX válida
+Synchronizing state of nginx.service with SysV service script with /usr/lib/systemd/systemd-sysv-install.
+Executing: /usr/lib/systemd/systemd-sysv-install enable nginx
+[11:38:03] ✅ NGINX rodando
+[11:38:03] 🌐 Testando conectividade...
+
+[11:40:20] WARNING: ⚠️ vlxsam02 pode não estar respondendo
+[11:40:20] ✅ Proxy NGINX funcionando
+
+[11:40:20] 🎯 NGINX CONFIGURADO COM SUCESSO
+════════════════════════════════════════════════
+
+🌐 CONFIGURAÇÃO HTTP:
+   ✓ Sem SSL (certificados não encontrados)
+   ✓ Proxy para vlxsam02:5000
+
+🌐 URLs DISPONÍVEIS:
+   • http://app.samureye.com.br
+   • http://app.samureye.com.br/api/
+   • http://app.samureye.com.br/collector-api/
+
+📊 MONITORAMENTO:
+   • Status: systemctl status nginx
+   • Logs: tail -f /var/log/nginx/samureye.access.log
+   • Teste: curl -I http://app.samureye.com.br/api/system/settings
+
+💡 PRÓXIMO PASSO:
+   Continuar com vlxsam03 (banco de dados)
+root@vlxsam01:~#
