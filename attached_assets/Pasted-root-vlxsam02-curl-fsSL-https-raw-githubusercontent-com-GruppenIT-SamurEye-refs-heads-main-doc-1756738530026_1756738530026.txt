@@ -1,0 +1,683 @@
+root@vlxsam02:~# curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/vlxsam02/fix-typescript-error.sh | sudo bash
+🔧 vlxsam02 - CORRIGIR ERRO TYPESCRIPT
+=====================================
+[11:45:49] 📁 Trabalhando em: /opt/samureye/SamurEye
+[11:45:49] ⏹️ Parando aplicação...
+[11:45:49] 🔍 Verificando erro no storage.ts...
+[11:45:49] Verificando linha 100 do storage.ts:
+
+  // Collector telemetry methods
+}
+
+  // Métodos para telemetria de collectors
+  async saveCollectorTelemetry(collectorId: string, telemetry: any): Promise<void> {
+    // Em implementação real, salvaria no banco de dados
+    console.log(`Salvando telemetria para collector ${collectorId}:`, telemetry);
+  }
+
+  async updateCollectorHeartbeat(collectorId: string, data: any): Promise<void> {
+[11:45:49] 🔧 Corrigindo syntax error...
+[11:45:49] ✅ Syntax error corrigido
+[11:45:49] 🔍 Verificando routes.ts...
+[11:45:49] ✅ Endpoints já existem
+[11:45:49] 🧪 Testando syntax TypeScript...
+server/storage.ts:101:84 - error TS1005: ';' expected.
+
+101   async saveCollectorTelemetry(collectorId: string, telemetry: any): Promise<void> {
+                                                                                       ~
+
+server/storage.ts:110:3 - error TS1434: Unexpected keyword or identifier.
+
+110   async updateCollectorHeartbeat(collectorId: string, data: any): Promise<void> {
+      ~~~~~
+
+server/storage.ts:110:45 - error TS1005: ',' expected.
+
+110   async updateCollectorHeartbeat(collectorId: string, data: any): Promise<void> {
+                                                ~
+
+server/storage.ts:110:59 - error TS1005: ',' expected.
+
+110   async updateCollectorHeartbeat(collectorId: string, data: any): Promise<void> {
+                                                              ~
+
+server/storage.ts:110:65 - error TS1005: ';' expected.
+
+110   async updateCollectorHeartbeat(collectorId: string, data: any): Promise<void> {
+                                                                    ~
+
+server/storage.ts:110:79 - error TS1109: Expression expected.
+
+110   async updateCollectorHeartbeat(collectorId: string, data: any): Promise<void> {
+                                                                                  ~
+
+server/storage.ts:111:11 - error TS1005: ':' expected.
+
+111     const collectors = this.data.collectors || [];
+              ~~~~~~~~~~
+
+server/storage.ts:111:50 - error TS1005: ',' expected.
+
+111     const collectors = this.data.collectors || [];
+                                                     ~
+
+server/storage.ts:112:11 - error TS1005: ':' expected.
+
+112     const index = collectors.findIndex(c => c.id === collectorId || c.name === collectorId);
+              ~~~~~
+
+server/storage.ts:112:92 - error TS1005: ',' expected.
+
+112     const index = collectors.findIndex(c => c.id === collectorId || c.name === collectorId);
+                                                                                               ~
+
+server/storage.ts:114:15 - error TS1005: ',' expected.
+
+114     if (index >= 0) {
+                  ~
+
+server/storage.ts:114:19 - error TS1005: ';' expected.
+
+114     if (index >= 0) {
+                      ~
+
+server/storage.ts:123:3 - error TS1128: Declaration or statement expected.
+
+123   }
+      ~
+
+server/storage.ts:125:3 - error TS1434: Unexpected keyword or identifier.
+
+125   async getCollectorByName(name: string): Promise<any | null> {
+      ~~~~~
+
+server/storage.ts:125:32 - error TS1005: ',' expected.
+
+125   async getCollectorByName(name: string): Promise<any | null> {
+                                   ~
+
+server/storage.ts:125:41 - error TS1005: ';' expected.
+
+125   async getCollectorByName(name: string): Promise<any | null> {
+                                            ~
+
+server/storage.ts:126:11 - error TS1005: ':' expected.
+
+126     const collectors = this.data.collectors || [];
+              ~~~~~~~~~~
+
+server/storage.ts:126:50 - error TS1005: ',' expected.
+
+126     const collectors = this.data.collectors || [];
+                                                     ~
+
+server/storage.ts:127:12 - error TS1005: ':' expected.
+
+127     return collectors.find(c => c.name === name) || null;
+               ~~~~~~~~~~
+
+server/storage.ts:127:57 - error TS1005: ',' expected.
+
+127     return collectors.find(c => c.name === name) || null;
+                                                            ~
+
+server/storage.ts:130:3 - error TS1434: Unexpected keyword or identifier.
+
+130   async getCollectorById(id: string): Promise<any | null> {
+      ~~~~~
+
+server/storage.ts:130:28 - error TS1005: ',' expected.
+
+130   async getCollectorById(id: string): Promise<any | null> {
+                               ~
+
+server/storage.ts:130:37 - error TS1005: ';' expected.
+
+130   async getCollectorById(id: string): Promise<any | null> {
+                                        ~
+
+server/storage.ts:131:11 - error TS1005: ':' expected.
+
+131     const collectors = this.data.collectors || [];
+              ~~~~~~~~~~
+
+server/storage.ts:131:50 - error TS1005: ',' expected.
+
+131     const collectors = this.data.collectors || [];
+                                                     ~
+
+server/storage.ts:132:12 - error TS1005: ':' expected.
+
+132     return collectors.find(c => c.id === id) || null;
+               ~~~~~~~~~~
+
+server/storage.ts:132:53 - error TS1005: ',' expected.
+
+132     return collectors.find(c => c.id === id) || null;
+                                                        ~
+
+server/storage.ts:135:3 - error TS1434: Unexpected keyword or identifier.
+
+135   async updateCollector(id: string, data: any): Promise<any> {
+      ~~~~~
+
+server/storage.ts:135:27 - error TS1005: ',' expected.
+
+135   async updateCollector(id: string, data: any): Promise<any> {
+                              ~
+
+server/storage.ts:135:41 - error TS1005: ',' expected.
+
+135   async updateCollector(id: string, data: any): Promise<any> {
+                                            ~
+
+server/storage.ts:135:47 - error TS1005: ';' expected.
+
+135   async updateCollector(id: string, data: any): Promise<any> {
+                                                  ~
+
+server/storage.ts:136:11 - error TS1005: ':' expected.
+
+136     const collectors = this.data.collectors || [];
+              ~~~~~~~~~~
+
+server/storage.ts:136:50 - error TS1005: ',' expected.
+
+136     const collectors = this.data.collectors || [];
+                                                     ~
+
+server/storage.ts:137:11 - error TS1005: ':' expected.
+
+137     const index = collectors.findIndex(c => c.id === id);
+              ~~~~~
+
+server/storage.ts:137:57 - error TS1005: ',' expected.
+
+137     const index = collectors.findIndex(c => c.id === id);
+                                                            ~
+
+server/storage.ts:139:15 - error TS1005: ',' expected.
+
+139     if (index >= 0) {
+                  ~
+
+server/storage.ts:139:19 - error TS1005: ';' expected.
+
+139     if (index >= 0) {
+                      ~
+
+server/storage.ts:146:3 - error TS1128: Declaration or statement expected.
+
+146   }
+      ~
+
+server/storage.ts:147:1 - error TS1128: Declaration or statement expected.
+
+147 }
+    ~
+
+
+Found 39 errors in the same file, starting at: server/storage.ts:101
+
+[11:45:51] WARNING: ⚠️ Possível problema de syntax no storage.ts
+server/storage.ts:101:84 - error TS1005: ';' expected.
+
+101   async saveCollectorTelemetry(collectorId: string, telemetry: any): Promise<void> {
+                                                                                       ~
+
+server/storage.ts:110:3 - error TS1434: Unexpected keyword or identifier.
+
+110   async updateCollectorHeartbeat(collectorId: string, data: any): Promise<void> {
+      ~~~~~
+
+server/storage.ts:110:45 - error TS1005: ',' expected.
+
+110   async updateCollectorHeartbeat(collectorId: string, data: any): Promise<void> {
+                                                ~
+
+server/storage.ts:110:59 - error TS1005: ',' expected.
+
+110   async updateCollectorHeartbeat(collectorId: string, data: any): Promise<void> {
+                                                              ~
+
+server/storage.ts:110:65 - error TS1005: ';' expected.
+
+110   async updateCollectorHeartbeat(collectorId: string, data: any): Promise<void> {
+                                                                    ~
+
+server/storage.ts:110:79 - error TS1109: Expression expected.
+
+110   async updateCollectorHeartbeat(collectorId: string, data: any): Promise<void> {
+                                                                                  ~
+
+server/storage.ts:111:11 - error TS1005: ':' expected.
+
+111     const collectors = this.data.collectors || [];
+              ~~~~~~~~~~
+
+server/storage.ts:111:50 - error TS1005: ',' expected.
+
+111     const collectors = this.data.collectors || [];
+                                                     ~
+
+server/storage.ts:112:11 - error TS1005: ':' expected.
+
+112     const index = collectors.findIndex(c => c.id === collectorId || c.name === collectorId);
+              ~~~~~
+
+server/storage.ts:112:92 - error TS1005: ',' expected.
+
+112     const index = collectors.findIndex(c => c.id === collectorId || c.name === collectorId);
+                                                                                               ~
+
+server/storage.ts:114:15 - error TS1005: ',' expected.
+
+114     if (index >= 0) {
+                  ~
+
+server/storage.ts:114:19 - error TS1005: ';' expected.
+
+114     if (index >= 0) {
+                      ~
+
+server/storage.ts:123:3 - error TS1128: Declaration or statement expected.
+
+123   }
+      ~
+
+server/storage.ts:125:3 - error TS1434: Unexpected keyword or identifier.
+
+125   async getCollectorByName(name: string): Promise<any | null> {
+      ~~~~~
+
+server/storage.ts:125:32 - error TS1005: ',' expected.
+
+125   async getCollectorByName(name: string): Promise<any | null> {
+                                   ~
+
+server/storage.ts:125:41 - error TS1005: ';' expected.
+
+125   async getCollectorByName(name: string): Promise<any | null> {
+                                            ~
+
+server/storage.ts:126:11 - error TS1005: ':' expected.
+
+126     const collectors = this.data.collectors || [];
+              ~~~~~~~~~~
+
+server/storage.ts:126:50 - error TS1005: ',' expected.
+
+126     const collectors = this.data.collectors || [];
+                                                     ~
+
+server/storage.ts:127:12 - error TS1005: ':' expected.
+
+127     return collectors.find(c => c.name === name) || null;
+               ~~~~~~~~~~
+
+server/storage.ts:127:57 - error TS1005: ',' expected.
+
+127     return collectors.find(c => c.name === name) || null;
+                                                            ~
+
+server/storage.ts:130:3 - error TS1434: Unexpected keyword or identifier.
+
+130   async getCollectorById(id: string): Promise<any | null> {
+      ~~~~~
+
+server/storage.ts:130:28 - error TS1005: ',' expected.
+
+130   async getCollectorById(id: string): Promise<any | null> {
+                               ~
+
+server/storage.ts:130:37 - error TS1005: ';' expected.
+
+130   async getCollectorById(id: string): Promise<any | null> {
+                                        ~
+
+server/storage.ts:131:11 - error TS1005: ':' expected.
+
+131     const collectors = this.data.collectors || [];
+              ~~~~~~~~~~
+
+server/storage.ts:131:50 - error TS1005: ',' expected.
+
+131     const collectors = this.data.collectors || [];
+                                                     ~
+
+server/storage.ts:132:12 - error TS1005: ':' expected.
+
+132     return collectors.find(c => c.id === id) || null;
+               ~~~~~~~~~~
+
+server/storage.ts:132:53 - error TS1005: ',' expected.
+
+132     return collectors.find(c => c.id === id) || null;
+                                                        ~
+
+server/storage.ts:135:3 - error TS1434: Unexpected keyword or identifier.
+
+135   async updateCollector(id: string, data: any): Promise<any> {
+      ~~~~~
+
+server/storage.ts:135:27 - error TS1005: ',' expected.
+
+135   async updateCollector(id: string, data: any): Promise<any> {
+                              ~
+
+server/storage.ts:135:41 - error TS1005: ',' expected.
+
+135   async updateCollector(id: string, data: any): Promise<any> {
+                                            ~
+
+server/storage.ts:135:47 - error TS1005: ';' expected.
+
+135   async updateCollector(id: string, data: any): Promise<any> {
+                                                  ~
+
+server/storage.ts:136:11 - error TS1005: ':' expected.
+
+136     const collectors = this.data.collectors || [];
+              ~~~~~~~~~~
+
+server/storage.ts:136:50 - error TS1005: ',' expected.
+
+136     const collectors = this.data.collectors || [];
+                                                     ~
+
+server/storage.ts:137:11 - error TS1005: ':' expected.
+
+137     const index = collectors.findIndex(c => c.id === id);
+              ~~~~~
+
+server/storage.ts:137:57 - error TS1005: ',' expected.
+
+137     const index = collectors.findIndex(c => c.id === id);
+                                                            ~
+
+server/storage.ts:139:15 - error TS1005: ',' expected.
+
+139     if (index >= 0) {
+                  ~
+
+server/storage.ts:139:19 - error TS1005: ';' expected.
+
+139     if (index >= 0) {
+                      ~
+
+server/storage.ts:146:3 - error TS1128: Declaration or statement expected.
+
+146   }
+      ~
+
+server/storage.ts:147:1 - error TS1128: Declaration or statement expected.
+
+147 }
+    ~
+
+
+Found 39 errors in the same file, starting at: server/storage.ts:101
+
+[11:45:53] WARNING: ⚠️ Possível problema de syntax no routes.ts
+[11:45:53] 🔨 Tentando build novamente...
+
+> rest-express@1.0.0 build
+> vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+
+vite v5.4.19 building for production...
+transforming (3) src/main.tsxBrowserslist: browsers data (caniuse-lite) is 11 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+✓ 2692 modules transformed.
+../dist/public/index.html                   2.20 kB │ gzip:   0.86 kB
+../dist/public/assets/index-BzMs3bRP.css   68.82 kB │ gzip:  11.97 kB
+../dist/public/assets/index-DI20BVPr.js   666.31 kB │ gzip: 192.35 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 6.60s
+✘ [ERROR] Unexpected "{"
+
+    server/storage.ts:101:83:
+      101 │ ...orTelemetry(collectorId: string, telemetry: any): Promise<void> {
+          ╵                                                                    ^
+
+1 error
+root@vlxsam02:~# curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/vlxsam02/rebuild-storage.sh | sudo bash
+🔧 vlxsam02 - RECONSTRUIR STORAGE.TS
+====================================
+[11:55:02] 📁 Trabalhando em: /opt/samureye/SamurEye
+[11:55:02] 💾 Fazendo backup do storage.ts corrompido...
+[11:55:02] 🔧 Reconstruindo storage.ts do zero...
+[11:55:02] ✅ storage.ts reconstruído completamente
+[11:55:02] 🔍 Verificando routes.ts...
+[11:55:02] 🧪 Testando sintaxe TypeScript...
+[11:55:08] ✅ storage.ts sintaxe OK
+node_modules/@google-cloud/storage/build/cjs/src/crc32c.d.ts:6:39 - error TS2315: Type 'Int32Array' is not generic.
+
+6 declare const CRC32C_EXTENSION_TABLE: Int32Array<ArrayBuffer>;
+                                        ~~~~~~~~~~~~~~~~~~~~~~~
+
+node_modules/@google-cloud/storage/build/cjs/src/crc32c.d.ts:66:5 - error TS18028: Private identifiers are only available when targeting ECMAScript 2015 and higher.
+
+66     #private;
+       ~~~~~~~~
+
+node_modules/@google-cloud/storage/build/cjs/src/crc32c.d.ts:115:45 - error TS2315: Type 'Int32Array' is not generic.
+
+115     static readonly CRC32C_EXTENSION_TABLE: Int32Array<ArrayBuffer>;
+                                                ~~~~~~~~~~~~~~~~~~~~~~~
+
+node_modules/@google-cloud/storage/build/cjs/src/file.d.ts:327:5 - error TS18028: Private identifiers are only available when targeting ECMAScript 2015 and higher.
+
+327     #private;
+        ~~~~~~~~
+
+node_modules/@google-cloud/storage/build/cjs/src/hash-stream-validator.d.ts:20:5 - error TS18028: Private identifiers are only available when targeting ECMAScript 2015 and higher.
+
+20     #private;
+       ~~~~~~~~
+
+node_modules/@google-cloud/storage/build/cjs/src/resumable-upload.d.ts:200:5 - error TS18028: Private identifiers are only available when targeting ECMAScript 2015 and higher.
+
+200     #private;
+        ~~~~~~~~
+
+node_modules/@google-cloud/storage/node_modules/google-auth-library/build/src/auth/awsclient.d.ts:84:5 - error TS18028: Private identifiers are only available when targeting ECMAScript 2015 and higher.
+
+84     #private;
+       ~~~~~~~~
+
+node_modules/@google-cloud/storage/node_modules/google-auth-library/build/src/auth/baseexternalclient.d.ts:176:5 - error TS18028: Private identifiers are only available when targeting ECMAScript 2015 and higher.
+
+176     #private;
+        ~~~~~~~~
+
+node_modules/@google-cloud/storage/node_modules/google-auth-library/build/src/auth/googleauth.d.ts:90:5 - error TS18028: Private identifiers are only available when targeting ECMAScript 2015 and higher.
+
+90     #private;
+       ~~~~~~~~
+
+node_modules/@google-cloud/storage/node_modules/google-auth-library/build/src/util.d.ts:134:5 - error TS18028: Private identifiers are only available when targeting ECMAScript 2015 and higher.
+
+134     #private;
+        ~~~~~~~~
+
+node_modules/@google-cloud/storage/node_modules/gtoken/build/src/index.d.ts:38:5 - error TS18028: Private identifiers are only available when targeting ECMAScript 2015 and higher.
+
+38     #private;
+       ~~~~~~~~
+
+node_modules/gaxios/build/src/gaxios.d.ts:6:5 - error TS18028: Private identifiers are only available when targeting ECMAScript 2015 and higher.
+
+6     #private;
+      ~~~~~~~~
+
+node_modules/memorystore/index.d.ts:1:8 - error TS1259: Module '"/opt/samureye/SamurEye/node_modules/@types/express-session/index"' can only be default-imported using the 'esModuleInterop' flag
+
+1 import expressSession, {
+         ~~~~~~~~~~~~~~
+
+  node_modules/@types/express-session/index.d.ts:35:1
+    35 export = session;
+       ~~~~~~~~~~~~~~~~~
+    This module is declared with 'export =', and can only be used with a default import when using the 'esModuleInterop' flag.
+
+node_modules/zod/lib/types.d.ts:772:5 - error TS18028: Private identifiers are only available when targeting ECMAScript 2015 and higher.
+
+772     #private;
+        ~~~~~~~~
+
+node_modules/zod/lib/types.d.ts:791:5 - error TS18028: Private identifiers are only available when targeting ECMAScript 2015 and higher.
+
+791     #private;
+        ~~~~~~~~
+
+server/replitAuth.ts:2:47 - error TS2307: Cannot find module 'openid-client/passport' or its corresponding type declarations.
+  There are types at '/opt/samureye/SamurEye/node_modules/openid-client/build/passport.d.ts', but this result could not be resolved under your current 'moduleResolution' setting. Consider updating to 'node16', 'nodenext', or 'bundler'.
+
+2 import { Strategy, type VerifyFunction } from "openid-client/passport";
+                                                ~~~~~~~~~~~~~~~~~~~~~~~~
+
+server/replitAuth.ts:4:8 - error TS1259: Module '"/opt/samureye/SamurEye/node_modules/@types/passport/index"' can only be default-imported using the 'esModuleInterop' flag
+
+4 import passport from "passport";
+         ~~~~~~~~
+
+  node_modules/@types/passport/index.d.ts:925:1
+    925 export = passport;
+        ~~~~~~~~~~~~~~~~~~
+    This module is declared with 'export =', and can only be used with a default import when using the 'esModuleInterop' flag.
+
+server/replitAuth.ts:5:8 - error TS1259: Module '"/opt/samureye/SamurEye/node_modules/@types/express-session/index"' can only be default-imported using the 'esModuleInterop' flag
+
+5 import session from "express-session";
+         ~~~~~~~
+
+  node_modules/@types/express-session/index.d.ts:35:1
+    35 export = session;
+       ~~~~~~~~~~~~~~~~~
+    This module is declared with 'export =', and can only be used with a default import when using the 'esModuleInterop' flag.
+
+server/replitAuth.ts:7:8 - error TS1259: Module '"/opt/samureye/SamurEye/node_modules/@types/memoizee/index"' can only be default-imported using the 'esModuleInterop' flag
+
+7 import memoize from "memoizee";
+         ~~~~~~~
+
+  node_modules/@types/memoizee/index.d.ts:27:1
+    27 export = memoizee;
+       ~~~~~~~~~~~~~~~~~~
+    This module is declared with 'export =', and can only be used with a default import when using the 'esModuleInterop' flag.
+
+server/replitAuth.ts:8:8 - error TS1259: Module '"/opt/samureye/SamurEye/node_modules/@types/connect-pg-simple/index"' can only be default-imported using the 'esModuleInterop' flag
+
+8 import connectPg from "connect-pg-simple";
+         ~~~~~~~~~
+
+  node_modules/@types/connect-pg-simple/index.d.ts:34:1
+    34 export = connectPgSimple;
+       ~~~~~~~~~~~~~~~~~~~~~~~~~
+    This module is declared with 'export =', and can only be used with a default import when using the 'esModuleInterop' flag.
+
+server/replitAuth.ts:9:10 - error TS2724: '"./storage"' has no exported member named 'storage'. Did you mean 'IStorage'?
+
+9 import { storage } from "./storage";
+           ~~~~~~~
+
+server/routes.ts:4:10 - error TS2724: '"./storage"' has no exported member named 'storage'. Did you mean 'IStorage'?
+
+4 import { storage } from "./storage";
+           ~~~~~~~
+
+server/routes.ts:13:8 - error TS2307: Cannot find module '@shared/schema' or its corresponding type declarations.
+
+13 } from "@shared/schema";
+          ~~~~~~~~~~~~~~~~
+
+server/routes.ts:17:8 - error TS1259: Module '"/opt/samureye/SamurEye/node_modules/@types/express-session/index"' can only be default-imported using the 'esModuleInterop' flag
+
+17 import session from "express-session";
+          ~~~~~~~
+
+  node_modules/@types/express-session/index.d.ts:35:1
+    35 export = session;
+       ~~~~~~~~~~~~~~~~~
+    This module is declared with 'export =', and can only be used with a default import when using the 'esModuleInterop' flag.
+
+server/routes.ts:18:8 - error TS1259: Module '"/opt/samureye/SamurEye/node_modules/memorystore/index"' can only be default-imported using the 'esModuleInterop' flag
+
+18 import createMemoryStore from "memorystore";
+          ~~~~~~~~~~~~~~~~~
+
+  node_modules/memorystore/index.d.ts:81:1
+    81 export = createMemoryStore;
+       ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    This module is declared with 'export =', and can only be used with a default import when using the 'esModuleInterop' flag.
+
+server/seedSimpleData.ts:1:10 - error TS2724: '"./storage"' has no exported member named 'storage'. Did you mean 'IStorage'?
+
+1 import { storage } from "./storage";
+           ~~~~~~~
+
+
+Found 26 errors in 15 files.
+
+Errors  Files
+     3  node_modules/@google-cloud/storage/build/cjs/src/crc32c.d.ts:6
+     1  node_modules/@google-cloud/storage/build/cjs/src/file.d.ts:327
+     1  node_modules/@google-cloud/storage/build/cjs/src/hash-stream-validator.d.ts:20
+     1  node_modules/@google-cloud/storage/build/cjs/src/resumable-upload.d.ts:200
+     1  node_modules/@google-cloud/storage/node_modules/google-auth-library/build/src/auth/awsclient.d.ts:84
+     1  node_modules/@google-cloud/storage/node_modules/google-auth-library/build/src/auth/baseexternalclient.d.ts:176
+     1  node_modules/@google-cloud/storage/node_modules/google-auth-library/build/src/auth/googleauth.d.ts:90
+     1  node_modules/@google-cloud/storage/node_modules/google-auth-library/build/src/util.d.ts:134
+     1  node_modules/@google-cloud/storage/node_modules/gtoken/build/src/index.d.ts:38
+     1  node_modules/gaxios/build/src/gaxios.d.ts:6
+     1  node_modules/memorystore/index.d.ts:1
+     2  node_modules/zod/lib/types.d.ts:772
+     6  server/replitAuth.ts:2
+     4  server/routes.ts:4
+     1  server/seedSimpleData.ts:1
+[11:55:15] WARNING: ⚠️ Possível problema em routes.ts
+[11:55:15] 🔨 Fazendo build...
+
+> rest-express@1.0.0 build
+> vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+
+vite v5.4.19 building for production...
+transforming (3) src/main.tsxBrowserslist: browsers data (caniuse-lite) is 11 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+✓ 2692 modules transformed.
+../dist/public/index.html                   2.20 kB │ gzip:   0.86 kB
+../dist/public/assets/index-BzMs3bRP.css   68.82 kB │ gzip:  11.97 kB
+../dist/public/assets/index-DI20BVPr.js   666.31 kB │ gzip: 192.35 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 6.53s
+✘ [ERROR] No matching export in "server/storage.ts" for import "storage"
+
+    server/replitAuth.ts:9:9:
+      9 │ import { storage } from "./storage";
+        ╵          ~~~~~~~
+
+✘ [ERROR] No matching export in "server/storage.ts" for import "storage"
+
+    server/seedSimpleData.ts:1:9:
+      1 │ import { storage } from "./storage";
+        ╵          ~~~~~~~
+
+✘ [ERROR] No matching export in "server/storage.ts" for import "storage"
+
+    server/routes.ts:4:9:
+      4 │ import { storage } from "./storage";
+        ╵          ~~~~~~~
+
+3 errors
+[11:55:22] ERROR: ❌ Build falhou
+root@vlxsam02:~#
