@@ -74,7 +74,52 @@ fi
 log "🗑️ Iniciando hard reset do servidor de banco de dados..."
 
 # ============================================================================
-# 2. PARAR TODOS OS SERVIÇOS
+# 2. INSTALAR DEPENDÊNCIAS BÁSICAS PRIMEIRO
+# ============================================================================
+
+log "📦 Instalando dependências básicas..."
+
+# Função para forçar liberação do apt
+force_apt_unlock() {
+    log "Forçando liberação do sistema de pacotes..."
+    
+    # Identificar e matar processos específicos
+    local apt_pids=$(pgrep -f "apt-get|dpkg|unattended-upgrade" 2>/dev/null || true)
+    if [ -n "$apt_pids" ]; then
+        warn "Matando processos apt/dpkg: $apt_pids"
+        echo "$apt_pids" | xargs -r kill -9 2>/dev/null || true
+        sleep 5
+    fi
+    
+    # Verificar se ainda há locks
+    local locks_found=false
+    for lock_file in "/var/lib/dpkg/lock-frontend" "/var/lib/dpkg/lock" "/var/cache/apt/archives/lock"; do
+        if [ -f "$lock_file" ]; then
+            if fuser "$lock_file" >/dev/null 2>&1; then
+                warn "Removendo lock: $lock_file"
+                rm -f "$lock_file"
+                locks_found=true
+            fi
+        fi
+    done
+    
+    # Se removeu locks, configurar dpkg
+    if [ "$locks_found" = true ]; then
+        log "Reparando configuração do dpkg..."
+        dpkg --configure -a 2>/dev/null || true
+        apt-get -f install -y 2>/dev/null || true
+    fi
+    
+    return 0
+}
+
+# Forçar liberação e instalar dependências críticas
+force_apt_unlock
+apt-get update -y || true
+apt-get install -y psmisc lsof procps || true
+
+# ============================================================================
+# 3. PARAR TODOS OS SERVIÇOS
 # ============================================================================
 
 log "⏹️ Parando todos os serviços..."
@@ -88,7 +133,7 @@ for service in "${services_to_stop[@]}"; do
 done
 
 # ============================================================================
-# 3. BACKUP E RESET DOS DADOS
+# 4. BACKUP E RESET DOS DADOS
 # ============================================================================
 
 log "💾 Criando backup dos dados atuais..."
@@ -116,7 +161,7 @@ fi
 log "📂 Backup salvo em: $BACKUP_DIR"
 
 # ============================================================================
-# 4. RESET COMPLETO DOS DADOS
+# 5. RESET COMPLETO DOS DADOS
 # ============================================================================
 
 log "🗑️ Removendo dados existentes..."
@@ -140,62 +185,15 @@ rm -rf /var/lib/grafana/grafana.db /var/lib/grafana/sessions/* 2>/dev/null || tr
 log "✅ Dados Grafana removidos"
 
 # ============================================================================
-# 5. AGUARDAR E CONFIGURAR DEPENDÊNCIAS
+# 6. CONFIGURAR DEPENDÊNCIAS ADICIONAIS
 # ============================================================================
 
-log "📦 Aguardando liberação do sistema de pacotes..."
-
-# Aguardar que outros processos apt terminem
-wait_for_apt() {
-    local max_wait=300  # 5 minutos máximo
-    local waited=0
-    
-    # Primeiro, tentar aguardar normalmente
-    while [ $waited -lt $max_wait ]; do
-        # Verificar múltiplos locks
-        if ! fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1 && \
-           ! fuser /var/lib/dpkg/lock >/dev/null 2>&1 && \
-           ! fuser /var/cache/apt/archives/lock >/dev/null 2>&1; then
-            return 0
-        fi
-        
-        if [ $((waited % 30)) -eq 0 ]; then
-            log "Aguardando liberação do apt... ($waited/$max_wait segundos)"
-        fi
-        sleep 5
-        waited=$((waited + 5))
-    done
-    
-    # Se timeout, tentar forçar liberação
-    warn "Timeout aguardando apt - tentando forçar liberação"
-    
-    # Matar processos apt/dpkg pendentes
-    pkill -f "apt-get" || true
-    pkill -f "dpkg" || true
-    pkill -f "unattended-upgrade" || true
-    
-    # Aguardar processos terminarem
-    sleep 10
-    
-    # Remover locks se ainda existirem (último recurso)
-    if fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1; then
-        warn "Removendo locks manualmente (último recurso)"
-        rm -f /var/lib/dpkg/lock-frontend /var/lib/dpkg/lock /var/cache/apt/archives/lock
-        dpkg --configure -a || true
-        apt-get -f install || true
-    fi
-    
-    return 0
-}
-
-wait_for_apt
-
-log "📦 Atualizando sistema e dependências..."
-apt-get update -y
-apt-get install -y wget curl gnupg2 software-properties-common apt-transport-https ca-certificates psmisc lsof
+log "📦 Instalando dependências adicionais..."
+force_apt_unlock
+apt-get install -y wget curl gnupg2 software-properties-common apt-transport-https ca-certificates
 
 # ============================================================================
-# 6. CONFIGURAR POSTGRESQL 16
+# 7. CONFIGURAR POSTGRESQL 16
 # ============================================================================
 
 log "🐘 Configurando PostgreSQL $POSTGRES_VERSION..."
@@ -329,7 +327,7 @@ GRANT ALL PRIVILEGES ON DATABASE grafana TO grafana;
 EOF
 
 # ============================================================================
-# 7. CONFIGURAR REDIS
+# 8. CONFIGURAR REDIS
 # ============================================================================
 
 log "🔴 Configurando Redis..."
@@ -388,7 +386,7 @@ systemctl start redis-server
 systemctl enable redis-server
 
 # ============================================================================
-# 8. CONFIGURAR MINIO
+# 9. CONFIGURAR MINIO
 # ============================================================================
 
 log "📦 Configurando MinIO..."
@@ -447,7 +445,7 @@ systemctl start minio
 systemctl enable minio
 
 # ============================================================================
-# 9. CONFIGURAR GRAFANA
+# 10. CONFIGURAR GRAFANA
 # ============================================================================
 
 log "📊 Configurando Grafana..."
@@ -505,7 +503,7 @@ systemctl start grafana-server
 systemctl enable grafana-server
 
 # ============================================================================
-# 10. CONFIGURAR FIREWALL
+# 11. CONFIGURAR FIREWALL
 # ============================================================================
 
 log "🔥 Configurando firewall UFW..."
@@ -531,7 +529,7 @@ ufw allow from 192.168.100.0/24 to any port 3000   # Grafana
 ufw --force enable
 
 # ============================================================================
-# 11. CRIAR SCRIPT DE TESTE
+# 12. CRIAR SCRIPT DE TESTE
 # ============================================================================
 
 log "🧪 Criando script de teste..."
@@ -601,7 +599,7 @@ EOF
 chmod +x /usr/local/bin/test-samureye-db.sh
 
 # ============================================================================
-# 12. VALIDAÇÃO FINAL
+# 13. VALIDAÇÃO FINAL
 # ============================================================================
 
 log "✅ Executando testes finais..."
@@ -636,7 +634,7 @@ else
 fi
 
 # ============================================================================
-# 13. RESUMO FINAL
+# 14. RESUMO FINAL
 # ============================================================================
 
 echo ""
