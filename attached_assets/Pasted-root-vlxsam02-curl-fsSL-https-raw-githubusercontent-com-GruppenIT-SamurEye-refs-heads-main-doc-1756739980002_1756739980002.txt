@@ -1,0 +1,169 @@
+root@vlxsam02:~# curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/vlxsam02/fix-index.sh | sudo bash
+🔧 vlxsam02 - CORRIGIR INDEX.TS
+===============================
+[12:18:43] 🔍 Verificando server/index.ts...
+[12:18:43] Conteúdo atual do index.ts:
+import express from "express";
+import { createProxyMiddleware } from "http-proxy-middleware";
+import routes from "./routes";
+import { setupAuth } from "./replitAuth";
+import { createServer } from "http";
+import { setupWebSocket } from "./websocket";
+
+const app = express();
+const PORT = process.env.PORT || 5000;
+
+[12:18:43] ✅ index.ts corrigido
+[12:18:43] 🔍 Verificando websocket.ts...
+[12:18:43] 🔨 Fazendo build...
+
+> rest-express@1.0.0 build
+> vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+
+vite v5.4.19 building for production...
+transforming (3) src/main.tsxBrowserslist: browsers data (caniuse-lite) is 11 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+✓ 2692 modules transformed.
+../dist/public/index.html                   2.20 kB │ gzip:   0.86 kB
+../dist/public/assets/index-BzMs3bRP.css   68.82 kB │ gzip:  11.97 kB
+../dist/public/assets/index-DI20BVPr.js   666.31 kB │ gzip: 192.35 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 6.45s
+
+  dist/index.js  17.5kb
+
+⚡ Done in 5ms
+[12:18:50] ✅ Build bem-sucedido!
+[12:18:50] 🚀 Iniciando aplicação...
+[12:19:14] 🧪 Verificando aplicação...
+[12:19:14] ERROR: ❌ Aplicação não iniciou - verificar logs
+root@vlxsam02:~# journalctl -u samureye-app -f
+Sep 01 12:20:10 vlxsam02 samureye-app[377396]:     at Object.transform (file:///opt/samureye/SamurEye/node_modules/@replit/vite-plugin-cartographer/dist/index.mjs:53:9)
+Sep 01 12:20:10 vlxsam02 samureye-app[377396]:     at async transform (file:///opt/samureye/SamurEye/node_modules/rollup/dist/es/shared/node-entry.js:19640:16)
+Sep 01 12:20:10 vlxsam02 samureye-app[377396]:     at async ModuleLoader.addModuleSource (file:///opt/samureye/SamurEye/node_modules/rollup/dist/es/shared/node-entry.js:19856:36)
+Sep 01 12:20:10 vlxsam02 samureye-app[377396]: [replit-cartographer] Error processing /opt/samureye/SamurEye/client/src/components/AdminProtectedRoute.tsx: TypeError: traverse is not a function
+Sep 01 12:20:10 vlxsam02 samureye-app[377396]:     at Object.transform (file:///opt/samureye/SamurEye/node_modules/@replit/vite-plugin-cartographer/dist/index.mjs:53:9)
+Sep 01 12:20:10 vlxsam02 samureye-app[377396]:     at async transform (file:///opt/samureye/SamurEye/node_modules/rollup/dist/es/shared/node-entry.js:19640:16)
+Sep 01 12:20:10 vlxsam02 samureye-app[377396]:     at async ModuleLoader.addModuleSource (file:///opt/samureye/SamurEye/node_modules/rollup/dist/es/shared/node-entry.js:19856:36)
+Sep 01 12:20:10 vlxsam02 samureye-app[377396]: Browserslist: browsers data (caniuse-lite) is 11 months old. Please run:
+Sep 01 12:20:10 vlxsam02 samureye-app[377396]:   npx update-browserslist-db@latest
+Sep 01 12:20:10 vlxsam02 samureye-app[377396]:   Why you should do it regularly: https://github.com/browserslist/update-db#readme
+Sep 01 12:20:10 vlxsam02 samureye-app[377396]: [replit-cartographer] Error processing /opt/samureye/SamurEye/client/src/components/ui/button.tsx: TypeError: traverse is not a function
+Sep 01 12:20:10 vlxsam02 samureye-app[377396]:     at Object.transform (file:///opt/samureye/SamurEye/node_modules/@replit/vite-plugin-cartographer/dist/index.mjs:53:9)
+Sep 01 12:20:10 vlxsam02 samureye-app[377396]:     at async transform (file:///opt/samureye/SamurEye/node_modules/rollup/dist/es/shared/node-entry.js:19640:16)
+Sep 01 12:20:10 vlxsam02 samureye-app[377396]:     at async ModuleLoader.addModuleSource (file:///opt/samureye/SamurEye/node_modules/rollup/dist/es/shared/node-entry.js:19856:36)
+Sep 01 12:20:10 vlxsam02 samureye-app[377396]: [replit-cartographer] Error processing /opt/samureye/SamurEye/client/src/components/ui/card.tsx: TypeError: traverse is not a function
+Sep 01 12:20:10 vlxsam02 samureye-app[377396]:     at Object.transform (file:///opt/samureye/SamurEye/node_modules/@replit/vite-plugin-cartographer/dist/index.mjs:53:9)
+Sep 01 12:20:10 vlxsam02 samureye-app[377396]:     at async transform (file:///opt/samureye/SamurEye/node_modules/rollup/dist/es/shared/node-entry.js:19640:16)
+Sep 01 12:20:10 vlxsam02 samureye-app[377396]:     at async ModuleLoader.addModuleSource (file:///opt/samureye/SamurEye/node_modules/rollup/dist/es/shared/node-entry.js:19856:36)
+Sep 01 12:20:10 vlxsam02 samureye-app[377396]: [replit-cartographer] Error processing /opt/samureye/SamurEye/client/src/components/ui/badge.tsx: TypeError: traverse is not a function
+Sep 01 12:20:10 vlxsam02 samureye-app[377396]:     at Object.transform (file:///opt/samureye/SamurEye/node_modules/@replit/vite-plugin-cartographer/dist/index.mjs:53:9)
+Sep 01 12:20:10 vlxsam02 samureye-app[377396]:     at async transform (file:///opt/samureye/SamurEye/node_modules/rollup/dist/es/shared/node-entry.js:19640:16)
+Sep 01 12:20:10 vlxsam02 samureye-app[377396]:     at async ModuleLoader.addModuleSource (file:///opt/samureye/SamurEye/node_modules/rollup/dist/es/shared/node-entry.js:19856:36)
+Sep 01 12:20:10 vlxsam02 samureye-app[377396]: [replit-cartographer] Error processing /opt/samureye/SamurEye/client/src/components/ui/tabs.tsx: TypeError: traverse is not a function
+Sep 01 12:20:10 vlxsam02 samureye-app[377396]:     at Object.transform (file:///opt/samureye/SamurEye/node_modules/@replit/vite-plugin-cartographer/dist/index.mjs:53:9)
+Sep 01 12:20:10 vlxsam02 samureye-app[377396]:     at async transform (file:///opt/samureye/SamurEye/node_modules/rollup/dist/es/shared/node-entry.js:19640:16)
+Sep 01 12:20:10 vlxsam02 samureye-app[377396]:     at async ModuleLoader.addModuleSource (file:///opt/samureye/SamurEye/node_modules/rollup/dist/es/shared/node-entry.js:19856:36)
+Sep 01 12:20:10 vlxsam02 samureye-app[377396]: [replit-cartographer] Error processing /opt/samureye/SamurEye/client/src/components/layout/MainLayout.tsx: TypeError: traverse is not a function
+Sep 01 12:20:10 vlxsam02 samureye-app[377396]:     at Object.transform (file:///opt/samureye/SamurEye/node_modules/@replit/vite-plugin-cartographer/dist/index.mjs:53:9)
+Sep 01 12:20:10 vlxsam02 samureye-app[377396]:     at async transform (file:///opt/samureye/SamurEye/node_modules/rollup/dist/es/shared/node-entry.js:19640:16)
+Sep 01 12:20:10 vlxsam02 samureye-app[377396]:     at async ModuleLoader.addModuleSource (file:///opt/samureye/SamurEye/node_modules/rollup/dist/es/shared/node-entry.js:19856:36)
+Sep 01 12:20:10 vlxsam02 samureye-app[377396]: [replit-cartographer] Error processing /opt/samureye/SamurEye/client/src/components/journeys/JourneyForm.tsx: TypeError: traverse is not a function
+Sep 01 12:20:10 vlxsam02 samureye-app[377396]:     at Object.transform (file:///opt/samureye/SamurEye/node_modules/@replit/vite-plugin-cartographer/dist/index.mjs:53:9)
+Sep 01 12:20:10 vlxsam02 samureye-app[377396]:     at async transform (file:///opt/samureye/SamurEye/node_modules/rollup/dist/es/shared/node-entry.js:19640:16)
+Sep 01 12:20:10 vlxsam02 samureye-app[377396]:     at async ModuleLoader.addModuleSource (file:///opt/samureye/SamurEye/node_modules/rollup/dist/es/shared/node-entry.js:19856:36)
+Sep 01 12:20:10 vlxsam02 samureye-app[377396]: [replit-cartographer] Error processing /opt/samureye/SamurEye/client/src/components/collectors/CollectorEnrollment.tsx: TypeError: traverse is not a function
+Sep 01 12:20:10 vlxsam02 samureye-app[377396]:     at Object.transform (file:///opt/samureye/SamurEye/node_modules/@replit/vite-plugin-cartographer/dist/index.mjs:53:9)
+Sep 01 12:20:10 vlxsam02 samureye-app[377396]:     at async transform (file:///opt/samureye/SamurEye/node_modules/rollup/dist/es/shared/node-entry.js:19640:16)
+Sep 01 12:20:10 vlxsam02 samureye-app[377396]:     at async ModuleLoader.addModuleSource (file:///opt/samureye/SamurEye/node_modules/rollup/dist/es/shared/node-entry.js:19856:36)
+Sep 01 12:20:10 vlxsam02 samureye-app[377396]: [replit-cartographer] Error processing /opt/samureye/SamurEye/client/src/components/ui/input.tsx: TypeError: traverse is not a function
+Sep 01 12:20:10 vlxsam02 samureye-app[377396]:     at Object.transform (file:///opt/samureye/SamurEye/node_modules/@replit/vite-plugin-cartographer/dist/index.mjs:53:9)
+Sep 01 12:20:10 vlxsam02 samureye-app[377396]:     at async transform (file:///opt/samureye/SamurEye/node_modules/rollup/dist/es/shared/node-entry.js:19640:16)
+Sep 01 12:20:10 vlxsam02 samureye-app[377396]:     at async ModuleLoader.addModuleSource (file:///opt/samureye/SamurEye/node_modules/rollup/dist/es/shared/node-entry.js:19856:36)
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]: [replit-cartographer] Error processing /opt/samureye/SamurEye/client/src/components/ui/table.tsx: TypeError: traverse is not a function
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]:     at Object.transform (file:///opt/samureye/SamurEye/node_modules/@replit/vite-plugin-cartographer/dist/index.mjs:53:9)
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]:     at async transform (file:///opt/samureye/SamurEye/node_modules/rollup/dist/es/shared/node-entry.js:19640:16)
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]:     at async ModuleLoader.addModuleSource (file:///opt/samureye/SamurEye/node_modules/rollup/dist/es/shared/node-entry.js:19856:36)
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]: [replit-cartographer] Error processing /opt/samureye/SamurEye/client/src/components/credentials/CredentialForm.tsx: TypeError: traverse is not a function
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]:     at Object.transform (file:///opt/samureye/SamurEye/node_modules/@replit/vite-plugin-cartographer/dist/index.mjs:53:9)
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]:     at async transform (file:///opt/samureye/SamurEye/node_modules/rollup/dist/es/shared/node-entry.js:19640:16)
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]:     at async ModuleLoader.addModuleSource (file:///opt/samureye/SamurEye/node_modules/rollup/dist/es/shared/node-entry.js:19856:36)
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]: [replit-cartographer] Error processing /opt/samureye/SamurEye/client/src/components/ui/form.tsx: TypeError: traverse is not a function
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]:     at Object.transform (file:///opt/samureye/SamurEye/node_modules/@replit/vite-plugin-cartographer/dist/index.mjs:53:9)
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]:     at async transform (file:///opt/samureye/SamurEye/node_modules/rollup/dist/es/shared/node-entry.js:19640:16)
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]:     at async ModuleLoader.addModuleSource (file:///opt/samureye/SamurEye/node_modules/rollup/dist/es/shared/node-entry.js:19856:36)
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]: [replit-cartographer] Error processing /opt/samureye/SamurEye/client/src/components/ui/select.tsx: TypeError: traverse is not a function
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]:     at Object.transform (file:///opt/samureye/SamurEye/node_modules/@replit/vite-plugin-cartographer/dist/index.mjs:53:9)
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]:     at async transform (file:///opt/samureye/SamurEye/node_modules/rollup/dist/es/shared/node-entry.js:19640:16)
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]:     at async ModuleLoader.addModuleSource (file:///opt/samureye/SamurEye/node_modules/rollup/dist/es/shared/node-entry.js:19856:36)
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]: [replit-cartographer] Error processing /opt/samureye/SamurEye/client/src/components/dashboard/MetricsGrid.tsx: TypeError: traverse is not a function
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]:     at Object.transform (file:///opt/samureye/SamurEye/node_modules/@replit/vite-plugin-cartographer/dist/index.mjs:53:9)
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]:     at async transform (file:///opt/samureye/SamurEye/node_modules/rollup/dist/es/shared/node-entry.js:19640:16)
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]:     at async ModuleLoader.addModuleSource (file:///opt/samureye/SamurEye/node_modules/rollup/dist/es/shared/node-entry.js:19856:36)
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]: [replit-cartographer] Error processing /opt/samureye/SamurEye/client/src/components/dashboard/EDRTimeline.tsx: TypeError: traverse is not a function
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]:     at Object.transform (file:///opt/samureye/SamurEye/node_modules/@replit/vite-plugin-cartographer/dist/index.mjs:53:9)
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]:     at async transform (file:///opt/samureye/SamurEye/node_modules/rollup/dist/es/shared/node-entry.js:19640:16)
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]:     at async ModuleLoader.addModuleSource (file:///opt/samureye/SamurEye/node_modules/rollup/dist/es/shared/node-entry.js:19856:36)
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]: [replit-cartographer] Error processing /opt/samureye/SamurEye/client/src/components/dashboard/AttackSurfaceHeatmap.tsx: TypeError: traverse is not a function
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]:     at Object.transform (file:///opt/samureye/SamurEye/node_modules/@replit/vite-plugin-cartographer/dist/index.mjs:53:9)
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]:     at async transform (file:///opt/samureye/SamurEye/node_modules/rollup/dist/es/shared/node-entry.js:19640:16)
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]:     at async ModuleLoader.addModuleSource (file:///opt/samureye/SamurEye/node_modules/rollup/dist/es/shared/node-entry.js:19856:36)
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]: [replit-cartographer] Error processing /opt/samureye/SamurEye/client/src/components/dashboard/JourneyResults.tsx: TypeError: traverse is not a function
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]:     at Object.transform (file:///opt/samureye/SamurEye/node_modules/@replit/vite-plugin-cartographer/dist/index.mjs:53:9)
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]:     at async transform (file:///opt/samureye/SamurEye/node_modules/rollup/dist/es/shared/node-entry.js:19640:16)
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]:     at async ModuleLoader.addModuleSource (file:///opt/samureye/SamurEye/node_modules/rollup/dist/es/shared/node-entry.js:19856:36)
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]: [replit-cartographer] Error processing /opt/samureye/SamurEye/client/src/components/dashboard/CollectorStatus.tsx: TypeError: traverse is not a function
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]:     at Object.transform (file:///opt/samureye/SamurEye/node_modules/@replit/vite-plugin-cartographer/dist/index.mjs:53:9)
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]:     at async transform (file:///opt/samureye/SamurEye/node_modules/rollup/dist/es/shared/node-entry.js:19640:16)
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]:     at async ModuleLoader.addModuleSource (file:///opt/samureye/SamurEye/node_modules/rollup/dist/es/shared/node-entry.js:19856:36)
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]: [replit-cartographer] Error processing /opt/samureye/SamurEye/client/src/components/dashboard/ActivityFeed.tsx: TypeError: traverse is not a function
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]:     at Object.transform (file:///opt/samureye/SamurEye/node_modules/@replit/vite-plugin-cartographer/dist/index.mjs:53:9)
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]:     at async transform (file:///opt/samureye/SamurEye/node_modules/rollup/dist/es/shared/node-entry.js:19640:16)
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]:     at async ModuleLoader.addModuleSource (file:///opt/samureye/SamurEye/node_modules/rollup/dist/es/shared/node-entry.js:19856:36)
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]: [replit-cartographer] Error processing /opt/samureye/SamurEye/client/src/hooks/useAdminAuth.tsx: TypeError: traverse is not a function
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]:     at Object.transform (file:///opt/samureye/SamurEye/node_modules/@replit/vite-plugin-cartographer/dist/index.mjs:53:9)
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]:     at async transform (file:///opt/samureye/SamurEye/node_modules/rollup/dist/es/shared/node-entry.js:19640:16)
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]:     at async ModuleLoader.addModuleSource (file:///opt/samureye/SamurEye/node_modules/rollup/dist/es/shared/node-entry.js:19856:36)
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]: [replit-cartographer] Error processing /opt/samureye/SamurEye/client/src/components/ui/label.tsx: TypeError: traverse is not a function
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]:     at Object.transform (file:///opt/samureye/SamurEye/node_modules/@replit/vite-plugin-cartographer/dist/index.mjs:53:9)
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]:     at async transform (file:///opt/samureye/SamurEye/node_modules/rollup/dist/es/shared/node-entry.js:19640:16)
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]:     at async ModuleLoader.addModuleSource (file:///opt/samureye/SamurEye/node_modules/rollup/dist/es/shared/node-entry.js:19856:36)
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]: [replit-cartographer] Error processing /opt/samureye/SamurEye/client/src/components/admin/LogoUploader.tsx: TypeError: traverse is not a function
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]:     at Object.transform (file:///opt/samureye/SamurEye/node_modules/@replit/vite-plugin-cartographer/dist/index.mjs:53:9)
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]:     at async transform (file:///opt/samureye/SamurEye/node_modules/rollup/dist/es/shared/node-entry.js:19640:16)
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]:     at async ModuleLoader.addModuleSource (file:///opt/samureye/SamurEye/node_modules/rollup/dist/es/shared/node-entry.js:19856:36)
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]: [replit-cartographer] Error processing /opt/samureye/SamurEye/client/src/components/ui/checkbox.tsx: TypeError: traverse is not a function
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]:     at Object.transform (file:///opt/samureye/SamurEye/node_modules/@replit/vite-plugin-cartographer/dist/index.mjs:53:9)
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]:     at async transform (file:///opt/samureye/SamurEye/node_modules/rollup/dist/es/shared/node-entry.js:19640:16)
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]:     at async ModuleLoader.addModuleSource (file:///opt/samureye/SamurEye/node_modules/rollup/dist/es/shared/node-entry.js:19856:36)
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]: [replit-cartographer] Error processing /opt/samureye/SamurEye/client/src/components/ui/toast.tsx: TypeError: traverse is not a function
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]:     at Object.transform (file:///opt/samureye/SamurEye/node_modules/@replit/vite-plugin-cartographer/dist/index.mjs:53:9)
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]:     at async transform (file:///opt/samureye/SamurEye/node_modules/rollup/dist/es/shared/node-entry.js:19640:16)
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]:     at async ModuleLoader.addModuleSource (file:///opt/samureye/SamurEye/node_modules/rollup/dist/es/shared/node-entry.js:19856:36)
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]: [replit-cartographer] Error processing /opt/samureye/SamurEye/client/src/components/ui/dialog.tsx: TypeError: traverse is not a function
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]:     at Object.transform (file:///opt/samureye/SamurEye/node_modules/@replit/vite-plugin-cartographer/dist/index.mjs:53:9)
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]:     at async transform (file:///opt/samureye/SamurEye/node_modules/rollup/dist/es/shared/node-entry.js:19640:16)
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]:     at async ModuleLoader.addModuleSource (file:///opt/samureye/SamurEye/node_modules/rollup/dist/es/shared/node-entry.js:19856:36)
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]: [replit-cartographer] Error processing /opt/samureye/SamurEye/client/src/components/ui/progress.tsx: TypeError: traverse is not a function
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]:     at Object.transform (file:///opt/samureye/SamurEye/node_modules/@replit/vite-plugin-cartographer/dist/index.mjs:53:9)
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]:     at async transform (file:///opt/samureye/SamurEye/node_modules/rollup/dist/es/shared/node-entry.js:19640:16)
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]:     at async ModuleLoader.addModuleSource (file:///opt/samureye/SamurEye/node_modules/rollup/dist/es/shared/node-entry.js:19856:36)
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]: [replit-cartographer] Error processing /opt/samureye/SamurEye/client/src/components/layout/AdminLayout.tsx: TypeError: traverse is not a function
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]:     at Object.transform (file:///opt/samureye/SamurEye/node_modules/@replit/vite-plugin-cartographer/dist/index.mjs:53:9)
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]:     at async transform (file:///opt/samureye/SamurEye/node_modules/rollup/dist/es/shared/node-entry.js:19640:16)
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]:     at async ModuleLoader.addModuleSource (file:///opt/samureye/SamurEye/node_modules/rollup/dist/es/shared/node-entry.js:19856:36)
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]: [replit-cartographer] Error processing /opt/samureye/SamurEye/client/src/components/ui/textarea.tsx: TypeError: traverse is not a function
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]:     at Object.transform (file:///opt/samureye/SamurEye/node_modules/@replit/vite-plugin-cartographer/dist/index.mjs:53:9)
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]:     at async transform (file:///opt/samureye/SamurEye/node_modules/rollup/dist/es/shared/node-entry.js:19640:16)
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]:     at async ModuleLoader.addModuleSource (file:///opt/samureye/SamurEye/node_modules/rollup/dist/es/shared/node-entry.js:19856:36)
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]: [replit-cartographer] Error processing /opt/samureye/SamurEye/client/src/components/ui/switch.tsx: TypeError: traverse is not a function
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]:     at Object.transform (file:///opt/samureye/SamurEye/node_modules/@replit/vite-plugin-cartographer/dist/index.mjs:53:9)
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]:     at async transform (file:///opt/samureye/SamurEye/node_modules/rollup/dist/es/shared/node-entry.js:19640:16)
+Sep 01 12:20:11 vlxsam02 samureye-app[377396]:     at async ModuleLoader.addModuleSource (file:///opt/samureye/SamurEye/node_modules/rollup/dist/es/shared/node-entry.js:19856:36)
+^C
+root@vlxsam02:~#
