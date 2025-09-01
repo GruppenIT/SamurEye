@@ -1,0 +1,224 @@
+Package 'node-unicode-property-aliases' is not installed, so not removed
+Package 'node-unicode-property-value-aliases' is not installed, so not removed
+Package 'node-unicode-property-value-aliases-ecmascript' is not installed, so not removed
+Package 'node-uniq' is not installed, so not removed
+Package 'node-uniqid' is not installed, so not removed
+Package 'node-uniqs' is not installed, so not removed
+Package 'node-unorm' is not installed, so not removed
+Package 'node-url-join' is not installed, so not removed
+Package 'node-url-parse-lax' is not installed, so not removed
+Package 'node-url-to-options' is not installed, so not removed
+Package 'node-urlgrey' is not installed, so not removed
+Package 'node-utilities' is not installed, so not removed
+Package 'node-utml' is not installed, so not removed
+Package 'node-vali-date' is not installed, so not removed
+Package 'node-vega' is not installed, so not removed
+Package 'node-vega-embed' is not installed, so not removed
+Package 'node-vega-lite' is not installed, so not removed
+Package 'node-vega-themes' is not installed, so not removed
+Package 'node-vega-tooltip' is not installed, so not removed
+Package 'node-vhost' is not installed, so not removed
+Package 'node-vows' is not installed, so not removed
+Package 'node-vscode-debugprotocol' is not installed, so not removed
+Package 'node-vscode-jsonrpc' is not installed, so not removed
+Package 'node-vscode-languageserver' is not installed, so not removed
+Package 'node-vscode-languageserver-protocol' is not installed, so not removed
+Package 'node-vscode-languageserver-types' is not installed, so not removed
+Package 'node-vscode-languageserver-textdocument' is not installed, so not removed
+Package 'node-vscode-languageserver-tools' is not installed, so not removed
+Package 'node-vscode-ws-jsonrpc' is not installed, so not removed
+Package 'node-vue' is not installed, so not removed
+Package 'node-vue-hot-reload-api' is not installed, so not removed
+Package 'node-vue-resource' is not installed, so not removed
+Package 'node-vue-style-loader' is not installed, so not removed
+Package 'node-watchpack' is not installed, so not removed
+Package 'node-webassemblyjs' is not installed, so not removed
+Package 'node-webfinger' is not installed, so not removed
+Package 'node-webfont' is not installed, so not removed
+Package 'node-webpack-env' is not installed, so not removed
+Package 'node-webpack-merge' is not installed, so not removed
+Package 'node-webpack-stats-plugin' is not installed, so not removed
+Package 'node-webrtc-adapter' is not installed, so not removed
+Package 'node-websocket' is not installed, so not removed
+Package 'node-websocket-stream' is not installed, so not removed
+Package 'node-when' is not installed, so not removed
+Package 'node-which-module' is not installed, so not removed
+Package 'node-wikibase-cli' is not installed, so not removed
+Package 'node-wikibase-edit' is not installed, so not removed
+Package 'node-wikibase-sdk' is not installed, so not removed
+Package 'node-wikidata-lang' is not installed, so not removed
+Package 'node-wildemitter' is not installed, so not removed
+Package 'node-winston-compat' is not installed, so not removed
+Package 'node-winston-transport' is not installed, so not removed
+Package 'node-with' is not installed, so not removed
+Package 'node-worker-loader' is not installed, so not removed
+Package 'node-write-file-promise' is not installed, so not removed
+Package 'node-ws-iconv' is not installed, so not removed
+Package 'node-xmlhttprequest' is not installed, so not removed
+Package 'node-xoauth2' is not installed, so not removed
+Package 'node-xregexp' is not installed, so not removed
+Package 'node-xterm' is not installed, so not removed
+Package 'node-xxhashjs' is not installed, so not removed
+Package 'node-y-codemirror' is not installed, so not removed
+Package 'node-yjs' is not installed, so not removed
+Package 'node-y-protocols' is not installed, so not removed
+Package 'node-y-websocket' is not installed, so not removed
+Package 'node-y18n' is not installed, so not removed
+Package 'node-yajsml' is not installed, so not removed
+Package 'node-yamlish' is not installed, so not removed
+Package 'node-yazl' is not installed, so not removed
+Package 'node-yn' is not installed, so not removed
+Package 'node-ytdl-core' is not installed, so not removed
+Package 'node-zkochan-cmd-shim' is not installed, so not removed
+Package 'node-zrender' is not installed, so not removed
+The following packages will be REMOVED:
+  nodejs*
+0 upgraded, 0 newly installed, 1 to remove and 1 not upgraded.
+After this operation, 199 MB disk space will be freed.
+(Reading database ... 133277 files and directories currently installed.)
+Removing nodejs (20.19.4-1nodesource1) ...
+dpkg: warning: while removing nodejs, directory '/usr/lib/node_modules' not empty so not removed
+Processing triggers for man-db (2.12.0-4build2) ...
+[18:05:18] 🗃️ Limpando banco de dados...
+[18:07:32] WARNING: ⚠️ PostgreSQL não acessível em 172.24.1.153:5432
+[18:07:32] WARNING:    Execute primeiro o reset no vlxsam03
+[18:09:48] 🔄 Atualizando sistema...
+Hit:1 https://deb.nodesource.com/node_20.x nodistro InRelease
+Hit:2 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:3 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:4 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:5 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists... Done
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+Calculating upgrade... Done
+The following packages have been kept back:
+  sosreport
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[18:09:51] 📦 Instalando dependências básicas...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+curl is already the newest version (8.5.0-2ubuntu10.6).
+wget is already the newest version (1.21.4-1ubuntu4.1).
+git is already the newest version (1:2.43.0-1ubuntu7.3).
+unzip is already the newest version (6.0-28ubuntu4.1).
+build-essential is already the newest version (12.10ubuntu1).
+python3 is already the newest version (3.12.3-0ubuntu2).
+python3-pip is already the newest version (24.0+dfsg-1ubuntu1.2).
+postgresql-client is already the newest version (16+257build1.1).
+netcat-openbsd is already the newest version (1.226-1ubuntu2).
+jq is already the newest version (1.7.1-3ubuntu0.24.04.1).
+htop is already the newest version (3.3.0-4build1).
+nano is already the newest version (7.2-2ubuntu0.1).
+ca-certificates is already the newest version (20240203).
+gnupg is already the newest version (2.4.4-2ubuntu17.3).
+lsb-release is already the newest version (12.0-2).
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[18:09:52] ✅ Dependências básicas instaladas
+[18:09:52] 📦 Instalando Node.js 20...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[18:09:53] 🔧 Configurando repositório NodeSource...
+Hit:1 https://deb.nodesource.com/node_20.x nodistro InRelease
+Hit:2 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:3 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:4 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:5 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists... Done
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following NEW packages will be installed:
+  nodejs
+0 upgraded, 1 newly installed, 0 to remove and 1 not upgraded.
+Need to get 32.0 MB of archives.
+After this operation, 199 MB of additional disk space will be used.
+Get:1 https://deb.nodesource.com/node_20.x nodistro/main amd64 nodejs amd64 20.19.4-1nodesource1 [32.0 MB]
+Fetched 32.0 MB in 1s (44.9 MB/s)
+Selecting previously unselected package nodejs.
+(Reading database ... 127914 files and directories currently installed.)
+Preparing to unpack .../nodejs_20.19.4-1nodesource1_amd64.deb ...
+Unpacking nodejs (20.19.4-1nodesource1) ...
+Setting up nodejs (20.19.4-1nodesource1) ...
+Processing triggers for man-db (2.12.0-4build2) ...
+Scanning processes...
+Scanning candidates...
+Scanning linux images...
+
+Pending kernel upgrade!
+Running kernel version:
+  6.8.0-41-generic
+Diagnostics:
+  The currently running kernel version is not the expected kernel version 6.8.0-79-generic.
+
+Restarting the system to load the new kernel will not be handled automatically, so you should consider rebooting.
+
+Restarting services...
+
+Service restarts being deferred:
+ /etc/needrestart/restart.d/dbus.service
+ systemctl restart getty@tty1.service
+ systemctl restart systemd-logind.service
+ systemctl restart unattended-upgrades.service
+
+No containers need to be restarted.
+
+No user sessions are running outdated binaries.
+
+No VM guests are running outdated hypervisor (qemu) binaries on this host.
+[18:10:04] 🔍 Verificando instalação Node.js...
+[18:10:04] ✅ Node.js instalado: v20.19.4
+[18:10:04] ✅ npm instalado: 10.8.2
+[18:10:04] 🔧 Instalando ferramentas globais...
+[18:10:11] ✅ Ferramentas globais instaladas
+[18:10:11] 👤 Criando usuário e estrutura de diretórios...
+[18:10:11] ✅ Estrutura de diretórios criada
+[18:10:11] 📥 Baixando aplicação SamurEye...
+Cloning into 'SamurEye'...
+remote: Enumerating objects: 2477, done.
+remote: Counting objects: 100% (404/404), done.
+remote: Compressing objects: 100% (232/232), done.
+remote: Total 2477 (delta 252), reused 277 (delta 130), pack-reused 2073 (from 1)
+Receiving objects: 100% (2477/2477), 2.40 MiB | 14.97 MiB/s, done.
+Resolving deltas: 100% (1688/1688), done.
+[18:10:12] ✅ Aplicação baixada com sucesso
+[18:10:12] ⚙️ Configurando ambiente...
+[18:10:12] ✅ Arquivo .env criado
+[18:10:12] 📦 Instalando dependências npm...
+npm warn config production Use `--omit=dev` instead.
+npm warn deprecated node-domexception@1.0.0: Use your platform's native DOMException instead
+
+added 526 packages, and audited 527 packages in 10s
+
+75 packages are looking for funding
+  run `npm fund` for details
+
+3 low severity vulnerabilities
+
+To address all issues, run:
+  npm audit fix
+
+Run `npm audit` for details.
+npm notice
+npm notice New major version of npm available! 10.8.2 -> 11.5.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.5.2
+npm notice To update run: npm install -g npm@11.5.2
+npm notice
+[18:10:23] ✅ Dependências npm instaladas
+[18:10:23] 🔨 Fazendo build da aplicação...
+
+> rest-express@1.0.0 build
+> vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+
+sh: 1: vite: not found
+root@vlxsam02:~#

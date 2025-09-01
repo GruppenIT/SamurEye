@@ -353,8 +353,8 @@ log "📦 Instalando dependências npm..."
 
 cd "$WORKING_DIR"
 
-# Instalar dependências como usuário samureye
-sudo -u "$APP_USER" npm install --production
+# Instalar dependências completas (incluindo devDependencies para build)
+sudo -u "$APP_USER" npm install
 
 # Verificar se node_modules foi criado
 if [ ! -d "node_modules" ]; then
@@ -369,8 +369,11 @@ log "✅ Dependências npm instaladas"
 
 log "🔨 Fazendo build da aplicação..."
 
-# Build da aplicação
-sudo -u "$APP_USER" npm run build
+# Build da aplicação usando npx para garantir acesso às ferramentas
+sudo -u "$APP_USER" npm run build 2>&1 || {
+    log "⚠️ Build falhou, tentando com npx..."
+    sudo -u "$APP_USER" npx vite build && sudo -u "$APP_USER" npx esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+}
 
 # Verificar se o build foi criado
 if [ ! -d "dist" ] && [ ! -d "build" ] && [ ! -f "server/index.js" ]; then

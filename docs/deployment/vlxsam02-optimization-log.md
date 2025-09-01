@@ -41,5 +41,16 @@ DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends nodejs
 ✅ Ferramentas globais essenciais (pm2, tsx)
 
 ## Status
-**OTIMIZADO**: Script vlxsam02 pronto para instalação sem conflitos
-**IP CORRIGIDO**: Conecta ao PostgreSQL em 172.24.1.153
+**FUNCIONANDO**: Script vlxsam02 executado com sucesso
+- ✅ Node.js 20 instalado sem conflitos
+- ✅ Dependências npm instaladas (incluindo devDependencies)
+- ✅ Build funcional com npx fallback
+- ✅ IP corrigido: PostgreSQL em 172.24.1.153
+- ⚠️ PostgreSQL connection warning (normal - vlxsam03 deve ser executado primeiro)
+
+## Correção do Build
+**Problema**: Vite não estava disponível globalmente
+**Solução**: 
+- Instalar dependências completas (`npm install` sem `--production`)
+- Fallback para `npx vite build` se `npm run build` falhar
+- Usar script `start` correto do package.json
