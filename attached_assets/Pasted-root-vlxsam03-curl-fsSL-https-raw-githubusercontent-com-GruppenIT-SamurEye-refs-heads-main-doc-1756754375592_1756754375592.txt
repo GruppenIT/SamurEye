@@ -1,0 +1,53 @@
+root@vlxsam03:~# curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/vlxsam03/install-hard-reset.sh | bash
+
+
+🔥 SAMUREYE HARD RESET - DATABASE SERVER vlxsam03
+===============================================
+⚠️  ATENÇÃO: Este script irá:
+   • Parar todos os serviços do banco de dados
+   • APAGAR TODOS OS DADOS do PostgreSQL, Redis, MinIO
+   • Reconfigurar pg_hba.conf e postgresql.conf
+   • Resetar senhas e configurações
+   • Recriar banco e usuários SamurEye
+   • Reconfigurar firewall e rede
+
+[19:19:26] WARNING: Modo não-interativo detectado (curl | bash)
+[19:19:26] INFO: Hard reset iniciará automaticamente em 5 segundos...
+[19:19:31] 🗑️ Iniciando hard reset do servidor de banco de dados...
+[19:19:31] ⏹️ Parando todos os serviços...
+[19:19:31] 💾 Criando backup dos dados atuais...
+[19:19:34] ✅ Backup PostgreSQL criado
+[19:19:34] ✅ Backup Redis criado
+[19:19:34] 📂 Backup salvo em: /opt/backups/samureye-reset-20250901-191931
+[19:19:34] 🗑️ Removendo dados existentes...
+[19:19:34] ✅ Dados PostgreSQL removidos
+[19:19:34] ✅ Dados Redis removidos
+[19:19:34] ✅ Dados MinIO removidos
+[19:19:34] ✅ Dados Grafana removidos
+[19:19:34] 📦 Atualizando sistema e dependências...
+Hit:1 https://packages.grafana.com/oss/deb stable InRelease
+Hit:2 http://archive.ubuntu.com/ubuntu noble InRelease
+Get:3 http://security.ubuntu.com/ubuntu noble-security InRelease [126 kB]
+Get:4 http://archive.ubuntu.com/ubuntu noble-updates InRelease [126 kB]
+Get:5 http://apt.postgresql.org/pub/repos/apt noble-pgdg InRelease [107 kB]
+Get:6 http://apt.postgresql.org/pub/repos/apt noble-pgdg/main amd64 Packages [336 kB]
+Get:7 http://security.ubuntu.com/ubuntu noble-security/main amd64 Components [21.6 kB]
+Get:8 http://archive.ubuntu.com/ubuntu noble-backports InRelease [126 kB]
+Get:9 http://security.ubuntu.com/ubuntu noble-security/restricted amd64 Components [212 B]
+Get:10 http://security.ubuntu.com/ubuntu noble-security/universe amd64 Components [52.2 kB]
+Get:11 http://security.ubuntu.com/ubuntu noble-security/multiverse amd64 Components [212 B]
+Get:12 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 Components [175 kB]
+Get:13 http://archive.ubuntu.com/ubuntu noble-updates/restricted amd64 Components [212 B]
+Get:14 http://archive.ubuntu.com/ubuntu noble-updates/universe amd64 Components [377 kB]
+Get:15 http://archive.ubuntu.com/ubuntu noble-updates/multiverse amd64 Components [940 B]
+Get:16 http://archive.ubuntu.com/ubuntu noble-backports/main amd64 Components [7,068 B]
+Get:17 http://archive.ubuntu.com/ubuntu noble-backports/restricted amd64 Components [216 B]
+Get:18 http://archive.ubuntu.com/ubuntu noble-backports/universe amd64 Components [19.2 kB]
+Get:19 http://archive.ubuntu.com/ubuntu noble-backports/multiverse amd64 Components [212 B]
+Fetched 1,475 kB in 5s (320 kB/s)
+Reading package lists... Done
+W: http://apt.postgresql.org/pub/repos/apt/dists/noble-pgdg/InRelease: Key is stored in legacy trusted.gpg keyring (/etc/apt/trusted.gpg), see the DEPRECATION section in apt-key(8) for details.
+E: Could not get lock /var/lib/dpkg/lock-frontend. It is held by process 269678 (apt-get)
+N: Be aware that removing the lock file is not a solution and may break your system.
+E: Unable to acquire the dpkg frontend lock (/var/lib/dpkg/lock-frontend), is another process using it?
+root@vlxsam03:~#

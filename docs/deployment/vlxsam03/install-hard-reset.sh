@@ -140,12 +140,59 @@ rm -rf /var/lib/grafana/grafana.db /var/lib/grafana/sessions/* 2>/dev/null || tr
 log "✅ Dados Grafana removidos"
 
 # ============================================================================
-# 5. REINSTALAR E CONFIGURAR DEPENDÊNCIAS
+# 5. AGUARDAR E CONFIGURAR DEPENDÊNCIAS
 # ============================================================================
+
+log "📦 Aguardando liberação do sistema de pacotes..."
+
+# Aguardar que outros processos apt terminem
+wait_for_apt() {
+    local max_wait=300  # 5 minutos máximo
+    local waited=0
+    
+    # Primeiro, tentar aguardar normalmente
+    while [ $waited -lt $max_wait ]; do
+        # Verificar múltiplos locks
+        if ! fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1 && \
+           ! fuser /var/lib/dpkg/lock >/dev/null 2>&1 && \
+           ! fuser /var/cache/apt/archives/lock >/dev/null 2>&1; then
+            return 0
+        fi
+        
+        if [ $((waited % 30)) -eq 0 ]; then
+            log "Aguardando liberação do apt... ($waited/$max_wait segundos)"
+        fi
+        sleep 5
+        waited=$((waited + 5))
+    done
+    
+    # Se timeout, tentar forçar liberação
+    warn "Timeout aguardando apt - tentando forçar liberação"
+    
+    # Matar processos apt/dpkg pendentes
+    pkill -f "apt-get" || true
+    pkill -f "dpkg" || true
+    pkill -f "unattended-upgrade" || true
+    
+    # Aguardar processos terminarem
+    sleep 10
+    
+    # Remover locks se ainda existirem (último recurso)
+    if fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1; then
+        warn "Removendo locks manualmente (último recurso)"
+        rm -f /var/lib/dpkg/lock-frontend /var/lib/dpkg/lock /var/cache/apt/archives/lock
+        dpkg --configure -a || true
+        apt-get -f install || true
+    fi
+    
+    return 0
+}
+
+wait_for_apt
 
 log "📦 Atualizando sistema e dependências..."
 apt-get update -y
-apt-get install -y wget curl gnupg2 software-properties-common apt-transport-https ca-certificates
+apt-get install -y wget curl gnupg2 software-properties-common apt-transport-https ca-certificates psmisc lsof
 
 # ============================================================================
 # 6. CONFIGURAR POSTGRESQL 16
@@ -156,6 +203,7 @@ log "🐘 Configurando PostgreSQL $POSTGRES_VERSION..."
 # Verificar se PostgreSQL está instalado
 if ! command -v psql &> /dev/null; then
     log "Instalando PostgreSQL $POSTGRES_VERSION..."
+    wait_for_apt
     wget -qO- https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
     echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/postgresql.list
     apt-get update -y
@@ -288,6 +336,7 @@ log "🔴 Configurando Redis..."
 
 # Instalar Redis se necessário
 if ! command -v redis-server &> /dev/null; then
+    wait_for_apt
     apt-get install -y redis-server
 fi
 
@@ -405,6 +454,7 @@ log "📊 Configurando Grafana..."
 
 # Instalar Grafana se necessário
 if ! command -v grafana-server &> /dev/null; then
+    wait_for_apt
     wget -q -O - https://packages.grafana.com/gpg.key | apt-key add -
     echo "deb https://packages.grafana.com/oss/deb stable main" > /etc/apt/sources.list.d/grafana.list
     apt-get update -y
