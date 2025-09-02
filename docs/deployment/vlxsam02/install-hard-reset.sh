@@ -399,15 +399,15 @@ log "✅ Build da aplicação concluído"
 
 log "🔧 Corrigindo autenticação admin no código..."
 
-# Aplicar patch para corrigir endpoint /api/admin/me
+# Aplicar patch mais robusto para corrigir endpoint /api/admin/me
 cat > /tmp/admin_me_patch.js << 'EOF'
 const fs = require('fs');
 const filePath = process.argv[2];
 
 let content = fs.readFileSync(filePath, 'utf8');
 
-// Substituir o endpoint problemático
-const oldPattern = /\/\/ Check admin authentication status - Public for on-premise\s*app\.get\('\/api\/admin\/me', async \(req, res\) => \{[\s\S]*?\}\);/;
+// Padrão mais específico para encontrar o endpoint
+const oldPattern = /\/\/ Check admin authentication status.*?\n.*?app\.get\('\/api\/admin\/me',.*?\n.*?try \{.*?\n.*?\/\/ In on-premise environment, always allow admin access.*?\n.*?res\.json\(\{.*?\n.*?isAuthenticated: true,.*?\n.*?email: '.*?',.*?\n.*?isAdmin: true.*?\n.*?\}\);.*?\n.*?\} catch \(error\) \{.*?\n.*?res\.status\(500\)\.json\(\{ message: '.*?' \}\);.*?\n.*?\}.*?\n.*?\}\);/s;
 
 const newEndpoint = `// Check admin authentication status - Fixed for on-premise
   app.get('/api/admin/me', async (req, res) => {
@@ -432,12 +432,34 @@ const newEndpoint = `// Check admin authentication status - Fixed for on-premise
     }
   });`;
 
-if (oldPattern.test(content)) {
-    content = content.replace(oldPattern, newEndpoint);
-    fs.writeFileSync(filePath, content, 'utf8');
-    console.log('✅ Endpoint /api/admin/me corrigido');
+// Tentar substituição mais simples linha por linha
+if (content.includes('// In on-premise environment, always allow admin access')) {
+    // Encontrar início e fim do endpoint
+    const startPattern = /app\.get\('\/api\/admin\/me', async \(req, res\) => \{/;
+    const endPattern = /\}\);\s*(?=\n\s*\/\/ Admin middleware|$)/;
+    
+    const startMatch = content.match(startPattern);
+    if (startMatch) {
+        const startIndex = startMatch.index;
+        const afterStart = content.substring(startIndex);
+        const endMatch = afterStart.match(endPattern);
+        
+        if (endMatch) {
+            const endIndex = startIndex + endMatch.index + endMatch[0].length;
+            const before = content.substring(0, startIndex);
+            const after = content.substring(endIndex);
+            
+            const newContent = before + newEndpoint + after;
+            fs.writeFileSync(filePath, newContent, 'utf8');
+            console.log('✅ Endpoint /api/admin/me corrigido com sucesso');
+        } else {
+            console.log('⚠️ Fim do endpoint não encontrado');
+        }
+    } else {
+        console.log('⚠️ Início do endpoint não encontrado');
+    }
 } else {
-    console.log('⚠️ Padrão não encontrado - correção pode já ter sido aplicada');
+    console.log('⚠️ Endpoint já pode ter sido corrigido');
 }
 EOF
 

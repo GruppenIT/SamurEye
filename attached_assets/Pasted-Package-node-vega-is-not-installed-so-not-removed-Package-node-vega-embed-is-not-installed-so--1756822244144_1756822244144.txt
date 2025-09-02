@@ -1,0 +1,283 @@
+Package 'node-vega' is not installed, so not removed
+Package 'node-vega-embed' is not installed, so not removed
+Package 'node-vega-lite' is not installed, so not removed
+Package 'node-vega-themes' is not installed, so not removed
+Package 'node-vega-tooltip' is not installed, so not removed
+Package 'node-vhost' is not installed, so not removed
+Package 'node-vows' is not installed, so not removed
+Package 'node-vscode-debugprotocol' is not installed, so not removed
+Package 'node-vscode-jsonrpc' is not installed, so not removed
+Package 'node-vscode-languageserver' is not installed, so not removed
+Package 'node-vscode-languageserver-protocol' is not installed, so not removed
+Package 'node-vscode-languageserver-types' is not installed, so not removed
+Package 'node-vscode-languageserver-textdocument' is not installed, so not removed
+Package 'node-vscode-languageserver-tools' is not installed, so not removed
+Package 'node-vscode-ws-jsonrpc' is not installed, so not removed
+Package 'node-vue' is not installed, so not removed
+Package 'node-vue-hot-reload-api' is not installed, so not removed
+Package 'node-vue-resource' is not installed, so not removed
+Package 'node-vue-style-loader' is not installed, so not removed
+Package 'node-watchpack' is not installed, so not removed
+Package 'node-webassemblyjs' is not installed, so not removed
+Package 'node-webfinger' is not installed, so not removed
+Package 'node-webfont' is not installed, so not removed
+Package 'node-webpack-env' is not installed, so not removed
+Package 'node-webpack-merge' is not installed, so not removed
+Package 'node-webpack-stats-plugin' is not installed, so not removed
+Package 'node-webrtc-adapter' is not installed, so not removed
+Package 'node-websocket' is not installed, so not removed
+Package 'node-websocket-stream' is not installed, so not removed
+Package 'node-when' is not installed, so not removed
+Package 'node-which-module' is not installed, so not removed
+Package 'node-wikibase-cli' is not installed, so not removed
+Package 'node-wikibase-edit' is not installed, so not removed
+Package 'node-wikibase-sdk' is not installed, so not removed
+Package 'node-wikidata-lang' is not installed, so not removed
+Package 'node-wildemitter' is not installed, so not removed
+Package 'node-winston-compat' is not installed, so not removed
+Package 'node-winston-transport' is not installed, so not removed
+Package 'node-with' is not installed, so not removed
+Package 'node-worker-loader' is not installed, so not removed
+Package 'node-write-file-promise' is not installed, so not removed
+Package 'node-ws-iconv' is not installed, so not removed
+Package 'node-xmlhttprequest' is not installed, so not removed
+Package 'node-xoauth2' is not installed, so not removed
+Package 'node-xregexp' is not installed, so not removed
+Package 'node-xterm' is not installed, so not removed
+Package 'node-xxhashjs' is not installed, so not removed
+Package 'node-y-codemirror' is not installed, so not removed
+Package 'node-yjs' is not installed, so not removed
+Package 'node-y-protocols' is not installed, so not removed
+Package 'node-y-websocket' is not installed, so not removed
+Package 'node-y18n' is not installed, so not removed
+Package 'node-yajsml' is not installed, so not removed
+Package 'node-yamlish' is not installed, so not removed
+Package 'node-yazl' is not installed, so not removed
+Package 'node-yn' is not installed, so not removed
+Package 'node-ytdl-core' is not installed, so not removed
+Package 'node-zkochan-cmd-shim' is not installed, so not removed
+Package 'node-zrender' is not installed, so not removed
+The following packages will be REMOVED:
+  nodejs*
+0 upgraded, 0 newly installed, 1 to remove and 1 not upgraded.
+After this operation, 199 MB disk space will be freed.
+(Reading database ... 133277 files and directories currently installed.)
+Removing nodejs (20.19.4-1nodesource1) ...
+dpkg: warning: while removing nodejs, directory '/usr/lib/node_modules' not empty so not removed
+Processing triggers for man-db (2.12.0-4build2) ...
+[11:04:12] 🗃️ Limpando banco de dados...
+[11:06:25] WARNING: ⚠️ PostgreSQL não acessível em 172.24.1.153:5432
+[11:06:25] WARNING:    Execute primeiro o reset no vlxsam03
+[11:08:40] 🔄 Atualizando sistema...
+Hit:1 https://deb.nodesource.com/node_20.x nodistro InRelease
+Hit:2 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:3 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:4 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:5 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists... Done
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+Calculating upgrade... Done
+The following packages have been kept back:
+  sosreport
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[11:08:44] 📦 Instalando dependências básicas...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+curl is already the newest version (8.5.0-2ubuntu10.6).
+wget is already the newest version (1.21.4-1ubuntu4.1).
+git is already the newest version (1:2.43.0-1ubuntu7.3).
+unzip is already the newest version (6.0-28ubuntu4.1).
+build-essential is already the newest version (12.10ubuntu1).
+python3 is already the newest version (3.12.3-0ubuntu2).
+python3-pip is already the newest version (24.0+dfsg-1ubuntu1.2).
+postgresql-client is already the newest version (16+257build1.1).
+netcat-openbsd is already the newest version (1.226-1ubuntu2).
+jq is already the newest version (1.7.1-3ubuntu0.24.04.1).
+htop is already the newest version (3.3.0-4build1).
+nano is already the newest version (7.2-2ubuntu0.1).
+ca-certificates is already the newest version (20240203).
+gnupg is already the newest version (2.4.4-2ubuntu17.3).
+lsb-release is already the newest version (12.0-2).
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[11:08:45] ✅ Dependências básicas instaladas
+[11:08:45] 📦 Instalando Node.js 20...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[11:08:46] 🔧 Configurando repositório NodeSource...
+Hit:1 https://deb.nodesource.com/node_20.x nodistro InRelease
+Hit:2 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:3 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:4 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:5 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists... Done
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following NEW packages will be installed:
+  nodejs
+0 upgraded, 1 newly installed, 0 to remove and 1 not upgraded.
+Need to get 32.0 MB of archives.
+After this operation, 199 MB of additional disk space will be used.
+Get:1 https://deb.nodesource.com/node_20.x nodistro/main amd64 nodejs amd64 20.19.4-1nodesource1 [32.0 MB]
+Fetched 32.0 MB in 1s (47.4 MB/s)
+Selecting previously unselected package nodejs.
+(Reading database ... 127914 files and directories currently installed.)
+Preparing to unpack .../nodejs_20.19.4-1nodesource1_amd64.deb ...
+Unpacking nodejs (20.19.4-1nodesource1) ...
+Setting up nodejs (20.19.4-1nodesource1) ...
+Processing triggers for man-db (2.12.0-4build2) ...
+Scanning processes...
+Scanning candidates...
+Scanning linux images...
+
+Pending kernel upgrade!
+Running kernel version:
+  6.8.0-41-generic
+Diagnostics:
+  The currently running kernel version is not the expected kernel version 6.8.0-79-generic.
+
+Restarting the system to load the new kernel will not be handled automatically, so you should consider rebooting.
+
+Restarting services...
+
+Service restarts being deferred:
+ /etc/needrestart/restart.d/dbus.service
+ systemctl restart getty@tty1.service
+ systemctl restart systemd-logind.service
+ systemctl restart unattended-upgrades.service
+
+No containers need to be restarted.
+
+No user sessions are running outdated binaries.
+
+No VM guests are running outdated hypervisor (qemu) binaries on this host.
+[11:08:58] 🔍 Verificando instalação Node.js...
+[11:08:58] ✅ Node.js instalado: v20.19.4
+[11:08:58] ✅ npm instalado: 10.8.2
+[11:08:58] 🔧 Instalando ferramentas globais...
+[11:09:07] ✅ Ferramentas globais instaladas
+[11:09:07] 👤 Criando usuário e estrutura de diretórios...
+[11:09:07] ✅ Estrutura de diretórios criada
+[11:09:07] 📥 Baixando aplicação SamurEye...
+Cloning into 'SamurEye'...
+remote: Enumerating objects: 2546, done.
+remote: Counting objects: 100% (473/473), done.
+remote: Compressing objects: 100% (263/263), done.
+remote: Total 2546 (delta 299), reused 330 (delta 161), pack-reused 2073 (from 1)
+Receiving objects: 100% (2546/2546), 2.54 MiB | 10.14 MiB/s, done.
+Resolving deltas: 100% (1735/1735), done.
+[11:09:08] ✅ Aplicação baixada com sucesso
+[11:09:08] ⚙️ Configurando ambiente...
+[11:09:08] ✅ Arquivo .env criado
+[11:09:08] 📦 Instalando dependências npm...
+npm warn deprecated node-domexception@1.0.0: Use your platform's native DOMException instead
+npm warn deprecated @esbuild-kit/core-utils@3.3.2: Merged into tsx: https://tsx.is
+npm warn deprecated @esbuild-kit/esm-loader@2.6.5: Merged into tsx: https://tsx.is
+
+added 635 packages, and audited 636 packages in 13s
+
+87 packages are looking for funding
+  run `npm fund` for details
+
+11 vulnerabilities (3 low, 8 moderate)
+
+To address issues that do not require attention, run:
+  npm audit fix
+
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+
+Run `npm audit` for details.
+npm notice
+npm notice New major version of npm available! 10.8.2 -> 11.5.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.5.2
+npm notice To update run: npm install -g npm@11.5.2
+npm notice
+[11:09:21] ✅ Dependências npm instaladas
+[11:09:21] 🔨 Fazendo build da aplicação...
+
+> rest-express@1.0.0 build
+> vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+
+vite v5.4.19 building for production...
+transforming (3) src/main.tsxBrowserslist: browsers data (caniuse-lite) is 11 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+✓ 2692 modules transformed.
+../dist/public/index.html                   2.20 kB │ gzip:   0.86 kB
+../dist/public/assets/index-3RvnZlKd.css   68.17 kB │ gzip:  11.88 kB
+../dist/public/assets/index-c8mzCPy-.js   670.09 kB │ gzip: 192.31 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 7.01s
+
+  dist/index.js  97.7kb
+
+⚡ Done in 11ms
+[11:09:29] ✅ Build da aplicação concluído
+[11:09:29] 🔧 Corrigindo autenticação admin no código...
+✅ Endpoint /api/admin/me corrigido
+[11:09:29] ✅ Endpoint /api/admin/me corrigido
+[11:09:29] 🔨 Refazendo build após correção...
+
+> rest-express@1.0.0 build
+> vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+
+vite v5.4.19 building for production...
+Browserslist: browsers data (caniuse-lite) is 11 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+✓ 2692 modules transformed.
+../dist/public/index.html                   2.20 kB │ gzip:   0.86 kB
+../dist/public/assets/index-3RvnZlKd.css   68.17 kB │ gzip:  11.88 kB
+../dist/public/assets/index-c8mzCPy-.js   670.09 kB │ gzip: 192.31 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 6.84s
+✘ [ERROR] Unexpected "catch"
+
+    server/routes.ts:192:6:
+      192 │     } catch (error) {
+          ╵       ~~~~~
+
+1 error
+[11:09:36] WARNING: ⚠️ npm run build falhou - usando npx fallback
+vite v5.4.19 building for production...
+transforming (3) src/main.tsxBrowserslist: browsers data (caniuse-lite) is 11 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+✓ 2692 modules transformed.
+../dist/public/index.html                   2.20 kB │ gzip:   0.86 kB
+../dist/public/assets/index-3RvnZlKd.css   68.17 kB │ gzip:  11.88 kB
+../dist/public/assets/index-c8mzCPy-.js   670.09 kB │ gzip: 192.31 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 6.96s
+✘ [ERROR] Unexpected "catch"
+
+    server/routes.ts:192:6:
+      192 │     } catch (error) {
+          ╵       ~~~~~
+
+1 error
+root@vlxsam02:~#

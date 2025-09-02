@@ -86,4 +86,11 @@ DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends nodejs
 ## Scripts Criados
 1. **fix-env.sh**: Correção das variáveis REPLIT_DOMAINS
 2. **fix-admin-simple.sh**: Correção específica de autenticação admin
-3. **install-hard-reset.sh**: Versão completa com todas as correções integradas
+3. **fix-admin-frontend.sh**: Correção completa com rebuild
+4. **install-hard-reset.sh**: Versão completa com todas as correções integradas
+
+## Correções no Hard Reset
+- **Patch JavaScript**: Correção robusta do endpoint /api/admin/me
+- **Build duplo**: Rebuild automático após correção do código
+- **Fallback**: npx se npm run build falhar
+- **Validação**: Teste automático da correção aplicada
