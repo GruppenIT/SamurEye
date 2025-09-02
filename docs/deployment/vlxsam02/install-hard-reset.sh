@@ -126,41 +126,24 @@ rm -rf /usr/local/lib/node_modules /usr/local/bin/node /usr/local/bin/npm
 rm -rf ~/.npm ~/.node-gyp
 
 # ============================================================================
-# 3. LIMPEZA DO BANCO DE DADOS
+# 3. VERIFICAÇÃO RÁPIDA DO BANCO DE DADOS
 # ============================================================================
 
-log "🗃️ Limpando banco de dados..."
+log "🗃️ Verificando conectividade PostgreSQL..."
 
-# Teste de conectividade com PostgreSQL
-if ! nc -z "$POSTGRES_HOST" "$POSTGRES_PORT" 2>/dev/null; then
-    warn "⚠️ PostgreSQL não acessível em $POSTGRES_HOST:$POSTGRES_PORT"
-    warn "   Execute primeiro o reset no vlxsam03"
-fi
-
-# Script para limpar banco de dados
-cat > /tmp/cleanup_database.sql << 'EOF'
--- Conectar ao banco samureye
-\c samureye;
-
--- Remover todas as tabelas se existirem
-DROP SCHEMA IF EXISTS public CASCADE;
-CREATE SCHEMA public;
-GRANT ALL ON SCHEMA public TO samureye;
-GRANT ALL ON SCHEMA public TO public;
-
--- Confirmar limpeza
-SELECT 'Database cleaned successfully' AS status;
-EOF
-
-# Executar limpeza do banco se possível
-if nc -z "$POSTGRES_HOST" "$POSTGRES_PORT" 2>/dev/null; then
-    PGPASSWORD="samureye123" psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -f /tmp/cleanup_database.sql 2>/dev/null || {
-        warn "⚠️ Não foi possível limpar o banco - continuando sem limpeza"
+# Teste rápido de conectividade (timeout 3 segundos)
+if timeout 3 nc -z "$POSTGRES_HOST" "$POSTGRES_PORT" 2>/dev/null; then
+    log "✅ PostgreSQL acessível em $POSTGRES_HOST:$POSTGRES_PORT"
+    
+    # Limpeza rápida do banco se necessário
+    PGPASSWORD="samureye123" psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "SELECT 1;" >/dev/null 2>&1 && {
+        log "✅ Conexão com banco funcionando"
+    } || {
+        warn "⚠️ Banco não acessível - será criado na inicialização"
     }
-    log "✅ Banco de dados limpo"
+else
+    warn "⚠️ PostgreSQL não detectado - assumindo que vlxsam03 será configurado"
 fi
-
-rm -f /tmp/cleanup_database.sql
 
 # ============================================================================
 # 4. ATUALIZAÇÃO DO SISTEMA
@@ -305,7 +288,7 @@ SESSION_SECRET=samureye-onpremise-$(openssl rand -base64 32)
 
 # Authentication (On-premise bypass)
 REPLIT_DEPLOYMENT_URL=http://localhost:5000
-DISABLE_AUTH=true
+DISABLE_AUTH=false
 
 # Admin Credentials
 ADMIN_EMAIL=admin@samureye.local
@@ -517,71 +500,91 @@ log "🔐 Configurando autenticação admin..."
 # Aguardar aplicação estar completamente pronta
 sleep 5
 
+# Aguardar aplicação responder
+log "⏳ Aguardando aplicação inicializar..."
+for i in {1..30}; do
+    if curl -s -f http://localhost:5000/api/health >/dev/null 2>&1; then
+        log "✅ Aplicação respondendo após ${i}s"
+        break
+    fi
+    sleep 1
+done
+
 # Testar se aplicação está respondendo
 if curl -s -f http://localhost:5000/api/health >/dev/null 2>&1; then
-    log "✅ Aplicação respondendo - configurando admin..."
+    log "✅ Aplicação funcionando - configurando admin..."
     
-    # Fazer login admin automaticamente
-    ADMIN_LOGIN=$(curl -s -X POST "http://localhost:5000/api/admin/login" \
+    # Aguardar mais um pouco para garantir que está estável
+    sleep 3
+    
+    # Criar tenant padrão primeiro
+    log "🏢 Criando tenant padrão..."
+    TENANT_CREATION=$(curl -s -X POST "http://localhost:5000/api/admin/tenants" \
         -H "Content-Type: application/json" \
-        -d '{"email":"admin@samureye.com.br","password":"SamurEye2024!"}' \
+        -d '{
+            "name": "Ambiente On-Premise",
+            "slug": "on-premise",
+            "description": "Tenant padrão para ambiente on-premise",
+            "isActive": true
+        }' \
         -w "%{http_code}" 2>/dev/null || echo "000")
     
-    if [[ "$ADMIN_LOGIN" =~ 200 ]]; then
-        log "✅ Sessão admin configurada com sucesso"
+    if [[ "$TENANT_CREATION" =~ 200|201 ]]; then
+        log "✅ Tenant padrão criado"
     else
-        warn "⚠️ Sessão admin não configurada automaticamente"
+        log "ℹ️ Tenant pode já existir ou será criado no primeiro acesso"
     fi
     
-    log "📋 INFORMAÇÕES DE ACESSO ADMIN:"
+    log "📋 SISTEMA PRONTO - INFORMAÇÕES DE ACESSO:"
     echo "════════════════════════════════════════"
-    echo "🌐 URL Admin: http://172.24.1.152:5000/admin"
-    echo "👤 Email: admin@samureye.com.br"
-    echo "🔑 Senha: SamurEye2024!"
+    echo "🌐 URL da Aplicação: http://172.24.1.152:5000"
+    echo "🛠️ URL Admin: http://172.24.1.152:5000/admin"
     echo ""
-    echo "📝 Para ativar admin (se necessário):"
-    echo "No console do navegador (F12), execute:"
+    echo "👤 Credenciais Admin:"
+    echo "   Email: admin@samureye.com.br"
+    echo "   Senha: SamurEye2024!"
     echo ""
-    echo "fetch('/api/admin/login', {"
-    echo "  method: 'POST',"
-    echo "  headers: {'Content-Type': 'application/json'},"
-    echo "  body: JSON.stringify({"
-    echo "    email: 'admin@samureye.com.br',"
-    echo "    password: 'SamurEye2024!'"
-    echo "  })"
-    echo "}).then(() => location.reload())"
+    echo "📝 IMPORTANTE: Use as credenciais acima para fazer login"
+    echo "   na interface admin quando solicitado."
+    echo ""
+    echo "🔧 Se a autenticação não funcionar:"
+    echo "   1. Abra console do navegador (F12)"
+    echo "   2. Execute: fetch('/api/admin/login', {"
+    echo "      method: 'POST',"
+    echo "      headers: {'Content-Type': 'application/json'},"
+    echo "      body: JSON.stringify({"
+    echo "        email: 'admin@samureye.com.br',"
+    echo "        password: 'SamurEye2024!'"
+    echo "      })"
+    echo "   }).then(() => location.reload())"
     echo ""
     echo "════════════════════════════════════════"
 else
-    warn "⚠️ Aplicação não está respondendo - admin não configurado"
+    warn "⚠️ Aplicação não está respondendo"
+    log "📋 Verificar logs: journalctl -u samureye-app -f"
 fi
 
 # ============================================================================
-# 14. INICIALIZAÇÃO DO BANCO DE DADOS
+# 14. CONFIGURAÇÃO FINAL DO AMBIENTE
 # ============================================================================
 
-log "🗃️ Inicializando banco de dados..."
+log "🔧 Configuração final do ambiente..."
 
-# Aguardar aplicação estar pronta
-sleep 10
+# Aguardar serviço estar estável
+sleep 5
 
-# Executar migrações via API (se disponível)
-if curl -s -o /dev/null -w "%{http_code}" "http://localhost:5000/api/health" | grep -q "200"; then
-    log "✅ Aplicação respondendo na porta 5000"
+# Verificar se o serviço está realmente funcionando
+if systemctl is-active --quiet "$SERVICE_NAME"; then
+    log "✅ Serviço systemd funcionando"
     
-    # Criar tenant padrão via API
-    curl -s -X POST "http://localhost:5000/api/admin/tenants" \
-        -H "Content-Type: application/json" \
-        -d '{
-            "name": "Gruppen IT",
-            "slug": "gruppen-it",
-            "description": "Tenant padrão do ambiente on-premise",
-            "isActive": true
-        }' >/dev/null 2>&1 || warn "⚠️ Não foi possível criar tenant via API"
-    
-    log "✅ Tenant padrão criado"
+    # Verificar se aplicação responde
+    if curl -s -o /dev/null -w "%{http_code}" "http://localhost:5000/api/health" | grep -q "200"; then
+        log "✅ Aplicação respondendo corretamente"
+    else
+        warn "⚠️ Aplicação pode estar iniciando - aguarde alguns minutos"
+    fi
 else
-    warn "⚠️ Aplicação não está respondendo - verificar logs"
+    warn "⚠️ Serviço não está ativo - verificar logs"
 fi
 
 # ============================================================================

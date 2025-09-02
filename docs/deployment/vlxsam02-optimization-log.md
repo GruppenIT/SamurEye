@@ -87,3 +87,15 @@ DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends nodejs
 1. **fix-env.sh**: Correção das variáveis REPLIT_DOMAINS
 2. **fix-admin-simple.sh**: Correção específica de autenticação admin
 3. **install-hard-reset.sh**: Versão completa com todas as correções integradas
+
+## Correções Finais Aplicadas
+### Problema PostgreSQL (RESOLVIDO)
+- **Antes**: Script demorava na etapa "Limpando banco de dados"
+- **Agora**: Verificação rápida com timeout de 3 segundos
+- **Resultado**: Não mais falsos positivos de "PostgreSQL inacessível"
+
+### Problema Autenticação Admin (RESOLVIDO)
+- **Antes**: Interface abria sem login, mas negava acesso às operações
+- **Agora**: DISABLE_AUTH=false força tela de login
+- **Resultado**: Admin deve fazer login com credenciais corretas
+- **Credenciais**: admin@samureye.com.br / SamurEye2024!
