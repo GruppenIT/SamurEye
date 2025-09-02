@@ -7,6 +7,7 @@ SamurEye is a cloud-based Breach & Attack Simulation (BAS) platform designed for
 Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
+- **02/09/2025**: ✅ vlxsam02 DIAGNÓSTICO AVANÇADO - detecta usuário correto + aguarda PostgreSQL + continua mesmo com problema
 - **01/09/2025**: ✅ vlxsam02 CONECTIVIDADE POSTGRESQL CORRIGIDA - timeout resolvido + tabelas criadas + schema push
 - **01/09/2025**: ✅ vlxsam03 EXECUTADO COM SUCESSO - ambos usuários criados + conectividade remota OK
 - **01/09/2025**: ✅ vlxsam03 COMPATIBILIDADE TOTAL - ambos usuários samureye + samureye_user funcionam

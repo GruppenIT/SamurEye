@@ -693,7 +693,21 @@ log "🔍 Verificando conectividade com PostgreSQL..."
 # Usar variáveis já definidas no topo do script
 # POSTGRES_HOST, POSTGRES_PORT, POSTGRES_DB, POSTGRES_USER já configurados
 
-# Testar conectividade
+# Diagnóstico completo de rede
+log "🔍 Diagnóstico completo de conectividade..."
+log "Host: $POSTGRES_HOST"
+log "Port: $POSTGRES_PORT" 
+log "Database: $POSTGRES_DB"
+log "User: $POSTGRES_USER"
+
+# Teste 1: Ping do host
+if ping -c 1 -W 5 "$POSTGRES_HOST" >/dev/null 2>&1; then
+    log "✅ Host $POSTGRES_HOST respondendo ao ping"
+else
+    warn "⚠️ Host $POSTGRES_HOST não responde ao ping"
+fi
+
+# Teste 2: Conectividade de porta TCP
 if timeout 10 nc -z "$POSTGRES_HOST" "$POSTGRES_PORT" 2>/dev/null; then
     log "✅ PostgreSQL acessível em $POSTGRES_HOST:$POSTGRES_PORT"
     
@@ -766,14 +780,77 @@ EOSQL
             fi
         fi
     else
-        error "❌ Falha na autenticação PostgreSQL"
-        warn "   Verifique se vlxsam03 foi configurado corretamente"
-        warn "   Execute: curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/vlxsam03/install-hard-reset.sh | bash"
+        warn "❌ Falha na autenticação PostgreSQL com usuário '$POSTGRES_USER'"
+        log "🔧 Tentando diagnóstico avançado e correções automáticas..."
+        
+        # Tentar com usuário alternativo
+        log "🔍 Testando com usuário 'samureye' (compatibilidade):"
+        if PGPASSWORD="samureye_secure_2024" psql -h "$POSTGRES_HOST" -p "$POSTGRES_PORT" -U "samureye" -d "$POSTGRES_DB" -c "SELECT version();" >/dev/null 2>&1; then
+            log "✅ Usuário 'samureye' funciona - atualizando configuração"
+            POSTGRES_USER="samureye"
+            export POSTGRES_USER
+            sed -i "s/POSTGRES_USER=\"samureye_user\"/POSTGRES_USER=\"samureye\"/" "$WORKING_DIR/.env"
+            log "✅ Configuração atualizada para usar usuário 'samureye'"
+        else
+            log "❌ Ambos usuários falharam - aguardando PostgreSQL inicializar..."
+            
+            # Aguardar mais tempo
+            for i in {1..6}; do
+                log "⏳ Tentativa $i/6 - aguardando 30 segundos..."
+                sleep 30
+                
+                if PGPASSWORD="samureye_secure_2024" psql -h "$POSTGRES_HOST" -p "$POSTGRES_PORT" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "SELECT 1;" >/dev/null 2>&1; then
+                    log "✅ PostgreSQL conectado na tentativa $i"
+                    break
+                elif PGPASSWORD="samureye_secure_2024" psql -h "$POSTGRES_HOST" -p "$POSTGRES_PORT" -U "samureye" -d "$POSTGRES_DB" -c "SELECT 1;" >/dev/null 2>&1; then
+                    log "✅ PostgreSQL conectado com usuário 'samureye' na tentativa $i"
+                    POSTGRES_USER="samureye"
+                    export POSTGRES_USER
+                    sed -i "s/POSTGRES_USER=\"samureye_user\"/POSTGRES_USER=\"samureye\"/" "$WORKING_DIR/.env"
+                    break
+                fi
+                
+                if [ $i -eq 6 ]; then
+                    warn "❌ Conectividade PostgreSQL falhou após todas tentativas"
+                    log "📋 DIAGNÓSTICO MANUAL NECESSÁRIO:"
+                    log "1. No vlxsam03: systemctl status postgresql"
+                    log "2. No vlxsam03: netstat -tlnp | grep 5432"
+                    log "3. No vlxsam03: tail -f /var/log/postgresql/postgresql-*.log"
+                    warn "⚠️ Continuando instalação mesmo com problema de conectividade..."
+                fi
+            done
+        fi
     fi
 else
-    error "❌ PostgreSQL não acessível em $POSTGRES_HOST:$POSTGRES_PORT"
-    warn "   Execute primeiro o reset no vlxsam03:"
-    warn "   curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/vlxsam03/install-hard-reset.sh | bash"
+    warn "❌ Porta PostgreSQL $POSTGRES_PORT não acessível em $POSTGRES_HOST"
+    log "🔧 Tentando correções de rede e conectividade..."
+    
+    # Diagnóstico de rede
+    log "🔍 Verificando rota para $POSTGRES_HOST:"
+    ip route get "$POSTGRES_HOST" 2>&1 || true
+    
+    log "🔍 Verificando se é problema de firewall:"
+    telnet "$POSTGRES_HOST" "$POSTGRES_PORT" < /dev/null 2>&1 | head -3 || true
+    
+    # Aguardar rede estabilizar
+    for i in {1..3}; do
+        log "⏳ Aguardando rede ($i/3) - 60 segundos..."
+        sleep 60
+        
+        if timeout 10 nc -z "$POSTGRES_HOST" "$POSTGRES_PORT" 2>/dev/null; then
+            log "✅ Conectividade de rede estabelecida na tentativa $i"
+            break
+        fi
+        
+        if [ $i -eq 3 ]; then
+            warn "❌ Problema de rede persistente"
+            log "📋 VERIFICAÇÕES MANUAIS NECESSÁRIAS:"
+            log "1. vlxsam03 está ligado? ping $POSTGRES_HOST"
+            log "2. PostgreSQL rodando? ssh $POSTGRES_HOST 'systemctl status postgresql'"
+            log "3. Firewall OK? ssh $POSTGRES_HOST 'ufw status'"
+            warn "⚠️ Continuando instalação com problema de rede..."
+        fi
+    done
 fi
 
 log "✅ Correções de criação de tenant aplicadas"

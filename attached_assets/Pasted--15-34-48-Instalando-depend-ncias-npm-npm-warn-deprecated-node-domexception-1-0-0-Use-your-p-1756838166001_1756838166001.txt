@@ -1,0 +1,66 @@
+[15:34:48] 📦 Instalando dependências npm...
+npm warn deprecated node-domexception@1.0.0: Use your platform's native DOMException instead
+npm warn deprecated @esbuild-kit/core-utils@3.3.2: Merged into tsx: https://tsx.is
+npm warn deprecated @esbuild-kit/esm-loader@2.6.5: Merged into tsx: https://tsx.is
+
+added 635 packages, and audited 636 packages in 13s
+
+87 packages are looking for funding
+  run `npm fund` for details
+
+11 vulnerabilities (3 low, 8 moderate)
+
+To address issues that do not require attention, run:
+  npm audit fix
+
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+
+Run `npm audit` for details.
+npm notice
+npm notice New major version of npm available! 10.8.2 -> 11.5.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.5.2
+npm notice To update run: npm install -g npm@11.5.2
+npm notice
+[15:35:01] ✅ Dependências npm instaladas
+[15:35:01] 🔨 Fazendo build da aplicação...
+
+> rest-express@1.0.0 build
+> vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+
+vite v5.4.19 building for production...
+transforming (3) src/main.tsxBrowserslist: browsers data (caniuse-lite) is 11 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+✓ 2692 modules transformed.
+../dist/public/index.html                   2.20 kB │ gzip:   0.86 kB
+../dist/public/assets/index-3RvnZlKd.css   68.17 kB │ gzip:  11.88 kB
+../dist/public/assets/index-B6BClJbt.js   670.11 kB │ gzip: 192.33 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 7.18s
+
+  dist/index.js  98.4kb
+
+⚡ Done in 11ms
+[15:35:09] ✅ Build da aplicação concluído
+[15:35:09] 🔧 Corrigindo autenticação admin no código...
+✅ Endpoint /api/admin/me corrigido com sucesso
+[15:35:09] ✅ Endpoint /api/admin/me corrigido
+[15:35:09] 🔧 Corrigindo redirecionamento admin pós-login...
+⚠️ Redirecionamento já corrigido
+[15:35:09] ✅ Redirecionamento admin corrigido
+[15:35:09] 🔧 Corrigindo erros de autenticação do dashboard...
+✅ 1 correções de autenticação aplicadas
+[15:35:09] ✅ Erros de autenticação do dashboard corrigidos
+[15:35:09] 🔧 Corrigindo erro JavaScript no AttackSurfaceHeatmap...
+⚠️ Correção já aplicada
+[15:35:09] ✅ Erro JavaScript no heatmap corrigido
+[15:35:09] 🔧 Corrigindo erro de criação de tenant...
+✅ Logging de criação de tenant melhorado
+[15:35:09] 🔍 Verificando conectividade com PostgreSQL...
+[15:35:19] ERROR: ❌ PostgreSQL não acessível em 172.24.1.153:5432
+root@vlxsam02:~#
