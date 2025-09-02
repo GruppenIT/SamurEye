@@ -367,18 +367,25 @@ cat >> "$PG_HBA" << 'EOF'
 # SamurEye On-Premise Access
 # vlxsam01 - Gateway
 host    samureye        samureye_user   172.24.1.151/32         md5
+host    samureye        samureye        172.24.1.151/32         md5
 # vlxsam02 - Application Server  
 host    samureye        samureye_user   172.24.1.152/32         md5
+host    samureye        samureye        172.24.1.152/32         md5
 # vlxsam03 - Database (local)
 host    samureye        samureye_user   127.0.0.1/32            md5
+host    samureye        samureye        127.0.0.1/32            md5
 host    samureye        samureye_user   172.24.1.153/32         md5
+host    samureye        samureye        172.24.1.153/32         md5
 # vlxsam04 - Collector
 host    samureye        samureye_user   172.24.1.154/32         md5
+host    samureye        samureye        172.24.1.154/32         md5
 # Rede local SamurEye (backup)
 host    samureye        samureye_user   172.24.1.0/24           md5
+host    samureye        samureye        172.24.1.0/24           md5
 host    grafana         grafana         172.24.1.153/32         md5
-# Permitir conexões md5 para usuário correto
+# Permitir conexões md5 para usuários corretos
 host    all             samureye_user   172.24.1.0/24           md5
+host    all             samureye        172.24.1.0/24           md5
 EOF
 
 # Reiniciar PostgreSQL para aplicar configurações
@@ -411,9 +418,15 @@ CREATE USER samureye_user WITH ENCRYPTED PASSWORD 'samureye_secure_2024';
 ALTER USER samureye_user CREATEDB;
 ALTER USER samureye_user SUPERUSER; -- Para resolver problemas de permissão
 
+-- Criar também usuário antigo por compatibilidade
+CREATE USER samureye WITH ENCRYPTED PASSWORD 'samureye_secure_2024';
+ALTER USER samureye CREATEDB;
+ALTER USER samureye SUPERUSER;
+
 -- Criar banco SamurEye
 CREATE DATABASE samureye OWNER samureye_user;
 GRANT ALL PRIVILEGES ON DATABASE samureye TO samureye_user;
+GRANT ALL PRIVILEGES ON DATABASE samureye TO samureye;
 
 -- Conectar ao banco samureye
 \c samureye
@@ -424,9 +437,13 @@ CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
 -- Conceder privilégios nas extensões
 GRANT ALL ON SCHEMA public TO samureye_user;
+GRANT ALL ON SCHEMA public TO samureye;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO samureye_user;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO samureye_user;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON FUNCTIONS TO samureye_user;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO samureye;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO samureye;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON FUNCTIONS TO samureye;
 
 -- Criar usuário e banco Grafana
 \c postgres
