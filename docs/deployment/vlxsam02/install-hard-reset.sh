@@ -40,7 +40,7 @@ SERVICE_NAME="samureye-app"
 POSTGRES_HOST="172.24.1.153"  # vlxsam03
 POSTGRES_PORT="5432"
 POSTGRES_DB="samureye"
-POSTGRES_USER="samureye"
+POSTGRES_USER="samureye_user"
 NODE_VERSION="20"
 
 echo ""
@@ -145,7 +145,7 @@ cat > /tmp/cleanup_database.sql << 'EOF'
 -- Remover todas as tabelas se existirem
 DROP SCHEMA IF EXISTS public CASCADE;
 CREATE SCHEMA public;
-GRANT ALL ON SCHEMA public TO samureye;
+GRANT ALL ON SCHEMA public TO samureye_user;
 GRANT ALL ON SCHEMA public TO public;
 
 -- Confirmar limpeza
@@ -154,7 +154,7 @@ EOF
 
 # Executar limpeza do banco se possível
 if nc -z "$POSTGRES_HOST" "$POSTGRES_PORT" 2>/dev/null; then
-    PGPASSWORD="samureye123" psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -f /tmp/cleanup_database.sql 2>/dev/null || {
+    PGPASSWORD="samureye_secure_2024" psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -f /tmp/cleanup_database.sql 2>/dev/null || {
         warn "⚠️ Não foi possível limpar o banco - continuando sem limpeza"
     }
     log "✅ Banco de dados limpo"
@@ -298,7 +298,7 @@ NODE_ENV=production
 PORT=5000
 
 # Database Configuration
-DATABASE_URL=postgresql://$POSTGRES_USER:samureye123@$POSTGRES_HOST:$POSTGRES_PORT/$POSTGRES_DB
+DATABASE_URL=postgresql://$POSTGRES_USER:samureye_secure_2024@$POSTGRES_HOST:$POSTGRES_PORT/$POSTGRES_DB
 
 # Session Configuration
 SESSION_SECRET=samureye-onpremise-$(openssl rand -base64 32)
@@ -870,7 +870,7 @@ else
     journalctl -u "$SERVICE_NAME" --no-pager -l | tail -20
     
     log "🔍 Testando conexão PostgreSQL manualmente:"
-    PGPASSWORD="SamurEye2024!" psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "SELECT version();" 2>&1 || true
+    PGPASSWORD="samureye_secure_2024" psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "SELECT version();" 2>&1 || true
     
     log "🔍 Testando execução manual da aplicação:"
     cd "$WORKING_DIR"
@@ -1067,7 +1067,7 @@ echo "   4. Criar tenant: Via interface /admin ou API"
 echo ""
 echo "🔐 Credenciais Padrão:"
 echo "   • Admin: admin@samureye.local / SamurEye2024!"
-echo "   • DB:    $POSTGRES_USER / samureye123"
+echo "   • DB:    $POSTGRES_USER / samureye_secure_2024"
 echo ""
 
 exit 0
