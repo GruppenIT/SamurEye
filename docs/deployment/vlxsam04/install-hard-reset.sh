@@ -325,29 +325,95 @@ fi
 # Nuclei
 log "🔍 Instalando Nuclei..."
 cd /tmp
-wget -q https://github.com/projectdiscovery/nuclei/releases/latest/download/nuclei_3.3.6_linux_amd64.zip
-unzip -q nuclei_3.3.6_linux_amd64.zip
-mv nuclei /usr/local/bin/
-chmod +x /usr/local/bin/nuclei
 
-# Nuclei templates
-sudo -u "$COLLECTOR_USER" nuclei -update-templates -silent
-mkdir -p "$TOOLS_DIR/nuclei"
-chown -R "$COLLECTOR_USER:$COLLECTOR_USER" "$TOOLS_DIR/nuclei"
+# Limpar qualquer download anterior
+rm -f nuclei*.zip nuclei 2>/dev/null
 
+# Tentar instalar via apt primeiro
+if apt-get install -y nuclei 2>/dev/null; then
+    log "✅ Nuclei instalado via apt"
+else
+    warn "⚠️ Nuclei via apt falhou, instalando via GitHub..."
+    
+    # Fallback: Instalar via GitHub releases
+    NUCLEI_LATEST_URL=$(curl -s https://api.github.com/repos/projectdiscovery/nuclei/releases/latest | grep "browser_download_url.*nuclei.*linux_amd64\.zip" | head -1 | cut -d '"' -f 4)
+    
+    if [ -n "$NUCLEI_LATEST_URL" ]; then
+        wget -q "$NUCLEI_LATEST_URL" -O nuclei_linux_amd64.zip
+        if [ -f "nuclei_linux_amd64.zip" ]; then
+            unzip -q nuclei_linux_amd64.zip
+            if [ -f "nuclei" ]; then
+                mv nuclei /usr/local/bin/
+                chmod +x /usr/local/bin/nuclei
+                log "✅ Nuclei instalado via GitHub"
+            else
+                warn "❌ Falha ao extrair Nuclei"
+            fi
+        else
+            warn "❌ Falha ao baixar Nuclei"
+        fi
+    else
+        warn "❌ Não foi possível obter URL do Nuclei"
+    fi
+fi
+
+# Verificar se Nuclei está disponível
 if command -v nuclei >/dev/null 2>&1; then
-    log "✅ Nuclei instalado"
+    nuclei_version=$(nuclei -version 2>&1 | head -1 | cut -d' ' -f2 || echo "unknown")
+    log "✅ Nuclei configurado (v$nuclei_version)"
+    
+    # Criar diretório para templates
+    mkdir -p "$TOOLS_DIR/nuclei"
+    chown -R "$COLLECTOR_USER:$COLLECTOR_USER" "$TOOLS_DIR/nuclei"
+    
+    # Baixar templates em background (não bloquear instalação)
+    log "📋 Atualizando templates Nuclei em background..."
+    (
+        sleep 5  # Aguardar 5 segundos
+        sudo -u "$COLLECTOR_USER" timeout 300 nuclei -update-templates -silent >/dev/null 2>&1 || true
+        log "✅ Templates Nuclei atualizados"
+    ) &
+    
+else
+    warn "❌ Nuclei não está disponível após instalação"
 fi
 
 # Gobuster
 log "🔍 Instalando Gobuster..."
-wget -q https://github.com/OJ/gobuster/releases/latest/download/gobuster_Linux_x86_64.tar.gz
-tar -xzf gobuster_Linux_x86_64.tar.gz
-mv gobuster /usr/local/bin/
-chmod +x /usr/local/bin/gobuster
+
+# Tentar instalar via apt primeiro
+if apt-get install -y gobuster 2>/dev/null; then
+    log "✅ Gobuster instalado via apt"
+else
+    warn "⚠️ Gobuster via apt falhou, instalando via GitHub..."
+    
+    # Fallback: Instalar via GitHub releases
+    GOBUSTER_LATEST_URL=$(curl -s https://api.github.com/repos/OJ/gobuster/releases/latest | grep "browser_download_url.*gobuster.*Linux_x86_64\.tar\.gz" | head -1 | cut -d '"' -f 4)
+    
+    if [ -n "$GOBUSTER_LATEST_URL" ]; then
+        wget -q "$GOBUSTER_LATEST_URL" -O gobuster_Linux_x86_64.tar.gz
+        if [ -f "gobuster_Linux_x86_64.tar.gz" ]; then
+            tar -xzf gobuster_Linux_x86_64.tar.gz
+            if [ -f "gobuster" ]; then
+                mv gobuster /usr/local/bin/
+                chmod +x /usr/local/bin/gobuster
+                log "✅ Gobuster instalado via GitHub"
+            else
+                warn "❌ Falha ao extrair Gobuster"
+            fi
+        else
+            warn "❌ Falha ao baixar Gobuster"
+        fi
+    else
+        warn "❌ Não foi possível obter URL do Gobuster"
+    fi
+fi
 
 if command -v gobuster >/dev/null 2>&1; then
-    log "✅ Gobuster instalado"
+    gobuster_version=$(gobuster version 2>&1 | grep "Version:" | cut -d' ' -f2 || echo "unknown")
+    log "✅ Gobuster configurado (v$gobuster_version)"
+else
+    warn "❌ Gobuster não está disponível após instalação"
 fi
 
 # Cleanup

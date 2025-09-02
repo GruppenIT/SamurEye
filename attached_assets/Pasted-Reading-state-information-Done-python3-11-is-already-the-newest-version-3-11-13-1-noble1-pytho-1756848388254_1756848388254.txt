@@ -1,0 +1,52 @@
+Reading state information... Done
+python3.11 is already the newest version (3.11.13-1+noble1).
+python3.11-dev is already the newest version (3.11.13-1+noble1).
+python3.11-venv is already the newest version (3.11.13-1+noble1).
+python3.11-distutils is already the newest version (3.11.13-1+noble1).
+python3-pip is already the newest version (24.0+dfsg-1ubuntu1.2).
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+[18:26:02] ✅ Python 3.11.13 instalado
+[18:26:02] ✅ Python padrão: 3.12.3
+[18:26:02] 📦 Instalando Node.js 20...
+2025-09-02 18:26:02 - Installing pre-requisites
+Hit:1 https://deb.nodesource.com/node_20.x nodistro InRelease
+Hit:2 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:3 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:4 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:5 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Hit:6 https://ppa.launchpadcontent.net/deadsnakes/ppa/ubuntu noble InRelease
+Reading package lists... Done
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+apt-transport-https is already the newest version (2.8.3).
+ca-certificates is already the newest version (20240203).
+curl is already the newest version (8.5.0-2ubuntu10.6).
+gnupg is already the newest version (2.4.4-2ubuntu17.3).
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+Hit:1 https://deb.nodesource.com/node_20.x nodistro InRelease
+Hit:2 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:3 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:4 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:5 https://ppa.launchpadcontent.net/deadsnakes/ppa/ubuntu noble InRelease
+Hit:6 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists... Done
+2025-09-02 18:26:07 - Repository configured successfully.
+2025-09-02 18:26:07 - To install Node.js, run: apt-get install nodejs -y
+2025-09-02 18:26:07 - You can use N|solid Runtime as a node.js alternative
+2025-09-02 18:26:07 - To install N|solid Runtime, run: apt-get install nsolid -y
+
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+nodejs is already the newest version (20.19.4-1nodesource1).
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+[18:26:07] ✅ Node.js v20.19.4 instalado
+[18:26:07] 👤 Criando usuário e estrutura de diretórios...
+[18:26:07] ✅ Estrutura de diretórios criada
+[18:26:07] 🛡️ Instalando ferramentas de segurança...
+[18:26:07] 📡 Configurando Nmap...
+[18:26:07] ✅ Masscan configurado
+[18:26:07]    Versão:
+[18:26:07] 🔍 Instalando Nuclei...
+root@vlxsam04:/opt/samureye-collector#
