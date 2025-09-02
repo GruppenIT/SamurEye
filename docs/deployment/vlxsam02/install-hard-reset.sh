@@ -690,10 +690,8 @@ rm /tmp/tenant_fix.js
 # Verificar conectividade com PostgreSQL
 log "🔍 Verificando conectividade com PostgreSQL..."
 
-POSTGRES_HOST="172.24.1.153"
-POSTGRES_PORT="5432"
-POSTGRES_DB="samureye"
-POSTGRES_USER="samureye_user"
+# Usar variáveis já definidas no topo do script
+# POSTGRES_HOST, POSTGRES_PORT, POSTGRES_DB, POSTGRES_USER já configurados
 
 # Testar conectividade
 if timeout 10 nc -z "$POSTGRES_HOST" "$POSTGRES_PORT" 2>/dev/null; then
