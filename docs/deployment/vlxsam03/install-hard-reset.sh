@@ -366,17 +366,19 @@ cat >> "$PG_HBA" << 'EOF'
 
 # SamurEye On-Premise Access
 # vlxsam01 - Gateway
-host    samureye        samureye        172.24.1.151/32         md5
+host    samureye        samureye_user   172.24.1.151/32         md5
 # vlxsam02 - Application Server  
-host    samureye        samureye        172.24.1.152/32         md5
+host    samureye        samureye_user   172.24.1.152/32         md5
 # vlxsam03 - Database (local)
-host    samureye        samureye        127.0.0.1/32            md5
-host    samureye        samureye        172.24.1.153/32         md5
+host    samureye        samureye_user   127.0.0.1/32            md5
+host    samureye        samureye_user   172.24.1.153/32         md5
 # vlxsam04 - Collector
-host    samureye        samureye        172.24.1.154/32         md5
+host    samureye        samureye_user   172.24.1.154/32         md5
 # Rede local SamurEye (backup)
-host    samureye        samureye        172.24.1.0/24           md5
+host    samureye        samureye_user   172.24.1.0/24           md5
 host    grafana         grafana         172.24.1.153/32         md5
+# Permitir conexões md5 para usuário correto
+host    all             samureye_user   172.24.1.0/24           md5
 EOF
 
 # Reiniciar PostgreSQL para aplicar configurações
@@ -400,16 +402,18 @@ sudo -u postgres psql << 'EOF'
 -- Remover usuário e banco se existirem
 DROP DATABASE IF EXISTS samureye;
 DROP DATABASE IF EXISTS grafana;
+DROP USER IF EXISTS samureye_user;
 DROP USER IF EXISTS samureye;
 DROP USER IF EXISTS grafana;
 
--- Criar usuário SamurEye
-CREATE USER samureye WITH ENCRYPTED PASSWORD 'SamurEye2024!';
-ALTER USER samureye CREATEDB;
+-- Criar usuário SamurEye (nome correto usado pelo vlxsam02)
+CREATE USER samureye_user WITH ENCRYPTED PASSWORD 'samureye_secure_2024';
+ALTER USER samureye_user CREATEDB;
+ALTER USER samureye_user SUPERUSER; -- Para resolver problemas de permissão
 
 -- Criar banco SamurEye
-CREATE DATABASE samureye OWNER samureye;
-GRANT ALL PRIVILEGES ON DATABASE samureye TO samureye;
+CREATE DATABASE samureye OWNER samureye_user;
+GRANT ALL PRIVILEGES ON DATABASE samureye TO samureye_user;
 
 -- Conectar ao banco samureye
 \c samureye
@@ -419,10 +423,10 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
 -- Conceder privilégios nas extensões
-GRANT ALL ON SCHEMA public TO samureye;
-ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO samureye;
-ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO samureye;
-ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON FUNCTIONS TO samureye;
+GRANT ALL ON SCHEMA public TO samureye_user;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO samureye_user;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO samureye_user;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON FUNCTIONS TO samureye_user;
 
 -- Criar usuário e banco Grafana
 \c postgres
@@ -715,7 +719,7 @@ echo ""
 echo "🧪 TESTES DE CONECTIVIDADE:"
 
 # PostgreSQL
-test_service "PostgreSQL" "PGPASSWORD=SamurEye2024! psql -h localhost -U samureye -d samureye -c 'SELECT version();'" "PostgreSQL SamurEye"
+test_service "PostgreSQL" "PGPASSWORD=samureye_secure_2024 psql -h localhost -U samureye_user -d samureye -c 'SELECT version();'" "PostgreSQL SamurEye"
 
 # Redis
 test_service "Redis" "redis-cli -a redis123 ping" "Redis"
@@ -730,7 +734,7 @@ echo ""
 echo "============================================="
 echo "CREDENCIAIS DE ACESSO:"
 echo "============================================="
-echo "PostgreSQL: samureye / SamurEye2024! @ localhost:5432"
+echo "PostgreSQL: samureye_user / samureye_secure_2024 @ localhost:5432"
 echo "Redis: redis123 @ localhost:6379"
 echo "MinIO: minio / minio123 @ localhost:9000"
 echo "Grafana: admin / grafana123 @ localhost:3000"
@@ -746,11 +750,40 @@ chmod +x /usr/local/bin/test-samureye-db.sh
 log "✅ Executando testes finais..."
 sleep 10
 
-# Testar PostgreSQL
-if PGPASSWORD="SamurEye2024!" psql -h localhost -U samureye -d samureye -c "SELECT version();" &>/dev/null; then
+# Testar PostgreSQL com credenciais corretas
+if PGPASSWORD="samureye_secure_2024" psql -h localhost -U samureye_user -d samureye -c "SELECT version();" &>/dev/null; then
     log "✅ PostgreSQL funcionando"
 else
     error "❌ PostgreSQL com problemas"
+fi
+
+# Testar conectividade remota do vlxsam02
+log "🔍 Testando conectividade remota do vlxsam02..."
+if PGPASSWORD="samureye_secure_2024" psql -h 172.24.1.153 -U samureye_user -d samureye -c "SELECT 1;" &>/dev/null; then
+    log "✅ Conectividade remota funcionando"
+else
+    warn "⚠️ Conectividade remota com problemas - verificando configurações..."
+    
+    # Verificar se PostgreSQL está escutando em todas as interfaces
+    if grep -q "listen_addresses = '\*'" /etc/postgresql/$POSTGRES_VERSION/main/postgresql.conf; then
+        log "✅ PostgreSQL configurado para escutar em todas as interfaces"
+    else
+        log "🔧 Forçando configuração listen_addresses..."
+        sed -i "s/^#\?listen_addresses.*/listen_addresses = '*'/" /etc/postgresql/$POSTGRES_VERSION/main/postgresql.conf
+        systemctl restart postgresql
+        sleep 5
+    fi
+    
+    # Verificar firewall
+    log "🔧 Verificando firewall..."
+    ufw allow 5432/tcp 2>/dev/null || true
+    
+    # Testar novamente após correções
+    if PGPASSWORD="samureye_secure_2024" psql -h 172.24.1.153 -U samureye_user -d samureye -c "SELECT 1;" &>/dev/null; then
+        log "✅ Conectividade remota corrigida"
+    else
+        warn "⚠️ Ainda com problemas de conectividade remota"
+    fi
 fi
 
 # Testar Redis
@@ -783,7 +816,7 @@ echo "🎉 HARD RESET CONCLUÍDO COM SUCESSO!"
 echo "====================================="
 echo ""
 echo "📊 SERVIÇOS CONFIGURADOS:"
-echo "• PostgreSQL 16: samureye/SamurEye2024! @ :5432"
+echo "• PostgreSQL 16: samureye_user/samureye_secure_2024 @ :5432"
 echo "• Redis: redis123 @ :6379"
 echo "• MinIO: minio/minio123 @ :9000"
 echo "• Grafana: admin/grafana123 @ :3000"
@@ -792,7 +825,8 @@ echo "🔧 COMANDOS ÚTEIS:"
 echo "• Testar tudo: /usr/local/bin/test-samureye-db.sh"
 echo "• Status: systemctl status postgresql redis-server minio grafana-server"
 echo "• Logs PostgreSQL: tail -f /var/log/postgresql/postgresql-*.log"
-echo "• Conectar DB: PGPASSWORD=SamurEye2024! psql -h localhost -U samureye -d samureye"
+echo "• Conectar DB: PGPASSWORD=samureye_secure_2024 psql -h localhost -U samureye_user -d samureye"
+echo "• Testar remoto: PGPASSWORD=samureye_secure_2024 psql -h 172.24.1.153 -U samureye_user -d samureye"
 echo ""
 echo "📂 Backup dos dados antigos: $BACKUP_DIR"
 echo ""
