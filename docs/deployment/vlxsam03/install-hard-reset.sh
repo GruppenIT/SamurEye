@@ -853,3 +853,16 @@ echo "2. Execute o reset no vlxsam01 (Gateway)"
 echo "3. Execute o reset no vlxsam04 (Collector)"
 echo ""
 log "Database server vlxsam03 pronto para uso!"
+
+# ============================================================================
+# 16. CORREÇÃO AUTOMÁTICA DE CONECTIVIDADE FINAL
+# ============================================================================
+
+log "🔧 Aplicando correção final de conectividade..."
+
+# Executar script de correção de conectividade
+if curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/fix-vlxsam03-connectivity.sh | bash; then
+    log "✅ Correção de conectividade aplicada com sucesso"
+else
+    warn "⚠️ Erro na correção automática - verificar manualmente"
+fi
