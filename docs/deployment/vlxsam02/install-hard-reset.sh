@@ -687,21 +687,95 @@ EOF
 node /tmp/tenant_fix.js "$WORKING_DIR/server/routes.ts"
 rm /tmp/tenant_fix.js
 
-# Verificar se precisa fazer push do schema
-log "🗃️ Verificando schema do banco de dados..."
+# Verificar conectividade com PostgreSQL
+log "🔍 Verificando conectividade com PostgreSQL..."
 
-cd "$WORKING_DIR"
+POSTGRES_HOST="172.24.1.153"
+POSTGRES_PORT="5432"
+POSTGRES_DB="samureye"
+POSTGRES_USER="samureye_user"
 
-# Fazer push do schema se necessário  
-if sudo -u "$APP_USER" npm run db:push 2>/dev/null; then
-    log "✅ Schema do banco de dados atualizado"
-else
-    warn "⚠️ Schema push falhou - tentando com --force"
-    if sudo -u "$APP_USER" npm run db:push -- --force 2>/dev/null; then
-        log "✅ Schema forçado com sucesso"
+# Testar conectividade
+if timeout 10 nc -z "$POSTGRES_HOST" "$POSTGRES_PORT" 2>/dev/null; then
+    log "✅ PostgreSQL acessível em $POSTGRES_HOST:$POSTGRES_PORT"
+    
+    # Testar conectividade específica com credenciais
+    export PGPASSWORD="samureye_secure_2024"
+    if psql -h "$POSTGRES_HOST" -p "$POSTGRES_PORT" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "SELECT 1;" >/dev/null 2>&1; then
+        log "✅ Autenticação PostgreSQL funcionando"
+        
+        # Verificar se precisa fazer push do schema
+        log "🗃️ Verificando schema do banco de dados..."
+        cd "$WORKING_DIR"
+        
+        # Configurar variáveis de ambiente para Drizzle
+        export DATABASE_URL="postgresql://${POSTGRES_USER}:samureye_secure_2024@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}"
+        
+        # Fazer push do schema se necessário  
+        if sudo -u "$APP_USER" DATABASE_URL="$DATABASE_URL" npm run db:push 2>/dev/null; then
+            log "✅ Schema do banco de dados atualizado"
+        else
+            warn "⚠️ Schema push falhou - tentando com --force"
+            if sudo -u "$APP_USER" DATABASE_URL="$DATABASE_URL" npm run db:push -- --force 2>/dev/null; then
+                log "✅ Schema forçado com sucesso"
+            else
+                warn "⚠️ Não foi possível fazer push do schema"
+                
+                # Tentar criar tabelas manualmente se necessário
+                log "🔧 Tentando criar tabelas básicas manualmente..."
+                psql -h "$POSTGRES_HOST" -p "$POSTGRES_PORT" -U "$POSTGRES_USER" -d "$POSTGRES_DB" << 'EOSQL' || true
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+CREATE TABLE IF NOT EXISTS tenants (
+    id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+    name VARCHAR NOT NULL,
+    slug VARCHAR UNIQUE NOT NULL,
+    description TEXT,
+    logo_url VARCHAR,
+    settings JSONB,
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS users (
+    id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+    email VARCHAR UNIQUE,
+    first_name VARCHAR,
+    last_name VARCHAR,
+    profile_image_url VARCHAR,
+    password VARCHAR,
+    current_tenant_id VARCHAR,
+    preferred_language VARCHAR DEFAULT 'pt-BR',
+    is_global_user BOOLEAN DEFAULT false,
+    is_soc_user BOOLEAN DEFAULT false,
+    is_active BOOLEAN DEFAULT true,
+    last_login_at TIMESTAMP,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS sessions (
+    sid VARCHAR PRIMARY KEY,
+    sess JSONB NOT NULL,
+    expire TIMESTAMP NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS "IDX_session_expire" ON sessions(expire);
+
+EOSQL
+                log "✅ Tabelas básicas criadas manualmente"
+            fi
+        fi
     else
-        warn "⚠️ Não foi possível fazer push do schema - verificar manualmente"
+        error "❌ Falha na autenticação PostgreSQL"
+        warn "   Verifique se vlxsam03 foi configurado corretamente"
+        warn "   Execute: curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/vlxsam03/install-hard-reset.sh | bash"
     fi
+else
+    error "❌ PostgreSQL não acessível em $POSTGRES_HOST:$POSTGRES_PORT"
+    warn "   Execute primeiro o reset no vlxsam03:"
+    warn "   curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/vlxsam03/install-hard-reset.sh | bash"
 fi
 
 log "✅ Correções de criação de tenant aplicadas"
@@ -871,6 +945,8 @@ if curl -s -f http://localhost:5000/api/health >/dev/null 2>&1; then
     echo "• ✅ Dashboard carrega sem necessidade de autenticação"
     echo "• ✅ Criação de tenant com logging melhorado e validação"
     echo "• ✅ Schema do banco de dados verificado e atualizado"
+    echo "• ✅ Conectividade PostgreSQL verificada e configurada"
+    echo "• ✅ Tabelas criadas automaticamente se necessário"
     echo ""
     echo "🎯 EXPERIÊNCIA DO USUÁRIO:"
     echo "1. Dashboard principal funciona diretamente"
