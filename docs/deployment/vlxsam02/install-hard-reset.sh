@@ -1145,4 +1145,27 @@ echo "   • Admin: admin@samureye.local / SamurEye2024!"
 echo "   • DB:    $POSTGRES_USER / samureye_secure_2024"
 echo ""
 
+# ============================================================================
+# 17. CORREÇÃO FINAL DE SCHEMA (SE NECESSÁRIO)
+# ============================================================================
+
+log "🗃️ Aplicando correção final de schema..."
+
+# Verificar se tabelas existem
+TABLES_CHECK=$(PGPASSWORD="samureye_secure_2024" psql -h "$POSTGRES_HOST" -p "$POSTGRES_PORT" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -t -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'tenants';" 2>/dev/null | tr -d ' ' || echo "0")
+
+if [ "$TABLES_CHECK" = "0" ]; then
+    warn "⚠️ Tabelas não encontradas - executando correção de schema"
+    
+    if curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/fix-vlxsam02-schema.sh | bash; then
+        log "✅ Correção de schema aplicada com sucesso"
+    else
+        warn "⚠️ Erro na correção de schema - verificar manualmente"
+    fi
+else
+    log "✅ Tabelas já existem no banco de dados"
+fi
+
+log "🎉 vlxsam02 (Application Server) pronto para uso!"
+
 exit 0
