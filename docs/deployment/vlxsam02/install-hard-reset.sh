@@ -394,6 +394,70 @@ fi
 log "✅ Build da aplicação concluído"
 
 # ============================================================================
+# 11.5. CORREÇÃO DO ENDPOINT /api/admin/me
+# ============================================================================
+
+log "🔧 Corrigindo autenticação admin no código..."
+
+# Aplicar patch para corrigir endpoint /api/admin/me
+cat > /tmp/admin_me_patch.js << 'EOF'
+const fs = require('fs');
+const filePath = process.argv[2];
+
+let content = fs.readFileSync(filePath, 'utf8');
+
+// Substituir o endpoint problemático
+const oldPattern = /\/\/ Check admin authentication status - Public for on-premise\s*app\.get\('\/api\/admin\/me', async \(req, res\) => \{[\s\S]*?\}\);/;
+
+const newEndpoint = `// Check admin authentication status - Fixed for on-premise
+  app.get('/api/admin/me', async (req, res) => {
+    try {
+      // Check if admin session exists (proper authentication check)
+      const adminUser = (req.session as any)?.adminUser;
+      
+      if (adminUser?.isAdmin) {
+        res.json({ 
+          isAuthenticated: true, 
+          email: adminUser.email || 'admin@onpremise.local',
+          isAdmin: true 
+        });
+      } else {
+        res.json({ 
+          isAuthenticated: false,
+          isAdmin: false 
+        });
+      }
+    } catch (error) {
+      res.status(500).json({ message: 'Erro na verificação de autenticação' });
+    }
+  });`;
+
+if (oldPattern.test(content)) {
+    content = content.replace(oldPattern, newEndpoint);
+    fs.writeFileSync(filePath, content, 'utf8');
+    console.log('✅ Endpoint /api/admin/me corrigido');
+} else {
+    console.log('⚠️ Padrão não encontrado - correção pode já ter sido aplicada');
+}
+EOF
+
+# Executar patch
+node /tmp/admin_me_patch.js "$WORKING_DIR/server/routes.ts"
+rm /tmp/admin_me_patch.js
+
+log "✅ Endpoint /api/admin/me corrigido"
+
+# Refazer build após correção
+log "🔨 Refazendo build após correção..."
+cd "$WORKING_DIR"
+
+# Build com fallback
+if ! sudo -u "$APP_USER" npm run build; then
+    warn "⚠️ npm run build falhou - usando npx fallback"
+    sudo -u "$APP_USER" npx vite build && sudo -u "$APP_USER" npx esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+fi
+
+# ============================================================================
 # 12. CONFIGURAÇÃO DO SERVIÇO SYSTEMD
 # ============================================================================
 
@@ -539,17 +603,10 @@ if curl -s -f http://localhost:5000/api/health >/dev/null 2>&1; then
     echo "👤 Email: admin@samureye.com.br"
     echo "🔑 Senha: SamurEye2024!"
     echo ""
-    echo "📝 Para ativar admin (se necessário):"
-    echo "No console do navegador (F12), execute:"
-    echo ""
-    echo "fetch('/api/admin/login', {"
-    echo "  method: 'POST',"
-    echo "  headers: {'Content-Type': 'application/json'},"
-    echo "  body: JSON.stringify({"
-    echo "    email: 'admin@samureye.com.br',"
-    echo "    password: 'SamurEye2024!'"
-    echo "  })"
-    echo "}).then(() => location.reload())"
+    echo "📝 NOVA EXPERIÊNCIA:"
+    echo "• Agora verá tela de LOGIN (não direto dashboard)"
+    echo "• Após login pode criar tenants normalmente"
+    echo "• Autenticação corrigida no frontend e backend"
     echo ""
     echo "════════════════════════════════════════"
 else

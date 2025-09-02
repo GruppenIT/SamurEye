@@ -1,0 +1,268 @@
+Package 'node-winston-transport' is not installed, so not removed
+Package 'node-with' is not installed, so not removed
+Package 'node-worker-loader' is not installed, so not removed
+Package 'node-write-file-promise' is not installed, so not removed
+Package 'node-ws-iconv' is not installed, so not removed
+Package 'node-xmlhttprequest' is not installed, so not removed
+Package 'node-xoauth2' is not installed, so not removed
+Package 'node-xregexp' is not installed, so not removed
+Package 'node-xterm' is not installed, so not removed
+Package 'node-xxhashjs' is not installed, so not removed
+Package 'node-y-codemirror' is not installed, so not removed
+Package 'node-yjs' is not installed, so not removed
+Package 'node-y-protocols' is not installed, so not removed
+Package 'node-y-websocket' is not installed, so not removed
+Package 'node-y18n' is not installed, so not removed
+Package 'node-yajsml' is not installed, so not removed
+Package 'node-yamlish' is not installed, so not removed
+Package 'node-yazl' is not installed, so not removed
+Package 'node-yn' is not installed, so not removed
+Package 'node-ytdl-core' is not installed, so not removed
+Package 'node-zkochan-cmd-shim' is not installed, so not removed
+Package 'node-zrender' is not installed, so not removed
+The following packages will be REMOVED:
+  nodejs*
+0 upgraded, 0 newly installed, 1 to remove and 1 not upgraded.
+After this operation, 199 MB disk space will be freed.
+(Reading database ... 133277 files and directories currently installed.)
+Removing nodejs (20.19.4-1nodesource1) ...
+dpkg: warning: while removing nodejs, directory '/usr/lib/node_modules' not empty so not removed
+Processing triggers for man-db (2.12.0-4build2) ...
+[10:15:13] 🗃️ Limpando banco de dados...
+[10:17:28] WARNING: ⚠️ PostgreSQL não acessível em 172.24.1.153:5432
+[10:17:28] WARNING:    Execute primeiro o reset no vlxsam03
+[10:19:44] 🔄 Atualizando sistema...
+Hit:1 https://deb.nodesource.com/node_20.x nodistro InRelease
+Hit:2 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:3 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:4 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:5 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists... Done
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+Calculating upgrade... Done
+The following packages have been kept back:
+  sosreport
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[10:19:47] 📦 Instalando dependências básicas...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+curl is already the newest version (8.5.0-2ubuntu10.6).
+wget is already the newest version (1.21.4-1ubuntu4.1).
+git is already the newest version (1:2.43.0-1ubuntu7.3).
+unzip is already the newest version (6.0-28ubuntu4.1).
+build-essential is already the newest version (12.10ubuntu1).
+python3 is already the newest version (3.12.3-0ubuntu2).
+python3-pip is already the newest version (24.0+dfsg-1ubuntu1.2).
+postgresql-client is already the newest version (16+257build1.1).
+netcat-openbsd is already the newest version (1.226-1ubuntu2).
+jq is already the newest version (1.7.1-3ubuntu0.24.04.1).
+htop is already the newest version (3.3.0-4build1).
+nano is already the newest version (7.2-2ubuntu0.1).
+ca-certificates is already the newest version (20240203).
+gnupg is already the newest version (2.4.4-2ubuntu17.3).
+lsb-release is already the newest version (12.0-2).
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[10:19:48] ✅ Dependências básicas instaladas
+[10:19:48] 📦 Instalando Node.js 20...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[10:19:50] 🔧 Configurando repositório NodeSource...
+Hit:1 https://deb.nodesource.com/node_20.x nodistro InRelease
+Hit:2 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:3 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:4 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:5 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists... Done
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following NEW packages will be installed:
+  nodejs
+0 upgraded, 1 newly installed, 0 to remove and 1 not upgraded.
+Need to get 32.0 MB of archives.
+After this operation, 199 MB of additional disk space will be used.
+Get:1 https://deb.nodesource.com/node_20.x nodistro/main amd64 nodejs amd64 20.19.4-1nodesource1 [32.0 MB]
+Fetched 32.0 MB in 1s (44.7 MB/s)
+Selecting previously unselected package nodejs.
+(Reading database ... 127914 files and directories currently installed.)
+Preparing to unpack .../nodejs_20.19.4-1nodesource1_amd64.deb ...
+Unpacking nodejs (20.19.4-1nodesource1) ...
+Setting up nodejs (20.19.4-1nodesource1) ...
+Processing triggers for man-db (2.12.0-4build2) ...
+Scanning processes...
+Scanning candidates...
+Scanning linux images...
+
+Pending kernel upgrade!
+Running kernel version:
+  6.8.0-41-generic
+Diagnostics:
+  The currently running kernel version is not the expected kernel version 6.8.0-79-generic.
+
+Restarting the system to load the new kernel will not be handled automatically, so you should consider rebooting.
+
+Restarting services...
+
+Service restarts being deferred:
+ /etc/needrestart/restart.d/dbus.service
+ systemctl restart getty@tty1.service
+ systemctl restart systemd-logind.service
+ systemctl restart unattended-upgrades.service
+
+No containers need to be restarted.
+
+No user sessions are running outdated binaries.
+
+No VM guests are running outdated hypervisor (qemu) binaries on this host.
+[10:20:02] 🔍 Verificando instalação Node.js...
+[10:20:02] ✅ Node.js instalado: v20.19.4
+[10:20:02] ✅ npm instalado: 10.8.2
+[10:20:02] 🔧 Instalando ferramentas globais...
+[10:20:11] ✅ Ferramentas globais instaladas
+[10:20:11] 👤 Criando usuário e estrutura de diretórios...
+[10:20:11] ✅ Estrutura de diretórios criada
+[10:20:11] 📥 Baixando aplicação SamurEye...
+Cloning into 'SamurEye'...
+remote: Enumerating objects: 2535, done.
+remote: Counting objects: 100% (462/462), done.
+remote: Compressing objects: 100% (259/259), done.
+remote: Total 2535 (delta 291), reused 321 (delta 155), pack-reused 2073 (from 1)
+Receiving objects: 100% (2535/2535), 2.48 MiB | 5.04 MiB/s, done.
+Resolving deltas: 100% (1727/1727), done.
+[10:20:12] ✅ Aplicação baixada com sucesso
+[10:20:12] ⚙️ Configurando ambiente...
+[10:20:13] ✅ Arquivo .env criado
+[10:20:13] 📦 Instalando dependências npm...
+npm warn deprecated node-domexception@1.0.0: Use your platform's native DOMException instead
+npm warn deprecated @esbuild-kit/core-utils@3.3.2: Merged into tsx: https://tsx.is
+npm warn deprecated @esbuild-kit/esm-loader@2.6.5: Merged into tsx: https://tsx.is
+
+added 635 packages, and audited 636 packages in 15s
+
+87 packages are looking for funding
+  run `npm fund` for details
+
+11 vulnerabilities (3 low, 8 moderate)
+
+To address issues that do not require attention, run:
+  npm audit fix
+
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+
+Run `npm audit` for details.
+npm notice
+npm notice New major version of npm available! 10.8.2 -> 11.5.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.5.2
+npm notice To update run: npm install -g npm@11.5.2
+npm notice
+[10:20:28] ✅ Dependências npm instaladas
+[10:20:28] 🔨 Fazendo build da aplicação...
+
+> rest-express@1.0.0 build
+> vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+
+vite v5.4.19 building for production...
+transforming (30) ../node_modules/@tanstack/react-query/build/modern/useQuery.jsBrowserslist: browsers data (caniuse-lite) is 11 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+✓ 2692 modules transformed.
+../dist/public/index.html                   2.20 kB │ gzip:   0.86 kB
+../dist/public/assets/index-3RvnZlKd.css   68.17 kB │ gzip:  11.88 kB
+../dist/public/assets/index-c8mzCPy-.js   670.09 kB │ gzip: 192.31 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 8.89s
+
+  dist/index.js  97.7kb
+
+⚡ Done in 13ms
+[10:20:37] ✅ Build da aplicação concluído
+[10:20:37] 🔧 Configurando serviço systemd...
+[10:20:38] ✅ Serviço systemd configurado
+[10:20:38] 🚀 Iniciando aplicação...
+Created symlink /etc/systemd/system/multi-user.target.wants/samureye-app.service → /etc/systemd/system/samureye-app.service.
+[10:20:53] ✅ Aplicação iniciada com sucesso
+[10:20:53] 🔐 Configurando autenticação admin...
+[10:20:58] ✅ Aplicação respondendo - configurando admin...
+[10:20:58] ✅ Sessão admin configurada com sucesso
+[10:20:58] 📋 INFORMAÇÕES DE ACESSO ADMIN:
+════════════════════════════════════════
+🌐 URL Admin: http://172.24.1.152:5000/admin
+👤 Email: admin@samureye.com.br
+🔑 Senha: SamurEye2024!
+
+📝 Para ativar admin (se necessário):
+No console do navegador (F12), execute:
+
+fetch('/api/admin/login', {
+  method: 'POST',
+  headers: {'Content-Type': 'application/json'},
+  body: JSON.stringify({
+    email: 'admin@samureye.com.br',
+    password: 'SamurEye2024!'
+  })
+}).then(() => location.reload())
+
+════════════════════════════════════════
+[10:20:58] 🗃️ Inicializando banco de dados...
+[10:21:08] ✅ Aplicação respondendo na porta 5000
+[10:21:08] ✅ Tenant padrão criado
+[10:21:08] 🧪 Executando testes de validação...
+[10:21:08] ✅ Serviço: Ativo
+[10:21:08] ✅ Porta: 5000 aberta
+[10:23:21] WARNING: ⚠️ PostgreSQL: Não conectado
+[10:23:21] ✅ HTTP: Respondendo (200)
+[10:23:21] ✅ Logs: Sem erros críticos
+
+[10:23:21] 🎉 HARD RESET DA APLICAÇÃO CONCLUÍDO!
+
+📋 RESUMO DA INSTALAÇÃO:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🚀 Aplicação:
+   • Status:  active
+   • Porta:   5000
+   • URL:     http://localhost:5000
+   • Logs:    /var/log/samureye/
+
+🗃️ Banco de Dados:
+   • Host:    172.24.1.153:5432
+   • Base:    samureye
+   • User:    samureye
+
+👤 Usuários:
+   • App:     samureye
+   • Dir:     /opt/samureye/SamurEye
+   • Config:  /opt/samureye/SamurEye/.env
+
+🔧 Comandos Úteis:
+   • Status:   systemctl status samureye-app
+   • Logs:     journalctl -u samureye-app -f
+   • Restart:  systemctl restart samureye-app
+   • Teste:    curl -I http://localhost:5000
+
+📝 Próximos Passos:
+   1. Verificar logs: journalctl -u samureye-app -f
+   2. Testar API: curl http://localhost:5000/api/health
+   3. Acessar admin: https://app.samureye.com.br/admin
+   4. Criar tenant: Via interface /admin ou API
+
+🔐 Credenciais Padrão:
+   • Admin: admin@samureye.local / SamurEye2024!
+   • DB:    samureye / samureye123
+
+root@vlxsam02:~#
