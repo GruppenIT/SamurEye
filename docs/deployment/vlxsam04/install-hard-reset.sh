@@ -745,6 +745,148 @@ else
 fi
 
 # ============================================================================
+# 14.5. CORREÇÃO AUTOMÁTICA DE HEARTBEAT
+# ============================================================================
+
+log "💓 Configurando correções de heartbeat e conectividade..."
+
+# Verificar e corrigir configuração para heartbeat
+CONFIG_FILE="/etc/samureye-collector/.env"
+
+if [ -f "$CONFIG_FILE" ]; then
+    # Garantir que API_BASE está correto
+    if ! grep -q "API_BASE.*https://api.samureye.com.br" "$CONFIG_FILE"; then
+        if grep -q "^API_BASE=" "$CONFIG_FILE"; then
+            sed -i 's|^API_BASE=.*|API_BASE=https://api.samureye.com.br|' "$CONFIG_FILE"
+        else
+            echo "API_BASE=https://api.samureye.com.br" >> "$CONFIG_FILE"
+        fi
+        log "✅ API_BASE corrigido para https://api.samureye.com.br"
+    fi
+    
+    # Garantir intervalo de heartbeat adequado (30 segundos)
+    if ! grep -q "^HEARTBEAT_INTERVAL=" "$CONFIG_FILE"; then
+        echo "HEARTBEAT_INTERVAL=30" >> "$CONFIG_FILE"
+        log "✅ HEARTBEAT_INTERVAL configurado (30 segundos)"
+    else
+        # Verificar se não está muito baixo (mínimo 15 segundos)
+        CURRENT_INTERVAL=$(grep "^HEARTBEAT_INTERVAL=" "$CONFIG_FILE" | cut -d= -f2)
+        if [ "$CURRENT_INTERVAL" -lt 15 ] 2>/dev/null; then
+            sed -i 's/^HEARTBEAT_INTERVAL=.*/HEARTBEAT_INTERVAL=30/' "$CONFIG_FILE"
+            log "✅ HEARTBEAT_INTERVAL ajustado para 30 segundos (estava muito baixo)"
+        fi
+    fi
+    
+    # Adicionar configuração de retry para heartbeat
+    if ! grep -q "^HEARTBEAT_RETRY_COUNT=" "$CONFIG_FILE"; then
+        echo "HEARTBEAT_RETRY_COUNT=3" >> "$CONFIG_FILE"
+        log "✅ HEARTBEAT_RETRY_COUNT configurado (3 tentativas)"
+    fi
+    
+    # Adicionar timeout para requests HTTP
+    if ! grep -q "^HTTP_TIMEOUT=" "$CONFIG_FILE"; then
+        echo "HTTP_TIMEOUT=30" >> "$CONFIG_FILE"
+        log "✅ HTTP_TIMEOUT configurado (30 segundos)"
+    fi
+    
+    # Configuração de log level para debug inicial
+    if ! grep -q "^LOG_LEVEL=" "$CONFIG_FILE"; then
+        echo "LOG_LEVEL=INFO" >> "$CONFIG_FILE"
+        log "✅ LOG_LEVEL configurado (INFO)"
+    fi
+    
+else
+    warn "⚠️ Arquivo de configuração $CONFIG_FILE não encontrado"
+fi
+
+# Criar script de teste de conectividade
+cat > "$COLLECTOR_DIR/test-connectivity.sh" << 'EOF'
+#!/bin/bash
+
+# Script para testar conectividade do collector
+CERTS_DIR="/opt/samureye-collector/certs"
+API_BASE="https://api.samureye.com.br"
+
+echo "🔧 Testando conectividade do collector..."
+
+# Teste DNS
+if nslookup api.samureye.com.br >/dev/null 2>&1; then
+    echo "✅ DNS: api.samureye.com.br"
+else
+    echo "❌ DNS: Falha na resolução"
+    exit 1
+fi
+
+# Teste porta
+if timeout 5 bash -c "</dev/tcp/api.samureye.com.br/443" >/dev/null 2>&1; then
+    echo "✅ Conectividade: Porta 443 acessível"
+else
+    echo "❌ Conectividade: Porta 443 bloqueada"
+    exit 1
+fi
+
+# Teste certificados
+if [ -f "$CERTS_DIR/collector.crt" ] && [ -f "$CERTS_DIR/collector.key" ]; then
+    echo "✅ Certificados: Encontrados"
+    
+    # Teste heartbeat
+    RESPONSE=$(curl -k \
+        --cert "$CERTS_DIR/collector.crt" \
+        --key "$CERTS_DIR/collector.key" \
+        --connect-timeout 10 \
+        --max-time 30 \
+        -X POST \
+        -H "Content-Type: application/json" \
+        -d "{
+            \"collector_id\": \"$(hostname)\",
+            \"status\": \"online\",
+            \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%S.%3NZ)\",
+            \"telemetry\": {
+                \"cpu_percent\": 15.0,
+                \"memory_percent\": 45.0,
+                \"disk_percent\": 30.0,
+                \"processes\": 100
+            },
+            \"capabilities\": [\"nmap\", \"nuclei\", \"masscan\"],
+            \"version\": \"1.0.0\"
+        }" \
+        "$API_BASE/collector-api/heartbeat" 2>/dev/null || echo "ERROR")
+    
+    if [[ "$RESPONSE" == *"Heartbeat received"* ]]; then
+        echo "✅ Heartbeat: Teste manual bem-sucedido"
+        echo "   Resposta: $RESPONSE"
+    else
+        echo "❌ Heartbeat: Falha no teste manual"
+        echo "   Resposta: $RESPONSE"
+        exit 1
+    fi
+else
+    echo "❌ Certificados: Não encontrados em $CERTS_DIR"
+    exit 1
+fi
+
+echo ""
+echo "🎉 Todos os testes de conectividade passaram!"
+EOF
+
+chmod +x "$COLLECTOR_DIR/test-connectivity.sh"
+chown "$COLLECTOR_USER:$COLLECTOR_USER" "$COLLECTOR_DIR/test-connectivity.sh"
+
+log "✅ Script de teste de conectividade criado: $COLLECTOR_DIR/test-connectivity.sh"
+
+# Testar conectividade imediatamente após instalação
+if [ -f "$COLLECTOR_DIR/certs/collector.crt" ] && [ -f "$COLLECTOR_DIR/certs/collector.key" ]; then
+    log "🧪 Executando teste de conectividade imediato..."
+    if sudo -u "$COLLECTOR_USER" "$COLLECTOR_DIR/test-connectivity.sh"; then
+        log "✅ Teste de conectividade inicial: SUCESSO"
+    else
+        warn "⚠️ Teste de conectividade inicial: FALHOU - verificar configuração"
+    fi
+else
+    warn "⚠️ Certificados não encontrados - teste de conectividade pulado"
+fi
+
+# ============================================================================
 # 15. SCRIPT DE REGISTRO NO SERVIDOR
 # ============================================================================
 
@@ -830,10 +972,17 @@ echo "   • Logs:      tail -f /var/log/samureye-collector/collector.log"
 echo "   • Restart:   systemctl restart $SERVICE_NAME"
 echo "   • Register:  $COLLECTOR_DIR/scripts/register.sh"
 echo "   • Cleanup:   $COLLECTOR_DIR/scripts/cleanup.sh"
+echo "   • Test Conn: $COLLECTOR_DIR/test-connectivity.sh"
 echo ""
 echo "🔗 Conectividade:"
 echo "   • API:       $API_SERVER"
 echo "   • Gateway:   $GATEWAY_SERVER"
+echo ""
+echo "💓 Heartbeat & Status:"
+echo "   • Intervalo: 30 segundos (configurável em $CONFIG_FILE)"
+echo "   • Endpoint:  https://api.samureye.com.br/collector-api/heartbeat"
+echo "   • Retry:     3 tentativas automáticas por request"
+echo "   • Timeout:   30 segundos por request HTTP"
 echo ""
 echo "📝 Próximos Passos:"
 echo "   1. Registrar collector: $COLLECTOR_DIR/scripts/register.sh"
