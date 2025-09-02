@@ -1,0 +1,265 @@
+root@vlxsam03:~# curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/vlxsam03/install-hard-reset.sh | bash
+
+🔥 SAMUREYE HARD RESET - DATABASE SERVER vlxsam03
+===============================================
+⚠️  ATENÇÃO: Este script irá:
+   • Parar todos os serviços do banco de dados
+   • APAGAR TODOS OS DADOS do PostgreSQL, Redis, MinIO
+   • Reconfigurar pg_hba.conf e postgresql.conf
+   • Resetar senhas e configurações
+   • Recriar banco e usuários SamurEye
+   • Reconfigurar firewall e rede
+
+[17:30:21] WARNING: Modo não-interativo detectado (curl | bash)
+[17:30:21] INFO: Hard reset iniciará automaticamente em 5 segundos...
+[17:30:26] 🗑️ Iniciando hard reset do servidor de banco de dados...
+[17:30:26] 🔧 Reparando sistema de pacotes corrompido...
+[17:30:26] WARNING: Matando processos apt/dpkg em execução...
+[17:30:31] WARNING: Removendo locks do sistema de pacotes...
+[17:30:31] Executando reparos do dpkg...
+[17:30:31] Tentativa 1: dpkg --configure -a
+[17:30:36] Tentativa 1: apt-get -f install
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following package was automatically installed and is no longer required:
+  libllvm17t64
+Use 'apt autoremove' to remove it.
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+[17:30:42] ✅ dpkg funcionando na tentativa 1
+[17:30:42] Aguardando estabilização do sistema...
+[17:30:52] ✅ Reparo inicial do sistema de pacotes concluído
+[17:30:52] 📦 Instalando dependências básicas...
+[17:30:52] Tentativa 1 de atualização do sistema...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following package was automatically installed and is no longer required:
+  libllvm17t64
+Use 'apt autoremove' to remove it.
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+Hit:1 https://packages.grafana.com/oss/deb stable InRelease
+Hit:2 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:3 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:4 http://apt.postgresql.org/pub/repos/apt noble-pgdg InRelease
+Hit:5 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:6 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists... Done
+[17:31:01] ✅ Sistema atualizado
+[17:31:01] Tentativa 1 de instalação de dependências...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following package was automatically installed and is no longer required:
+  libllvm17t64
+Use 'apt autoremove' to remove it.
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+psmisc is already the newest version (23.7-1build1).
+lsof is already the newest version (4.95.0-1build3).
+procps is already the newest version (2:4.0.4-4ubuntu3.2).
+The following package was automatically installed and is no longer required:
+  libllvm17t64
+Use 'apt autoremove' to remove it.
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+[17:31:06] ✅ Dependências básicas instaladas
+[17:31:06] ⏹️ Parando todos os serviços...
+[17:31:06] ✅ postgresql parado
+[17:31:06] ✅ redis-server parado
+[17:31:06] ✅ minio parado
+[17:31:06] ✅ grafana-server parado
+[17:31:06] 💾 Criando backup dos dados atuais...
+[17:31:08] ✅ Backup PostgreSQL criado
+[17:31:08] ✅ Backup Redis criado
+[17:31:08] ✅ Backup MinIO criado
+[17:31:08] 📂 Backup salvo em: /opt/backups/samureye-reset-20250902-173106
+[17:31:08] 🗑️ Removendo dados existentes...
+[17:31:08] ✅ Dados PostgreSQL removidos
+[17:31:08] ✅ Configurações PostgreSQL removidas
+[17:31:08] ✅ Dados Redis removidos
+[17:31:08] ✅ Dados MinIO removidos
+[17:31:08] ✅ Dados Grafana removidos
+[17:31:08] 📦 Instalando dependências adicionais...
+[17:31:08] Tentativa 1 de instalação de dependências adicionais...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following package was automatically installed and is no longer required:
+  libllvm17t64
+Use 'apt autoremove' to remove it.
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+wget is already the newest version (1.21.4-1ubuntu4.1).
+curl is already the newest version (8.5.0-2ubuntu10.6).
+gnupg2 is already the newest version (2.4.4-2ubuntu17.3).
+software-properties-common is already the newest version (0.99.49.3).
+apt-transport-https is already the newest version (2.8.3).
+ca-certificates is already the newest version (20240203).
+The following package was automatically installed and is no longer required:
+  libllvm17t64
+Use 'apt autoremove' to remove it.
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+[17:31:13] ✅ Dependências adicionais instaladas
+[17:31:13] 🐘 Configurando PostgreSQL 16...
+[17:31:13] 📁 Recriando cluster PostgreSQL usando método Ubuntu...
+[17:31:20] 🔧 Criando novo cluster PostgreSQL...
+Creating new PostgreSQL cluster 16/main ...
+/usr/lib/postgresql/16/bin/initdb -D /var/lib/postgresql/16/main --auth-local peer --auth-host scram-sha-256 --no-instructions
+The files belonging to this database system will be owned by user "postgres".
+This user must also own the server process.
+
+The database cluster will be initialized with locale "en_US.UTF-8".
+The default database encoding has accordingly been set to "UTF8".
+The default text search configuration will be set to "english".
+
+Data page checksums are disabled.
+
+fixing permissions on existing directory /var/lib/postgresql/16/main ... ok
+creating subdirectories ... ok
+selecting dynamic shared memory implementation ... posix
+selecting default max_connections ... 100
+selecting default shared_buffers ... 128MB
+selecting default time zone ... Etc/UTC
+creating configuration files ... ok
+running bootstrap script ... ok
+performing post-bootstrap initialization ... ok
+syncing data to disk ... ok
+Ver Cluster Port Status Owner    Data directory              Log file
+16  main    5432 online postgres /var/lib/postgresql/16/main /var/log/postgresql/postgresql-16-main.log
+[17:31:29] ✅ Cluster PostgreSQL recriado usando pg_createcluster
+[17:31:29] 🚀 Iniciando PostgreSQL...
+Synchronizing state of postgresql.service with SysV service script with /usr/lib/systemd/systemd-sysv-install.
+Executing: /usr/lib/systemd/systemd-sysv-install enable postgresql
+[17:31:35] ✅ PostgreSQL iniciado com sucesso
+[17:31:35] ⚙️ Configurando postgresql.conf...
+[17:31:35] 🔐 Configurando pg_hba.conf...
+[17:31:35] 🔄 Reiniciando PostgreSQL para aplicar configurações...
+[17:31:42] ✅ PostgreSQL configurado para SamurEye
+[17:31:42] 🔍 Verificando conectividade PostgreSQL...
+[17:31:42] ✅ PostgreSQL respondendo, criando usuários...
+[17:31:42] 👤 Criando usuário e banco SamurEye...
+NOTICE:  database "samureye" does not exist, skipping
+DROP DATABASE
+NOTICE:  database "grafana" does not exist, skipping
+DROP DATABASE
+NOTICE:  role "samureye_user" does not exist, skipping
+DROP ROLE
+NOTICE:  role "samureye" does not exist, skipping
+DROP ROLE
+NOTICE:  role "grafana" does not exist, skipping
+DROP ROLE
+CREATE ROLE
+ALTER ROLE
+ALTER ROLE
+CREATE ROLE
+ALTER ROLE
+ALTER ROLE
+CREATE DATABASE
+GRANT
+GRANT
+You are now connected to database "samureye" as user "postgres".
+CREATE EXTENSION
+CREATE EXTENSION
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+You are now connected to database "postgres" as user "postgres".
+CREATE ROLE
+CREATE DATABASE
+GRANT
+                                                               List of databases
+   Name    |     Owner     | Encoding | Locale Provider |   Collate   |    Ctype    | ICU Locale | ICU Rules |        Access privileges
+-----------+---------------+----------+-----------------+-------------+-------------+------------+-----------+---------------------------------
+ grafana   | grafana       | UTF8     | libc            | en_US.UTF-8 | en_US.UTF-8 |            |           | =Tc/grafana                    +
+           |               |          |                 |             |             |            |           | grafana=CTc/grafana
+ postgres  | postgres      | UTF8     | libc            | en_US.UTF-8 | en_US.UTF-8 |            |           |
+ samureye  | samureye_user | UTF8     | libc            | en_US.UTF-8 | en_US.UTF-8 |            |           | =Tc/samureye_user              +
+           |               |          |                 |             |             |            |           | samureye_user=CTc/samureye_user+
+           |               |          |                 |             |             |            |           | samureye=CTc/samureye_user
+ template0 | postgres      | UTF8     | libc            | en_US.UTF-8 | en_US.UTF-8 |            |           | =c/postgres                    +
+           |               |          |                 |             |             |            |           | postgres=CTc/postgres
+ template1 | postgres      | UTF8     | libc            | en_US.UTF-8 | en_US.UTF-8 |            |           | =c/postgres                    +
+           |               |          |                 |             |             |            |           | postgres=CTc/postgres
+(5 rows)
+
+                               List of roles
+   Role name   |                         Attributes
+---------------+------------------------------------------------------------
+ grafana       |
+ postgres      | Superuser, Create role, Create DB, Replication, Bypass RLS
+ samureye      | Superuser, Create DB
+ samureye_user | Superuser, Create DB
+
+[17:31:42] 🔴 Configurando Redis...
+[17:31:42] 🚀 Iniciando Redis...
+Synchronizing state of redis-server.service with SysV service script with /usr/lib/systemd/systemd-sysv-install.
+Executing: /usr/lib/systemd/systemd-sysv-install enable redis-server
+[17:31:46] ✅ Redis iniciado com sucesso
+[17:31:46] ✅ Redis respondendo corretamente
+[17:31:46] 📦 Configurando MinIO...
+[17:31:47] 📊 Configurando Grafana...
+Synchronizing state of grafana-server.service with SysV service script with /usr/lib/systemd/systemd-sysv-install.
+Executing: /usr/lib/systemd/systemd-sysv-install enable grafana-server
+[17:31:48] 🔥 Configurando firewall UFW...
+Backing up 'user.rules' to '/etc/ufw/user.rules.20250902_173149'
+Backing up 'before.rules' to '/etc/ufw/before.rules.20250902_173149'
+Backing up 'after.rules' to '/etc/ufw/after.rules.20250902_173149'
+Backing up 'user6.rules' to '/etc/ufw/user6.rules.20250902_173149'
+Backing up 'before6.rules' to '/etc/ufw/before6.rules.20250902_173149'
+Backing up 'after6.rules' to '/etc/ufw/after6.rules.20250902_173149'
+
+Default incoming policy changed to 'deny'
+(be sure to update your rules accordingly)
+Default outgoing policy changed to 'allow'
+(be sure to update your rules accordingly)
+Rules updated
+Rules updated (v6)
+Rules updated
+Rules updated
+Rules updated
+Rules updated
+Rules updated
+Firewall is active and enabled on system startup
+[17:31:50] 🧪 Criando script de teste...
+[17:31:50] ✅ Executando testes finais...
+[17:32:00] ✅ PostgreSQL funcionando
+[17:32:00] 🔍 Testando conectividade remota do vlxsam02...
+[17:32:00] ✅ Conectividade remota funcionando
+[17:32:00] ✅ Redis funcionando
+[17:32:00] ✅ MinIO funcionando
+[17:32:00] ✅ Grafana funcionando
+
+🎉 HARD RESET CONCLUÍDO COM SUCESSO!
+=====================================
+
+📊 SERVIÇOS CONFIGURADOS:
+• PostgreSQL 16: samureye_user/samureye_secure_2024 @ :5432
+• Redis: redis123 @ :6379
+• MinIO: minio/minio123 @ :9000
+• Grafana: admin/grafana123 @ :3000
+
+🔧 COMANDOS ÚTEIS:
+• Testar tudo: /usr/local/bin/test-samureye-db.sh
+• Status: systemctl status postgresql redis-server minio grafana-server
+• Logs PostgreSQL: tail -f /var/log/postgresql/postgresql-*.log
+• Conectar DB: PGPASSWORD=samureye_secure_2024 psql -h localhost -U samureye_user -d samureye
+• Testar remoto: PGPASSWORD=samureye_secure_2024 psql -h 172.24.1.153 -U samureye_user -d samureye
+
+📂 Backup dos dados antigos: /opt/backups/samureye-reset-20250902-173106
+
+⚠️ PRÓXIMOS PASSOS:
+1. Execute o reset no vlxsam02 (Application)
+2. Execute o reset no vlxsam01 (Gateway)
+3. Execute o reset no vlxsam04 (Collector)
+
+[17:32:00] Database server vlxsam03 pronto para uso!
+root@vlxsam03:~#
