@@ -184,12 +184,33 @@ apt-get install -y \
     apt-transport-https \
     netcat-openbsd \
     nmap \
-    masscan \
     jq \
     htop \
     nano \
     systemd \
-    cron
+    cron \
+    libpcap-dev
+
+# Instalar masscan com fallback para compilação do código fonte
+log "🔧 Instalando masscan..."
+if ! apt-get install -y masscan 2>/dev/null; then
+    warn "⚠️ Masscan via apt falhou (403 Forbidden), compilando do source..."
+    cd /tmp
+    
+    if [ -d "masscan" ]; then
+        rm -rf masscan
+    fi
+    
+    git clone https://github.com/robertdavidgraham/masscan
+    cd masscan
+    make -j$(nproc) 2>/dev/null || make
+    make install
+    cd /
+    rm -rf /tmp/masscan
+    log "✅ Masscan compilado e instalado do código fonte"
+else
+    log "✅ Masscan instalado via apt"
+fi
 
 # ============================================================================
 # 5. INSTALAÇÃO PYTHON 3.11
@@ -284,9 +305,13 @@ if command -v nmap >/dev/null 2>&1; then
     log "✅ Nmap configurado"
 fi
 
-# Masscan (já instalado via apt)
+# Masscan (já instalado via apt ou compilado)
 if command -v masscan >/dev/null 2>&1; then
-    log "✅ Masscan instalado"
+    log "✅ Masscan configurado"
+    masscan_version=$(masscan --version 2>&1 | head -1)
+    log "   Versão: $masscan_version"
+else
+    warn "❌ Masscan não encontrado após instalação"
 fi
 
 # Nuclei
