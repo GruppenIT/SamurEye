@@ -227,8 +227,7 @@ apt-get install -y \
     python$PYTHON_VERSION \
     python$PYTHON_VERSION-dev \
     python$PYTHON_VERSION-venv \
-    python$PYTHON_VERSION-distutils \
-    python3-pip
+    python$PYTHON_VERSION-distutils
 
 # Configurar Python padrão
 update-alternatives --install /usr/bin/python3 python3 /usr/bin/python$PYTHON_VERSION 1
