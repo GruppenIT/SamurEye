@@ -1,0 +1,108 @@
+python3.11-distutils is already the newest version (3.11.13-1+noble1).
+python3-pip is already the newest version (24.0+dfsg-1ubuntu1.2).
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+[18:29:47] ✅ Python 3.11.13 instalado
+[18:29:47] ✅ Python padrão: 3.12.3
+[18:29:47] 📦 Instalando Node.js 20...
+2025-09-02 18:29:47 - Installing pre-requisites
+Hit:1 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:2 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:3 https://deb.nodesource.com/node_20.x nodistro InRelease
+Hit:4 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:5 https://ppa.launchpadcontent.net/deadsnakes/ppa/ubuntu noble InRelease
+Hit:6 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists... Done
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+apt-transport-https is already the newest version (2.8.3).
+ca-certificates is already the newest version (20240203).
+curl is already the newest version (8.5.0-2ubuntu10.6).
+gnupg is already the newest version (2.4.4-2ubuntu17.3).
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+Hit:1 https://deb.nodesource.com/node_20.x nodistro InRelease
+Hit:2 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:3 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:4 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:5 https://ppa.launchpadcontent.net/deadsnakes/ppa/ubuntu noble InRelease
+Hit:6 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists... Done
+2025-09-02 18:29:51 - Repository configured successfully.
+2025-09-02 18:29:51 - To install Node.js, run: apt-get install nodejs -y
+2025-09-02 18:29:51 - You can use N|solid Runtime as a node.js alternative
+2025-09-02 18:29:51 - To install N|solid Runtime, run: apt-get install nsolid -y
+
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+nodejs is already the newest version (20.19.4-1nodesource1).
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+[18:29:52] ✅ Node.js v20.19.4 instalado
+[18:29:52] 👤 Criando usuário e estrutura de diretórios...
+[18:29:52] ✅ Estrutura de diretórios criada
+[18:29:52] 🛡️ Instalando ferramentas de segurança...
+[18:29:52] 📡 Configurando Nmap...
+[18:29:52] ✅ Masscan configurado
+[18:29:52]    Versão:
+[18:29:52] 🔍 Instalando Nuclei...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+[18:29:52] WARNING: ⚠️ Nuclei via apt falhou, instalando via GitHub...
+replace LICENSE.md? [y]es, [n]o, [A]ll, [N]one, [r]ename: error:  invalid response [{ENTER}]
+replace LICENSE.md? [y]es, [n]o, [A]ll, [N]one, [r]ename: error:  invalid response [# Verific]
+replace LICENSE.md? [y]es, [n]o, [A]ll, [N]one, [r]ename: error:  invalid response [ar se Nuc]
+replace LICENSE.md? [y]es, [n]o, [A]ll, [N]one, [r]ename: error:  invalid response [lei está]
+replace LICENSE.md? [y]es, [n]o, [A]ll, [N]one, [r]ename: error:  invalid response [ disponí]
+replace LICENSE.md? [y]es, [n]o, [A]ll, [N]one, [r]ename: error:  invalid response [vel]
+replace LICENSE.md? [y]es, [n]o, [A]ll, [N]one, [r]ename: error:  invalid response [if comman]
+replace LICENSE.md? [y]es, [n]o, [A]ll, [N]one, [r]ename: error:  invalid response [d -v nucl]
+replace LICENSE.md? [y]es, [n]o, [A]ll, [N]one, [r]ename: error:  invalid response [ei >/dev/]
+replace LICENSE.md? [y]es, [n]o, [A]ll, [N]one, [r]ename: replace README.md? [y]es, [n]o, [A]ll, [N]one, [r]ename: error:  invalid response [; then]
+replace README.md? [y]es, [n]o, [A]ll, [N]one, [r]ename: error:  invalid response [    nucle]
+replace README.md? [y]es, [n]o, [A]ll, [N]one, [r]ename: error:  invalid response [i_version]
+replace README.md? [y]es, [n]o, [A]ll, [N]one, [r]ename: error:  invalid response [=$(nuclei]
+replace README.md? [y]es, [n]o, [A]ll, [N]one, [r]ename: error:  invalid response [ -version]
+replace README.md? [y]es, [n]o, [A]ll, [N]one, [r]ename: error:  invalid response [ 2>&1 | h]
+replace README.md? [y]es, [n]o, [A]ll, [N]one, [r]ename: error:  invalid response [ead -1 | ]
+replace README.md? [y]es, [n]o, [A]ll, [N]one, [r]ename: error:  invalid response [cut -d' ']
+replace README.md? [y]es, [n]o, [A]ll, [N]one, [r]ename: error:  invalid response [ -f2 || e]
+replace README.md? [y]es, [n]o, [A]ll, [N]one, [r]ename: error:  invalid response [cho "unkn]
+replace README.md? [y]es, [n]o, [A]ll, [N]one, [r]ename: error:  invalid response [own")]
+replace README.md? [y]es, [n]o, [A]ll, [N]one, [r]ename: error:  invalid response [    log "]
+replace README.md? [y]es, [n]o, [A]ll, [N]one, [r]ename: error:  invalid response [✅ Nucle]
+replace README.md? [y]es, [n]o, [A]ll, [N]one, [r]ename: error:  invalid response [i configu]
+replace README.md? [y]es, [n]o, [A]ll, [N]one, [r]ename: new name: replace README_CN.md? [y]es, [n]o, [A]ll, [N]one, [r]ename: error:  invalid response [    ]
+replace README_CN.md? [y]es, [n]o, [A]ll, [N]one, [r]ename: error:  invalid response [    # Cri]
+replace README_CN.md? [y]es, [n]o, [A]ll, [N]one, [r]ename: error:  invalid response [ar diret▒]
+replace README_CN.md? [y]es, [n]o, [A]ll, [N]one, [r]ename: error:  invalid response [▒rio para]
+replace README_CN.md? [y]es, [n]o, [A]ll, [N]one, [r]ename: error:  invalid response [ template]
+replace README_CN.md? [y]es, [n]o, [A]ll, [N]one, [r]ename: error:  invalid response [s]
+replace README_CN.md? [y]es, [n]o, [A]ll, [N]one, [r]ename: error:  invalid response [    mkdir]
+replace README_CN.md? [y]es, [n]o, [A]ll, [N]one, [r]ename: error:  invalid response [ -p "$TOO]
+replace README_CN.md? [y]es, [n]o, [A]ll, [N]one, [r]ename: error:  invalid response [LS_DIR/nu]
+replace README_CN.md? [y]es, [n]o, [A]ll, [N]one, [r]ename: error:  invalid response [clei"]
+replace README_CN.md? [y]es, [n]o, [A]ll, [N]one, [r]ename: error:  invalid response [    chown]
+replace README_CN.md? [y]es, [n]o, [A]ll, [N]one, [r]ename: error:  invalid response [ -R "$COL]
+replace README_CN.md? [y]es, [n]o, [A]ll, [N]one, [r]ename: error:  invalid response [LECTOR_US]
+replace README_CN.md? [y]es, [n]o, [A]ll, [N]one, [r]ename: error:  invalid response [ER:$COLLE]
+replace README_CN.md? [y]es, [n]o, [A]ll, [N]one, [r]ename: error:  invalid response [CTOR_USER]
+replace README_CN.md? [y]es, [n]o, [A]ll, [N]one, [r]ename: error:  invalid response [" "$TOOLS]
+replace README_CN.md? [y]es, [n]o, [A]ll, [N]one, [r]ename: error:  invalid response [_DIR/nucl]
+replace README_CN.md? [y]es, [n]o, [A]ll, [N]one, [r]ename: error:  invalid response [ei"]
+replace README_CN.md? [y]es, [n]o, [A]ll, [N]one, [r]ename: error:  invalid response [    ]
+replace README_CN.md? [y]es, [n]o, [A]ll, [N]one, [r]ename: error:  invalid response [    # Bai]
+replace README_CN.md? [y]es, [n]o, [A]ll, [N]one, [r]ename: error:  invalid response [xar templ]
+replace README_CN.md? [y]es, [n]o, [A]ll, [N]one, [r]ename: error:  invalid response [ates em b]
+replace README_CN.md? [y]es, [n]o, [A]ll, [N]one, [r]ename: error:  invalid response [ackground]
+replace README_CN.md? [y]es, [n]o, [A]ll, [N]one, [r]ename: error:  invalid response [ (não bl]
+replace README_CN.md? [y]es, [n]o, [A]ll, [N]one, [r]ename: error:  invalid response [oquear in]
+replace README_CN.md? [y]es, [n]o, [A]ll, [N]one, [r]ename: error:  invalid response [stalaçã]
+replace README_CN.md? [y]es, [n]o, [A]ll, [N]one, [r]ename: error:  invalid response [o)]
+replace README_CN.md? [y]es, [n]o, [A]ll, [N]one, [r]ename: error:  invalid response [    log "]
+replace README_CN.md? [y]es, [n]o, [A]ll, [N]one, [r]ename: error:  invalid response [📋 Atua]
+replace README_CN.md? [y]es, [n]o, [A]ll, [N]one, [r]ename: error:  invalid response [lizando t]
+replace README_CN.md? [y]es, [n]o, [A]ll, [N]one, [r]ename: error:  invalid response [emplates ]
+replace README_CN.md? [y]es, [n]o, [A]ll, [N]one, [r]ename: [18:29:54] ✅ Nuclei instalado via GitHub
+bash: line 359: memory_percent:: command not found
+root@vlxsam04:/opt/samureye-collector#

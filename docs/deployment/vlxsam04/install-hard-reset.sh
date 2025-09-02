@@ -341,7 +341,7 @@ else
     if [ -n "$NUCLEI_LATEST_URL" ]; then
         wget -q "$NUCLEI_LATEST_URL" -O nuclei_linux_amd64.zip
         if [ -f "nuclei_linux_amd64.zip" ]; then
-            unzip -q nuclei_linux_amd64.zip
+            unzip -o -q nuclei_linux_amd64.zip  # -o para sobrescrever sem perguntar
             if [ -f "nuclei" ]; then
                 mv nuclei /usr/local/bin/
                 chmod +x /usr/local/bin/nuclei
@@ -393,7 +393,7 @@ else
     if [ -n "$GOBUSTER_LATEST_URL" ]; then
         wget -q "$GOBUSTER_LATEST_URL" -O gobuster_Linux_x86_64.tar.gz
         if [ -f "gobuster_Linux_x86_64.tar.gz" ]; then
-            tar -xzf gobuster_Linux_x86_64.tar.gz
+            tar -xzf gobuster_Linux_x86_64.tar.gz --overwrite  # Sobrescrever sem perguntar
             if [ -f "gobuster" ]; then
                 mv gobuster /usr/local/bin/
                 chmod +x /usr/local/bin/gobuster
@@ -416,8 +416,10 @@ else
     warn "❌ Gobuster não está disponível após instalação"
 fi
 
-# Cleanup
-rm -f /tmp/*.zip /tmp/*.tar.gz
+# Cleanup arquivos temporários
+cd /tmp
+rm -f nuclei*.zip gobuster*.tar.gz nuclei gobuster LICENSE* README* 2>/dev/null || true
+log "🧹 Arquivos temporários removidos"
 
 # ============================================================================
 # 9. INSTALAÇÃO DO AGENTE COLETOR
