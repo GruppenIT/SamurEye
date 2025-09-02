@@ -469,8 +469,41 @@ rm /tmp/admin_me_patch.js
 
 log "✅ Endpoint /api/admin/me corrigido"
 
-# Refazer build após correção
-log "🔨 Refazendo build após correção..."
+# ============================================================================
+# 11.6. CORREÇÃO DO REDIRECIONAMENTO PÓS-LOGIN
+# ============================================================================
+
+log "🔧 Corrigindo redirecionamento admin pós-login..."
+
+# Corrigir redirecionamento no AdminLogin.tsx
+cat > /tmp/redirect_fix.js << 'EOF'
+const fs = require('fs');
+const filePath = process.argv[2];
+
+let content = fs.readFileSync(filePath, 'utf8');
+
+// Substituir setLocation por window.location.href para forçar refresh
+const oldRedirect = 'setLocation("/admin/dashboard");';
+const newRedirect = `// Force refresh of admin auth status after successful login
+        window.location.href = "/admin/dashboard";`;
+
+if (content.includes(oldRedirect)) {
+    content = content.replace(oldRedirect, newRedirect);
+    fs.writeFileSync(filePath, content, 'utf8');
+    console.log('✅ Redirecionamento corrigido');
+} else {
+    console.log('⚠️ Redirecionamento já corrigido');
+}
+EOF
+
+# Executar correção
+node /tmp/redirect_fix.js "$WORKING_DIR/client/src/pages/AdminLogin.tsx"
+rm /tmp/redirect_fix.js
+
+log "✅ Redirecionamento admin corrigido"
+
+# Refazer build após todas as correções
+log "🔨 Refazendo build após correções..."
 cd "$WORKING_DIR"
 
 # Build com fallback

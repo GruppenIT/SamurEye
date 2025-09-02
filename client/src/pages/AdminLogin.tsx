@@ -77,7 +77,9 @@ export default function AdminLogin() {
           title: "Login realizado com sucesso",
           description: "Redirecionando para o painel administrativo...",
         });
-        setLocation("/admin/dashboard");
+        
+        // Force refresh of admin auth status after successful login
+        window.location.href = "/admin/dashboard";
       } else {
         throw new Error(result.message || "Erro no login");
       }

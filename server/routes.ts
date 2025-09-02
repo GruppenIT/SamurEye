@@ -970,15 +970,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Journey Results Dashboard data
-  app.get('/api/dashboard/journey-results', isLocalUserAuthenticated, async (req: any, res) => {
+  app.get('/api/dashboard/journey-results', async (req: any, res) => {
     try {
-      if (!req.user) {
-        return res.status(401).json({ message: "User not authenticated" });
-      }
-
-      const tenantId = req.user.currentTenantId;
+      // For on-premise, use first available tenant
+      const tenants = await storage.getAllTenants();
+      let tenantId = tenants.length > 0 ? tenants[0].id : null;
+      
       if (!tenantId) {
-        return res.status(400).json({ message: "No active tenant selected" });
+        return res.status(400).json({ message: "No tenants available" });
       }
 
       const tenant = await storage.getTenant(tenantId);
@@ -990,8 +989,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const journeys = await storage.getJourneysByTenant(tenantId);
       const threatIntel = await storage.getThreatIntelligenceByTenant(tenantId);
       
-      // Tenant-specific journey results
-      const journeyData = tenant.name === 'PoC' ? [
+      // Tenant-specific journey results  
+      const journeyData = tenant?.name === 'PoC' ? [
         {
           id: 'attack-surface',
           title: 'Superfície de Ataque',
@@ -1110,10 +1109,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Activity routes
-  app.get('/api/activities', isLocalUserAuthenticated, requireLocalUserTenant, async (req: any, res) => {
+  app.get('/api/activities', async (req: any, res) => {
     try {
+      // For on-premise, use first available tenant
+      const tenants = await storage.getAllTenants();
+      const tenantId = tenants.length > 0 ? tenants[0].id : null;
+      
+      if (!tenantId) {
+        return res.status(400).json({ message: "No tenants available" });
+      }
+
       const limit = parseInt(req.query.limit as string) || 20;
-      const activities = await storage.getActivitiesByTenant(req.tenant.id, limit);
+      const activities = await storage.getActivitiesByTenant(tenantId, limit);
       res.json(activities);
     } catch (error) {
       console.error("Error fetching activities:", error);
@@ -1122,19 +1129,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Dashboard metrics route
-  app.get('/api/dashboard/metrics', isLocalUserAuthenticated, requireLocalUserTenant, async (req: any, res) => {
+  app.get('/api/dashboard/metrics', async (req: any, res) => {
     try {
-      const collectors = await storage.getCollectorsByTenant(req.tenant.id);
-      const journeys = await storage.getJourneysByTenant(req.tenant.id);
-      const threatIntel = await storage.getThreatIntelligenceByTenant(req.tenant.id);
+      // For on-premise, use first available tenant
+      const tenants = await storage.getAllTenants();
+      const tenantId = tenants.length > 0 ? tenants[0].id : null;
+      
+      if (!tenantId) {
+        return res.status(400).json({ message: "No tenants available" });
+      }
+
+      const collectors = await storage.getCollectorsByTenant(tenantId);
+      const journeys = await storage.getJourneysByTenant(tenantId);
+      const threatIntel = await storage.getThreatIntelligenceByTenant(tenantId);
 
       const onlineCollectors = collectors.filter(c => c.status === 'online').length;
       const totalCollectors = collectors.length;
       const activeJourneys = journeys.filter(j => j.status === 'running').length;
       const criticalThreats = threatIntel.filter(t => t.severity === 'critical').length;
 
+      // Get tenant for metrics
+      const tenant = await storage.getTenant(tenantId);
+      
       // Tenant-specific metrics based on actual data
-      const baseMetrics = req.tenant.name === 'PoC' ? {
+      const baseMetrics = tenant?.name === 'PoC' ? {
         assets: { total: 425 },
         edr: { detectionRate: 87.5, blockRate: 78.3, avgLatency: 2.1 }
       } : {
@@ -1168,10 +1186,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Attack Surface Heatmap data
-  app.get('/api/dashboard/attack-surface', isLocalUserAuthenticated, requireLocalUserTenant, async (req: any, res) => {
+  app.get('/api/dashboard/attack-surface', async (req: any, res) => {
     try {
+      // For on-premise, use first available tenant
+      const tenants = await storage.getAllTenants();
+      const tenant = tenants.length > 0 ? tenants[0] : null;
+      
+      if (!tenant) {
+        return res.status(400).json({ message: "No tenants available" });
+      }
+
       // Tenant-specific attack surface data
-      const heatmapData = req.tenant.name === 'PoC' ? [
+      const heatmapData = tenant.name === 'PoC' ? [
         { severity: 'medium', service: 'SSH', port: '22/TCP', count: 3, tooltip: 'SSH - 22/TCP: 3 vulnerabilidades médias' },
         { severity: 'low', service: 'HTTP', port: '80/TCP', count: 2, tooltip: 'HTTP - 80/TCP: 2 vulnerabilidades baixas' },
         { severity: 'high', service: 'RDP', port: '3389/TCP', count: 1, tooltip: 'RDP - 3389/TCP: 1 vulnerabilidade alta' },
@@ -1195,10 +1221,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // EDR Timeline data
-  app.get('/api/dashboard/edr-events', isLocalUserAuthenticated, requireLocalUserTenant, async (req: any, res) => {
+  app.get('/api/dashboard/edr-events', async (req: any, res) => {
     try {
+      // For on-premise, use first available tenant
+      const tenants = await storage.getAllTenants();
+      const tenant = tenants.length > 0 ? tenants[0] : null;
+      
+      if (!tenant) {
+        return res.status(400).json({ message: "No tenants available" });
+      }
+
       // Tenant-specific EDR events
-      const edrEvents = req.tenant.name === 'PoC' ? [
+      const edrEvents = tenant.name === 'PoC' ? [
         {
           id: '1',
           type: 'detected',

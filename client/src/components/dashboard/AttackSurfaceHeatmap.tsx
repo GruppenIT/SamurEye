@@ -99,7 +99,7 @@ export function AttackSurfaceHeatmap() {
 
         {/* Service Details */}
         <div className="mt-4 grid grid-cols-2 gap-2 text-xs">
-          {heatmapData.filter(cell => cell.severity !== 'none').map((cell, index) => (
+          {(heatmapData || []).filter(cell => cell.severity !== 'none').map((cell, index) => (
             <div key={index} className="flex items-center space-x-2 p-2 bg-card rounded">
               <div className={`w-3 h-3 rounded ${getSeverityColor(cell.severity).split(' ')[0]}`}></div>
               <span className="font-medium">{cell.service}</span>
