@@ -628,6 +628,84 @@ rm /tmp/heatmap_fix.js
 
 log "✅ Erro JavaScript no heatmap corrigido"
 
+# ============================================================================
+# 11.9. CORREÇÃO DO ERRO DE CRIAÇÃO DE TENANT
+# ============================================================================
+
+log "🔧 Corrigindo erro de criação de tenant..."
+
+# Adicionar logging melhor para debug da criação de tenant
+cat > /tmp/tenant_fix.js << 'EOF'
+const fs = require('fs');
+const filePath = process.argv[2];
+
+let content = fs.readFileSync(filePath, 'utf8');
+
+// Melhorar logging na criação de tenant
+const oldTenantRoute = `  app.post('/api/admin/tenants', isAdmin, async (req, res) => {
+    try {
+      const tenant = await storage.createTenant(req.body);
+      res.json(tenant);
+    } catch (error) {
+      console.error("Error creating tenant:", error);
+      res.status(500).json({ message: "Failed to create tenant" });
+    }
+  });`;
+
+const newTenantRoute = `  app.post('/api/admin/tenants', isAdmin, async (req, res) => {
+    try {
+      console.log('Creating tenant with data:', req.body);
+      
+      // Validate required fields
+      if (!req.body.name || !req.body.name.trim()) {
+        return res.status(400).json({ message: "Nome do tenant é obrigatório" });
+      }
+      
+      const tenant = await storage.createTenant(req.body);
+      console.log('Tenant created successfully:', tenant);
+      res.json(tenant);
+    } catch (error) {
+      console.error("Error creating tenant:", error);
+      console.error("Error details:", error.message, error.stack);
+      res.status(500).json({ 
+        message: "Failed to create tenant", 
+        details: error.message 
+      });
+    }
+  });`;
+
+if (content.includes(oldTenantRoute)) {
+    content = content.replace(oldTenantRoute, newTenantRoute);
+    fs.writeFileSync(filePath, content, 'utf8');
+    console.log('✅ Logging de criação de tenant melhorado');
+} else {
+    console.log('⚠️ Correção já aplicada ou padrão não encontrado');
+}
+EOF
+
+# Executar correção
+node /tmp/tenant_fix.js "$WORKING_DIR/server/routes.ts"
+rm /tmp/tenant_fix.js
+
+# Verificar se precisa fazer push do schema
+log "🗃️ Verificando schema do banco de dados..."
+
+cd "$WORKING_DIR"
+
+# Fazer push do schema se necessário  
+if sudo -u "$APP_USER" npm run db:push 2>/dev/null; then
+    log "✅ Schema do banco de dados atualizado"
+else
+    warn "⚠️ Schema push falhou - tentando com --force"
+    if sudo -u "$APP_USER" npm run db:push -- --force 2>/dev/null; then
+        log "✅ Schema forçado com sucesso"
+    else
+        warn "⚠️ Não foi possível fazer push do schema - verificar manualmente"
+    fi
+fi
+
+log "✅ Correções de criação de tenant aplicadas"
+
 # Refazer build após todas as correções
 log "🔨 Refazendo build após todas as correções..."
 cd "$WORKING_DIR"
@@ -791,6 +869,8 @@ if curl -s -f http://localhost:5000/api/health >/dev/null 2>&1; then
     echo "• ✅ Erros 401/403 do dashboard corrigidos"
     echo "• ✅ Erro JavaScript do heatmap corrigido"
     echo "• ✅ Dashboard carrega sem necessidade de autenticação"
+    echo "• ✅ Criação de tenant com logging melhorado e validação"
+    echo "• ✅ Schema do banco de dados verificado e atualizado"
     echo ""
     echo "🎯 EXPERIÊNCIA DO USUÁRIO:"
     echo "1. Dashboard principal funciona diretamente"

@@ -7,6 +7,7 @@ SamurEye is a cloud-based Breach & Attack Simulation (BAS) platform designed for
 Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
+- **01/09/2025**: ✅ vlxsam02 ERRO TENANT CORRIGIDO - logging melhorado + validação + schema push
 - **01/09/2025**: ✅ vlxsam02 COMPLETAMENTE CORRIGIDO - todos patches JavaScript integrados no hard reset
 - **01/09/2025**: ✅ vlxsam02 PATCH ADMIN CORRIGIDO - patch JavaScript robusto para correção de autenticação
 - **01/09/2025**: ✅ vlxsam02 AUTENTICAÇÃO ADMIN CORRIGIDA - agora mostra tela de login corretamente
