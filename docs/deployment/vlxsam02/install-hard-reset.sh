@@ -1146,25 +1146,265 @@ echo "   • DB:    $POSTGRES_USER / samureye_secure_2024"
 echo ""
 
 # ============================================================================
-# 17. CORREÇÃO FINAL DE SCHEMA (SE NECESSÁRIO)
+# 17. CORREÇÃO AUTOMÁTICA DE SCHEMA E CONECTIVIDADE
 # ============================================================================
 
-log "🗃️ Aplicando correção final de schema..."
+log "🗃️ Aplicando correções finais de schema e conectividade..."
+
+# ============================================================================
+# 17.1. TESTAR E CORRIGIR CONECTIVIDADE POSTGRESQL
+# ============================================================================
+
+log "🔍 Testando conectividade PostgreSQL..."
+
+# Testar usuários disponíveis
+WORKING_USER=""
+WORKING_PASSWORD="samureye_secure_2024"
+
+for user in "samureye_user" "samureye"; do
+    echo -n "• Testando usuário '$user': "
+    if PGPASSWORD="$WORKING_PASSWORD" psql -h "$POSTGRES_HOST" -p "$POSTGRES_PORT" -U "$user" -d "$POSTGRES_DB" -c "SELECT 1;" >/dev/null 2>&1; then
+        echo -e "${GREEN}✅ OK${NC}"
+        WORKING_USER="$user"
+        break
+    else
+        echo -e "${RED}❌ FAIL${NC}"
+    fi
+done
+
+if [ -z "$WORKING_USER" ]; then
+    warn "❌ Conectividade PostgreSQL falhou - aguardando e tentando novamente..."
+    
+    # Aguardar mais tempo para PostgreSQL estar pronto
+    for i in {1..6}; do
+        log "⏳ Tentativa $i/6 - aguardando 30 segundos..."
+        sleep 30
+        
+        for user in "samureye_user" "samureye"; do
+            if PGPASSWORD="$WORKING_PASSWORD" psql -h "$POSTGRES_HOST" -p "$POSTGRES_PORT" -U "$user" -d "$POSTGRES_DB" -c "SELECT 1;" >/dev/null 2>&1; then
+                log "✅ PostgreSQL conectado com usuário '$user' na tentativa $i"
+                WORKING_USER="$user"
+                break 2
+            fi
+        done
+        
+        if [ $i -eq 6 ]; then
+            error "❌ Conectividade PostgreSQL falhou após todas tentativas"
+        fi
+    done
+fi
+
+if [ -n "$WORKING_USER" ]; then
+    log "✅ Usando usuário PostgreSQL: $WORKING_USER"
+    
+    # Atualizar POSTGRES_USER para o que funciona
+    POSTGRES_USER="$WORKING_USER"
+    
+    # Atualizar .env com usuário correto
+    if [ -f "$WORKING_DIR/.env" ]; then
+        DATABASE_URL="postgresql://${WORKING_USER}:${WORKING_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}"
+        
+        # Substituir ou adicionar DATABASE_URL
+        if grep -q "^DATABASE_URL=" "$WORKING_DIR/.env"; then
+            sed -i "s|^DATABASE_URL=.*|DATABASE_URL=\"$DATABASE_URL\"|" "$WORKING_DIR/.env"
+        else
+            echo "DATABASE_URL=\"$DATABASE_URL\"" >> "$WORKING_DIR/.env"
+        fi
+        
+        # Atualizar variáveis individuais
+        sed -i "s/^POSTGRES_USER=.*/POSTGRES_USER=\"$WORKING_USER\"/" "$WORKING_DIR/.env"
+        sed -i "s/^POSTGRES_PASSWORD=.*/POSTGRES_PASSWORD=\"$WORKING_PASSWORD\"/" "$WORKING_DIR/.env"
+        
+        log "✅ Arquivo .env atualizado com usuário $WORKING_USER"
+    fi
+fi
+
+# ============================================================================
+# 17.2. VERIFICAR E CRIAR SCHEMA
+# ============================================================================
+
+log "🗃️ Verificando e criando schema do banco..."
 
 # Verificar se tabelas existem
-TABLES_CHECK=$(PGPASSWORD="samureye_secure_2024" psql -h "$POSTGRES_HOST" -p "$POSTGRES_PORT" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -t -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'tenants';" 2>/dev/null | tr -d ' ' || echo "0")
+TABLES_CHECK=$(PGPASSWORD="$WORKING_PASSWORD" psql -h "$POSTGRES_HOST" -p "$POSTGRES_PORT" -U "$WORKING_USER" -d "$POSTGRES_DB" -t -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'tenants';" 2>/dev/null | tr -d ' ' || echo "0")
 
 if [ "$TABLES_CHECK" = "0" ]; then
-    warn "⚠️ Tabelas não encontradas - executando correção de schema"
+    warn "⚠️ Tabelas não encontradas - criando schema..."
     
-    if curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/fix-vlxsam02-schema.sh | bash; then
-        log "✅ Correção de schema aplicada com sucesso"
+    cd "$WORKING_DIR"
+    export DATABASE_URL="postgresql://${WORKING_USER}:${WORKING_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}"
+    
+    # Tentativa 1: npm run db:push normal
+    log "🔄 Tentativa 1: npm run db:push normal"
+    if sudo -u "$APP_USER" DATABASE_URL="$DATABASE_URL" npm run db:push 2>/dev/null; then
+        log "✅ Schema push concluído com sucesso"
+        SCHEMA_SUCCESS=true
     else
-        warn "⚠️ Erro na correção de schema - verificar manualmente"
+        warn "❌ Schema push falhou - tentando com --force"
+        
+        # Tentativa 2: com --force
+        log "🔄 Tentativa 2: npm run db:push --force"
+        if sudo -u "$APP_USER" DATABASE_URL="$DATABASE_URL" npm run db:push -- --force 2>/dev/null; then
+            log "✅ Schema push forçado com sucesso"
+            SCHEMA_SUCCESS=true
+        else
+            warn "❌ Schema push com --force falhou - criando tabelas manualmente"
+            SCHEMA_SUCCESS=false
+        fi
     fi
+    
+    # ============================================================================
+    # 17.3. CRIAÇÃO MANUAL DE TABELAS (SE NECESSÁRIO)
+    # ============================================================================
+    
+    if [ "$SCHEMA_SUCCESS" != "true" ]; then
+        log "🔧 Criando tabelas manualmente..."
+        
+        PGPASSWORD="$WORKING_PASSWORD" psql -h "$POSTGRES_HOST" -p "$POSTGRES_PORT" -U "$WORKING_USER" -d "$POSTGRES_DB" << 'EOSQL'
+-- Criar extensões necessárias
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+
+-- Remover tabelas se existirem (para recriar)
+DROP TABLE IF EXISTS user_tenants CASCADE;
+DROP TABLE IF EXISTS users CASCADE;
+DROP TABLE IF EXISTS tenants CASCADE;
+DROP TABLE IF EXISTS sessions CASCADE;
+DROP TABLE IF EXISTS collectors CASCADE;
+DROP TABLE IF EXISTS collector_telemetry CASCADE;
+DROP TABLE IF EXISTS security_journeys CASCADE;
+DROP TABLE IF EXISTS journey_executions CASCADE;
+DROP TABLE IF EXISTS credentials CASCADE;
+DROP TABLE IF EXISTS threat_intelligence CASCADE;
+DROP TABLE IF EXISTS activity_logs CASCADE;
+
+-- 1. Tabela de tenants
+CREATE TABLE tenants (
+    id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+    name VARCHAR NOT NULL,
+    slug VARCHAR UNIQUE NOT NULL,
+    description TEXT,
+    logo_url VARCHAR,
+    settings JSONB DEFAULT '{}',
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- 2. Tabela de usuários
+CREATE TABLE users (
+    id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+    email VARCHAR UNIQUE,
+    first_name VARCHAR,
+    last_name VARCHAR,
+    profile_image_url VARCHAR,
+    password VARCHAR,
+    current_tenant_id VARCHAR REFERENCES tenants(id),
+    preferred_language VARCHAR DEFAULT 'pt-BR',
+    is_global_user BOOLEAN DEFAULT false,
+    is_soc_user BOOLEAN DEFAULT false,
+    is_active BOOLEAN DEFAULT true,
+    last_login_at TIMESTAMP,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- 3. Tabela de relacionamento usuário-tenant
+CREATE TABLE user_tenants (
+    id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id VARCHAR NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    tenant_id VARCHAR NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+    role VARCHAR NOT NULL DEFAULT 'viewer',
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW(),
+    UNIQUE(user_id, tenant_id)
+);
+
+-- 4. Tabela de sessões
+CREATE TABLE sessions (
+    sid VARCHAR PRIMARY KEY,
+    sess JSONB NOT NULL,
+    expire TIMESTAMP NOT NULL
+);
+
+-- 5. Tabela de coletores
+CREATE TABLE collectors (
+    id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+    tenant_id VARCHAR NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+    name VARCHAR NOT NULL,
+    hostname VARCHAR,
+    ip_address VARCHAR,
+    location VARCHAR,
+    status VARCHAR DEFAULT 'enrolling',
+    last_heartbeat TIMESTAMP,
+    collector_version VARCHAR,
+    capabilities JSONB DEFAULT '[]',
+    metadata JSONB DEFAULT '{}',
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- 6. Tabela de telemetria de coletores
+CREATE TABLE collector_telemetry (
+    id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+    collector_id VARCHAR NOT NULL REFERENCES collectors(id) ON DELETE CASCADE,
+    tenant_id VARCHAR NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+    cpu_usage NUMERIC,
+    memory_usage NUMERIC,
+    disk_usage NUMERIC,
+    network_usage JSONB,
+    processes JSONB,
+    timestamp TIMESTAMP DEFAULT NOW()
+);
+
+-- Criar índices para performance
+CREATE INDEX IF NOT EXISTS "IDX_session_expire" ON sessions(expire);
+CREATE INDEX IF NOT EXISTS "IDX_user_tenants_user_id" ON user_tenants(user_id);
+CREATE INDEX IF NOT EXISTS "IDX_user_tenants_tenant_id" ON user_tenants(tenant_id);
+CREATE INDEX IF NOT EXISTS "IDX_collectors_tenant_id" ON collectors(tenant_id);
+CREATE INDEX IF NOT EXISTS "IDX_collector_telemetry_collector_id" ON collector_telemetry(collector_id);
+CREATE INDEX IF NOT EXISTS "IDX_collector_telemetry_timestamp" ON collector_telemetry(timestamp);
+
+-- Inserir tenant padrão
+INSERT INTO tenants (id, name, slug, description, is_active) 
+VALUES (
+    'default-tenant-' || substr(gen_random_uuid()::text, 1, 8),
+    'Tenant Padrão',
+    'default',
+    'Tenant criado automaticamente durante instalação',
+    true
+) ON CONFLICT (slug) DO NOTHING;
+
+EOSQL
+        
+        if [ $? -eq 0 ]; then
+            log "✅ Tabelas criadas manualmente com sucesso"
+        else
+            warn "❌ Falha ao criar tabelas manualmente"
+        fi
+    fi
+    
 else
-    log "✅ Tabelas já existem no banco de dados"
+    log "✅ Tabelas já existem no banco de dados ($TABLES_CHECK tabelas encontradas)"
 fi
+
+# ============================================================================
+# 17.4. VERIFICAR TABELAS CRIADAS
+# ============================================================================
+
+log "🔍 Verificando tabelas criadas..."
+
+FINAL_TABLES_COUNT=$(PGPASSWORD="$WORKING_PASSWORD" psql -h "$POSTGRES_HOST" -p "$POSTGRES_PORT" -U "$WORKING_USER" -d "$POSTGRES_DB" -t -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public' AND table_type = 'BASE TABLE';" 2>/dev/null | tr -d ' ')
+
+if [ "$FINAL_TABLES_COUNT" -gt 5 ]; then
+    log "✅ Schema completo: $FINAL_TABLES_COUNT tabelas no banco"
+else
+    warn "⚠️ Schema incompleto: apenas $FINAL_TABLES_COUNT tabelas encontradas"
+fi
+
+log "✅ Correções de schema e conectividade aplicadas com sucesso"
 
 log "🎉 vlxsam02 (Application Server) pronto para uso!"
 

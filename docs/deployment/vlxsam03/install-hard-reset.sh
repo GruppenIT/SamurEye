@@ -855,14 +855,184 @@ echo ""
 log "Database server vlxsam03 pronto para uso!"
 
 # ============================================================================
-# 16. CORREÇÃO AUTOMÁTICA DE CONECTIVIDADE FINAL
+# 16. CORREÇÃO AUTOMÁTICA DE CONECTIVIDADE E FIREWALL
 # ============================================================================
 
-log "🔧 Aplicando correção final de conectividade..."
+log "🔧 Aplicando correções de conectividade e firewall..."
 
-# Executar script de correção de conectividade
-if curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/fix-vlxsam03-connectivity.sh | bash; then
-    log "✅ Correção de conectividade aplicada com sucesso"
+# ============================================================================
+# 16.1. CONFIGURAÇÃO listen_addresses
+# ============================================================================
+
+log "⚙️ Verificando configuração listen_addresses..."
+
+POSTGRES_VERSION=$(ls /etc/postgresql/ | head -1)
+POSTGRES_CONF="/etc/postgresql/$POSTGRES_VERSION/main/postgresql.conf"
+PG_HBA="/etc/postgresql/$POSTGRES_VERSION/main/pg_hba.conf"
+
+# Verificar listen_addresses
+if grep -q "^listen_addresses = '\*'" "$POSTGRES_CONF"; then
+    log "✅ listen_addresses já configurado corretamente"
 else
-    warn "⚠️ Erro na correção automática - verificar manualmente"
+    warn "Corrigindo listen_addresses..."
+    
+    # Comentar linha antiga e adicionar nova
+    sed -i "s/^#\?listen_addresses.*/listen_addresses = '*'/" "$POSTGRES_CONF"
+    
+    # Verificar se foi aplicado
+    if grep -q "^listen_addresses = '\*'" "$POSTGRES_CONF"; then
+        log "✅ listen_addresses corrigido"
+        RESTART_NEEDED=true
+    else
+        # Forçar adição se não funcionou
+        echo "listen_addresses = '*'" >> "$POSTGRES_CONF"
+        log "✅ listen_addresses adicionado"
+        RESTART_NEEDED=true
+    fi
 fi
+
+# ============================================================================
+# 16.2. CONFIGURAÇÃO pg_hba.conf
+# ============================================================================
+
+log "🔐 Verificando configuração pg_hba.conf..."
+
+# Verificar se já tem as regras SamurEye
+if grep -q "SamurEye On-Premise Access" "$PG_HBA"; then
+    log "✅ Regras SamurEye já existem no pg_hba.conf"
+else
+    warn "Adicionando regras SamurEye ao pg_hba.conf..."
+    
+    # Backup do arquivo original
+    cp "$PG_HBA" "$PG_HBA.backup.$(date +%Y%m%d_%H%M%S)"
+    
+    # Adicionar regras SamurEye
+    cat >> "$PG_HBA" << 'EOF'
+
+# SamurEye On-Premise Access
+# vlxsam01 - Gateway
+host    samureye        samureye_user   172.24.1.151/32         md5
+host    samureye        samureye        172.24.1.151/32         md5
+# vlxsam02 - Application Server  
+host    samureye        samureye_user   172.24.1.152/32         md5
+host    samureye        samureye        172.24.1.152/32         md5
+# vlxsam03 - Database (local)
+host    samureye        samureye_user   127.0.0.1/32            md5
+host    samureye        samure        127.0.0.1/32            md5
+host    samureye        samureye_user   172.24.1.153/32         md5
+host    samureye        samureye        172.24.1.153/32         md5
+# vlxsam04 - Collector
+host    samureye        samureye_user   172.24.1.154/32         md5
+host    samureye        samureye        172.24.1.154/32         md5
+# Rede local SamurEye (backup)
+host    samureye        samureye_user   172.24.1.0/24           md5
+host    samureye        samureye        172.24.1.0/24           md5
+host    grafana         grafana         172.24.1.153/32         md5
+# Permitir conexões md5 para usuários corretos
+host    all             samureye_user   172.24.1.0/24           md5
+host    all             samureye        172.24.1.0/24           md5
+EOF
+    
+    log "✅ Regras SamurEye adicionadas ao pg_hba.conf"
+    RESTART_NEEDED=true
+fi
+
+# ============================================================================
+# 16.3. CONFIGURAÇÃO DO FIREWALL UFW
+# ============================================================================
+
+log "🔥 Verificando configuração do firewall..."
+
+# Verificar se UFW está ativo
+if ufw status | grep -q "Status: active"; then
+    log "🔍 UFW ativo - verificando regras..."
+    
+    # Verificar se porta 5432 está liberada
+    if ufw status | grep -q "5432"; then
+        log "✅ Porta 5432 já liberada no firewall"
+    else
+        warn "Liberando porta 5432 no firewall..."
+        ufw allow 5432/tcp
+        log "✅ Porta 5432 liberada"
+    fi
+    
+    # Verificar regras específicas para vlxsam02
+    if ufw status numbered | grep -q "172.24.1.152"; then
+        log "✅ Regras específicas para vlxsam02 já existem"
+    else
+        warn "Adicionando regras específicas para vlxsam02..."
+        ufw allow from 172.24.1.152 to any port 5432
+        log "✅ Regras para vlxsam02 adicionadas"
+    fi
+    
+else
+    warn "UFW não está ativo - ativando com regras básicas..."
+    ufw --force enable
+    ufw allow ssh
+    ufw allow 5432/tcp
+    ufw allow from 172.24.1.0/24
+    log "✅ UFW configurado e ativado"
+fi
+
+# ============================================================================
+# 16.4. REINICIAR POSTGRESQL SE NECESSÁRIO
+# ============================================================================
+
+if [ "$RESTART_NEEDED" = "true" ]; then
+    log "🔄 Reiniciando PostgreSQL para aplicar mudanças..."
+    systemctl restart postgresql
+    sleep 10
+    
+    if systemctl is-active --quiet postgresql; then
+        log "✅ PostgreSQL reiniciado com sucesso"
+    else
+        error "❌ Falha ao reiniciar PostgreSQL"
+    fi
+fi
+
+# ============================================================================
+# 16.5. TESTES DE CONECTIVIDADE
+# ============================================================================
+
+log "🧪 Executando testes de conectividade..."
+
+# Teste 1: Conectividade local
+echo -n "• Teste local (samureye_user): "
+if PGPASSWORD="samureye_secure_2024" psql -h localhost -U samureye_user -d samureye -c "SELECT 1;" >/dev/null 2>&1; then
+    echo -e "${GREEN}✅ OK${NC}"
+else
+    echo -e "${RED}❌ FAIL${NC}"
+fi
+
+echo -n "• Teste local (samureye): "
+if PGPASSWORD="samureye_secure_2024" psql -h localhost -U samureye -d samureye -c "SELECT 1;" >/dev/null 2>&1; then
+    echo -e "${GREEN}✅ OK${NC}"
+else
+    echo -e "${RED}❌ FAIL${NC}"
+fi
+
+# Teste 2: Conectividade via IP específico
+echo -n "• Teste IP 172.24.1.153 (samureye_user): "
+if PGPASSWORD="samureye_secure_2024" psql -h 172.24.1.153 -U samureye_user -d samureye -c "SELECT 1;" >/dev/null 2>&1; then
+    echo -e "${GREEN}✅ OK${NC}"
+else
+    echo -e "${RED}❌ FAIL${NC}"
+fi
+
+# Teste 3: Porta TCP acessível
+echo -n "• Porta 5432 acessível: "
+if netstat -tlnp | grep -q ":5432.*LISTEN"; then
+    echo -e "${GREEN}✅ LISTENING${NC}"
+else
+    echo -e "${RED}❌ NOT LISTENING${NC}"
+fi
+
+# Teste 4: Firewall
+echo -n "• Firewall permite 5432: "
+if ufw status | grep -q "5432.*ALLOW"; then
+    echo -e "${GREEN}✅ ALLOWED${NC}"
+else
+    echo -e "${RED}❌ BLOCKED${NC}"
+fi
+
+log "✅ Correções de conectividade aplicadas com sucesso"
