@@ -7,6 +7,7 @@ SamurEye is a cloud-based Breach & Attack Simulation (BAS) platform designed for
 Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
+- **02/09/2025**: ✅ vlxsam04 PYTHON DEPENDENCIES CORRIGIDO - usa apt em vez de pip para Ubuntu 24.04 externally-managed-environment  
 - **02/09/2025**: ✅ vlxsam04 NUCLEI CORRIGIDO - fallback apt + GitHub + templates em background para não travar
 - **02/09/2025**: ✅ vlxsam04 HEARTBEAT INTEGRADO - correção automática de conectividade e status ENROLLING→ONLINE
 - **02/09/2025**: ✅ vlxsam04 MASSCAN CORRIGIDO - fallback para compilação quando apt falha com 403 Forbidden

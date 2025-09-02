@@ -634,8 +634,15 @@ EOF
 chmod +x "$COLLECTOR_DIR/agent/collector.py"
 chown "$COLLECTOR_USER:$COLLECTOR_USER" "$COLLECTOR_DIR/agent/collector.py"
 
-# Instalar dependências Python
-pip3 install psutil requests
+# Instalar dependências Python via apt (Ubuntu 24.04)
+log "📦 Instalando dependências Python..."
+apt-get install -y python3-psutil python3-requests python3-venv
+
+if python3 -c "import psutil, requests" 2>/dev/null; then
+    log "✅ Dependências Python instaladas"
+else
+    warn "⚠️ Algumas dependências Python podem estar ausentes"
+fi
 
 # ============================================================================
 # 10. CONFIGURAÇÃO DO SERVIÇO SYSTEMD
