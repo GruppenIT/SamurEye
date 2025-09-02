@@ -1,0 +1,359 @@
+Package 'node-vscode-languageserver' is not installed, so not removed
+Package 'node-vscode-languageserver-protocol' is not installed, so not removed
+Package 'node-vscode-languageserver-types' is not installed, so not removed
+Package 'node-vscode-languageserver-textdocument' is not installed, so not removed
+Package 'node-vscode-languageserver-tools' is not installed, so not removed
+Package 'node-vscode-ws-jsonrpc' is not installed, so not removed
+Package 'node-vue' is not installed, so not removed
+Package 'node-vue-hot-reload-api' is not installed, so not removed
+Package 'node-vue-resource' is not installed, so not removed
+Package 'node-vue-style-loader' is not installed, so not removed
+Package 'node-watchpack' is not installed, so not removed
+Package 'node-webassemblyjs' is not installed, so not removed
+Package 'node-webfinger' is not installed, so not removed
+Package 'node-webfont' is not installed, so not removed
+Package 'node-webpack-env' is not installed, so not removed
+Package 'node-webpack-merge' is not installed, so not removed
+Package 'node-webpack-stats-plugin' is not installed, so not removed
+Package 'node-webrtc-adapter' is not installed, so not removed
+Package 'node-websocket' is not installed, so not removed
+Package 'node-websocket-stream' is not installed, so not removed
+Package 'node-when' is not installed, so not removed
+Package 'node-which-module' is not installed, so not removed
+Package 'node-wikibase-cli' is not installed, so not removed
+Package 'node-wikibase-edit' is not installed, so not removed
+Package 'node-wikibase-sdk' is not installed, so not removed
+Package 'node-wikidata-lang' is not installed, so not removed
+Package 'node-wildemitter' is not installed, so not removed
+Package 'node-winston-compat' is not installed, so not removed
+Package 'node-winston-transport' is not installed, so not removed
+Package 'node-with' is not installed, so not removed
+Package 'node-worker-loader' is not installed, so not removed
+Package 'node-write-file-promise' is not installed, so not removed
+Package 'node-ws-iconv' is not installed, so not removed
+Package 'node-xmlhttprequest' is not installed, so not removed
+Package 'node-xoauth2' is not installed, so not removed
+Package 'node-xregexp' is not installed, so not removed
+Package 'node-xterm' is not installed, so not removed
+Package 'node-xxhashjs' is not installed, so not removed
+Package 'node-y-codemirror' is not installed, so not removed
+Package 'node-yjs' is not installed, so not removed
+Package 'node-y-protocols' is not installed, so not removed
+Package 'node-y-websocket' is not installed, so not removed
+Package 'node-y18n' is not installed, so not removed
+Package 'node-yajsml' is not installed, so not removed
+Package 'node-yamlish' is not installed, so not removed
+Package 'node-yazl' is not installed, so not removed
+Package 'node-yn' is not installed, so not removed
+Package 'node-ytdl-core' is not installed, so not removed
+Package 'node-zkochan-cmd-shim' is not installed, so not removed
+Package 'node-zrender' is not installed, so not removed
+Some packages could not be installed. This may mean that you have
+requested an impossible situation or if you are using the unstable
+distribution that some required packages have not yet been created
+or been moved out of Incoming.
+The following information may help to resolve the situation:
+
+The following packages have unmet dependencies:
+ shim-signed : Depends: grub-efi-amd64-signed (>= 1.191~) but it is not going to be installed or
+                        grub-efi-arm64-signed (>= 1.191~) but it is not installable or
+                        base-files (< 12.3) but 13ubuntu10.3 is to be installed
+               Depends: grub-efi-amd64-signed (>= 1.187.2~) but it is not going to be installed or
+                        grub-efi-arm64-signed (>= 1.187.2~) but it is not installable
+               Depends: grub2-common (>= 2.04-1ubuntu24) but it is not going to be installed
+[18:00:48] 🗑️ Removendo ferramentas de segurança...
+[18:00:48] ✅ masscan removido
+[18:00:48] ✅ Remoção completa finalizada
+[18:00:48] 🔄 Atualizando sistema...
+Hit:1 https://deb.nodesource.com/node_20.x nodistro InRelease
+Hit:2 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:3 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:4 https://ppa.launchpadcontent.net/deadsnakes/ppa/ubuntu noble InRelease
+Hit:5 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:6 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists... Done
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+Calculating upgrade... Done
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+[18:00:51] 📦 Instalando dependências básicas...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+Note, selecting 'libncurses-dev' instead of 'libncurses5-dev'
+Note, selecting 'libncurses-dev' instead of 'libncursesw5-dev'
+curl is already the newest version (8.5.0-2ubuntu10.6).
+wget is already the newest version (1.21.4-1ubuntu4.1).
+git is already the newest version (1:2.43.0-1ubuntu7.3).
+unzip is already the newest version (6.0-28ubuntu4.1).
+build-essential is already the newest version (12.10ubuntu1).
+cmake is already the newest version (3.28.3-1build7).
+libssl-dev is already the newest version (3.0.13-0ubuntu3.5).
+libffi-dev is already the newest version (3.4.6-1build1).
+zlib1g-dev is already the newest version (1:1.3.dfsg-3.1ubuntu2.1).
+libbz2-dev is already the newest version (1.0.8-5.1build0.1).
+libreadline-dev is already the newest version (8.2-4build1).
+libsqlite3-dev is already the newest version (3.45.1-1ubuntu2.4).
+libncurses-dev is already the newest version (6.4+20240113-1ubuntu2).
+xz-utils is already the newest version (5.6.1+really5.4.5-1ubuntu0.2).
+tk-dev is already the newest version (8.6.14build1).
+libxml2-dev is already the newest version (2.9.14+dfsg-1.3ubuntu3.4).
+libxmlsec1-dev is already the newest version (1.2.39-5build2).
+liblzma-dev is already the newest version (5.6.1+really5.4.5-1ubuntu0.2).
+ca-certificates is already the newest version (20240203).
+gnupg is already the newest version (2.4.4-2ubuntu17.3).
+lsb-release is already the newest version (12.0-2).
+software-properties-common is already the newest version (0.99.49.3).
+apt-transport-https is already the newest version (2.8.3).
+netcat-openbsd is already the newest version (1.226-1ubuntu2).
+nmap is already the newest version (7.94+git20230807.3be01efb1+dfsg-3build2).
+jq is already the newest version (1.7.1-3ubuntu0.24.04.1).
+htop is already the newest version (3.3.0-4build1).
+nano is already the newest version (7.2-2ubuntu0.1).
+systemd is already the newest version (255.4-1ubuntu8.10).
+cron is already the newest version (3.0pl1-184ubuntu2).
+libpcap-dev is already the newest version (1.10.4-4.1ubuntu3).
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+[18:00:51] 🔧 Instalando masscan...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following NEW packages will be installed:
+  masscan
+0 upgraded, 1 newly installed, 0 to remove and 0 not upgraded.
+Need to get 237 kB of archives.
+After this operation, 566 kB of additional disk space will be used.
+Err:1 http://archive.ubuntu.com/ubuntu noble/universe amd64 masscan amd64 2:1.3.2+ds1-1
+  403  Forbidden [IP: 91.189.91.82 80]
+[18:00:53] WARNING: ⚠️ Masscan via apt falhou (403 Forbidden), compilando do source...
+Cloning into 'masscan'...
+remote: Enumerating objects: 6349, done.
+remote: Total 6349 (delta 0), reused 0 (delta 0), pack-reused 6349 (from 1)
+Receiving objects: 100% (6349/6349), 3.56 MiB | 5.95 MiB/s, done.
+Resolving deltas: 100% (4619/4619), done.
+cc -g -ggdb    -Wall -O2 -c src/crypto-base64.c -o tmp/crypto-base64.o
+cc -g -ggdb    -Wall -O2 -c src/crypto-blackrock.c -o tmp/crypto-blackrock.o
+cc -g -ggdb    -Wall -O2 -c src/crypto-blackrock2.c -o tmp/crypto-blackrock2.o
+cc -g -ggdb    -Wall -O2 -c src/crypto-lcg.c -o tmp/crypto-lcg.o
+cc -g -ggdb    -Wall -O2 -c src/crypto-primegen.c -o tmp/crypto-primegen.o
+cc -g -ggdb    -Wall -O2 -c src/crypto-siphash24.c -o tmp/crypto-siphash24.o
+cc -g -ggdb    -Wall -O2 -c src/event-timeout.c -o tmp/event-timeout.o
+cc -g -ggdb    -Wall -O2 -c src/in-binary.c -o tmp/in-binary.o
+cc -g -ggdb    -Wall -O2 -c src/in-filter.c -o tmp/in-filter.o
+cc -g -ggdb    -Wall -O2 -c src/in-report.c -o tmp/in-report.o
+cc -g -ggdb    -Wall -O2 -c src/main-conf.c -o tmp/main-conf.o -DGIT=\"1.3.2-213-gb99d433\"
+cc -g -ggdb    -Wall -O2 -c src/main-dedup.c -o tmp/main-dedup.o
+cc -g -ggdb    -Wall -O2 -c src/main-initadapter.c -o tmp/main-initadapter.o
+cc -g -ggdb    -Wall -O2 -c src/main-listscan.c -o tmp/main-listscan.o
+cc -g -ggdb    -Wall -O2 -c src/main-ptrace.c -o tmp/main-ptrace.o
+cc -g -ggdb    -Wall -O2 -c src/main-readrange.c -o tmp/main-readrange.o
+cc -g -ggdb    -Wall -O2 -c src/main-status.c -o tmp/main-status.o
+cc -g -ggdb    -Wall -O2 -c src/main-throttle.c -o tmp/main-throttle.o
+cc -g -ggdb    -Wall -O2 -c src/main.c -o tmp/main.o
+cc -g -ggdb    -Wall -O2 -c src/masscan-app.c -o tmp/masscan-app.o
+cc -g -ggdb    -Wall -O2 -c src/massip-addr.c -o tmp/massip-addr.o
+cc -g -ggdb    -Wall -O2 -c src/massip-parse.c -o tmp/massip-parse.o
+cc -g -ggdb    -Wall -O2 -c src/massip-rangesv4.c -o tmp/massip-rangesv4.o
+cc -g -ggdb    -Wall -O2 -c src/massip-rangesv6.c -o tmp/massip-rangesv6.o
+cc -g -ggdb    -Wall -O2 -c src/massip.c -o tmp/massip.o
+cc -g -ggdb    -Wall -O2 -c src/misc-rstfilter.c -o tmp/misc-rstfilter.o
+cc -g -ggdb    -Wall -O2 -c src/out-binary.c -o tmp/out-binary.o
+cc -g -ggdb    -Wall -O2 -c src/out-certs.c -o tmp/out-certs.o
+cc -g -ggdb    -Wall -O2 -c src/out-grepable.c -o tmp/out-grepable.o
+cc -g -ggdb    -Wall -O2 -c src/out-hostonly.c -o tmp/out-hostonly.o
+cc -g -ggdb    -Wall -O2 -c src/out-json.c -o tmp/out-json.o
+cc -g -ggdb    -Wall -O2 -c src/out-ndjson.c -o tmp/out-ndjson.o
+cc -g -ggdb    -Wall -O2 -c src/out-null.c -o tmp/out-null.o
+cc -g -ggdb    -Wall -O2 -c src/out-redis.c -o tmp/out-redis.o
+cc -g -ggdb    -Wall -O2 -c src/out-tcp-services.c -o tmp/out-tcp-services.o
+cc -g -ggdb    -Wall -O2 -c src/out-text.c -o tmp/out-text.o
+cc -g -ggdb    -Wall -O2 -c src/out-unicornscan.c -o tmp/out-unicornscan.o
+cc -g -ggdb    -Wall -O2 -c src/out-xml.c -o tmp/out-xml.o
+cc -g -ggdb    -Wall -O2 -c src/output.c -o tmp/output.o
+cc -g -ggdb    -Wall -O2 -c src/pixie-backtrace.c -o tmp/pixie-backtrace.o
+cc -g -ggdb    -Wall -O2 -c src/pixie-file.c -o tmp/pixie-file.o
+cc -g -ggdb    -Wall -O2 -c src/pixie-threads.c -o tmp/pixie-threads.o
+cc -g -ggdb    -Wall -O2 -c src/pixie-timer.c -o tmp/pixie-timer.o
+cc -g -ggdb    -Wall -O2 -c src/proto-arp.c -o tmp/proto-arp.o
+cc -g -ggdb    -Wall -O2 -c src/proto-banner1.c -o tmp/proto-banner1.o
+cc -g -ggdb    -Wall -O2 -c src/proto-banout.c -o tmp/proto-banout.o
+cc -g -ggdb    -Wall -O2 -c src/proto-coap.c -o tmp/proto-coap.o
+cc -g -ggdb    -Wall -O2 -c src/proto-dns.c -o tmp/proto-dns.o
+cc -g -ggdb    -Wall -O2 -c src/proto-ftp.c -o tmp/proto-ftp.o
+cc -g -ggdb    -Wall -O2 -c src/proto-http.c -o tmp/proto-http.o
+cc -g -ggdb    -Wall -O2 -c src/proto-icmp.c -o tmp/proto-icmp.o
+cc -g -ggdb    -Wall -O2 -c src/proto-imap4.c -o tmp/proto-imap4.o
+cc -g -ggdb    -Wall -O2 -c src/proto-isakmp.c -o tmp/proto-isakmp.o
+cc -g -ggdb    -Wall -O2 -c src/proto-mc.c -o tmp/proto-mc.o
+cc -g -ggdb    -Wall -O2 -c src/proto-memcached.c -o tmp/proto-memcached.o
+cc -g -ggdb    -Wall -O2 -c src/proto-netbios.c -o tmp/proto-netbios.o
+cc -g -ggdb    -Wall -O2 -c src/proto-ntlmssp.c -o tmp/proto-ntlmssp.o
+cc -g -ggdb    -Wall -O2 -c src/proto-ntp.c -o tmp/proto-ntp.o
+cc -g -ggdb    -Wall -O2 -c src/proto-oproto.c -o tmp/proto-oproto.o
+cc -g -ggdb    -Wall -O2 -c src/proto-pop3.c -o tmp/proto-pop3.o
+cc -g -ggdb    -Wall -O2 -c src/proto-preprocess.c -o tmp/proto-preprocess.o
+cc -g -ggdb    -Wall -O2 -c src/proto-sctp.c -o tmp/proto-sctp.o
+cc -g -ggdb    -Wall -O2 -c src/proto-smb.c -o tmp/proto-smb.o
+cc -g -ggdb    -Wall -O2 -c src/proto-smtp.c -o tmp/proto-smtp.o
+cc -g -ggdb    -Wall -O2 -c src/proto-snmp.c -o tmp/proto-snmp.o
+cc -g -ggdb    -Wall -O2 -c src/proto-ssh.c -o tmp/proto-ssh.o
+cc -g -ggdb    -Wall -O2 -c src/proto-ssl-test.c -o tmp/proto-ssl-test.o
+cc -g -ggdb    -Wall -O2 -c src/proto-ssl.c -o tmp/proto-ssl.o
+cc -g -ggdb    -Wall -O2 -c src/proto-tcp-rdp.c -o tmp/proto-tcp-rdp.o
+cc -g -ggdb    -Wall -O2 -c src/proto-tcp-telnet.c -o tmp/proto-tcp-telnet.o
+cc -g -ggdb    -Wall -O2 -c src/proto-udp.c -o tmp/proto-udp.o
+cc -g -ggdb    -Wall -O2 -c src/proto-versioning.c -o tmp/proto-versioning.o
+cc -g -ggdb    -Wall -O2 -c src/proto-vnc.c -o tmp/proto-vnc.o
+cc -g -ggdb    -Wall -O2 -c src/proto-x509.c -o tmp/proto-x509.o
+cc -g -ggdb    -Wall -O2 -c src/proto-zeroaccess.c -o tmp/proto-zeroaccess.o
+cc -g -ggdb    -Wall -O2 -c src/rawsock-getif.c -o tmp/rawsock-getif.o
+cc -g -ggdb    -Wall -O2 -c src/rawsock-getip.c -o tmp/rawsock-getip.o
+cc -g -ggdb    -Wall -O2 -c src/rawsock-getip6.c -o tmp/rawsock-getip6.o
+cc -g -ggdb    -Wall -O2 -c src/rawsock-getmac.c -o tmp/rawsock-getmac.o
+cc -g -ggdb    -Wall -O2 -c src/rawsock-getroute.c -o tmp/rawsock-getroute.o
+cc -g -ggdb    -Wall -O2 -c src/rawsock-pcapfile.c -o tmp/rawsock-pcapfile.o
+cc -g -ggdb    -Wall -O2 -c src/rawsock.c -o tmp/rawsock.o
+cc -g -ggdb    -Wall -O2 -c src/read-service-probes.c -o tmp/read-service-probes.o
+cc -g -ggdb    -Wall -O2 -c src/rte-ring.c -o tmp/rte-ring.o
+cc -g -ggdb    -Wall -O2 -c src/scripting-banner.c -o tmp/scripting-banner.o
+cc -g -ggdb    -Wall -O2 -c src/scripting-masscan.c -o tmp/scripting-masscan.o
+cc -g -ggdb    -Wall -O2 -c src/scripting.c -o tmp/scripting.o
+cc -g -ggdb    -Wall -O2 -c src/smack1.c -o tmp/smack1.o
+cc -g -ggdb    -Wall -O2 -c src/smackqueue.c -o tmp/smackqueue.o
+cc -g -ggdb    -Wall -O2 -c src/stack-arpv4.c -o tmp/stack-arpv4.o
+cc -g -ggdb    -Wall -O2 -c src/stack-if.c -o tmp/stack-if.o
+cc -g -ggdb    -Wall -O2 -c src/stack-ndpv6.c -o tmp/stack-ndpv6.o
+cc -g -ggdb    -Wall -O2 -c src/stack-queue.c -o tmp/stack-queue.o
+cc -g -ggdb    -Wall -O2 -c src/stack-src.c -o tmp/stack-src.o
+cc -g -ggdb    -Wall -O2 -c src/stack-tcp-app.c -o tmp/stack-tcp-app.o
+cc -g -ggdb    -Wall -O2 -c src/stack-tcp-core.c -o tmp/stack-tcp-core.o
+cc -g -ggdb    -Wall -O2 -c src/stub-lua.c -o tmp/stub-lua.o
+cc -g -ggdb    -Wall -O2 -c src/stub-pcap.c -o tmp/stub-pcap.o
+cc -g -ggdb    -Wall -O2 -c src/stub-pfring.c -o tmp/stub-pfring.o
+cc -g -ggdb    -Wall -O2 -c src/syn-cookie.c -o tmp/syn-cookie.o
+cc -g -ggdb    -Wall -O2 -c src/templ-nmap-payloads.c -o tmp/templ-nmap-payloads.o
+cc -g -ggdb    -Wall -O2 -c src/templ-payloads.c -o tmp/templ-payloads.o
+cc -g -ggdb    -Wall -O2 -c src/templ-pkt.c -o tmp/templ-pkt.o
+cc -g -ggdb    -Wall -O2 -c src/templ-tcp-hdr.c -o tmp/templ-tcp-hdr.o
+cc -g -ggdb    -Wall -O2 -c src/util-checksum.c -o tmp/util-checksum.o
+cc -g -ggdb    -Wall -O2 -c src/util-errormsg.c -o tmp/util-errormsg.o
+cc -g -ggdb    -Wall -O2 -c src/util-extract.c -o tmp/util-extract.o
+cc -g -ggdb    -Wall -O2 -c src/util-logger.c -o tmp/util-logger.o
+cc -g -ggdb    -Wall -O2 -c src/util-malloc.c -o tmp/util-malloc.o
+cc -g -ggdb    -Wall -O2 -c src/util-safefunc.c -o tmp/util-safefunc.o
+cc -g -ggdb    -Wall -O2 -c src/vulncheck-heartbleed.c -o tmp/vulncheck-heartbleed.o
+cc -g -ggdb    -Wall -O2 -c src/vulncheck-ntp-monlist.c -o tmp/vulncheck-ntp-monlist.o
+cc -g -ggdb    -Wall -O2 -c src/vulncheck-sslv3.c -o tmp/vulncheck-sslv3.o
+cc -g -ggdb    -Wall -O2 -c src/vulncheck.c -o tmp/vulncheck.o
+cc -g -ggdb    -Wall -O2 -c src/xring.c -o tmp/xring.o
+cc -g -ggdb    -Wall -O2 -o bin/masscan tmp/crypto-base64.o tmp/crypto-blackrock.o tmp/crypto-blackrock2.o tmp/crypto-lcg.o tmp/crypto-primegen.o tmp/crypto-siphash24.o tmp/event-timeout.o tmp/in-binary.o tmp/in-filter.o tmp/in-report.o tmp/main-conf.o tmp/main-dedup.o tmp/main-initadapter.o tmp/main-listscan.o tmp/main-ptrace.o tmp/main-readrange.o tmp/main-status.o tmp/main-throttle.o tmp/main.o tmp/masscan-app.o tmp/massip-addr.o tmp/massip-parse.o tmp/massip-rangesv4.o tmp/massip-rangesv6.o tmp/massip.o tmp/misc-rstfilter.o tmp/out-binary.o tmp/out-certs.o tmp/out-grepable.o tmp/out-hostonly.o tmp/out-json.o tmp/out-ndjson.o tmp/out-null.o tmp/out-redis.o tmp/out-tcp-services.o tmp/out-text.o tmp/out-unicornscan.o tmp/out-xml.o tmp/output.o tmp/pixie-backtrace.o tmp/pixie-file.o tmp/pixie-threads.o tmp/pixie-timer.o tmp/proto-arp.o tmp/proto-banner1.o tmp/proto-banout.o tmp/proto-coap.o tmp/proto-dns.o tmp/proto-ftp.o tmp/proto-http.o tmp/proto-icmp.o tmp/proto-imap4.o tmp/proto-isakmp.o tmp/proto-mc.o tmp/proto-memcached.o tmp/proto-netbios.o tmp/proto-ntlmssp.o tmp/proto-ntp.o tmp/proto-oproto.o tmp/proto-pop3.o tmp/proto-preprocess.o tmp/proto-sctp.o tmp/proto-smb.o tmp/proto-smtp.o tmp/proto-snmp.o tmp/proto-ssh.o tmp/proto-ssl-test.o tmp/proto-ssl.o tmp/proto-tcp-rdp.o tmp/proto-tcp-telnet.o tmp/proto-udp.o tmp/proto-versioning.o tmp/proto-vnc.o tmp/proto-x509.o tmp/proto-zeroaccess.o tmp/rawsock-getif.o tmp/rawsock-getip.o tmp/rawsock-getip6.o tmp/rawsock-getmac.o tmp/rawsock-getroute.o tmp/rawsock-pcapfile.o tmp/rawsock.o tmp/read-service-probes.o tmp/rte-ring.o tmp/scripting-banner.o tmp/scripting-masscan.o tmp/scripting.o tmp/smack1.o tmp/smackqueue.o tmp/stack-arpv4.o tmp/stack-if.o tmp/stack-ndpv6.o tmp/stack-queue.o tmp/stack-src.o tmp/stack-tcp-app.o tmp/stack-tcp-core.o tmp/stub-lua.o tmp/stub-pcap.o tmp/stub-pfring.o tmp/syn-cookie.o tmp/templ-nmap-payloads.o tmp/templ-payloads.o tmp/templ-pkt.o tmp/templ-tcp-hdr.o tmp/util-checksum.o tmp/util-errormsg.o tmp/util-extract.o tmp/util-logger.o tmp/util-malloc.o tmp/util-safefunc.o tmp/vulncheck-heartbleed.o tmp/vulncheck-ntp-monlist.o tmp/vulncheck-sslv3.o tmp/vulncheck.o tmp/xring.o   -lm -lrt -ldl -lpthread
+install -pDm755 bin/masscan /usr/bin/masscan
+[18:00:57] ✅ Masscan compilado e instalado do código fonte
+[18:00:57] 🐍 Instalando Python 3.11...
+Repository: 'Types: deb
+URIs: https://ppa.launchpadcontent.net/deadsnakes/ppa/ubuntu/
+Suites: noble
+Components: main
+'
+Description:
+This PPA contains more recent Python versions packaged for Ubuntu.
+
+Disclaimer: there's no guarantee of timely updates in case of security problems or other issues. If you want to use them in a security-or-otherwise-critical environment (say, on a production server), you do so at your own risk.
+
+Update Note
+===========
+Please use this repository instead of ppa:fkrull/deadsnakes.
+
+Reporting Issues
+================
+
+Issues can be reported in the master issue tracker at:
+https://github.com/deadsnakes/issues/issues
+
+Supported Ubuntu and Python Versions
+====================================
+
+- Ubuntu 20.04 (focal) Python3.5 - Python3.7, Python3.9 - Python3.13
+- Ubuntu 22.04 (jammy) Python3.7 - Python3.9, Python3.11 - Python3.13
+- Ubuntu 24.04 (noble) Python3.7 - Python3.11, Python3.13
+- Note: Python2.7 (focal, jammy), Python 3.8 (focal), Python 3.10 (jammy), Python3.12 (noble) are not provided by deadsnakes as upstream ubuntu provides those packages.
+
+Why some packages aren't built:
+- Note: for focal, older python versions require libssl<1.1 so they are not currently built
+- Note: for jammy and noble, older python versions requre libssl<3 so they are not currently built
+- If you need these, reach out to asottile to set up a private ppa
+
+The packages may also work on other versions of Ubuntu or Debian, but that is not tested or supported.
+
+Packages
+========
+
+The packages provided here are loosely based on the debian upstream packages with some modifications to make them more usable as non-default pythons and on ubuntu.  As such, the packages follow debian's patterns and often do not include a full python distribution with just `apt install python#.#`.  Here is a list of packages that may be useful along with the default install:
+
+- `python#.#-dev`: includes development headers for building C extensions
+- `python#.#-venv`: provides the standard library `venv` module
+- `python#.#-distutils`: provides the standard library `distutils` module
+- `python#.#-lib2to3`: provides the `2to3-#.#` utility as well as the standard library `lib2to3` module
+- `python#.#-gdbm`: provides the standard library `dbm.gnu` module
+- `python#.#-tk`: provides the standard library `tkinter` module
+
+Third-Party Python Modules
+==========================
+
+Python modules in the official Ubuntu repositories are packaged to work with the Python interpreters from the official repositories. Accordingly, they generally won't work with the Python interpreters from this PPA. As an exception, pure-Python modules for Python 3 will work, but any compiled extension modules won't.
+
+To install 3rd-party Python modules, you should use the common Python packaging tools.  For an introduction into the Python packaging ecosystem and its tools, refer to the Python Packaging User Guide:
+https://packaging.python.org/installing/
+
+Sources
+=======
+The package sources are available at:
+https://github.com/deadsnakes/
+
+Nightly Builds
+==============
+
+For nightly builds, see ppa:deadsnakes/nightly https://launchpad.net/~deadsnakes/+archive/ubuntu/nightly
+More info: https://launchpad.net/~deadsnakes/+archive/ubuntu/ppa
+Adding repository.
+Found existing deb entry in /etc/apt/sources.list.d/deadsnakes-ubuntu-ppa-noble.sources
+Hit:1 https://deb.nodesource.com/node_20.x nodistro InRelease
+Hit:2 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:3 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:4 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Hit:5 https://ppa.launchpadcontent.net/deadsnakes/ppa/ubuntu noble InRelease
+Get:6 http://security.ubuntu.com/ubuntu noble-security InRelease [126 kB]
+Get:7 http://security.ubuntu.com/ubuntu noble-security/main amd64 Components [21.5 kB]
+Get:8 http://security.ubuntu.com/ubuntu noble-security/restricted amd64 Components [212 B]
+Get:9 http://security.ubuntu.com/ubuntu noble-security/universe amd64 Components [52.3 kB]
+Get:10 http://security.ubuntu.com/ubuntu noble-security/multiverse amd64 Components [208 B]
+Fetched 200 kB in 2s (88.6 kB/s)
+Reading package lists... Done
+Hit:1 https://deb.nodesource.com/node_20.x nodistro InRelease
+Hit:2 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:3 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:4 https://ppa.launchpadcontent.net/deadsnakes/ppa/ubuntu noble InRelease
+Get:5 http://archive.ubuntu.com/ubuntu noble-updates InRelease [126 kB]
+Get:6 http://archive.ubuntu.com/ubuntu noble-backports InRelease [126 kB]
+Get:7 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 Components [175 kB]
+Get:8 http://archive.ubuntu.com/ubuntu noble-updates/restricted amd64 Components [212 B]
+Get:9 http://archive.ubuntu.com/ubuntu noble-updates/universe amd64 Components [377 kB]
+Get:10 http://archive.ubuntu.com/ubuntu noble-updates/multiverse amd64 Components [940 B]
+Get:11 http://archive.ubuntu.com/ubuntu noble-backports/main amd64 Components [7,060 B]
+Get:12 http://archive.ubuntu.com/ubuntu noble-backports/restricted amd64 Components [216 B]
+Get:13 http://archive.ubuntu.com/ubuntu noble-backports/universe amd64 Components [19.2 kB]
+Get:14 http://archive.ubuntu.com/ubuntu noble-backports/multiverse amd64 Components [212 B]
+Fetched 832 kB in 4s (204 kB/s)
+Reading package lists... Done
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+python3.11 is already the newest version (3.11.13-1+noble1).
+python3.11-dev is already the newest version (3.11.13-1+noble1).
+python3.11-venv is already the newest version (3.11.13-1+noble1).
+python3.11-distutils is already the newest version (3.11.13-1+noble1).
+python3-pip is already the newest version (24.0+dfsg-1ubuntu1.2).
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+[18:01:20] ERROR: ❌ Falha na instalação do Python
+root@vlxsam04:~#

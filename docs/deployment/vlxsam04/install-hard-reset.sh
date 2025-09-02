@@ -235,11 +235,19 @@ update-alternatives --install /usr/bin/python3 python3 /usr/bin/python$PYTHON_VE
 update-alternatives --install /usr/bin/python python /usr/bin/python$PYTHON_VERSION 1
 
 # Verificar instalação
-python_version=$(python --version 2>&1 | cut -d' ' -f2)
-if [[ "$python_version" == $PYTHON_VERSION* ]]; then
+if python$PYTHON_VERSION --version >/dev/null 2>&1; then
+    python_version=$(python$PYTHON_VERSION --version 2>&1 | cut -d' ' -f2)
     log "✅ Python $python_version instalado"
 else
-    error "❌ Falha na instalação do Python"
+    error "❌ Falha na instalação do Python $PYTHON_VERSION"
+fi
+
+# Verificar se o symlink funciona
+if python --version >/dev/null 2>&1; then
+    python_default=$(python --version 2>&1 | cut -d' ' -f2)
+    log "✅ Python padrão: $python_default"
+else
+    warn "⚠️ Symlink do Python pode precisar ser reconfigurado"
 fi
 
 # ============================================================================
