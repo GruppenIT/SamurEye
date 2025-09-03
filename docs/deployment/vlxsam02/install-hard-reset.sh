@@ -629,7 +629,115 @@ rm /tmp/heatmap_fix.js
 log "✅ Erro JavaScript no heatmap corrigido"
 
 # ============================================================================
-# 11.9. CORREÇÃO DO ERRO DE CRIAÇÃO DE TENANT
+# 11.9. CORREÇÃO CRÍTICA AUTENTICAÇÃO /API/USER
+# ============================================================================
+
+log "🔒 Corrigindo bypass de autenticação na rota /api/user..."
+
+# Corrigir rota /api/user que permite acesso sem login
+cat > /tmp/fix_api_user_auth.js << 'EOF'
+const fs = require('fs');
+const filePath = process.argv[2];
+
+let content = fs.readFileSync(filePath, 'utf8');
+
+// Encontrar e substituir a rota /api/user desprotegida
+const oldUserRoute = `  // Get current user endpoint (for session-based auth) with tenant information - Public for on-premise
+  app.get('/api/user', async (req, res) => {
+    try {
+      // In on-premise environment, create a default tenant user
+      const allTenants = await storage.getAllTenants();
+      if (allTenants.length === 0) {
+        return res.status(400).json({ message: "No tenants available" });
+      }
+      
+      const defaultTenant = allTenants[0];
+      
+      res.json({
+        id: 'onpremise-user',
+        email: 'tenant@onpremise.local',
+        name: 'On-Premise Tenant User',
+        isSocUser: false,
+        isActive: true,
+        tenants: [{
+          tenantId: defaultTenant.id,
+          role: 'tenant_admin',
+          tenant: defaultTenant
+        }],
+        currentTenant: defaultTenant
+      });
+    } catch (error) {
+      console.error("Error in /api/user:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });`;
+
+const newUserRoute = `  // Get current user endpoint - PROTEGIDA COM AUTENTICAÇÃO
+  app.get('/api/user', isLocalUserAuthenticated, async (req, res) => {
+    try {
+      const user = req.localUser;
+      
+      // Buscar tenants do usuário autenticado
+      const userTenants = await storage.getUserTenants(user.id);
+      
+      // Se usuário não tem tenants, usar tenant padrão
+      let tenants = userTenants;
+      let currentTenant = null;
+      
+      if (tenants.length === 0) {
+        const allTenants = await storage.getAllTenants();
+        if (allTenants.length > 0) {
+          const defaultTenant = allTenants[0];
+          tenants = [{
+            tenantId: defaultTenant.id,
+            role: 'tenant_admin',
+            tenant: defaultTenant
+          }];
+          currentTenant = defaultTenant;
+        }
+      } else {
+        currentTenant = tenants[0].tenant;
+      }
+      
+      res.json({
+        id: user.id,
+        email: user.email,
+        name: \`\${user.firstName} \${user.lastName}\`.trim(),
+        firstName: user.firstName,
+        lastName: user.lastName,
+        isSocUser: user.isSocUser || false,
+        isActive: user.isActive,
+        tenants: tenants,
+        currentTenant: currentTenant
+      });
+    } catch (error) {
+      console.error("Error in /api/user:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });`;
+
+if (content.includes(oldUserRoute)) {
+    content = content.replace(oldUserRoute, newUserRoute);
+    fs.writeFileSync(filePath, content, 'utf8');
+    console.log('✅ Rota /api/user corrigida - agora requer autenticação');
+} else {
+    console.log('⚠️ Padrão da rota /api/user não encontrado ou já corrigido');
+    
+    // Verificar se rota existe sem proteção
+    if (content.includes("app.get('/api/user'") && !content.includes("app.get('/api/user', isLocalUserAuthenticated")) {
+        console.log('❌ Rota /api/user ainda desprotegida - correção manual necessária');
+    }
+}
+EOF
+
+# Executar correção
+node /tmp/fix_api_user_auth.js "$WORKING_DIR/server/routes.ts"
+rm /tmp/fix_api_user_auth.js
+
+log "✅ Correção de autenticação /api/user aplicada"
+
+# ============================================================================
+# 11.10. CORREÇÃO DO ERRO DE CRIAÇÃO DE TENANT
 # ============================================================================
 
 log "🔧 Corrigindo erro de criação de tenant..."
