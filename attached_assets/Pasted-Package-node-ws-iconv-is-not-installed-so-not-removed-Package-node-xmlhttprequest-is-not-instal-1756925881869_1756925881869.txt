@@ -1,0 +1,345 @@
+Package 'node-ws-iconv' is not installed, so not removed
+Package 'node-xmlhttprequest' is not installed, so not removed
+Package 'node-xoauth2' is not installed, so not removed
+Package 'node-xregexp' is not installed, so not removed
+Package 'node-xterm' is not installed, so not removed
+Package 'node-xxhashjs' is not installed, so not removed
+Package 'node-y-codemirror' is not installed, so not removed
+Package 'node-yjs' is not installed, so not removed
+Package 'node-y-protocols' is not installed, so not removed
+Package 'node-y-websocket' is not installed, so not removed
+Package 'node-y18n' is not installed, so not removed
+Package 'node-yajsml' is not installed, so not removed
+Package 'node-yamlish' is not installed, so not removed
+Package 'node-yazl' is not installed, so not removed
+Package 'node-yn' is not installed, so not removed
+Package 'node-ytdl-core' is not installed, so not removed
+Package 'node-zkochan-cmd-shim' is not installed, so not removed
+Package 'node-zrender' is not installed, so not removed
+The following packages will be REMOVED:
+  nodejs*
+0 upgraded, 0 newly installed, 1 to remove and 1 not upgraded.
+After this operation, 199 MB disk space will be freed.
+(Reading database ... 133277 files and directories currently installed.)
+Removing nodejs (20.19.4-1nodesource1) ...
+dpkg: warning: while removing nodejs, directory '/usr/lib/node_modules' not empty so not removed
+Processing triggers for man-db (2.12.0-4build2) ...
+[15:54:05] 🗃️ Limpando banco de dados...
+You are now connected to database "samureye" as user "samureye_user".
+DROP SCHEMA
+CREATE SCHEMA
+GRANT
+GRANT
+            status
+-------------------------------
+ Database cleaned successfully
+(1 row)
+
+[15:54:05] ✅ Banco de dados limpo
+[15:54:05] 🔄 Atualizando sistema...
+Hit:1 https://deb.nodesource.com/node_20.x nodistro InRelease
+Hit:2 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:3 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:4 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:5 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists... Done
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+Calculating upgrade... Done
+The following packages have been kept back:
+  sosreport
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[15:54:09] 📦 Instalando dependências básicas...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+curl is already the newest version (8.5.0-2ubuntu10.6).
+wget is already the newest version (1.21.4-1ubuntu4.1).
+git is already the newest version (1:2.43.0-1ubuntu7.3).
+unzip is already the newest version (6.0-28ubuntu4.1).
+build-essential is already the newest version (12.10ubuntu1).
+python3 is already the newest version (3.12.3-0ubuntu2).
+python3-pip is already the newest version (24.0+dfsg-1ubuntu1.2).
+postgresql-client is already the newest version (16+257build1.1).
+netcat-openbsd is already the newest version (1.226-1ubuntu2).
+jq is already the newest version (1.7.1-3ubuntu0.24.04.1).
+htop is already the newest version (3.3.0-4build1).
+nano is already the newest version (7.2-2ubuntu0.1).
+ca-certificates is already the newest version (20240203).
+gnupg is already the newest version (2.4.4-2ubuntu17.3).
+lsb-release is already the newest version (12.0-2).
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[15:54:09] ✅ Dependências básicas instaladas
+[15:54:09] 📦 Instalando Node.js 20...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[15:54:11] 🔧 Configurando repositório NodeSource...
+Hit:1 https://deb.nodesource.com/node_20.x nodistro InRelease
+Hit:2 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:3 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:4 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:5 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists... Done
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following NEW packages will be installed:
+  nodejs
+0 upgraded, 1 newly installed, 0 to remove and 1 not upgraded.
+Need to get 32.0 MB of archives.
+After this operation, 199 MB of additional disk space will be used.
+Get:1 https://deb.nodesource.com/node_20.x nodistro/main amd64 nodejs amd64 20.19.4-1nodesource1 [32.0 MB]
+Fetched 32.0 MB in 1s (46.0 MB/s)
+Selecting previously unselected package nodejs.
+(Reading database ... 127914 files and directories currently installed.)
+Preparing to unpack .../nodejs_20.19.4-1nodesource1_amd64.deb ...
+Unpacking nodejs (20.19.4-1nodesource1) ...
+Setting up nodejs (20.19.4-1nodesource1) ...
+Processing triggers for man-db (2.12.0-4build2) ...
+Scanning processes...
+Scanning candidates...
+Scanning linux images...
+
+Pending kernel upgrade!
+Running kernel version:
+  6.8.0-41-generic
+Diagnostics:
+  The currently running kernel version is not the expected kernel version 6.8.0-79-generic.
+
+Restarting the system to load the new kernel will not be handled automatically, so you should consider rebooting.
+
+Restarting services...
+
+Service restarts being deferred:
+ /etc/needrestart/restart.d/dbus.service
+ systemctl restart getty@tty1.service
+ systemctl restart systemd-logind.service
+ systemctl restart unattended-upgrades.service
+
+No containers need to be restarted.
+
+No user sessions are running outdated binaries.
+
+No VM guests are running outdated hypervisor (qemu) binaries on this host.
+[15:54:22] 🔍 Verificando instalação Node.js...
+[15:54:22] ✅ Node.js instalado: v20.19.4
+[15:54:23] ✅ npm instalado: 10.8.2
+[15:54:23] 🔧 Instalando ferramentas globais...
+[15:54:31] ✅ Ferramentas globais instaladas
+[15:54:31] 👤 Criando usuário e estrutura de diretórios...
+[15:54:31] ✅ Estrutura de diretórios criada
+[15:54:31] 📥 Baixando aplicação SamurEye...
+Cloning into 'SamurEye'...
+remote: Enumerating objects: 2909, done.
+remote: Counting objects: 100% (310/310), done.
+remote: Compressing objects: 100% (172/172), done.
+remote: Total 2909 (delta 223), reused 190 (delta 106), pack-reused 2599 (from 2)
+Receiving objects: 100% (2909/2909), 3.44 MiB | 15.00 MiB/s, done.
+Resolving deltas: 100% (2015/2015), done.
+[15:54:32] ✅ Aplicação baixada com sucesso
+[15:54:32] ⚙️ Configurando ambiente...
+[15:54:32] ✅ Arquivo .env criado
+[15:54:32] 📦 Instalando dependências npm...
+npm warn deprecated node-domexception@1.0.0: Use your platform's native DOMException instead
+npm warn deprecated @esbuild-kit/esm-loader@2.6.5: Merged into tsx: https://tsx.is
+npm warn deprecated @esbuild-kit/core-utils@3.3.2: Merged into tsx: https://tsx.is
+
+added 635 packages, and audited 636 packages in 13s
+
+87 packages are looking for funding
+  run `npm fund` for details
+
+11 vulnerabilities (3 low, 8 moderate)
+
+To address issues that do not require attention, run:
+  npm audit fix
+
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+
+Run `npm audit` for details.
+npm notice
+npm notice New major version of npm available! 10.8.2 -> 11.5.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.5.2
+npm notice To update run: npm install -g npm@11.5.2
+npm notice
+[15:54:46] ✅ Dependências npm instaladas
+[15:54:46] 🔨 Fazendo build da aplicação...
+
+> rest-express@1.0.0 build
+> vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+
+vite v5.4.19 building for production...
+transforming (3) src/main.tsxBrowserslist: browsers data (caniuse-lite) is 11 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+✓ 2692 modules transformed.
+../dist/public/index.html                   2.20 kB │ gzip:   0.86 kB
+../dist/public/assets/index-3RvnZlKd.css   68.17 kB │ gzip:  11.88 kB
+../dist/public/assets/index-B6BClJbt.js   670.11 kB │ gzip: 192.33 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 6.79s
+
+  dist/index.js  100.5kb
+
+⚡ Done in 10ms
+[15:54:53] ✅ Build da aplicação concluído
+[15:54:53] 🔧 Corrigindo autenticação admin no código...
+✅ Endpoint /api/admin/me corrigido com sucesso
+[15:54:53] ✅ Endpoint /api/admin/me corrigido
+[15:54:53] 🔧 Corrigindo redirecionamento admin pós-login...
+⚠️ Redirecionamento já corrigido
+[15:54:53] ✅ Redirecionamento admin corrigido
+[15:54:53] 🔧 Corrigindo erros de autenticação do dashboard...
+✅ 1 correções de autenticação aplicadas
+[15:54:53] ✅ Erros de autenticação do dashboard corrigidos
+[15:54:53] 🔧 Corrigindo erro JavaScript no AttackSurfaceHeatmap...
+⚠️ Correção já aplicada
+[15:54:53] ✅ Erro JavaScript no heatmap corrigido
+[15:54:53] 🔒 Corrigindo erro crítico de sintaxe linha 656...
+🔍 Arquivo tem 1708 linhas
+🎯 Linha 656: 'if (tenants.length > 0) {'
+📋 Contexto da linha 656:
+     646:   const requireLocalUserTenant = async (req: any, res: any, next: any) => {
+     647:     try {
+     648:       const user = req.localUser;
+     649:
+     650:       if (user.isSocUser) {
+     651:         // SOC users can access all tenants - use currentTenantId if set
+     652:         let tenantId = user.currentTenantId;
+     653:         if (!tenantId) {
+     654:           // If no current tenant set, use first available
+     655:           const tenants = await storage.getAllTenants();
+ >>> 656:           if (tenants.length > 0) {
+     657:             tenantId = tenants[0].id;
+     658:           } else {
+     659:             return res.status(400).json({ message: "No tenants available" });
+     660:           }
+     661:         }
+     662:
+     663:         const tenant = await storage.getTenant(tenantId);
+     664:         if (!tenant) {
+     665:           return res.status(404).json({ message: "Tenant not found" });
+     666:         }
+🧹 Removendo todo middleware mal formado...
+✅ 0 padrões de middleware removidos
+📋 Pós-limpeza: 1708 linhas
+⚠️ Não foi possível encontrar local para middleware - inserindo no início
+📊 Final - Abertas: 413, Fechadas: 477
+🛠️ Removendo 64 chaves extras do final...
+✅ Arquivo cirurgicamente corrigido e salvo
+[15:54:53] ✅ Correção cirúrgica da linha 656 aplicada
+[15:54:53] 🔧 Corrigindo erro de criação de tenant...
+✅ Logging de criação de tenant melhorado
+[15:54:53] 🔍 Verificando conectividade com PostgreSQL...
+[15:54:53] 🔍 Diagnóstico completo de conectividade...
+[15:54:53] Host: 172.24.1.153
+[15:54:53] Port: 5432
+[15:54:53] Database: samureye
+[15:54:53] User: samureye_user
+[15:54:53] ✅ Host 172.24.1.153 respondendo ao ping
+[15:54:53] ✅ PostgreSQL acessível em 172.24.1.153:5432
+[15:54:53] ✅ Autenticação PostgreSQL funcionando
+[15:54:53] 🗃️ Verificando schema do banco de dados...
+[15:54:53] 🗃️ Sincronizando schema do banco de dados...
+
+> rest-express@1.0.0 db:push
+> drizzle-kit push
+
+No config path provided, using default 'drizzle.config.ts'
+Reading config file '/opt/samureye/SamurEye/drizzle.config.ts'
+Using 'pg' driver for database querying
+[✓] Pulling schema from database...
+[✓] Changes applied
+[15:54:54] ✅ Schema sincronizado com sucesso via npm run db:push
+[15:54:54] 📋 Verificando tabelas criadas...
+ activities
+ collector_telemetry
+ collectors
+ credentials
+ journeys
+ sessions
+ system_settings
+ tenant_user_auth
+ tenant_users
+ tenants
+ threat_intelligence
+ users
+
+[15:54:54] ✅ Tabelas verificadas com sucesso
+
+> rest-express@1.0.0 db:push
+> drizzle-kit push
+
+No config path provided, using default 'drizzle.config.ts'
+Reading config file '/opt/samureye/SamurEye/drizzle.config.ts'
+Using 'pg' driver for database querying
+[✓] Pulling schema from database...
+[i] No changes detected
+[15:54:55] ✅ Schema do banco de dados atualizado
+[15:54:55] ✅ Correções de criação de tenant aplicadas
+[15:54:55] 🔍 Verificando build atual...
+[15:54:55] ⚡ Testando importação do módulo atual...
+[15:54:56] ✅ Build atual está funcional
+[15:54:56] 🔨 Fazendo build final com todas as correções...
+
+> rest-express@1.0.0 build
+> vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+
+vite v5.4.19 building for production...
+transforming (19) src/components/ui/toaster.tsxBrowserslist: browsers data (caniuse-lite) is 11 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+✓ 2692 modules transformed.
+../dist/public/index.html                   2.20 kB │ gzip:   0.86 kB
+../dist/public/assets/index-3RvnZlKd.css   68.17 kB │ gzip:  11.88 kB
+../dist/public/assets/index-B6BClJbt.js   670.11 kB │ gzip: 192.33 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 6.85s
+✘ [ERROR] Unexpected "else"
+
+    server/routes.ts:236:8:
+      236 │       } else {
+          ╵         ~~~~
+
+1 error
+[15:55:03] WARNING: ⚠️ npm run build falhou - usando npx fallback
+vite v5.4.19 building for production...
+transforming (3) src/main.tsxBrowserslist: browsers data (caniuse-lite) is 11 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+✓ 2692 modules transformed.
+../dist/public/index.html                   2.20 kB │ gzip:   0.86 kB
+../dist/public/assets/index-3RvnZlKd.css   68.17 kB │ gzip:  11.88 kB
+../dist/public/assets/index-B6BClJbt.js   670.11 kB │ gzip: 192.33 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 7.12s
+✘ [ERROR] Unexpected "else"
+
+    server/routes.ts:236:8:
+      236 │       } else {
+          ╵         ~~~~
+
+1 error
+root@vlxsam02:~#
