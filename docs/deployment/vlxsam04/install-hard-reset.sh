@@ -303,13 +303,25 @@ log "✅ Estrutura de diretórios criada"
 
 log "🛡️ Instalando ferramentas de segurança..."
 
-# Nmap (já instalado via apt, configurar scripts)
+# Nmap - INSTALAÇÃO OBRIGATÓRIA
 log "📡 Configurando Nmap..."
+if ! command -v nmap >/dev/null 2>&1; then
+    log "🔄 Instalando Nmap (OBRIGATÓRIO para collector)..."
+    
+    if apt-get update >/dev/null 2>&1 && apt-get install -y nmap >/dev/null 2>&1; then
+        log "✅ Nmap instalado via apt"
+    else
+        warn "❌ Falha instalação nmap - collector funcionará com limitações"
+    fi
+fi
+
 if command -v nmap >/dev/null 2>&1; then
     mkdir -p "$TOOLS_DIR/nmap/scripts"
     cp /usr/share/nmap/scripts/* "$TOOLS_DIR/nmap/scripts/" 2>/dev/null || true
     chown -R "$COLLECTOR_USER:$COLLECTOR_USER" "$TOOLS_DIR/nmap"
-    log "✅ Nmap configurado"
+    log "✅ Nmap configurado: $(nmap --version 2>/dev/null | head -1 || echo 'versão indisponível')"
+else
+    warn "❌ CRÍTICO: Nmap não disponível - collector pode falhar"
 fi
 
 # Masscan (já instalado via apt ou compilado)

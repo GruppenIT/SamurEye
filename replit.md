@@ -9,6 +9,8 @@ Preferred communication style: Simple, everyday language.
 ## Recent Changes
 - **02/09/2025**: ✅ PROBLEMA DUPLICAÇÃO DIAGNOSTICADO - scripts debug + fix criados para vlxsam04
 - **02/09/2025**: ✅ CORREÇÕES INTEGRADAS NO install-hard-reset.sh - heartbeat robusto + anti-duplicação + curl commands
+- **03/09/2025**: ✅ SCRIPTS DIAGNÓSTICO CRIADOS - diagnose-service-failed.sh + fix-service-failed.sh para vlxsam04
+- **03/09/2025**: ✅ CORREÇÃO NMAP INTEGRADA - instalação obrigatória + verificação gobuster PATH
 - **02/09/2025**: ✅ COLLECTOR HEARTBEAT SYSTEM IMPLEMENTADO - evita duplicação + status automático ENROLLING→ONLINE→OFFLINE  
 - **02/09/2025**: ✅ vlxsam04 INSTALAÇÃO COMPLETA - collector registrado, token gerado, status ENROLLING→ONLINE automático
 - **02/09/2025**: ✅ vlxsam04 PYTHON DEPENDENCIES CORRIGIDO - usa apt em vez de pip para Ubuntu 24.04 externally-managed-environment  
