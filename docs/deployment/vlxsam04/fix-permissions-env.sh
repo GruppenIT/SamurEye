@@ -49,10 +49,10 @@ ENV_EOF
 
 log "🔒 Aplicando permissões corretas..."
 
-# Definir permissões corretas
-chown -R root:$COLLECTOR_USER "$CONFIG_DIR"
-chmod 750 "$CONFIG_DIR"
-chmod 640 "$CONFIG_FILE"
+# Definir permissões corretas - usuário precisa escrever para criar token.conf
+chown -R $COLLECTOR_USER:$COLLECTOR_USER "$CONFIG_DIR"
+chmod 755 "$CONFIG_DIR"
+chmod 644 "$CONFIG_FILE"
 
 # Verificar se as permissões estão corretas
 log "🔍 Verificando permissões aplicadas..."
@@ -70,9 +70,10 @@ else
     log "❌ ERRO: Usuário $COLLECTOR_USER ainda não pode ler o arquivo"
     echo "🔧 Tentando permissões alternativas..."
     
-    # Permissões mais abertas como fallback
+    # Permissões mais abertas como fallback - usuário owner do diretório
+    chown -R $COLLECTOR_USER:$COLLECTOR_USER "$CONFIG_DIR"
+    chmod 755 "$CONFIG_DIR"
     chmod 644 "$CONFIG_FILE"
-    chown $COLLECTOR_USER:$COLLECTOR_USER "$CONFIG_FILE"
     
     if sudo -u $COLLECTOR_USER cat "$CONFIG_FILE" >/dev/null 2>&1; then
         log "✅ Permissões alternativas funcionaram"
@@ -153,9 +154,17 @@ echo "✅ CORREÇÃO PERMISSÕES FINALIZADA"
 echo "================================"
 echo ""
 echo "📁 Estrutura final:"
-echo "• Config dir: $CONFIG_DIR ($(stat -c %A $CONFIG_DIR))"
-echo "• .env file:  $CONFIG_FILE ($(stat -c %A $CONFIG_FILE))"
-echo "• Owner:      $(stat -c %U:%G $CONFIG_FILE)"
+echo "• Config dir: $CONFIG_DIR ($(stat -c %A $CONFIG_DIR)) - Owner: $(stat -c %U:%G $CONFIG_DIR)"
+echo "• .env file:  $CONFIG_FILE ($(stat -c %A $CONFIG_FILE)) - Owner: $(stat -c %U:%G $CONFIG_FILE)"
+
+# Teste final de escrita
+log "🧪 Teste final de escrita no diretório config..."
+if sudo -u $COLLECTOR_USER touch "$CONFIG_DIR/test_token.conf" 2>/dev/null; then
+    log "✅ Usuário pode criar arquivos no diretório config"
+    rm -f "$CONFIG_DIR/test_token.conf"
+else
+    log "❌ CRÍTICO: Usuário ainda não pode escrever no diretório config"
+fi
 echo ""
 echo "🔧 Se ainda houver problemas:"
 echo "• Verificar logs: journalctl -u $SERVICE_NAME -f"

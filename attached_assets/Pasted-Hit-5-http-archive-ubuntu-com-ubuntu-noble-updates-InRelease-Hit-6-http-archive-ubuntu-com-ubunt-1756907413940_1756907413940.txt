@@ -1,0 +1,257 @@
+Hit:5 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:6 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists... Done
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+apt-transport-https is already the newest version (2.8.3).
+ca-certificates is already the newest version (20240203).
+curl is already the newest version (8.5.0-2ubuntu10.6).
+gnupg is already the newest version (2.4.4-2ubuntu17.3).
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+Hit:1 https://deb.nodesource.com/node_20.x nodistro InRelease
+Hit:2 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:3 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:4 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:5 https://ppa.launchpadcontent.net/deadsnakes/ppa/ubuntu noble InRelease
+Hit:6 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists... Done
+2025-09-03 10:44:06 - Repository configured successfully.
+2025-09-03 10:44:06 - To install Node.js, run: apt-get install nodejs -y
+2025-09-03 10:44:06 - You can use N|solid Runtime as a node.js alternative
+2025-09-03 10:44:06 - To install N|solid Runtime, run: apt-get install nsolid -y
+
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+nodejs is already the newest version (20.19.4-1nodesource1).
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+[10:44:07] ✅ Node.js v20.19.4 instalado
+[10:44:07] 👤 Criando usuário e estrutura de diretórios...
+[10:44:07] ✅ Estrutura de diretórios criada
+[10:44:07] 🛡️ Instalando ferramentas de segurança...
+[10:44:07] 📡 Configurando Nmap...
+[10:44:07] 🔄 Instalando Nmap (OBRIGATÓRIO para collector)...
+[10:44:10] ✅ Nmap instalado via apt
+[10:44:10] WARNING: ❌ CRÍTICO: Nmap não disponível - collector pode falhar
+[10:44:10] ✅ Masscan configurado
+[10:44:10]    Versão:
+[10:44:10] 🔍 Instalando Nuclei...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+[10:44:10] WARNING: ⚠️ Nuclei via apt falhou, instalando via GitHub...
+[10:44:14] ✅ Nuclei instalado via GitHub
+[10:44:14] ✅ Nuclei configurado (vNuclei)
+[10:44:14] 📋 Atualizando templates Nuclei em background...
+[10:44:14] 🔍 Instalando Gobuster...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+gobuster is already the newest version (3.6.0-1ubuntu0.24.04.3).
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+[10:44:15] ✅ Gobuster instalado via apt
+[10:44:15] WARNING: ❌ Gobuster não está disponível após instalação
+[10:44:15] 🧹 Arquivos temporários removidos
+[10:44:15] 🤖 Instalando agente coletor...
+[10:44:15] 📦 Instalando dependências Python...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+python3-psutil is already the newest version (5.9.8-2build2).
+python3-requests is already the newest version (2.31.0+dfsg-1ubuntu1.1).
+python3-venv is already the newest version (3.12.3-0ubuntu2).
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+[10:44:16] ✅ Dependências Python instaladas
+[10:44:16] 🔧 Configurando serviço systemd...
+[10:44:16] ✅ Serviço systemd configurado
+[10:44:17] ⏰ Configurando cron jobs...
+[10:44:17] ✅ Cron jobs configurados
+[10:44:17] 🔒 Configurando firewall...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+ufw is already the newest version (0.36.2-6).
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+Backing up 'user.rules' to '/etc/ufw/user.rules.20250903_104418'
+Backing up 'before.rules' to '/etc/ufw/before.rules.20250903_104418'
+Backing up 'after.rules' to '/etc/ufw/after.rules.20250903_104418'
+Backing up 'user6.rules' to '/etc/ufw/user6.rules.20250903_104418'
+Backing up 'before6.rules' to '/etc/ufw/before6.rules.20250903_104418'
+Backing up 'after6.rules' to '/etc/ufw/after6.rules.20250903_104418'
+
+Default incoming policy changed to 'deny'
+(be sure to update your rules accordingly)
+Default outgoing policy changed to 'allow'
+(be sure to update your rules accordingly)
+Rules updated
+Rules updated (v6)
+Rules updated
+Rules updated
+Rules updated (v6)
+Firewall is active and enabled on system startup
+[10:44:19] ✅ Firewall configurado
+[10:44:19] 🚀 Iniciando serviço collector...
+Created symlink /etc/systemd/system/multi-user.target.wants/samureye-collector.service → /etc/systemd/system/samureye-collector.service.
+[10:44:27] ✅ Templates Nuclei atualizados
+[10:44:30] WARNING: ⚠️ Collector pode ter problemas - verificar logs
+[10:44:30] 🧪 Executando testes de validação...
+[10:44:30] WARNING: ⚠️ Serviço: Inativo
+[10:44:30] ✅ Python: Dependências OK
+[10:44:30] 🛡️ Ferramentas: nmap:❌ nuclei:✅ masscan:✅ gobuster:❌
+[10:44:30] ✅ API: Conectividade OK
+[10:44:30] ✅ Logs: Sendo gerados
+[10:44:30] 💓 Configurando correções de heartbeat e conectividade...
+[10:44:30] WARNING: ⚠️ Arquivo de configuração /etc/samureye-collector/.env não encontrado
+[10:44:30] ✅ Script de teste de conectividade criado: /opt/samureye/collector/test-connectivity.sh
+[10:44:30] WARNING: ⚠️ Certificados não encontrados - teste de conectividade pulado
+[10:44:30] 📝 Criando script de registro...
+[10:44:30] 📝 Sistema de registro integrado ao heartbeat implementado
+[10:44:30] 🔧 Implementando correção de duplicação de coletores...
+[10:44:30] WARNING: ❌ Problema permissão .env - aplicando fallback
+[10:44:30] ✅ Sistema anti-duplicação integrado no install-hard-reset
+[10:44:30] 🔗 Registrando collector com proteção anti-duplicação...
+[10:44:30] ✅ Registro automático será realizado pelo sistema de heartbeat
+[10:44:30] 📋 Criando scripts de diagnóstico integrados...
+[10:44:30] ✅ Script de diagnóstico integrado criado
+
+[10:44:30] 🎉 HARD RESET DO COLLECTOR AGENT CONCLUÍDO!
+
+📋 RESUMO DA INSTALAÇÃO:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🤖 Collector Agent:
+   • Status:  active
+   • User:    samureye-collector
+   • Dir:     /opt/samureye/collector
+   • Logs:    /var/log/samureye-collector/
+
+🐍 Python 3.11:
+   • Version: Python 3.12.3
+   • Libs:    psutil, requests
+
+📦 Node.js 20:
+   • Version: v20.19.4
+
+🛡️ Security Tools:
+   • Nmap:     ❌ Ausente
+   • Nuclei:   ✅ Instalado
+   • Masscan:  ✅ Instalado
+   • Gobuster: ❌ Ausente
+
+🔧 Comandos Úteis:
+   • Status:     systemctl status samureye-collector
+   • Logs:       tail -f /var/log/samureye-collector/collector.log
+   • Restart:    systemctl restart samureye-collector
+   • Heartbeat:  /opt/samureye/collector/heartbeat.py
+   • Cleanup:    /opt/samureye/collector/scripts/cleanup.sh
+   • Test Conn:  /opt/samureye/collector/test-connectivity.sh
+   • Check Status: /opt/samureye/collector/scripts/check-status.sh
+
+🔗 Conectividade:
+   • API:       https://api.samureye.com.br
+   • Gateway:   192.168.100.151
+
+💓 Heartbeat & Status:
+   • Intervalo: 30 segundos (configurável em /etc/samureye-collector/.env)
+   • Endpoint:  https://api.samureye.com.br/collector-api/heartbeat
+   • Retry:     3 tentativas automáticas por request
+   • Timeout:   30 segundos por request HTTP
+
+📝 Próximos Passos:
+   1. Monitorar logs: tail -f /var/log/samureye-collector/heartbeat.log
+   2. Verificar status: /opt/samureye/collector/scripts/check-status.sh
+   3. Interface admin: https://app.samureye.com.br/admin/collectors
+   4. Aguardar transição: ENROLLING → ONLINE (1-2 minutos)
+
+✅ SISTEMA ANTI-DUPLICAÇÃO INTEGRADO:
+   • Heartbeat robusto implementado para evitar coletores duplicados
+   • Registro automático com proteção anti-duplicação
+   • Transição automática: ENROLLING → ONLINE → (timeout) → OFFLINE
+   • Auto-recovery em caso de falhas de conexão
+
+🔧 COMANDOS DE EXECUÇÃO REMOTA:
+   curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/vlxsam04/install-hard-reset.sh | bash
+
+root@vlxsam04:~# tail -f /var/log/samureye-collector/collector.log
+2025-09-03 10:48:47,627 - ERROR - Erro ao carregar configuração: [Errno 13] Permission denied: '/etc/samureye-collector/.env'
+2025-09-03 10:48:57,859 - ERROR - Erro ao carregar configuração: [Errno 13] Permission denied: '/etc/samureye-collector/.env'
+2025-09-03 10:49:08,177 - ERROR - Erro ao carregar configuração: [Errno 13] Permission denied: '/etc/samureye-collector/.env'
+2025-09-03 10:49:18,614 - ERROR - Erro ao carregar configuração: [Errno 13] Permission denied: '/etc/samureye-collector/.env'
+2025-09-03 10:49:28,877 - ERROR - Erro ao carregar configuração: [Errno 13] Permission denied: '/etc/samureye-collector/.env'
+2025-09-03 10:49:39,142 - ERROR - Erro ao carregar configuração: [Errno 13] Permission denied: '/etc/samureye-collector/.env'
+2025-09-03 10:49:49,403 - ERROR - Erro ao carregar configuração: [Errno 13] Permission denied: '/etc/samureye-collector/.env'
+2025-09-03 10:49:59,618 - ERROR - Erro ao carregar configuração: [Errno 13] Permission denied: '/etc/samureye-collector/.env'
+2025-09-03 10:50:09,878 - ERROR - Erro ao carregar configuração: [Errno 13] Permission denied: '/etc/samureye-collector/.env'
+2025-09-03 10:50:20,148 - ERROR - Erro ao carregar configuração: [Errno 13] Permission denied: '/etc/samureye-collector/.env'
+2025-09-03 10:50:30,361 - ERROR - Erro ao carregar configuração: [Errno 13] Permission denied: '/etc/samureye-collector/.env'
+^C
+root@vlxsam04:~# curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/vlxsam04/fix-permissions-env.sh | bash
+🔧 CORREÇÃO PERMISSÕES .ENV - vlxsam04
+=====================================
+[10:50:40] 🛑 Parando serviço para correção...
+[10:50:40] 🔍 Diagnóstico inicial de permissões...
+📁 Status do diretório /etc/samureye-collector:
+total 12
+drwxr-x---   2 root               root               4096 Sep  3 10:44 .
+drwxr-xr-x 113 root               root               4096 Sep  3 10:44 ..
+-rw-r--r--   1 samureye-collector samureye-collector  258 Sep  3 10:44 .env
+
+👤 Verificando usuário samureye-collector:
+uid=999(samureye-collector) gid=988(samureye-collector) groups=988(samureye-collector)
+[10:50:40] 🔧 Recriando estrutura de configuração com permissões corretas...
+[10:50:40] 📝 Criando arquivo .env com permissões adequadas...
+[10:50:40] 🔒 Aplicando permissões corretas...
+[10:50:40] 🔍 Verificando permissões aplicadas...
+📁 Diretório /etc/samureye-collector:
+total 12
+drwxr-x---   2 root samureye-collector 4096 Sep  3 10:44 .
+drwxr-xr-x 113 root root               4096 Sep  3 10:44 ..
+-rw-r-----   1 root samureye-collector  274 Sep  3 10:50 .env
+
+📄 Arquivo .env:
+-rw-r----- 1 root samureye-collector 274 Sep  3 10:50 /etc/samureye-collector/.env
+[10:50:40] 🧪 Testando leitura do arquivo pelo usuário collector...
+[10:50:40] ✅ Usuário samureye-collector pode ler o arquivo .env
+[10:50:40] 🔧 Verificando outros arquivos necessários...
+[10:50:40] ✅ Permissões heartbeat.py ajustadas
+[10:50:40] ✅ Permissões logs ajustadas
+[10:50:40] ✅ Permissões collector dir ajustadas
+[10:50:40] 🧪 Teste final de execução...
+Testando execução do heartbeat (timeout 5s):
+2025-09-03 10:50:41,143 - INFO - Configuração carregada - ID: vlxsam04, Nome: vlxsam04-collector
+2025-09-03 10:50:41,143 - INFO - Iniciando heartbeat collector...
+2025-09-03 10:50:41,143 - INFO - Token não encontrado, registrando collector...
+2025-09-03 10:50:41,143 - INFO - Registrando collector: {'name': 'vlxsam04-collector', 'hostname': 'vlxsam04', 'ipAddress': '192.168.100.151', 'status': 'enrolling', 'description': 'Collector agent on-premise vlxsam04'}
+/usr/lib/python3/dist-packages/urllib3/connectionpool.py:1100: InsecureRequestWarning: Unverified HTTPS request is being made to host 'api.samureye.com.br'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+2025-09-03 10:50:41,213 - ERROR - Erro ao registrar collector: [Errno 13] Permission denied: '/etc/samureye-collector/token.conf'
+2025-09-03 10:50:41,213 - ERROR - Falha no registro inicial
+[10:50:41] 🚀 Reiniciando serviço...
+[10:50:44] 🔍 Verificação final...
+[10:50:44] ❌ Serviço ainda com problemas
+
+📝 Logs de erro:
+Sep 03 10:50:30 vlxsam04 systemd[1]: Started samureye-collector.service - SamurEye Collector Agent.
+Sep 03 10:50:30 vlxsam04 systemd[1]: samureye-collector.service: Main process exited, code=exited, status=1/FAILURE
+Sep 03 10:50:30 vlxsam04 systemd[1]: samureye-collector.service: Failed with result 'exit-code'.
+Sep 03 10:50:40 vlxsam04 systemd[1]: samureye-collector.service: Scheduled restart job, restart counter is at 37.
+Sep 03 10:50:40 vlxsam04 systemd[1]: Started samureye-collector.service - SamurEye Collector Agent.
+Sep 03 10:50:40 vlxsam04 systemd[1]: samureye-collector.service: Main process exited, code=exited, status=1/FAILURE
+Sep 03 10:50:40 vlxsam04 systemd[1]: samureye-collector.service: Failed with result 'exit-code'.
+Sep 03 10:50:40 vlxsam04 systemd[1]: Stopped samureye-collector.service - SamurEye Collector Agent.
+Sep 03 10:50:41 vlxsam04 systemd[1]: Started samureye-collector.service - SamurEye Collector Agent.
+Sep 03 10:50:41 vlxsam04 systemd[1]: samureye-collector.service: Deactivated successfully.
+
+✅ CORREÇÃO PERMISSÕES FINALIZADA
+================================
+
+📁 Estrutura final:
+• Config dir: /etc/samureye-collector (drwxr-x---)
+• .env file:  /etc/samureye-collector/.env (-rw-r-----)
+• Owner:      root:samureye-collector
+
+🔧 Se ainda houver problemas:
+• Verificar logs: journalctl -u samureye-collector -f
+• Testar manual: sudo -u samureye-collector python3 /opt/samureye/collector/heartbeat.py
+• Status: systemctl status samureye-collector
+root@vlxsam04:~#

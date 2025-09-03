@@ -1001,15 +1001,25 @@ RETRY_DELAY=5
 LOG_LEVEL=INFO
 CONFIG_EOF
 
-# Aplicar permissões corretas ao arquivo .env
-chown root:$COLLECTOR_USER "$CONFIG_FILE"
+# Aplicar permissões corretas ao diretório e arquivo .env
+chown -R root:$COLLECTOR_USER "$CONFIG_DIR"
+chmod 750 "$CONFIG_DIR"
 chmod 640 "$CONFIG_FILE"
 
-# Verificar se o usuário consegue ler o arquivo
+# Verificar se o usuário consegue ler e escrever no diretório
 if ! sudo -u $COLLECTOR_USER cat "$CONFIG_FILE" >/dev/null 2>&1; then
     warn "❌ Problema permissão .env - aplicando fallback"
     chmod 644 "$CONFIG_FILE"
     chown $COLLECTOR_USER:$COLLECTOR_USER "$CONFIG_FILE"
+fi
+
+# Garantir que o usuário pode criar arquivos no diretório (para token.conf)
+if ! sudo -u $COLLECTOR_USER touch "$CONFIG_DIR/test_write" 2>/dev/null; then
+    warn "❌ Usuário não pode escrever no diretório config - corrigindo"
+    chown -R $COLLECTOR_USER:$COLLECTOR_USER "$CONFIG_DIR"
+    chmod 755 "$CONFIG_DIR"
+else
+    rm -f "$CONFIG_DIR/test_write"
 fi
 
 # Criar script de heartbeat robusto integrado

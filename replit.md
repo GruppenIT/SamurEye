@@ -13,6 +13,7 @@ Preferred communication style: Simple, everyday language.
 - **03/09/2025**: ✅ CORREÇÃO NMAP INTEGRADA - instalação obrigatória + verificação gobuster PATH
 - **03/09/2025**: ✅ CORREÇÃO SYSTEMD SERVICE - fix-systemd-service.sh criado para erro "path is not absolute" vlxsam04
 - **03/09/2025**: ✅ CORREÇÃO PERMISSÕES .ENV - fix-permissions-env.sh para erro "Permission denied" vlxsam04
+- **03/09/2025**: ✅ CORREÇÃO COMPLETA - fix-all-issues.sh master script para resolver todos os problemas vlxsam04
 - **02/09/2025**: ✅ COLLECTOR HEARTBEAT SYSTEM IMPLEMENTADO - evita duplicação + status automático ENROLLING→ONLINE→OFFLINE  
 - **02/09/2025**: ✅ vlxsam04 INSTALAÇÃO COMPLETA - collector registrado, token gerado, status ENROLLING→ONLINE automático
 - **02/09/2025**: ✅ vlxsam04 PYTHON DEPENDENCIES CORRIGIDO - usa apt em vez de pip para Ubuntu 24.04 externally-managed-environment  
