@@ -321,7 +321,19 @@ if command -v nmap >/dev/null 2>&1; then
     chown -R "$COLLECTOR_USER:$COLLECTOR_USER" "$TOOLS_DIR/nmap"
     log "✅ Nmap configurado: $(nmap --version 2>/dev/null | head -1 || echo 'versão indisponível')"
 else
-    warn "❌ CRÍTICO: Nmap não disponível - collector pode falhar"
+    # Verificar se nmap foi instalado mas não está no PATH
+    if dpkg -l | grep -q nmap; then
+        warn "⚠️ Nmap instalado mas não no PATH - corrigindo..."
+        NMAP_PATH=$(find /usr -name "nmap" -type f 2>/dev/null | head -1)
+        if [ -n "$NMAP_PATH" ]; then
+            ln -sf "$NMAP_PATH" /usr/local/bin/nmap
+            log "✅ Nmap linkado para PATH: $NMAP_PATH"
+        else
+            warn "❌ CRÍTICO: Nmap instalado mas binário não encontrado"
+        fi
+    else
+        warn "❌ CRÍTICO: Nmap não disponível - collector pode falhar"
+    fi
 fi
 
 # Masscan (já instalado via apt ou compilado)
@@ -424,7 +436,21 @@ if command -v gobuster >/dev/null 2>&1; then
     gobuster_version=$(gobuster version 2>&1 | grep "Version:" | cut -d' ' -f2 || echo "unknown")
     log "✅ Gobuster configurado (v$gobuster_version)"
 else
-    warn "❌ Gobuster não está disponível após instalação"
+    # Verificar se gobuster foi instalado mas não está no PATH
+    if dpkg -l | grep -q gobuster; then
+        warn "⚠️ Gobuster instalado mas não no PATH - corrigindo..."
+        GOBUSTER_PATH=$(find /usr -name "gobuster" -type f 2>/dev/null | head -1)
+        if [ -n "$GOBUSTER_PATH" ]; then
+            ln -sf "$GOBUSTER_PATH" /usr/local/bin/gobuster
+            log "✅ Gobuster linkado para PATH: $GOBUSTER_PATH"
+            gobuster_version=$(gobuster version 2>&1 | grep "Version:" | cut -d' ' -f2 || echo "unknown")
+            log "   Versão: v$gobuster_version"
+        else
+            warn "❌ Gobuster instalado mas binário não encontrado"
+        fi
+    else
+        warn "❌ Gobuster não instalado via apt"
+    fi
 fi
 
 # Cleanup arquivos temporários
@@ -987,12 +1013,12 @@ log "📝 Sistema de registro integrado ao heartbeat implementado"
 
 log "🔧 Implementando correção de duplicação de coletores..."
 
-# Criar configuração robusta para evitar duplicação
-cat > "$CONFIG_FILE" << 'CONFIG_EOF'
+# Criar configuração robusta para evitar duplicação - EXPANDIR VARIÁVEIS
+cat > "$CONFIG_FILE" << CONFIG_EOF
 # Configuração do Collector SamurEye - Anti-duplicação
-COLLECTOR_ID=${HOSTNAME}
+COLLECTOR_ID=$HOSTNAME
 COLLECTOR_NAME=${COLLECTOR_NAME}
-HOSTNAME=${HOSTNAME}
+HOSTNAME=$HOSTNAME
 IP_ADDRESS=${IP_ADDRESS}
 API_BASE_URL=${API_SERVER}
 HEARTBEAT_INTERVAL=30
