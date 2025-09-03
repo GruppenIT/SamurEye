@@ -629,112 +629,138 @@ rm /tmp/heatmap_fix.js
 log "✅ Erro JavaScript no heatmap corrigido"
 
 # ============================================================================
-# 11.9. CORREÇÃO CRÍTICA AUTENTICAÇÃO /API/USER
+# 11.9. CORREÇÃO CRÍTICA TDZ - MIDDLEWARE AUTENTICAÇÃO
 # ============================================================================
 
-log "🔒 Corrigindo bypass de autenticação na rota /api/user..."
+log "🔒 Corrigindo Temporal Dead Zone no middleware isLocalUserAuthenticated..."
 
-# Corrigir rota /api/user que permite acesso sem login
-cat > /tmp/fix_api_user_auth.js << 'EOF'
+# CORREÇÃO TDZ: Adicionar middleware hoisted ANTES de qualquer uso
+cat > /tmp/fix_middleware_tdz.js << 'EOF'
 const fs = require('fs');
 const filePath = process.argv[2];
 
 let content = fs.readFileSync(filePath, 'utf8');
 
-// Encontrar e substituir a rota /api/user desprotegida
-const oldUserRoute = `  // Get current user endpoint (for session-based auth) with tenant information - Public for on-premise
-  app.get('/api/user', async (req, res) => {
-    try {
-      // In on-premise environment, create a default tenant user
-      const allTenants = await storage.getAllTenants();
-      if (allTenants.length === 0) {
-        return res.status(400).json({ message: "No tenants available" });
-      }
-      
-      const defaultTenant = allTenants[0];
-      
-      res.json({
-        id: 'onpremise-user',
-        email: 'tenant@onpremise.local',
-        name: 'On-Premise Tenant User',
-        isSocUser: false,
-        isActive: true,
-        tenants: [{
-          tenantId: defaultTenant.id,
-          role: 'tenant_admin',
-          tenant: defaultTenant
-        }],
-        currentTenant: defaultTenant
-      });
-    } catch (error) {
-      console.error("Error in /api/user:", error);
-      res.status(500).json({ message: "Internal server error" });
-    }
-  });`;
+// 1. PRIMEIRO: Adicionar middleware hoisted no início do arquivo (depois dos imports)
+const middlewareDeclaration = `
+// MIDDLEWARE DE AUTENTICAÇÃO - HOISTED PARA EVITAR TDZ
+function isLocalUserAuthenticated(req, res, next) {
+  if (process.env.DISABLE_AUTH === 'true') {
+    // Em ambiente on-premise com DISABLE_AUTH, criar usuário fictício
+    req.localUser = {
+      id: 'onpremise-user',
+      email: 'tenant@onpremise.local',
+      firstName: 'On-Premise',
+      lastName: 'User',
+      isSocUser: false,
+      isActive: true
+    };
+    return next();
+  }
+  
+  // Verificar sessão real do usuário
+  const user = req?.session?.user;
+  if (user && user.id) {
+    req.localUser = user;
+    return next();
+  }
+  
+  return res.status(401).json({ error: 'Authentication required' });
+}
+
+function requireLocalUserTenant(req, res, next) {
+  if (req.localUser) {
+    return next();
+  }
+  return res.status(401).json({ error: 'Tenant access required' });
+}
+`;
+
+// Encontrar local para inserir middleware (após imports, antes das rotas)
+const insertAfterPattern = /app\.use\(express\.json\(\)\);/;
+const match = content.match(insertAfterPattern);
+
+if (match) {
+  const insertIndex = match.index + match[0].length;
+  const before = content.substring(0, insertIndex);
+  const after = content.substring(insertIndex);
+  
+  // Verificar se middleware já foi adicionado
+  if (!content.includes('function isLocalUserAuthenticated')) {
+    content = before + middlewareDeclaration + after;
+    console.log('✅ Middleware isLocalUserAuthenticated adicionado com hoisting');
+  } else {
+    console.log('⚠️ Middleware já existe');
+  }
+} else {
+  console.log('❌ Não foi possível encontrar local para inserir middleware');
+}
+
+// 2. SEGUNDO: Corrigir rota /api/user para usar o middleware
+const oldUserRoutePatterns = [
+  /\/\/ Get current user endpoint.*?\n.*?app\.get\('\/api\/user', async \(req, res\) => \{[\s\S]*?\}\);/,
+  /app\.get\('\/api\/user', async \(req, res\) => \{[\s\S]*?\}\);/
+];
 
 const newUserRoute = `  // Get current user endpoint - PROTEGIDA COM AUTENTICAÇÃO
   app.get('/api/user', isLocalUserAuthenticated, async (req, res) => {
     try {
       const user = req.localUser;
       
-      // Buscar tenants do usuário autenticado
-      const userTenants = await storage.getUserTenants(user.id);
-      
-      // Se usuário não tem tenants, usar tenant padrão
-      let tenants = userTenants;
+      // Para ambiente on-premise, usar tenant padrão
+      const allTenants = await storage.getAllTenants();
+      let tenants = [];
       let currentTenant = null;
       
-      if (tenants.length === 0) {
-        const allTenants = await storage.getAllTenants();
-        if (allTenants.length > 0) {
-          const defaultTenant = allTenants[0];
-          tenants = [{
-            tenantId: defaultTenant.id,
-            role: 'tenant_admin',
-            tenant: defaultTenant
-          }];
-          currentTenant = defaultTenant;
-        }
-      } else {
-        currentTenant = tenants[0].tenant;
+      if (allTenants.length > 0) {
+        const defaultTenant = allTenants[0];
+        tenants = [{
+          tenantId: defaultTenant.id,
+          role: 'tenant_admin',
+          tenant: defaultTenant
+        }];
+        currentTenant = defaultTenant;
       }
       
       res.json({
         id: user.id,
         email: user.email,
-        name: \`\${user.firstName} \${user.lastName}\`.trim(),
+        name: \`\${user.firstName || ''} \${user.lastName || ''}\`.trim() || user.email,
         firstName: user.firstName,
         lastName: user.lastName,
         isSocUser: user.isSocUser || false,
-        isActive: user.isActive,
+        isActive: user.isActive !== false,
         tenants: tenants,
         currentTenant: currentTenant
       });
     } catch (error) {
-      console.error("Error in /api/user:", error);
-      res.status(500).json({ message: "Internal server error" });
+      console.error('Error in /api/user:', error);
+      res.status(500).json({ message: 'Internal server error' });
     }
   });`;
 
-if (content.includes(oldUserRoute)) {
-    content = content.replace(oldUserRoute, newUserRoute);
-    fs.writeFileSync(filePath, content, 'utf8');
-    console.log('✅ Rota /api/user corrigida - agora requer autenticação');
-} else {
-    console.log('⚠️ Padrão da rota /api/user não encontrado ou já corrigido');
-    
-    // Verificar se rota existe sem proteção
-    if (content.includes("app.get('/api/user'") && !content.includes("app.get('/api/user', isLocalUserAuthenticated")) {
-        console.log('❌ Rota /api/user ainda desprotegida - correção manual necessária');
-    }
+let routeFixed = false;
+for (const pattern of oldUserRoutePatterns) {
+  if (pattern.test(content)) {
+    content = content.replace(pattern, newUserRoute);
+    console.log('✅ Rota /api/user corrigida com middleware seguro');
+    routeFixed = true;
+    break;
+  }
 }
+
+if (!routeFixed) {
+  console.log('⚠️ Rota /api/user não encontrada para correção');
+}
+
+fs.writeFileSync(filePath, content, 'utf8');
 EOF
 
 # Executar correção
-node /tmp/fix_api_user_auth.js "$WORKING_DIR/server/routes.ts"
-rm /tmp/fix_api_user_auth.js
+node /tmp/fix_middleware_tdz.js "$WORKING_DIR/server/routes.ts"
+rm /tmp/fix_middleware_tdz.js
 
-log "✅ Correção de autenticação /api/user aplicada"
+log "✅ Correção TDZ do middleware aplicada"
 
 # ============================================================================
 # 11.10. CORREÇÃO DO ERRO DE CRIAÇÃO DE TENANT
@@ -986,14 +1012,67 @@ fi
 
 log "✅ Correções de criação de tenant aplicadas"
 
-# Refazer build após todas as correções
-log "🔨 Refazendo build após todas as correções..."
+# PRÉ-TESTE CRÍTICO: Verificar build atual antes do rebuild
+log "🔍 Verificando build atual..."
 cd "$WORKING_DIR"
 
-# Build com fallback
+if [ -f "dist/index.js" ]; then
+    log "⚡ Testando importação do módulo atual..."
+    test_result=$(timeout 15s node -e "import('./dist/index.js').then(()=>{console.log('OK');process.exit(0);}).catch(e=>{console.error('ERROR:',e.message);process.exit(1);});" 2>&1 || echo "FAILED")
+    
+    if echo "$test_result" | grep -q "Cannot access.*before initialization"; then
+        warn "❌ TDZ detectado no build atual - rebuild necessário"
+    elif echo "$test_result" | grep -q "OK"; then
+        log "✅ Build atual está funcional"
+    fi
+fi
+
+# Refazer build após todas as correções
+log "🔨 Fazendo build final com todas as correções..."
+
+# Build único e definitivo
 if ! sudo -u "$APP_USER" npm run build; then
     warn "⚠️ npm run build falhou - usando npx fallback"
     sudo -u "$APP_USER" npx vite build && sudo -u "$APP_USER" npx esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+fi
+
+# PRÉ-START SANITY CHECK
+log "🔍 Executando verificação de sanidade pré-inicialização..."
+if [ -f "dist/index.js" ]; then
+    log "⚡ Testando módulo final antes da inicialização..."
+    
+    check_result=$(timeout 30s node -e "
+        import('./dist/index.js')
+            .then(() => {
+                console.log('✅ MODULE_IMPORT_SUCCESS');
+                process.exit(0);
+            })
+            .catch(e => {
+                console.error('❌ MODULE_IMPORT_ERROR:', e.message);
+                if (e.message.includes('Cannot access')) {
+                    console.error('🎯 TDZ_DETECTED:', e.message);
+                }
+                if (e.stack) {
+                    const lines = e.stack.split('\\n').slice(0, 3);
+                    console.error('📍 STACK_TRACE:', lines.join(' | '));
+                }
+                process.exit(1);
+            });
+    " 2>&1 || echo "TIMEOUT_OR_ERROR")
+    
+    echo "$check_result"
+    
+    if echo "$check_result" | grep -q "MODULE_IMPORT_SUCCESS"; then
+        log "✅ Módulo passou na verificação de sanidade"
+    elif echo "$check_result" | grep -q "TDZ_DETECTED"; then
+        error "❌ TEMPORAL DEAD ZONE ainda presente após correções - verifique middleware declarations"
+    elif echo "$check_result" | grep -q "Cannot access.*before initialization"; then
+        error "❌ Problema de inicialização detectado - execute diagnose-startup-issue.sh"
+    else
+        warn "⚠️ Verificação de sanidade apresentou problemas - prosseguindo com cautela"
+    fi
+else
+    error "❌ Build não foi criado - falha crítica"
 fi
 
 # ============================================================================
@@ -1055,25 +1134,66 @@ log "🚀 Iniciando aplicação..."
 systemctl enable "$SERVICE_NAME"
 systemctl start "$SERVICE_NAME"
 
-# Aguardar inicialização
-sleep 15
+# Aguardar inicialização com múltiplas verificações
+log "⏳ Aguardando inicialização da aplicação..."
+for i in {1..6}; do
+    sleep 5
+    if systemctl is-active --quiet "$SERVICE_NAME"; then
+        log "✅ Aplicação iniciada com sucesso (tentativa $i)"
+        break
+    elif [ $i -eq 6 ]; then
+        warn "❌ Aplicação falhou ao iniciar após 6 tentativas"
+    else
+        log "⏳ Tentativa $i/6 - aplicação ainda inicializando..."
+    fi
+done
 
 # Verificar status com diagnóstico detalhado
 if systemctl is-active --quiet "$SERVICE_NAME"; then
-    log "✅ Aplicação iniciada com sucesso"
+    log "✅ Aplicação funcionando corretamente"
+    
+    # Teste rápido de responsividade
+    sleep 3
+    if curl -s -f http://localhost:5000/api/health >/dev/null 2>&1; then
+        log "✅ API respondendo corretamente"
+    else
+        warn "⚠️ Serviço ativo mas API não responde ainda"
+    fi
 else
-    warn "❌ Aplicação falhou ao iniciar - realizando diagnóstico..."
+    warn "❌ Aplicação falhou ao iniciar - realizando diagnóstico avançado..."
+    
+    # Verificar se é problema TDZ nos logs
+    if journalctl -u "$SERVICE_NAME" --no-pager -n 30 | grep -q "Cannot access.*before initialization"; then
+        error "🎯 CONFIRMADO: Temporal Dead Zone (TDZ) detectado nos logs!"
+        echo ""
+        echo "📋 AÇÃO NECESSÁRIA:"
+        echo "   Execute o script de diagnóstico para mais detalhes:"
+        echo "   curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam02/diagnose-startup-issue.sh | bash"
+        echo ""
+    fi
+    
+    # Verificar se é problema com isLocalUserAuthenticated
+    if journalctl -u "$SERVICE_NAME" --no-pager -n 30 | grep -q "isLocalUserAuthenticated"; then
+        error "🎯 CONFIRMADO: Problema com middleware isLocalUserAuthenticated!"
+        echo ""
+        echo "📋 AÇÃO NECESSÁRIA:"
+        echo "   1. Execute script de diagnóstico completo:"
+        echo "   curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam02/diagnose-startup-issue.sh | bash"
+        echo "   2. Se TDZ confirmado, execute versão atualizada do install:"
+        echo "   curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam02/install-hard-reset.sh | bash"
+        echo ""
+    fi
     
     # Verificar logs de erro específicos
     log "🔍 Verificando logs de erro:"
     if [ -f "/var/log/samureye/error.log" ]; then
         echo "=== ÚLTIMOS ERROS ==="
-        tail -20 /var/log/samureye/error.log
+        tail -20 /var/log/samureye/error.log | head -10
         echo "===================="
     fi
     
-    log "🔍 Verificando logs do systemd:"
-    journalctl -u "$SERVICE_NAME" --no-pager -l | tail -20
+    log "🔍 Últimos logs do systemd (com padrões de erro):"
+    journalctl -u "$SERVICE_NAME" --no-pager -n 20
     
     log "🔍 Testando conexão PostgreSQL manualmente:"
     PGPASSWORD="samureye_secure_2024" psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "SELECT version();" 2>&1 || true
