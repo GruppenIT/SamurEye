@@ -723,6 +723,29 @@ if timeout 10 nc -z "$POSTGRES_HOST" "$POSTGRES_PORT" 2>/dev/null; then
         # Configurar variáveis de ambiente para Drizzle
         export DATABASE_URL="postgresql://${POSTGRES_USER}:samureye_secure_2024@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}"
         
+        # Executar db:push para sincronizar schema
+        log "🗃️ Sincronizando schema do banco de dados..."
+        if npm run db:push --force 2>/dev/null; then
+            log "✅ Schema sincronizado com sucesso via npm run db:push"
+            
+            # Verificar se tabelas foram criadas
+            log "📋 Verificando tabelas criadas..."
+            if echo "SELECT tablename FROM pg_tables WHERE schemaname = 'public' ORDER BY tablename;" | psql "$DATABASE_URL" -t 2>/dev/null; then
+                log "✅ Tabelas verificadas com sucesso"
+            fi
+        else
+            warn "⚠️ npm run db:push falhou, tentando drizzle-kit diretamente..."
+            
+            # Tentar métodos alternativos
+            for cmd in "npx drizzle-kit push --force" "npx drizzle-kit push" "npx drizzle-kit push:pg"; do
+                log "🔄 Tentando: $cmd"
+                if $cmd 2>/dev/null; then
+                    log "✅ Schema sincronizado com $cmd"
+                    break
+                fi
+            done
+        fi
+        
         # Fazer push do schema se necessário  
         if sudo -u "$APP_USER" DATABASE_URL="$DATABASE_URL" npm run db:push 2>/dev/null; then
             log "✅ Schema do banco de dados atualizado"
