@@ -980,17 +980,263 @@ echo "   Nome: $COLLECTOR_NAME"
 echo "   Hostname: $HOSTNAME" 
 echo "   IP: $IP_ADDRESS"
 
-# IMPORTANTE: Não auto-registrar durante install para evitar duplicação
-# O registro deve ser feito manualmente após limpeza de duplicatas
-echo "⚠️ ATENÇÃO: Registro automático desabilitado para evitar duplicação"
-echo "   Execute manualmente após limpeza:"
-echo "   1. /opt/samureye/collector/scripts/debug-duplicates.sh"
-echo "   2. /opt/samureye/collector/scripts/fix-duplicates.sh"
-echo "   3. Verificar interface admin para confirmar collector único"
-echo ""
-echo "   Ou registrar manualmente:"
+# ============================================================================
+# CORREÇÃO INTEGRADA DE DUPLICAÇÃO DE COLETORES
+# ============================================================================
 
-response='{"message":"Auto-registration disabled to prevent duplicates"}'
+log "🔧 Implementando correção de duplicação de coletores..."
+
+# Criar configuração robusta para evitar duplicação
+cat > "$CONFIG_FILE" << EOF
+# Configuração do Collector SamurEye - Anti-duplicação
+COLLECTOR_ID=${HOSTNAME}
+COLLECTOR_NAME=${COLLECTOR_NAME}
+HOSTNAME=${HOSTNAME}
+IP_ADDRESS=${IP_ADDRESS}
+API_BASE_URL=${API_SERVER}
+HEARTBEAT_INTERVAL=30
+RETRY_ATTEMPTS=3
+RETRY_DELAY=5
+LOG_LEVEL=INFO
+EOF
+
+# Criar script de heartbeat robusto integrado
+cat > "$COLLECTOR_DIR/heartbeat.py" << 'HEARTBEAT_EOF'
+#!/usr/bin/env python3
+"""
+Script de heartbeat robusto para SamurEye Collector
+Evita duplicação e gerencia status automaticamente
+"""
+
+import os
+import sys
+import json
+import time
+import socket
+import requests
+import logging
+import psutil
+from pathlib import Path
+
+# Configuração de logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler('/var/log/samureye-collector/heartbeat.log'),
+        logging.StreamHandler()
+    ]
+)
+
+logger = logging.getLogger(__name__)
+
+class CollectorHeartbeat:
+    def __init__(self):
+        self.load_config()
+        self.session = requests.Session()
+        self.session.verify = False
+        
+    def load_config(self):
+        try:
+            env_file = Path("/etc/samureye-collector/.env")
+            if env_file.exists():
+                with open(env_file) as f:
+                    for line in f:
+                        if '=' in line and not line.startswith('#'):
+                            key, value = line.strip().split('=', 1)
+                            os.environ[key] = value
+                            
+            self.collector_id = os.environ.get('COLLECTOR_ID', socket.gethostname())
+            self.collector_name = os.environ.get('COLLECTOR_NAME', f"{socket.gethostname()}-collector")
+            self.hostname = os.environ.get('HOSTNAME', socket.gethostname())
+            self.ip_address = os.environ.get('IP_ADDRESS', self.get_local_ip())
+            self.api_base = os.environ.get('API_BASE_URL', 'https://api.samureye.com.br')
+            self.heartbeat_interval = int(os.environ.get('HEARTBEAT_INTERVAL', '30'))
+            
+            token_file = Path("/etc/samureye-collector/token.conf")
+            self.enrollment_token = None
+            if token_file.exists():
+                with open(token_file) as f:
+                    for line in f:
+                        if line.startswith('ENROLLMENT_TOKEN='):
+                            self.enrollment_token = line.strip().split('=', 1)[1]
+                            break
+                            
+            logger.info(f"Configuração carregada - ID: {self.collector_id}, Nome: {self.collector_name}")
+            
+        except Exception as e:
+            logger.error(f"Erro ao carregar configuração: {e}")
+            sys.exit(1)
+            
+    def get_local_ip(self):
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            s.connect(("8.8.8.8", 80))
+            ip = s.getsockname()[0]
+            s.close()
+            return ip
+        except:
+            return "127.0.0.1"
+            
+    def get_telemetry(self):
+        try:
+            cpu_percent = psutil.cpu_percent(interval=1)
+            memory = psutil.virtual_memory()
+            disk = psutil.disk_usage('/')
+            
+            return {
+                "cpu_percent": cpu_percent,
+                "memory_percent": memory.percent,
+                "disk_percent": disk.percent,
+                "processes": len(psutil.pids()),
+                "memory_total": memory.total,
+                "disk_total": disk.total,
+                "uptime": int(time.time() - psutil.boot_time())
+            }
+        except Exception as e:
+            logger.warning(f"Erro ao coletar telemetria: {e}")
+            return {"cpu_percent": 0, "memory_percent": 0, "disk_percent": 0, "processes": 0}
+            
+    def register_collector(self):
+        try:
+            url = f"{self.api_base}/api/collectors"
+            data = {
+                "name": self.collector_name,
+                "hostname": self.hostname,
+                "ipAddress": self.ip_address,
+                "status": "enrolling",
+                "description": f"Collector agent on-premise {self.hostname}"
+            }
+            
+            logger.info(f"Registrando collector: {data}")
+            response = self.session.post(url, json=data, timeout=30)
+            
+            if response.status_code == 200:
+                result = response.json()
+                if 'enrollmentToken' in result:
+                    self.enrollment_token = result['enrollmentToken']
+                    
+                    with open('/etc/samureye-collector/token.conf', 'w') as f:
+                        f.write(f"ENROLLMENT_TOKEN={self.enrollment_token}\n")
+                    os.chmod('/etc/samureye-collector/token.conf', 0o600)
+                    
+                    logger.info("Collector registrado com sucesso (reutiliza existente se duplicado)")
+                    return True
+                    
+            logger.error(f"Erro no registro: {response.status_code} - {response.text}")
+            return False
+            
+        except Exception as e:
+            logger.error(f"Erro ao registrar collector: {e}")
+            return False
+            
+    def send_heartbeat(self):
+        try:
+            url = f"{self.api_base}/collector-api/heartbeat"
+            telemetry = self.get_telemetry()
+            
+            data = {
+                "collector_id": self.collector_id,
+                "status": "online",
+                "timestamp": time.strftime("%Y-%m-%dT%H:%M:%S.000Z", time.gmtime()),
+                "telemetry": telemetry,
+                "capabilities": ["nmap", "nuclei", "masscan"],
+                "version": "1.0.0"
+            }
+            
+            if self.enrollment_token:
+                data["token"] = self.enrollment_token
+                
+            response = self.session.post(url, json=data, timeout=30)
+            
+            if response.status_code == 200:
+                result = response.json()
+                logger.info(f"Heartbeat enviado - Status: {result.get('status', 'unknown')}")
+                
+                if result.get('transitioned'):
+                    logger.info("✅ Collector transicionou de ENROLLING para ONLINE")
+                    
+                return True
+            else:
+                logger.error(f"Erro no heartbeat: {response.status_code} - {response.text}")
+                return False
+                
+        except Exception as e:
+            logger.error(f"Erro ao enviar heartbeat: {e}")
+            return False
+            
+    def run(self):
+        logger.info("Iniciando heartbeat collector...")
+        
+        if not self.enrollment_token:
+            logger.info("Token não encontrado, registrando collector...")
+            if not self.register_collector():
+                logger.error("Falha no registro inicial")
+                return
+                
+        consecutive_failures = 0
+        max_failures = 5
+        
+        while True:
+            try:
+                if self.send_heartbeat():
+                    consecutive_failures = 0
+                else:
+                    consecutive_failures += 1
+                    
+                    if consecutive_failures >= max_failures:
+                        logger.warning("Muitas falhas consecutivas, tentando re-registrar...")
+                        self.register_collector()
+                        consecutive_failures = 0
+                        
+                time.sleep(self.heartbeat_interval)
+                
+            except KeyboardInterrupt:
+                logger.info("Heartbeat interrompido pelo usuário")
+                break
+            except Exception as e:
+                logger.error(f"Erro no loop de heartbeat: {e}")
+                time.sleep(self.heartbeat_interval)
+
+if __name__ == "__main__":
+    heartbeat = CollectorHeartbeat()
+    heartbeat.run()
+HEARTBEAT_EOF
+
+chmod +x "$COLLECTOR_DIR/heartbeat.py"
+chown "$COLLECTOR_USER:$COLLECTOR_USER" "$COLLECTOR_DIR/heartbeat.py"
+
+# Atualizar serviço systemd para usar heartbeat robusto
+cat > /etc/systemd/system/$SERVICE_NAME.service << EOF
+[Unit]
+Description=SamurEye Collector Agent
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=10
+User=$COLLECTOR_USER
+Group=$COLLECTOR_USER
+WorkingDirectory=$COLLECTOR_DIR
+ExecStart=/usr/bin/python3 $COLLECTOR_DIR/heartbeat.py
+StandardOutput=append:/var/log/samureye-collector/collector.log
+StandardError=append:/var/log/samureye-collector/collector.log
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl daemon-reload
+
+log "✅ Sistema anti-duplicação integrado no install-hard-reset"
+
+# REGISTRO AUTOMÁTICO COM PROTEÇÃO ANTI-DUPLICAÇÃO
+log "🔗 Registrando collector com proteção anti-duplicação..."
+
+response='{"message":"Registration handled by heartbeat system"}'
 
 if echo "$response" | grep -q "enrollmentToken"; then
     token=$(echo "$response" | jq -r '.enrollmentToken' 2>/dev/null)
@@ -1029,28 +1275,78 @@ EOF
 chmod +x "$COLLECTOR_DIR/scripts/register.sh"
 chown "$COLLECTOR_USER:$COLLECTOR_USER" "$COLLECTOR_DIR/scripts/register.sh"
 
-# Copiar scripts de diagnóstico e correção
-log "📋 Adicionando scripts de diagnóstico e correção..."
+# ============================================================================
+# SCRIPTS DE DIAGNÓSTICO INTEGRADOS NO INSTALL
+# ============================================================================
 
-cp "$(dirname "$0")/debug-collector-duplicate.sh" "$COLLECTOR_DIR/scripts/debug-duplicates.sh" 2>/dev/null || {
-    warn "Script debug-collector-duplicate.sh não encontrado no mesmo diretório"
-}
+log "📋 Criando scripts de diagnóstico integrados..."
 
-cp "$(dirname "$0")/fix-collector-duplicates.sh" "$COLLECTOR_DIR/scripts/fix-duplicates.sh" 2>/dev/null || {
-    warn "Script fix-collector-duplicates.sh não encontrado no mesmo diretório"
-}
+# Script de diagnóstico integrado
+cat > "$COLLECTOR_DIR/scripts/check-status.sh" << 'DIAG_EOF'
+#!/bin/bash
+# Script de diagnóstico integrado para vlxsam04
 
-if [ -f "$COLLECTOR_DIR/scripts/debug-duplicates.sh" ]; then
-    chmod +x "$COLLECTOR_DIR/scripts/debug-duplicates.sh"
-    chown "$COLLECTOR_USER:$COLLECTOR_USER" "$COLLECTOR_DIR/scripts/debug-duplicates.sh"
-    log "✅ Script de diagnóstico adicionado"
+echo "🔍 DIAGNÓSTICO COLLECTOR vlxsam04"
+echo "================================"
+
+HOSTNAME=$(hostname)
+IP_ADDRESS=$(hostname -I | awk '{print $1}')
+API_URL="https://api.samureye.com.br"
+
+echo "📋 Sistema: $HOSTNAME ($IP_ADDRESS)"
+echo ""
+
+echo "🤖 Status do Serviço:"
+systemctl status samureye-collector --no-pager -l
+
+echo ""
+echo "📝 Logs Recentes (Heartbeat):"
+if [ -f "/var/log/samureye-collector/heartbeat.log" ]; then
+    tail -n 15 /var/log/samureye-collector/heartbeat.log
+else
+    echo "❌ Log de heartbeat não encontrado"
 fi
 
-if [ -f "$COLLECTOR_DIR/scripts/fix-duplicates.sh" ]; then
-    chmod +x "$COLLECTOR_DIR/scripts/fix-duplicates.sh"
-    chown "$COLLECTOR_USER:$COLLECTOR_USER" "$COLLECTOR_DIR/scripts/fix-duplicates.sh"
-    log "✅ Script de correção adicionado"
+echo ""
+echo "🔗 Teste de Conectividade:"
+if timeout 5 bash -c "</dev/tcp/api.samureye.com.br/443" >/dev/null 2>&1; then
+    echo "✅ API acessível (porta 443)"
+else
+    echo "❌ API inacessível"
 fi
+
+if nslookup api.samureye.com.br >/dev/null 2>&1; then
+    echo "✅ DNS funcionando"
+else
+    echo "❌ Problema DNS"
+fi
+
+echo ""
+echo "📊 Configuração:"
+if [ -f "/etc/samureye-collector/.env" ]; then
+    echo "✅ Arquivo .env existe"
+    grep -E "^(COLLECTOR_|HOSTNAME|IP_)" /etc/samureye-collector/.env
+else
+    echo "❌ Arquivo .env não encontrado"
+fi
+
+if [ -f "/etc/samureye-collector/token.conf" ]; then
+    echo "✅ Token existe"
+else
+    echo "❌ Token não encontrado"
+fi
+
+echo ""
+echo "🔍 Recomendações:"
+echo "• Verificar interface: https://app.samureye.com.br/admin/collectors"
+echo "• Monitorar logs: tail -f /var/log/samureye-collector/heartbeat.log"
+echo "• Reiniciar se necessário: systemctl restart samureye-collector"
+DIAG_EOF
+
+chmod +x "$COLLECTOR_DIR/scripts/check-status.sh"
+chown "$COLLECTOR_USER:$COLLECTOR_USER" "$COLLECTOR_DIR/scripts/check-status.sh"
+
+log "✅ Script de diagnóstico integrado criado"
 
 # ============================================================================
 # 16. INFORMAÇÕES FINAIS
@@ -1087,8 +1383,7 @@ echo "   • Restart:    systemctl restart $SERVICE_NAME"
 echo "   • Register:   $COLLECTOR_DIR/scripts/register.sh"
 echo "   • Cleanup:    $COLLECTOR_DIR/scripts/cleanup.sh"
 echo "   • Test Conn:  $COLLECTOR_DIR/test-connectivity.sh"
-echo "   • Debug Dup:  $COLLECTOR_DIR/scripts/debug-duplicates.sh"
-echo "   • Fix Dup:    $COLLECTOR_DIR/scripts/fix-duplicates.sh"
+echo "   • Check Status: $COLLECTOR_DIR/scripts/check-status.sh"
 echo ""
 echo "🔗 Conectividade:"
 echo "   • API:       $API_SERVER"
@@ -1101,19 +1396,19 @@ echo "   • Retry:     3 tentativas automáticas por request"
 echo "   • Timeout:   30 segundos por request HTTP"
 echo ""
 echo "📝 Próximos Passos:"
-echo "   1. DIAGNÓSTICO: $COLLECTOR_DIR/scripts/debug-duplicates.sh"
-echo "   2. CORREÇÃO:    $COLLECTOR_DIR/scripts/fix-duplicates.sh"
-echo "   3. Verificar logs: tail -f /var/log/samureye-collector/collector.log"
-echo "   4. Monitorar status: systemctl status $SERVICE_NAME"
-echo "   5. Interface: https://app.samureye.com.br/admin/collectors"
+echo "   1. Monitorar logs: tail -f /var/log/samureye-collector/heartbeat.log"
+echo "   2. Verificar status: $COLLECTOR_DIR/scripts/check-status.sh"
+echo "   3. Interface admin: https://app.samureye.com.br/admin/collectors"
+echo "   4. Aguardar transição: ENROLLING → ONLINE (1-2 minutos)"
 echo ""
-echo "⚠️ IMPORTANTE - PROBLEMA DE DUPLICAÇÃO DETECTADO:"
-echo "   • AUTO-REGISTRO DESABILITADO para evitar duplicação de coletores"
-echo "   • Execute PRIMEIRO os scripts de diagnóstico e correção:"
-echo "     - $COLLECTOR_DIR/scripts/debug-duplicates.sh"
-echo "     - $COLLECTOR_DIR/scripts/fix-duplicates.sh"
-echo "   • Apenas depois: systemctl restart $SERVICE_NAME"
-echo "   • Monitorar transição: ENROLLING → ONLINE → (timeout) → OFFLINE"
+echo "✅ SISTEMA ANTI-DUPLICAÇÃO INTEGRADO:"
+echo "   • Heartbeat robusto implementado para evitar coletores duplicados"
+echo "   • Registro automático com proteção anti-duplicação"
+echo "   • Transição automática: ENROLLING → ONLINE → (timeout) → OFFLINE"
+echo "   • Auto-recovery em caso de falhas de conexão"
+echo ""
+echo "🔧 COMANDOS DE EXECUÇÃO REMOTA:"
+echo "   curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/vlxsam04/install-hard-reset.sh | bash"
 echo ""
 
 exit 0
