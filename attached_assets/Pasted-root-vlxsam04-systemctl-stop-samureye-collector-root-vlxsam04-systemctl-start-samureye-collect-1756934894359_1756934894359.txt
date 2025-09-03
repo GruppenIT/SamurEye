@@ -1,0 +1,44 @@
+root@vlxsam04:~# systemctl stop samureye-collector
+root@vlxsam04:~# systemctl start samureye-collector
+root@vlxsam04:~# systemctl status samureye-collector
+● samureye-collector.service - SamurEye Collector Agent
+     Loaded: loaded (/etc/systemd/system/samureye-collector.service; enabled; preset: enabled)
+     Active: activating (auto-restart) since Wed 2025-09-03 18:21:10 -03; 4s ago
+    Process: 262853 ExecStart=/usr/bin/python3 /opt/samureye/collector/heartbeat.py (code=exited, status=0/SUCCESS)
+   Main PID: 262853 (code=exited, status=0/SUCCESS)
+        CPU: 255ms
+root@vlxsam04:~# tail -f /var/log/samureye-collector/collector.log
+2025-09-03 18:27:43,417 - ERROR - Erro no registro: 401 - {"message":"Unauthorized"}
+2025-09-03 18:27:43,417 - ERROR - Falha no registro inicial
+2025-09-03 18:27:53,609 - INFO - Configuração carregada - ID: vlxsam04, Nome:
+2025-09-03 18:27:53,609 - INFO - Iniciando heartbeat collector...
+2025-09-03 18:27:53,609 - INFO - Token não encontrado, registrando collector...
+2025-09-03 18:27:53,609 - INFO - Registrando collector: {'name': '', 'hostname': 'vlxsam04', 'ipAddress': '', 'status': 'enrolling', 'description': 'Collector agent on-premise vlxsam04'}
+/usr/lib/python3/dist-packages/urllib3/connectionpool.py:1100: InsecureRequestWarning: Unverified HTTPS request is being made to host 'api.samureye.com.br'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+2025-09-03 18:27:53,659 - ERROR - Erro no registro: 401 - {"message":"Unauthorized"}
+2025-09-03 18:27:53,660 - ERROR - Falha no registro inicial
+2025-09-03 18:28:03,866 - INFO - Configuração carregada - ID: vlxsam04, Nome:
+2025-09-03 18:28:03,867 - INFO - Iniciando heartbeat collector...
+2025-09-03 18:28:03,867 - INFO - Token não encontrado, registrando collector...
+2025-09-03 18:28:03,867 - INFO - Registrando collector: {'name': '', 'hostname': 'vlxsam04', 'ipAddress': '', 'status': 'enrolling', 'description': 'Collector agent on-premise vlxsam04'}
+/usr/lib/python3/dist-packages/urllib3/connectionpool.py:1100: InsecureRequestWarning: Unverified HTTPS request is being made to host 'api.samureye.com.br'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+2025-09-03 18:28:03,926 - ERROR - Erro no registro: 401 - {"message":"Unauthorized"}
+2025-09-03 18:28:03,926 - ERROR - Falha no registro inicial
+2025-09-03 18:28:14,365 - INFO - Configuração carregada - ID: vlxsam04, Nome:
+2025-09-03 18:28:14,365 - INFO - Iniciando heartbeat collector...
+2025-09-03 18:28:14,365 - INFO - Token não encontrado, registrando collector...
+2025-09-03 18:28:14,365 - INFO - Registrando collector: {'name': '', 'hostname': 'vlxsam04', 'ipAddress': '', 'status': 'enrolling', 'description': 'Collector agent on-premise vlxsam04'}
+/usr/lib/python3/dist-packages/urllib3/connectionpool.py:1100: InsecureRequestWarning: Unverified HTTPS request is being made to host 'api.samureye.com.br'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+2025-09-03 18:28:14,413 - ERROR - Erro no registro: 401 - {"message":"Unauthorized"}
+2025-09-03 18:28:14,413 - ERROR - Falha no registro inicial
+2025-09-03 18:28:24,604 - INFO - Configuração carregada - ID: vlxsam04, Nome:
+2025-09-03 18:28:24,604 - INFO - Iniciando heartbeat collector...
+2025-09-03 18:28:24,604 - INFO - Token não encontrado, registrando collector...
+2025-09-03 18:28:24,604 - INFO - Registrando collector: {'name': '', 'hostname': 'vlxsam04', 'ipAddress': '', 'status': 'enrolling', 'description': 'Collector agent on-premise vlxsam04'}
+/usr/lib/python3/dist-packages/urllib3/connectionpool.py:1100: InsecureRequestWarning: Unverified HTTPS request is being made to host 'api.samureye.com.br'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+2025-09-03 18:28:24,650 - ERROR - Erro no registro: 401 - {"message":"Unauthorized"}
+2025-09-03 18:28:24,651 - ERROR - Falha no registro inicial

@@ -1384,7 +1384,109 @@ chown "$COLLECTOR_USER:$COLLECTOR_USER" "$COLLECTOR_DIR/scripts/check-status.sh"
 log "✅ Script de diagnóstico integrado criado"
 
 # ============================================================================
-# 16. INFORMAÇÕES FINAIS
+# 16. CORREÇÃO AUTOMÁTICA DE PROBLEMAS DE AUTENTICAÇÃO
+# ============================================================================
+
+log "🔧 Verificando e corrigindo problemas de autenticação..."
+
+# Verificar se existe token corrompido ou problema de autenticação
+if [ -f "$CONFIG_FILE" ]; then
+    # Verificar se há logs de erro 401 recentes
+    if [ -f "/var/log/samureye-collector/collector.log" ]; then
+        RECENT_401_ERRORS=$(grep "401.*Unauthorized" "/var/log/samureye-collector/collector.log" 2>/dev/null | tail -5 | wc -l)
+        
+        if [ "$RECENT_401_ERRORS" -gt 0 ]; then
+            warn "⚠️ Detectados erros 401 Unauthorized recentes ($RECENT_401_ERRORS)"
+            log "🔧 Aplicando correção automática..."
+            
+            # Parar serviço
+            if systemctl is-active --quiet "$SERVICE_NAME" 2>/dev/null; then
+                systemctl stop "$SERVICE_NAME"
+                log "✅ Serviço parado para correção"
+            fi
+            
+            # Limpar token corrompido
+            if grep -q "^COLLECTOR_TOKEN=" "$CONFIG_FILE"; then
+                sed -i '/^COLLECTOR_TOKEN=/d' "$CONFIG_FILE"
+                log "✅ Token corrompido removido"
+            fi
+            
+            # Limpar arquivos de configuração problemáticos
+            rm -f "$COLLECTOR_DIR/config.json" "$COLLECTOR_DIR/.collector_id" "$COLLECTOR_DIR/collector.pid" 2>/dev/null
+            
+            # Limpar logs com erros
+            if [ -f "/var/log/samureye-collector/collector.log" ]; then
+                tail -50 "/var/log/samureye-collector/collector.log" > "/var/log/samureye-collector/collector.log.tmp"
+                mv "/var/log/samureye-collector/collector.log.tmp" "/var/log/samureye-collector/collector.log"
+                log "✅ Logs com erros limpos"
+            fi
+            
+            # Criar instruções de re-registro
+            cat > "$COLLECTOR_DIR/REREGISTER_REQUIRED.txt" << 'REREG_EOF'
+❗ CORREÇÃO APLICADA - RE-REGISTRO NECESSÁRIO
+================================================
+
+Problema detectado: Erros 401 Unauthorized
+Correção aplicada: Token corrompido removido
+
+🔄 PARA REATIVAR O COLLECTOR:
+
+1. Crie NOVO collector na interface:
+   https://app.samureye.com.br/admin/collectors
+
+2. Execute comando de registro:
+   curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/register-collector.sh | bash -s -- <tenant-slug> <enrollment-token>
+
+3. Collector voltará automaticamente para ONLINE
+
+REReg_EOF
+            
+            chown "$COLLECTOR_USER:$COLLECTOR_USER" "$COLLECTOR_DIR/REREGISTER_REQUIRED.txt"
+            
+            warn "⚠️ Correção aplicada - RE-REGISTRO NECESSÁRIO"
+            echo "   • Instruções salvas em: $COLLECTOR_DIR/REREGISTER_REQUIRED.txt"
+            echo "   • Collector não iniciará automaticamente"
+            echo "   • Execute register-collector.sh com novo token"
+            
+        else
+            log "✅ Nenhum erro de autenticação detectado"
+        fi
+    fi
+fi
+
+# Criar script de diagnóstico específico para problemas 401
+cat > "$COLLECTOR_DIR/scripts/diagnose-401-issue.sh" << 'DIAG401_EOF'
+#!/bin/bash
+# Diagnóstico rápido para problemas 401 Unauthorized
+echo "🔍 Verificando problema 401 Unauthorized..."
+echo ""
+
+if [ -f "/var/log/samureye-collector/collector.log" ]; then
+    ERRORS_401=$(grep "401.*Unauthorized" "/var/log/samureye-collector/collector.log" 2>/dev/null | wc -l)
+    echo "Erros 401 encontrados: $ERRORS_401"
+    
+    if [ "$ERRORS_401" -gt 0 ]; then
+        echo ""
+        echo "⚠️ PROBLEMA CONFIRMADO: Collector com erro de autenticação"
+        echo ""
+        echo "🔧 SOLUÇÃO:"
+        echo "   curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/fix-collector-401-issue.sh | bash"
+        echo ""
+    else
+        echo "✅ Nenhum erro 401 encontrado"
+    fi
+else
+    echo "⚠️ Log file não encontrado"
+fi
+DIAG401_EOF
+
+chmod +x "$COLLECTOR_DIR/scripts/diagnose-401-issue.sh"
+chown "$COLLECTOR_USER:$COLLECTOR_USER" "$COLLECTOR_DIR/scripts/diagnose-401-issue.sh"
+
+log "✅ Sistema de correção automática integrado"
+
+# ============================================================================
+# 17. INFORMAÇÕES FINAIS
 # ============================================================================
 
 echo ""
@@ -1465,6 +1567,16 @@ echo "     curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/
 echo ""
 echo "   • Verificar status:"
 echo "     $COLLECTOR_DIR/scripts/check-status.sh"
+echo ""
+echo "🔍 DIAGNÓSTICO E CORREÇÃO:"
+echo "   • Diagnóstico problema 401 Unauthorized:"
+echo "     curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/diagnose-collector-401-unauthorized.sh | bash"
+echo ""
+echo "   • Correção problema 401 Unauthorized:"
+echo "     curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/fix-collector-401-issue.sh | bash"
+echo ""
+echo "   • Diagnóstico rápido local:"
+echo "     $COLLECTOR_DIR/scripts/diagnose-401-issue.sh"
 echo ""
 
 exit 0
