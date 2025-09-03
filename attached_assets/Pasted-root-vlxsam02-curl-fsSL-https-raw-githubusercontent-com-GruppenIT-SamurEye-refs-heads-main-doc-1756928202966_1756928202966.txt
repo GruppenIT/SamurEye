@@ -1,0 +1,36 @@
+root@vlxsam02:~# curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/vlxsam02/fix-conditional-auth.sh | bash
+
+🔧 CORREÇÃO PROBLEMA AUTENTICAÇÃO CONDICIONAL
+============================================
+
+[16:35:11] INFO: Removendo lógica que bypassa autenticação quando há usuários no banco
+[16:35:11] 📁 Criando backup do routes.ts atual...
+[16:35:11] ✅ Backup criado
+[16:35:11] 🔧 Aplicando correção de autenticação condicional...
+🔧 Corrigindo problema de autenticação condicional...
+✅ Arquivo .env corrigido
+⚠️ Middleware não encontrado - adicionando novo
+✅ Middleware adicionado
+✅ Rota /api/user corrigida
+✅ Correção de autenticação condicional aplicada com sucesso
+[16:35:11] 🧹 Limpando sessões existentes para forçar novo login...
+[16:35:11] 🔄 Rebuilding aplicação com correção...
+[16:35:19] WARNING: ⚠️ Build apresentou warnings, mas pode estar OK
+[16:35:19] 🔄 Reiniciando serviço samureye-app...
+[16:35:19] ✅ Serviço reiniciado
+[16:35:19] ⏳ Aguardando aplicação ficar disponível...
+.[16:35:21] ✅ Aplicação online na porta 5000
+
+[16:35:21] 🧪 Testando correção aplicada...
+[16:35:21] ERROR: ❌ Problema persiste - /api/user ainda retorna 200
+[16:35:21] WARNING: ⚠️ Verifique se middleware foi aplicado corretamente
+{"id":"onpremise-user","email":"tenant@onpremise.local","name":"On-Premise Tenant User","isSocUser":false,"isActive":true,"tenants":[{"tenantId":"3ad0d4ee-e6fa-4690-af4b-8993dd412305","role":"tenant_admin","tenant":{"id":"3ad0d4ee-e6fa-4690-af4b-8993dd412305","name":"Gruppen it","slug":"gruppen-it","description":"","logoUrl":null,"settings":null,"isActive":true,"createdAt":"2025-09-03T19:29:02.768Z","updatedAt":"2025-09-03T19:29:02.768Z"}}],"currentTenant":{"id":"3ad0d4ee-e6fa-4690-af4b-8993dd412305","name":"Gruppen it","slug":"gruppen-it","description":"","logoUrl":null,"settings":null,"isActive":true,"createdAt":"2025-09-03T19:29:02.768Z","updatedAt":"2025-09-03T19:29:02.768Z"}}
+[16:35:21] 🎯 CORREÇÃO DE AUTENTICAÇÃO CONDICIONAL CONCLUÍDA
+=================================================
+
+[16:35:21] ERROR: ❌ CORREÇÃO PODE TER FALHADO
+   • Execute diagnóstico para verificar:
+   curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam02/diagnose-conditional-auth.sh | bash
+
+[16:35:21] 🔧 Correção de autenticação condicional finalizada
+root@vlxsam02:~#
