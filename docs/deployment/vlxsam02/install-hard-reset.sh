@@ -1932,6 +1932,240 @@ fi
 
 log "✅ Correções de schema e conectividade aplicadas com sucesso"
 
+# ============================================================================
+# 18. CORREÇÃO ESPECÍFICA - TENANT CREATION
+# ============================================================================
+
+log "🔧 Aplicando correção específica para falha de criação de tenant..."
+
+# Forçar recriação do schema se ainda houver problema
+if [ "$FINAL_TABLES_COUNT" -lt 5 ]; then
+    warn "⚠️ Schema incompleto detectado - forçando recriação..."
+    
+    # Parar aplicação temporariamente
+    if systemctl is-active --quiet "$SERVICE_NAME" 2>/dev/null; then
+        log "⏹️ Parando aplicação para correção..."
+        systemctl stop "$SERVICE_NAME"
+        RESTART_NEEDED=true
+    else
+        RESTART_NEEDED=false
+    fi
+    
+    # Forçar recriação das tabelas críticas
+    log "🔄 Recriando tabelas críticas..."
+    
+    PGPASSWORD="$WORKING_PASSWORD" psql -h "$POSTGRES_HOST" -p "$POSTGRES_PORT" -U "$WORKING_USER" -d "$POSTGRES_DB" << 'TENANT_FIX'
+-- Criar extensões necessárias
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+
+-- Recriar tabela de tenants com estrutura correta
+DROP TABLE IF EXISTS tenants CASCADE;
+CREATE TABLE tenants (
+    id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+    name VARCHAR NOT NULL,
+    slug VARCHAR UNIQUE NOT NULL,
+    description TEXT,
+    logo_url VARCHAR,
+    settings JSONB DEFAULT '{}',
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Recriar tabela de usuários
+DROP TABLE IF EXISTS users CASCADE;
+CREATE TABLE users (
+    id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+    email VARCHAR UNIQUE,
+    first_name VARCHAR,
+    last_name VARCHAR,
+    profile_image_url VARCHAR,
+    password VARCHAR,
+    current_tenant_id VARCHAR,
+    preferred_language VARCHAR DEFAULT 'pt-BR',
+    is_global_user BOOLEAN DEFAULT false,
+    is_soc_user BOOLEAN DEFAULT false,
+    is_active BOOLEAN DEFAULT true,
+    last_login_at TIMESTAMP,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Recriar tabela tenant_users
+DROP TABLE IF EXISTS tenant_users CASCADE;
+CREATE TABLE tenant_users (
+    id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id VARCHAR NOT NULL,
+    tenant_id VARCHAR NOT NULL,
+    role VARCHAR NOT NULL DEFAULT 'viewer',
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW(),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
+    UNIQUE(user_id, tenant_id)
+);
+
+-- Recriar sessões
+DROP TABLE IF EXISTS sessions CASCADE;
+CREATE TABLE sessions (
+    sid VARCHAR PRIMARY KEY,
+    sess JSONB NOT NULL,
+    expire TIMESTAMP NOT NULL
+);
+CREATE INDEX IF NOT EXISTS "IDX_session_expire" ON sessions(expire);
+
+-- Recriar coletores
+DROP TABLE IF EXISTS collectors CASCADE;
+CREATE TABLE collectors (
+    id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+    tenant_id VARCHAR NOT NULL,
+    name VARCHAR NOT NULL,
+    hostname VARCHAR,
+    ip_address VARCHAR,
+    description TEXT,
+    status VARCHAR DEFAULT 'offline',
+    version VARCHAR,
+    last_seen TIMESTAMP,
+    enrollment_token VARCHAR,
+    enrollment_token_expires TIMESTAMP,
+    settings JSONB DEFAULT '{}',
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW(),
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
+);
+
+-- Recriar outras tabelas essenciais
+DROP TABLE IF EXISTS journeys CASCADE;
+CREATE TABLE journeys (
+    id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+    tenant_id VARCHAR NOT NULL,
+    collector_id VARCHAR,
+    name VARCHAR NOT NULL,
+    description TEXT,
+    type VARCHAR NOT NULL,
+    target VARCHAR NOT NULL,
+    config JSONB DEFAULT '{}',
+    status VARCHAR DEFAULT 'pending',
+    results JSONB,
+    started_at TIMESTAMP,
+    completed_at TIMESTAMP,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW(),
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
+    FOREIGN KEY (collector_id) REFERENCES collectors(id) ON DELETE SET NULL
+);
+
+DROP TABLE IF EXISTS credentials CASCADE;
+CREATE TABLE credentials (
+    id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+    tenant_id VARCHAR NOT NULL,
+    name VARCHAR NOT NULL,
+    type VARCHAR NOT NULL,
+    username VARCHAR,
+    password VARCHAR,
+    domain VARCHAR,
+    description TEXT,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW(),
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
+);
+
+DROP TABLE IF EXISTS system_settings CASCADE;
+CREATE TABLE system_settings (
+    id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+    key VARCHAR UNIQUE NOT NULL,
+    value JSONB NOT NULL,
+    description TEXT,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+
+DROP TABLE IF EXISTS tenant_user_auth CASCADE;
+CREATE TABLE tenant_user_auth (
+    id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+    tenant_id VARCHAR NOT NULL,
+    username VARCHAR NOT NULL,
+    email VARCHAR,
+    password_hash VARCHAR NOT NULL,
+    full_name VARCHAR,
+    role VARCHAR DEFAULT 'viewer',
+    is_active BOOLEAN DEFAULT true,
+    last_login_at TIMESTAMP,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW(),
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
+    UNIQUE(tenant_id, username),
+    UNIQUE(tenant_id, email)
+);
+
+TENANT_FIX
+    
+    if [ $? -eq 0 ]; then
+        log "✅ Tabelas críticas recriadas com sucesso"
+    else
+        warn "⚠️ Falha na recriação das tabelas"
+    fi
+    
+    # Reiniciar aplicação se necessário
+    if [ "$RESTART_NEEDED" = true ]; then
+        log "🔄 Reiniciando aplicação..."
+        systemctl start "$SERVICE_NAME"
+        sleep 5
+    fi
+fi
+
+# ============================================================================
+# 19. TESTE FINAL DE CRIAÇÃO DE TENANT
+# ============================================================================
+
+log "🧪 Testando criação de tenant após correções..."
+
+# Aguardar aplicação ficar online
+for i in {1..30}; do
+    if curl -s --connect-timeout 2 http://localhost:5000/api/health >/dev/null 2>&1; then
+        log "✅ Aplicação respondendo na porta 5000"
+        break
+    fi
+    sleep 1
+done
+
+# Fazer teste de criação de tenant
+TEST_PAYLOAD='{"name":"Teste Hard Reset","description":"Tenant de teste pós hard reset"}'
+
+RESPONSE=$(curl -s -w "HTTPSTATUS:%{http_code}" \
+    -H "Content-Type: application/json" \
+    -X POST \
+    --data "$TEST_PAYLOAD" \
+    "http://localhost:5000/api/tenants" \
+    --connect-timeout 10 \
+    --max-time 30 2>&1)
+
+HTTP_STATUS=$(echo $RESPONSE | tr -d '\n' | sed -e 's/.*HTTPSTATUS://')
+RESPONSE_BODY=$(echo $RESPONSE | sed -e 's/HTTPSTATUS:.*//g')
+
+if [ "$HTTP_STATUS" = "200" ] || [ "$HTTP_STATUS" = "201" ]; then
+    log "🎉 SUCESSO! Criação de tenant funcionando perfeitamente"
+    
+    # Limpar tenant de teste
+    TENANT_ID=$(echo "$RESPONSE_BODY" | jq -r '.id // empty' 2>/dev/null)
+    if [ -n "$TENANT_ID" ] && [ "$TENANT_ID" != "null" ]; then
+        log "🧹 Removendo tenant de teste (ID: $TENANT_ID)..."
+        PGPASSWORD="$WORKING_PASSWORD" psql -h "$POSTGRES_HOST" -p "$POSTGRES_PORT" -U "$WORKING_USER" -d "$POSTGRES_DB" -c "DELETE FROM tenants WHERE id = '$TENANT_ID';" >/dev/null 2>&1
+    fi
+else
+    warn "⚠️ Teste de criação ainda apresenta problemas"
+    echo "   • Status HTTP: $HTTP_STATUS"
+    echo "   • Response: $RESPONSE_BODY"
+    echo ""
+    echo "🔍 DIAGNÓSTICO DISPONÍVEL:"
+    echo "   curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam02/diagnose-tenant-creation-failed.sh | bash"
+    echo ""
+fi
+
 log "🎉 vlxsam02 (Application Server) pronto para uso!"
+log "📋 Interface disponível em: https://app.samureye.com.br"
+log "📋 Admin disponível em: https://app.samureye.com.br/admin"
 
 exit 0
