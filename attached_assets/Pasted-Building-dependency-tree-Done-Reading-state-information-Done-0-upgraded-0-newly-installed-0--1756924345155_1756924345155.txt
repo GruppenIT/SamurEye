@@ -1,0 +1,239 @@
+Building dependency tree... Done
+Reading state information... Done
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[15:29:47] 🔧 Configurando repositório NodeSource...
+Hit:1 https://deb.nodesource.com/node_20.x nodistro InRelease
+Hit:2 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:3 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:4 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:5 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists... Done
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following NEW packages will be installed:
+  nodejs
+0 upgraded, 1 newly installed, 0 to remove and 1 not upgraded.
+Need to get 32.0 MB of archives.
+After this operation, 199 MB of additional disk space will be used.
+Get:1 https://deb.nodesource.com/node_20.x nodistro/main amd64 nodejs amd64 20.19.4-1nodesource1 [32.0 MB]
+Fetched 32.0 MB in 1s (41.5 MB/s)
+Selecting previously unselected package nodejs.
+(Reading database ... 127914 files and directories currently installed.)
+Preparing to unpack .../nodejs_20.19.4-1nodesource1_amd64.deb ...
+Unpacking nodejs (20.19.4-1nodesource1) ...
+Setting up nodejs (20.19.4-1nodesource1) ...
+Processing triggers for man-db (2.12.0-4build2) ...
+Scanning processes...
+Scanning candidates...
+Scanning linux images...
+
+Pending kernel upgrade!
+Running kernel version:
+  6.8.0-41-generic
+Diagnostics:
+  The currently running kernel version is not the expected kernel version 6.8.0-79-generic.
+
+Restarting the system to load the new kernel will not be handled automatically, so you should consider rebooting.
+
+Restarting services...
+
+Service restarts being deferred:
+ /etc/needrestart/restart.d/dbus.service
+ systemctl restart getty@tty1.service
+ systemctl restart systemd-logind.service
+ systemctl restart unattended-upgrades.service
+
+No containers need to be restarted.
+
+No user sessions are running outdated binaries.
+
+No VM guests are running outdated hypervisor (qemu) binaries on this host.
+[15:29:58] 🔍 Verificando instalação Node.js...
+[15:29:58] ✅ Node.js instalado: v20.19.4
+[15:29:58] ✅ npm instalado: 10.8.2
+[15:29:58] 🔧 Instalando ferramentas globais...
+[15:30:07] ✅ Ferramentas globais instaladas
+[15:30:07] 👤 Criando usuário e estrutura de diretórios...
+[15:30:07] ✅ Estrutura de diretórios criada
+[15:30:07] 📥 Baixando aplicação SamurEye...
+Cloning into 'SamurEye'...
+remote: Enumerating objects: 2892, done.
+remote: Counting objects: 100% (293/293), done.
+remote: Compressing objects: 100% (161/161), done.
+remote: Total 2892 (delta 207), reused 184 (delta 101), pack-reused 2599 (from 2)
+Receiving objects: 100% (2892/2892), 3.43 MiB | 15.35 MiB/s, done.
+Resolving deltas: 100% (1999/1999), done.
+[15:30:08] ✅ Aplicação baixada com sucesso
+[15:30:08] ⚙️ Configurando ambiente...
+[15:30:08] ✅ Arquivo .env criado
+[15:30:08] 📦 Instalando dependências npm...
+npm warn deprecated node-domexception@1.0.0: Use your platform's native DOMException instead
+npm warn deprecated @esbuild-kit/esm-loader@2.6.5: Merged into tsx: https://tsx.is
+npm warn deprecated @esbuild-kit/core-utils@3.3.2: Merged into tsx: https://tsx.is
+
+added 635 packages, and audited 636 packages in 13s
+
+87 packages are looking for funding
+  run `npm fund` for details
+
+11 vulnerabilities (3 low, 8 moderate)
+
+To address issues that do not require attention, run:
+  npm audit fix
+
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+
+Run `npm audit` for details.
+npm notice
+npm notice New major version of npm available! 10.8.2 -> 11.5.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.5.2
+npm notice To update run: npm install -g npm@11.5.2
+npm notice
+[15:30:21] ✅ Dependências npm instaladas
+[15:30:21] 🔨 Fazendo build da aplicação...
+
+> rest-express@1.0.0 build
+> vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+
+vite v5.4.19 building for production...
+transforming (3) src/main.tsxBrowserslist: browsers data (caniuse-lite) is 11 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+✓ 2692 modules transformed.
+../dist/public/index.html                   2.20 kB │ gzip:   0.86 kB
+../dist/public/assets/index-3RvnZlKd.css   68.17 kB │ gzip:  11.88 kB
+../dist/public/assets/index-B6BClJbt.js   670.11 kB │ gzip: 192.33 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 6.83s
+
+  dist/index.js  100.5kb
+
+⚡ Done in 11ms
+[15:30:28] ✅ Build da aplicação concluído
+[15:30:28] 🔧 Corrigindo autenticação admin no código...
+✅ Endpoint /api/admin/me corrigido com sucesso
+[15:30:28] ✅ Endpoint /api/admin/me corrigido
+[15:30:28] 🔧 Corrigindo redirecionamento admin pós-login...
+⚠️ Redirecionamento já corrigido
+[15:30:28] ✅ Redirecionamento admin corrigido
+[15:30:28] 🔧 Corrigindo erros de autenticação do dashboard...
+✅ 1 correções de autenticação aplicadas
+[15:30:28] ✅ Erros de autenticação do dashboard corrigidos
+[15:30:28] 🔧 Corrigindo erro JavaScript no AttackSurfaceHeatmap...
+⚠️ Correção já aplicada
+[15:30:28] ✅ Erro JavaScript no heatmap corrigido
+[15:30:28] 🔒 Corrigindo erro de sintaxe e middleware isLocalUserAuthenticated...
+⚠️ Local para inserir middleware não encontrado - usando fallback
+✅ Rota /api/user corrigida
+📊 Chaves abertas: 521, fechadas: 524
+⚠️ Chaves desbalanceadas detectadas - tentando corrigir automaticamente
+✅ Removidas 3 chaves extras
+✅ Arquivo corrigido e salvo
+[15:30:28] ✅ Correção de sintaxe e middleware aplicada
+[15:30:28] 🔧 Corrigindo erro de criação de tenant...
+✅ Logging de criação de tenant melhorado
+[15:30:28] 🔍 Verificando conectividade com PostgreSQL...
+[15:30:28] 🔍 Diagnóstico completo de conectividade...
+[15:30:28] Host: 172.24.1.153
+[15:30:28] Port: 5432
+[15:30:28] Database: samureye
+[15:30:29] User: samureye_user
+[15:30:29] ✅ Host 172.24.1.153 respondendo ao ping
+[15:30:29] ✅ PostgreSQL acessível em 172.24.1.153:5432
+[15:30:29] ✅ Autenticação PostgreSQL funcionando
+[15:30:29] 🗃️ Verificando schema do banco de dados...
+[15:30:29] 🗃️ Sincronizando schema do banco de dados...
+
+> rest-express@1.0.0 db:push
+> drizzle-kit push
+
+No config path provided, using default 'drizzle.config.ts'
+Reading config file '/opt/samureye/SamurEye/drizzle.config.ts'
+Using 'pg' driver for database querying
+[✓] Pulling schema from database...
+[✓] Changes applied
+[15:30:30] ✅ Schema sincronizado com sucesso via npm run db:push
+[15:30:30] 📋 Verificando tabelas criadas...
+ activities
+ collector_telemetry
+ collectors
+ credentials
+ journeys
+ sessions
+ system_settings
+ tenant_user_auth
+ tenant_users
+ tenants
+ threat_intelligence
+ users
+
+[15:30:30] ✅ Tabelas verificadas com sucesso
+
+> rest-express@1.0.0 db:push
+> drizzle-kit push
+
+No config path provided, using default 'drizzle.config.ts'
+Reading config file '/opt/samureye/SamurEye/drizzle.config.ts'
+Using 'pg' driver for database querying
+[✓] Pulling schema from database...
+[i] No changes detected
+[15:30:31] ✅ Schema do banco de dados atualizado
+[15:30:31] ✅ Correções de criação de tenant aplicadas
+[15:30:31] 🔍 Verificando build atual...
+[15:30:31] ⚡ Testando importação do módulo atual...
+[15:30:31] ✅ Build atual está funcional
+[15:30:31] 🔨 Fazendo build final com todas as correções...
+
+> rest-express@1.0.0 build
+> vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+
+vite v5.4.19 building for production...
+Browserslist: browsers data (caniuse-lite) is 11 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+✓ 2692 modules transformed.
+../dist/public/index.html                   2.20 kB │ gzip:   0.86 kB
+../dist/public/assets/index-3RvnZlKd.css   68.17 kB │ gzip:  11.88 kB
+../dist/public/assets/index-B6BClJbt.js   670.11 kB │ gzip: 192.33 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 6.64s
+✘ [ERROR] Unexpected "}"
+
+    server/routes.ts:656:4:
+      656 │     } catch (error) {
+          ╵     ^
+
+1 error
+[15:30:39] WARNING: ⚠️ npm run build falhou - usando npx fallback
+vite v5.4.19 building for production...
+transforming (3) src/main.tsxBrowserslist: browsers data (caniuse-lite) is 11 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+✓ 2692 modules transformed.
+../dist/public/index.html                   2.20 kB │ gzip:   0.86 kB
+../dist/public/assets/index-3RvnZlKd.css   68.17 kB │ gzip:  11.88 kB
+../dist/public/assets/index-B6BClJbt.js   670.11 kB │ gzip: 192.33 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 6.70s
+✘ [ERROR] Unexpected "}"
+
+    server/routes.ts:656:4:
+      656 │     } catch (error) {
+          ╵     ^
+
+1 error
+root@vlxsam02:~#

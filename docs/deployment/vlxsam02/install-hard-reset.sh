@@ -632,47 +632,75 @@ log "✅ Erro JavaScript no heatmap corrigido"
 # 11.9. CORREÇÃO CRÍTICA TDZ - MIDDLEWARE AUTENTICAÇÃO
 # ============================================================================
 
-log "🔒 Corrigindo erro de sintaxe e middleware isLocalUserAuthenticated..."
+log "🔒 Corrigindo erro crítico de sintaxe linha 656..."
 
-# CORREÇÃO COMPLETA: Erro de sintaxe + middleware TDZ
-cat > /tmp/fix_syntax_and_middleware.js << 'EOF'
+# CORREÇÃO CIRÚRGICA: Foco específico na linha 656
+cat > /tmp/fix_line_656_surgical.js << 'EOF'
 const fs = require('fs');
 const filePath = process.argv[2];
 
 let content = fs.readFileSync(filePath, 'utf8');
+const lines = content.split('\n');
 
-// 1. PRIMEIRO: Limpar qualquer middleware mal formado existente
-const badMiddlewarePatterns = [
-  /\/\/ MIDDLEWARE DE AUTENTICAÇÃO[\s\S]*?function requireLocalUserTenant[\s\S]*?\}/,
-  /function isLocalUserAuthenticated[\s\S]*?function requireLocalUserTenant[\s\S]*?\}/,
+console.log(`🔍 Arquivo tem ${lines.length} linhas`);
+
+// 1. PRIMEIRO: Analisar linha 656 especificamente
+if (lines.length > 656) {
+  const line656 = lines[655]; // Array base-0
+  console.log(`🎯 Linha 656: '${line656.trim()}'`);
+  
+  // Analisar contexto ao redor da linha 656 (±10 linhas)
+  const startLine = Math.max(0, 655 - 10);
+  const endLine = Math.min(lines.length - 1, 655 + 10);
+  
+  console.log('📋 Contexto da linha 656:');
+  for (let i = startLine; i <= endLine; i++) {
+    const marker = (i === 655) ? ' >>> ' : '     ';
+    console.log(`${marker}${i + 1}: ${lines[i]}`);
+  }
+} else {
+  console.log('⚠️ Arquivo tem menos de 656 linhas');
+}
+
+// 2. SEGUNDO: Remover TUDO relacionado a middleware mal formado
+console.log('🧹 Removendo todo middleware mal formado...');
+
+// Padrões de middleware mal formados para remover completamente
+const removePatterns = [
+  // Middleware standalone mal formado
+  /\/\/ MIDDLEWARE DE AUTENTICAÇÃO[\s\S]*?function requireLocalUserTenant[\s\S]*?\}\s*(?=\n\s*\/\/|\n\s*app\.|\n\s*export|$)/g,
+  
+  // Function isLocalUserAuthenticated mal formada
+  /function isLocalUserAuthenticated\s*\([\s\S]*?\}\s*(?=\n\s*function|\n\s*app\.|\n\s*\/\/|$)/g,
+  
+  // Blocos de middleware que podem estar causando problemas
+  /\/\/ MIDDLEWARE DE AUTENTICAÇÃO - DECLARADO[\s\S]*?\}\s*(?=\n)/g
 ];
 
-for (const pattern of badMiddlewarePatterns) {
-  if (pattern.test(content)) {
-    content = content.replace(pattern, '');
-    console.log('🧹 Middleware mal formado removido');
+let removedCount = 0;
+for (const pattern of removePatterns) {
+  const before = content;
+  content = content.replace(pattern, '');
+  if (content !== before) {
+    removedCount++;
+    console.log(`🗑️ Padrão removido: ${removedCount}`);
   }
 }
 
-// 2. SEGUNDO: Encontrar local correto após imports e antes das rotas
-const insertAfterPattern = /app\.use\(express\.json\(\)\);/;
-const match = content.match(insertAfterPattern);
+console.log(`✅ ${removedCount} padrões de middleware removidos`);
 
-if (match) {
-  const insertIndex = match.index + match[0].length;
-  const before = content.substring(0, insertIndex);
-  const after = content.substring(insertIndex);
-  
-  // Middleware bem formado
-  const middlewareDeclaration = `
+// 3. TERCEIRO: Reconstruir arquivo limpo linha por linha
+const cleanLines = content.split('\n');
+console.log(`📋 Pós-limpeza: ${cleanLines.length} linhas`);
 
-// MIDDLEWARE DE AUTENTICAÇÃO - DECLARADO ANTES DAS ROTAS
+// 4. QUARTO: Inserir middleware correto em local seguro
+const safeMiddleware = `
+// MIDDLEWARE AUTHENTICATION - SAFE DECLARATION
 function isLocalUserAuthenticated(req, res, next) {
   if (process.env.DISABLE_AUTH === 'true') {
-    // Em ambiente on-premise com DISABLE_AUTH, criar usuário padrão
     req.localUser = {
       id: 'onpremise-user',
-      email: 'tenant@onpremise.local',
+      email: 'tenant@onpremise.local', 
       firstName: 'On-Premise',
       lastName: 'User',
       isSocUser: false,
@@ -680,79 +708,53 @@ function isLocalUserAuthenticated(req, res, next) {
     };
     return next();
   }
-  
   const user = req?.session?.user;
-  if (user && user.id) {
+  if (user?.id) {
     req.localUser = user;
     return next();
   }
-  
   return res.status(401).json({ error: 'Authentication required' });
 }
 
 function requireLocalUserTenant(req, res, next) {
-  if (req.localUser) {
-    return next();
-  }
-  return res.status(401).json({ error: 'Tenant access required' });
+  return req.localUser ? next() : res.status(401).json({ error: 'Tenant access required' });
 }
 `;
-  
-  // Verificar se middleware já existe
-  if (!content.includes('function isLocalUserAuthenticated')) {
-    content = before + middlewareDeclaration + after;
-    console.log('✅ Middleware isLocalUserAuthenticated adicionado corretamente');
-  } else {
-    console.log('⚠️ Middleware já existe');
-  }
-} else {
-  console.log('⚠️ Local para inserir middleware não encontrado - usando fallback');
-  
-  // Fallback: inserir no início das rotas
-  const routeStartPattern = /\/\/ Routes/;
-  const routeMatch = content.match(routeStartPattern);
-  
-  if (routeMatch) {
-    const insertIndex = routeMatch.index;
-    const before = content.substring(0, insertIndex);
-    const after = content.substring(insertIndex);
-    
-    const middlewareDeclaration = `// MIDDLEWARE DE AUTENTICAÇÃO\nfunction isLocalUserAuthenticated(req, res, next) {\n  if (process.env.DISABLE_AUTH === 'true') {\n    req.localUser = { id: 'onpremise-user', email: 'tenant@onpremise.local', firstName: 'On-Premise', lastName: 'User', isSocUser: false, isActive: true };\n    return next();\n  }\n  const user = req?.session?.user;\n  if (user && user.id) {\n    req.localUser = user;\n    return next();\n  }\n  return res.status(401).json({ error: 'Authentication required' });\n}\n\nfunction requireLocalUserTenant(req, res, next) {\n  if (req.localUser) return next();\n  return res.status(401).json({ error: 'Tenant access required' });\n}\n\n`;
-    
-    content = before + middlewareDeclaration + after;
-    console.log('✅ Middleware inserido via fallback');
+
+// Encontrar local seguro para inserir (após imports, antes de rotas)
+const insertTargets = [
+  'app.use(express.json());',
+  'app.use(cors(',
+  '// Routes',
+  '// API Routes'
+];
+
+let inserted = false;
+for (const target of insertTargets) {
+  const targetIndex = content.indexOf(target);
+  if (targetIndex > -1) {
+    const beforeTarget = content.substring(0, targetIndex + target.length);
+    const afterTarget = content.substring(targetIndex + target.length);
+    content = beforeTarget + safeMiddleware + afterTarget;
+    console.log(`✅ Middleware inserido após: ${target}`);
+    inserted = true;
+    break;
   }
 }
 
-// 3. TERCEIRO: Corrigir rota /api/user para usar middleware corretamente
-const userRoutePatterns = [
-  // Padrão complexo com comentários
-  /\/\/ Get current user endpoint.*?\n.*?app\.get\('\/api\/user', async \(req, res\) => \{[\s\S]*?\}\);/,
-  // Padrão simples
-  /app\.get\('\/api\/user', async \(req, res\) => \{[\s\S]*?\}\);/,
-  // Padrão já com middleware
-  /app\.get\('\/api\/user', isLocalUserAuthenticated, async \(req, res\) => \{[\s\S]*?\}\);/
-];
+if (!inserted) {
+  console.log('⚠️ Não foi possível encontrar local para middleware - inserindo no início');
+  content = safeMiddleware + '\n' + content;
+}
 
-const newUserRoute = `  // Get current user endpoint - PROTEGIDA COM AUTENTICAÇÃO
+// 5. QUINTO: Corrigir rota /api/user de forma limpa
+const cleanUserRoute = `
+  // Get current user endpoint
   app.get('/api/user', isLocalUserAuthenticated, async (req, res) => {
     try {
       const user = req.localUser;
-      
-      // Para ambiente on-premise, usar tenant padrão
       const allTenants = await storage.getAllTenants();
-      let tenants = [];
-      let currentTenant = null;
-      
-      if (allTenants.length > 0) {
-        const defaultTenant = allTenants[0];
-        tenants = [{
-          tenantId: defaultTenant.id,
-          role: 'tenant_admin',
-          tenant: defaultTenant
-        }];
-        currentTenant = defaultTenant;
-      }
+      const defaultTenant = allTenants[0];
       
       res.json({
         id: user.id,
@@ -762,8 +764,8 @@ const newUserRoute = `  // Get current user endpoint - PROTEGIDA COM AUTENTICAÇ
         lastName: user.lastName,
         isSocUser: user.isSocUser || false,
         isActive: user.isActive !== false,
-        tenants: tenants,
-        currentTenant: currentTenant
+        tenants: defaultTenant ? [{ tenantId: defaultTenant.id, role: 'tenant_admin', tenant: defaultTenant }] : [],
+        currentTenant: defaultTenant
       });
     } catch (error) {
       console.error('Error in /api/user:', error);
@@ -771,59 +773,56 @@ const newUserRoute = `  // Get current user endpoint - PROTEGIDA COM AUTENTICAÇ
     }
   });`;
 
-let routeFixed = false;
+// Remover rotas /api/user existentes (todas as variações)
+const userRoutePatterns = [
+  /\/\/ Get current user endpoint[\s\S]*?app\.get\s*\(\s*['\/api\/user'"`,].*?\}\s*\)\s*;/g,
+  /app\.get\s*\(\s*['\/api\/user'"`,][\s\S]*?\}\s*\)\s*;/g
+];
+
 for (const pattern of userRoutePatterns) {
-  if (pattern.test(content)) {
-    content = content.replace(pattern, newUserRoute);
-    console.log('✅ Rota /api/user corrigida');
-    routeFixed = true;
-    break;
-  }
+  content = content.replace(pattern, '');
 }
 
-if (!routeFixed) {
-  console.log('⚠️ Rota /api/user não encontrada - tentando inserir nova');
-  // Inserir rota se não existir
-  const routeInsertPattern = /\/\/ Routes/;
-  if (routeInsertPattern.test(content)) {
-    content = content.replace(routeInsertPattern, '// Routes\n' + newUserRoute);
-    console.log('✅ Nova rota /api/user inserida');
-  }
+// Inserir rota limpa
+const routeInsertPoint = content.indexOf('// Routes');
+if (routeInsertPoint > -1) {
+  const before = content.substring(0, routeInsertPoint + '// Routes'.length);
+  const after = content.substring(routeInsertPoint + '// Routes'.length);
+  content = before + cleanUserRoute + after;
+  console.log('✅ Rota /api/user inserida limpa');
 }
 
-// 4. QUARTO: Verificar e corrigir balanceamento de chaves
-const openBraces = (content.match(/{/g) || []).length;
-const closeBraces = (content.match(/}/g) || []).length;
+// 6. SEXTO: Verificação final de sintaxe
+const finalOpenBraces = (content.match(/{/g) || []).length;
+const finalCloseBraces = (content.match(/}/g) || []).length;
+console.log(`📊 Final - Abertas: ${finalOpenBraces}, Fechadas: ${finalCloseBraces}`);
 
-console.log(`📊 Chaves abertas: ${openBraces}, fechadas: ${closeBraces}`);
-
-if (openBraces !== closeBraces) {
-  console.log('⚠️ Chaves desbalanceadas detectadas - tentando corrigir automaticamente');
-  
-  // Estratégia simples: se temos chaves demais, remover as extras do final
-  const diff = closeBraces - openBraces;
+if (finalOpenBraces !== finalCloseBraces) {
+  const diff = finalCloseBraces - finalOpenBraces;
   if (diff > 0) {
-    // Remover chaves extras do final
+    console.log(`🛠️ Removendo ${diff} chaves extras do final...`);
     for (let i = 0; i < diff; i++) {
       const lastBraceIndex = content.lastIndexOf('}');
       if (lastBraceIndex > 0) {
         content = content.substring(0, lastBraceIndex) + content.substring(lastBraceIndex + 1);
       }
     }
-    console.log(`✅ Removidas ${diff} chaves extras`);
+  } else if (diff < 0) {
+    console.log(`🛠️ Adicionando ${Math.abs(diff)} chaves faltantes...`);
+    content += '\n' + '}'.repeat(Math.abs(diff));
   }
 }
 
-// 5. QUINTO: Salvar arquivo corrigido
+// Salvar arquivo corrigido
 fs.writeFileSync(filePath, content, 'utf8');
-console.log('✅ Arquivo corrigido e salvo');
+console.log('✅ Arquivo cirurgicamente corrigido e salvo');
 EOF
 
-# Executar correção
-node /tmp/fix_syntax_and_middleware.js "$WORKING_DIR/server/routes.ts"
-rm /tmp/fix_syntax_and_middleware.js
+# Executar correção cirúrgica
+node /tmp/fix_line_656_surgical.js "$WORKING_DIR/server/routes.ts"
+rm /tmp/fix_line_656_surgical.js
 
-log "✅ Correção de sintaxe e middleware aplicada"
+log "✅ Correção cirúrgica da linha 656 aplicada"
 
 # ============================================================================
 # 11.10. CORREÇÃO DO ERRO DE CRIAÇÃO DE TENANT
