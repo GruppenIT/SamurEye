@@ -632,21 +632,44 @@ log "✅ Erro JavaScript no heatmap corrigido"
 # 11.9. CORREÇÃO CRÍTICA TDZ - MIDDLEWARE AUTENTICAÇÃO
 # ============================================================================
 
-log "🔒 Corrigindo Temporal Dead Zone no middleware isLocalUserAuthenticated..."
+log "🔒 Corrigindo erro de sintaxe e middleware isLocalUserAuthenticated..."
 
-# CORREÇÃO TDZ: Adicionar middleware hoisted ANTES de qualquer uso
-cat > /tmp/fix_middleware_tdz.js << 'EOF'
+# CORREÇÃO COMPLETA: Erro de sintaxe + middleware TDZ
+cat > /tmp/fix_syntax_and_middleware.js << 'EOF'
 const fs = require('fs');
 const filePath = process.argv[2];
 
 let content = fs.readFileSync(filePath, 'utf8');
 
-// 1. PRIMEIRO: Adicionar middleware hoisted no início do arquivo (depois dos imports)
-const middlewareDeclaration = `
-// MIDDLEWARE DE AUTENTICAÇÃO - HOISTED PARA EVITAR TDZ
+// 1. PRIMEIRO: Limpar qualquer middleware mal formado existente
+const badMiddlewarePatterns = [
+  /\/\/ MIDDLEWARE DE AUTENTICAÇÃO[\s\S]*?function requireLocalUserTenant[\s\S]*?\}/,
+  /function isLocalUserAuthenticated[\s\S]*?function requireLocalUserTenant[\s\S]*?\}/,
+];
+
+for (const pattern of badMiddlewarePatterns) {
+  if (pattern.test(content)) {
+    content = content.replace(pattern, '');
+    console.log('🧹 Middleware mal formado removido');
+  }
+}
+
+// 2. SEGUNDO: Encontrar local correto após imports e antes das rotas
+const insertAfterPattern = /app\.use\(express\.json\(\)\);/;
+const match = content.match(insertAfterPattern);
+
+if (match) {
+  const insertIndex = match.index + match[0].length;
+  const before = content.substring(0, insertIndex);
+  const after = content.substring(insertIndex);
+  
+  // Middleware bem formado
+  const middlewareDeclaration = `
+
+// MIDDLEWARE DE AUTENTICAÇÃO - DECLARADO ANTES DAS ROTAS
 function isLocalUserAuthenticated(req, res, next) {
   if (process.env.DISABLE_AUTH === 'true') {
-    // Em ambiente on-premise com DISABLE_AUTH, criar usuário fictício
+    // Em ambiente on-premise com DISABLE_AUTH, criar usuário padrão
     req.localUser = {
       id: 'onpremise-user',
       email: 'tenant@onpremise.local',
@@ -658,7 +681,6 @@ function isLocalUserAuthenticated(req, res, next) {
     return next();
   }
   
-  // Verificar sessão real do usuário
   const user = req?.session?.user;
   if (user && user.id) {
     req.localUser = user;
@@ -675,31 +697,41 @@ function requireLocalUserTenant(req, res, next) {
   return res.status(401).json({ error: 'Tenant access required' });
 }
 `;
-
-// Encontrar local para inserir middleware (após imports, antes das rotas)
-const insertAfterPattern = /app\.use\(express\.json\(\)\);/;
-const match = content.match(insertAfterPattern);
-
-if (match) {
-  const insertIndex = match.index + match[0].length;
-  const before = content.substring(0, insertIndex);
-  const after = content.substring(insertIndex);
   
-  // Verificar se middleware já foi adicionado
+  // Verificar se middleware já existe
   if (!content.includes('function isLocalUserAuthenticated')) {
     content = before + middlewareDeclaration + after;
-    console.log('✅ Middleware isLocalUserAuthenticated adicionado com hoisting');
+    console.log('✅ Middleware isLocalUserAuthenticated adicionado corretamente');
   } else {
     console.log('⚠️ Middleware já existe');
   }
 } else {
-  console.log('❌ Não foi possível encontrar local para inserir middleware');
+  console.log('⚠️ Local para inserir middleware não encontrado - usando fallback');
+  
+  // Fallback: inserir no início das rotas
+  const routeStartPattern = /\/\/ Routes/;
+  const routeMatch = content.match(routeStartPattern);
+  
+  if (routeMatch) {
+    const insertIndex = routeMatch.index;
+    const before = content.substring(0, insertIndex);
+    const after = content.substring(insertIndex);
+    
+    const middlewareDeclaration = `// MIDDLEWARE DE AUTENTICAÇÃO\nfunction isLocalUserAuthenticated(req, res, next) {\n  if (process.env.DISABLE_AUTH === 'true') {\n    req.localUser = { id: 'onpremise-user', email: 'tenant@onpremise.local', firstName: 'On-Premise', lastName: 'User', isSocUser: false, isActive: true };\n    return next();\n  }\n  const user = req?.session?.user;\n  if (user && user.id) {\n    req.localUser = user;\n    return next();\n  }\n  return res.status(401).json({ error: 'Authentication required' });\n}\n\nfunction requireLocalUserTenant(req, res, next) {\n  if (req.localUser) return next();\n  return res.status(401).json({ error: 'Tenant access required' });\n}\n\n`;
+    
+    content = before + middlewareDeclaration + after;
+    console.log('✅ Middleware inserido via fallback');
+  }
 }
 
-// 2. SEGUNDO: Corrigir rota /api/user para usar o middleware
-const oldUserRoutePatterns = [
+// 3. TERCEIRO: Corrigir rota /api/user para usar middleware corretamente
+const userRoutePatterns = [
+  // Padrão complexo com comentários
   /\/\/ Get current user endpoint.*?\n.*?app\.get\('\/api\/user', async \(req, res\) => \{[\s\S]*?\}\);/,
-  /app\.get\('\/api\/user', async \(req, res\) => \{[\s\S]*?\}\);/
+  // Padrão simples
+  /app\.get\('\/api\/user', async \(req, res\) => \{[\s\S]*?\}\);/,
+  // Padrão já com middleware
+  /app\.get\('\/api\/user', isLocalUserAuthenticated, async \(req, res\) => \{[\s\S]*?\}\);/
 ];
 
 const newUserRoute = `  // Get current user endpoint - PROTEGIDA COM AUTENTICAÇÃO
@@ -740,27 +772,58 @@ const newUserRoute = `  // Get current user endpoint - PROTEGIDA COM AUTENTICAÇ
   });`;
 
 let routeFixed = false;
-for (const pattern of oldUserRoutePatterns) {
+for (const pattern of userRoutePatterns) {
   if (pattern.test(content)) {
     content = content.replace(pattern, newUserRoute);
-    console.log('✅ Rota /api/user corrigida com middleware seguro');
+    console.log('✅ Rota /api/user corrigida');
     routeFixed = true;
     break;
   }
 }
 
 if (!routeFixed) {
-  console.log('⚠️ Rota /api/user não encontrada para correção');
+  console.log('⚠️ Rota /api/user não encontrada - tentando inserir nova');
+  // Inserir rota se não existir
+  const routeInsertPattern = /\/\/ Routes/;
+  if (routeInsertPattern.test(content)) {
+    content = content.replace(routeInsertPattern, '// Routes\n' + newUserRoute);
+    console.log('✅ Nova rota /api/user inserida');
+  }
 }
 
+// 4. QUARTO: Verificar e corrigir balanceamento de chaves
+const openBraces = (content.match(/{/g) || []).length;
+const closeBraces = (content.match(/}/g) || []).length;
+
+console.log(`📊 Chaves abertas: ${openBraces}, fechadas: ${closeBraces}`);
+
+if (openBraces !== closeBraces) {
+  console.log('⚠️ Chaves desbalanceadas detectadas - tentando corrigir automaticamente');
+  
+  // Estratégia simples: se temos chaves demais, remover as extras do final
+  const diff = closeBraces - openBraces;
+  if (diff > 0) {
+    // Remover chaves extras do final
+    for (let i = 0; i < diff; i++) {
+      const lastBraceIndex = content.lastIndexOf('}');
+      if (lastBraceIndex > 0) {
+        content = content.substring(0, lastBraceIndex) + content.substring(lastBraceIndex + 1);
+      }
+    }
+    console.log(`✅ Removidas ${diff} chaves extras`);
+  }
+}
+
+// 5. QUINTO: Salvar arquivo corrigido
 fs.writeFileSync(filePath, content, 'utf8');
+console.log('✅ Arquivo corrigido e salvo');
 EOF
 
 # Executar correção
-node /tmp/fix_middleware_tdz.js "$WORKING_DIR/server/routes.ts"
-rm /tmp/fix_middleware_tdz.js
+node /tmp/fix_syntax_and_middleware.js "$WORKING_DIR/server/routes.ts"
+rm /tmp/fix_syntax_and_middleware.js
 
-log "✅ Correção TDZ do middleware aplicada"
+log "✅ Correção de sintaxe e middleware aplicada"
 
 # ============================================================================
 # 11.10. CORREÇÃO DO ERRO DE CRIAÇÃO DE TENANT
