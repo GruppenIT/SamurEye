@@ -792,64 +792,210 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Public collector creation for tenant users (on-premise)
-  app.post('/api/collectors', async (req: any, res) => {
+  // Create collector with temporary enrollment token (requires authentication)
+  app.post('/api/collectors', isLocalUserAuthenticated, async (req: any, res) => {
     try {
-      // Get first available tenant for on-premise environment
-      const tenants = await storage.getAllTenants();
-      if (tenants.length === 0) {
-        return res.status(400).json({ message: "No tenants available" });
+      const user = req.localUser;
+      
+      // Get user's tenants
+      let userTenants = [];
+      if (user.isSocUser) {
+        userTenants = await storage.getAllTenants();
+      } else {
+        const allTenants = await storage.getAllTenants();
+        userTenants = allTenants.filter(t => t.id === user.tenantId);
       }
       
-      const defaultTenant = tenants[0]; // Use first tenant in on-premise
+      if (userTenants.length === 0) {
+        return res.status(400).json({ message: "No tenants available for this user" });
+      }
+      
+      // Use specified tenantId or first available
+      const { tenantId, ...collectorData } = req.body;
+      const targetTenantId = tenantId || userTenants[0].id;
+      
+      // Verify user has access to this tenant
+      if (!userTenants.find(t => t.id === targetTenantId)) {
+        return res.status(403).json({ message: "Access denied to this tenant" });
+      }
+      
+      // Get tenant for slug
+      const tenant = userTenants.find(t => t.id === targetTenantId);
+      
+      // Generate enrollment token valid for 15 minutes
+      const enrollmentToken = randomUUID();
+      const enrollmentTokenExpires = new Date(Date.now() + 15 * 60 * 1000);
       
       const validatedData = insertCollectorSchema.parse({
-        ...req.body,
-        tenantId: defaultTenant.id
+        ...collectorData,
+        tenantId: targetTenantId,
+        status: 'enrolling' as const,
+        enrollmentToken,
+        enrollmentTokenExpires
       });
-
-      // Check if collector already exists (by name, hostname, or IP)
-      const existingCollectors = await storage.getCollectorsByTenant(defaultTenant.id);
-      const existingCollector = existingCollectors.find(c => 
-        c.name === validatedData.name ||
-        c.hostname === validatedData.hostname ||
-        c.ipAddress === validatedData.ipAddress
-      );
-
-      if (existingCollector) {
-        // Update existing collector status for re-registration
-        await storage.updateCollectorStatus(existingCollector.id, 'enrolling', new Date());
-        
-        const enrollmentToken = await storage.generateEnrollmentToken(existingCollector.id);
-        console.log(`Updated existing collector ${existingCollector.name} for re-registration`);
-        res.json({ ...existingCollector, status: 'enrolling', enrollmentToken });
-      } else {
-        // Create new collector
-        const collector = await storage.createCollector(validatedData);
-        const enrollmentToken = await storage.generateEnrollmentToken(collector.id);
-        console.log(`Created new collector ${collector.name} for tenant ${defaultTenant.id}`);
-        res.json({ ...collector, enrollmentToken });
-      }
+      
+      const collector = await storage.createCollector(validatedData);
+      
+      res.json({
+        ...collector,
+        message: `Collector created successfully. Token expires in 15 minutes.`,
+        enrollmentInstructions: {
+          step1: "Copy the enrollment token and tenant slug",
+          step2: "Run the registration script on the collector server:",
+          command: `curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/register-collector.sh | bash -s -- ${tenant?.slug || 'tenant-slug'} ${enrollmentToken}`,
+          note: "Token expires at: " + enrollmentTokenExpires.toISOString()
+        }
+      });
     } catch (error) {
-      console.error("Error creating/updating collector:", error);
-      res.status(500).json({ message: "Failed to create or update collector" });
+      console.error("Error creating collector:", error);
+      res.status(500).json({ message: "Failed to create collector" });
     }
   });
 
-  // Public token regeneration for tenant users (on-premise)
-  app.post('/api/collectors/:id/regenerate-token', async (req: any, res) => {
+  // Regenerate enrollment token (requires authentication)
+  app.post('/api/collectors/:id/regenerate-token', isLocalUserAuthenticated, async (req: any, res) => {
     try {
+      const user = req.localUser;
       const collector = await storage.getCollector(req.params.id);
+      
       if (!collector) {
         return res.status(404).json({ message: "Collector not found" });
       }
-
-      const enrollmentToken = await storage.generateEnrollmentToken(collector.id);
-      console.log(`Regenerated token for collector ${collector.name}`);
-      res.json({ enrollmentToken });
+      
+      // Verify user has access to this collector's tenant
+      let hasAccess = false;
+      if (user.isSocUser) {
+        hasAccess = true;
+      } else {
+        hasAccess = collector.tenantId === user.tenantId;
+      }
+      
+      if (!hasAccess) {
+        return res.status(403).json({ message: "Access denied to this collector" });
+      }
+      
+      // Get tenant for slug
+      const tenant = await storage.getTenant(collector.tenantId);
+      
+      const newToken = randomUUID();
+      const tokenExpires = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
+      
+      await storage.updateCollectorToken(collector.id, newToken, tokenExpires);
+      
+      res.json({ 
+        enrollmentToken: newToken, 
+        enrollmentTokenExpires: tokenExpires,
+        message: "Token regenerated successfully. Valid for 15 minutes.",
+        enrollmentInstructions: {
+          command: `curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/register-collector.sh | bash -s -- ${tenant?.slug || 'tenant-slug'} ${newToken}`,
+          note: "Token expires at: " + tokenExpires.toISOString()
+        }
+      });
     } catch (error) {
       console.error("Error regenerating token:", error);
       res.status(500).json({ message: "Failed to regenerate token" });
+    }
+  });
+
+  // Delete collector (requires authentication)
+  app.delete('/api/collectors/:id', isLocalUserAuthenticated, async (req: any, res) => {
+    try {
+      const user = req.localUser;
+      const collector = await storage.getCollector(req.params.id);
+      
+      if (!collector) {
+        return res.status(404).json({ message: "Collector not found" });
+      }
+      
+      // Verify user has access to this collector's tenant
+      let hasAccess = false;
+      if (user.isSocUser) {
+        hasAccess = true;
+      } else {
+        hasAccess = collector.tenantId === user.tenantId;
+      }
+      
+      if (!hasAccess) {
+        return res.status(403).json({ message: "Access denied to this collector" });
+      }
+      
+      await storage.deleteCollector(req.params.id);
+      
+      res.json({ 
+        message: "Collector deleted successfully",
+        deletedCollector: {
+          id: collector.id,
+          name: collector.name
+        }
+      });
+    } catch (error) {
+      console.error("Error deleting collector:", error);
+      res.status(500).json({ message: "Failed to delete collector" });
+    }
+  });
+
+  // Collector registration endpoint (for collector enrollment)
+  app.post('/collector-api/register', async (req, res) => {
+    try {
+      const { tenantSlug, enrollmentToken, hostname, ipAddress } = req.body;
+      
+      if (!tenantSlug || !enrollmentToken) {
+        return res.status(400).json({ 
+          message: "Missing required parameters: tenantSlug and enrollmentToken" 
+        });
+      }
+      
+      // Find tenant by slug
+      const allTenants = await storage.getAllTenants();
+      const tenant = allTenants.find(t => t.slug === tenantSlug);
+      
+      if (!tenant) {
+        return res.status(404).json({ 
+          message: `Tenant with slug '${tenantSlug}' not found` 
+        });
+      }
+      
+      // Find collector with matching token
+      const tenantCollectors = await storage.getCollectorsByTenant(tenant.id);
+      const collector = tenantCollectors.find(c => 
+        c.enrollmentToken === enrollmentToken && 
+        c.status === 'enrolling'
+      );
+      
+      if (!collector) {
+        return res.status(404).json({ 
+          message: "Collector not found or enrollment token invalid. Please verify the token is correct and the collector exists." 
+        });
+      }
+      
+      // Check if token is expired
+      if (collector.enrollmentTokenExpires && new Date() > collector.enrollmentTokenExpires) {
+        return res.status(400).json({ 
+          message: "Enrollment token has expired. Please regenerate the token from the admin interface." 
+        });
+      }
+      
+      // Update collector status and clear token
+      await storage.updateCollectorStatus(collector.id, 'online', new Date(), {
+        hostname: hostname || collector.hostname,
+        ipAddress: ipAddress || collector.ipAddress,
+        enrollmentToken: null,
+        enrollmentTokenExpires: null
+      });
+      
+      res.json({ 
+        message: "Collector registered successfully!",
+        collector: {
+          id: collector.id,
+          name: collector.name,
+          tenantName: tenant.name,
+          status: 'online'
+        }
+      });
+      
+    } catch (error) {
+      console.error("Error registering collector:", error);
+      res.status(500).json({ message: "Failed to register collector" });
     }
   });
 

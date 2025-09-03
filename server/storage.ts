@@ -66,7 +66,9 @@ export interface IStorage {
   getCollectorsByTenant(tenantId: string): Promise<Collector[]>;
   getCollector(id: string): Promise<Collector | undefined>;
   createCollector(collector: InsertCollector): Promise<Collector>;
-  updateCollectorStatus(id: string, status: string, lastSeen?: Date): Promise<void>;
+  updateCollectorStatus(id: string, status: string, lastSeen?: Date, updates?: any): Promise<void>;
+  updateCollectorToken(id: string, token: string, expires: Date): Promise<void>;
+  deleteCollector(id: string): Promise<void>;
   generateEnrollmentToken(collectorId: string): Promise<string>;
   getCollectorByEnrollmentToken(token: string): Promise<Collector | undefined>;
   addCollectorTelemetry(telemetry: InsertCollectorTelemetry): Promise<CollectorTelemetry>;
@@ -334,15 +336,37 @@ export class DatabaseStorage implements IStorage {
     return newCollector;
   }
 
-  async updateCollectorStatus(id: string, status: string, lastSeen?: Date): Promise<void> {
+  async updateCollectorStatus(id: string, status: string, lastSeen?: Date, updates?: any): Promise<void> {
+    const updateData: any = {
+      status: status as any, 
+      lastSeen: lastSeen || new Date(), 
+      updatedAt: new Date()
+    };
+    
+    // Merge additional updates if provided
+    if (updates) {
+      Object.assign(updateData, updates);
+    }
+    
     await db
       .update(collectors)
-      .set({ 
-        status: status as any, 
-        lastSeen: lastSeen || new Date(), 
-        updatedAt: new Date() 
+      .set(updateData)
+      .where(eq(collectors.id, id));
+  }
+
+  async updateCollectorToken(id: string, token: string, expires: Date): Promise<void> {
+    await db
+      .update(collectors)
+      .set({
+        enrollmentToken: token,
+        enrollmentTokenExpires: expires,
+        updatedAt: new Date()
       })
       .where(eq(collectors.id, id));
+  }
+
+  async deleteCollector(id: string): Promise<void> {
+    await db.delete(collectors).where(eq(collectors.id, id));
   }
 
   async generateEnrollmentToken(collectorId: string): Promise<string> {

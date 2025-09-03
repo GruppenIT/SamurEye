@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Copy, Server, Download, Terminal, CheckCircle } from 'lucide-react';
+import { Copy, Server, Download, Terminal, CheckCircle, Package } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -90,43 +90,52 @@ export function CollectorEnrollment({ isOpen, onClose }: CollectorEnrollmentProp
     }
   };
 
-  const installScript = enrollmentData ? `#!/bin/bash
-# SamurEye Collector Installation Script
-set -e
+  const getTenantSlug = () => {
+    // Get tenant slug from enrollmentData or derive from tenant name
+    return enrollmentData?.tenantSlug || enrollmentData?.tenant?.slug || 'your-tenant-slug';
+  };
 
-echo "Installing SamurEye Collector..."
+  const installCommand = enrollmentData ? 
+    `curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/install-hard-reset.sh | bash` : '';
 
-# Download and install collector
-curl -sSL https://releases.samureye.com.br/collector/install.sh | sudo bash
+  const registerCommand = enrollmentData ? 
+    `curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/register-collector.sh | bash -s -- ${getTenantSlug()} ${enrollmentData.enrollmentToken}` : '';
 
-# Configure collector
-sudo tee /etc/samureye/collector.conf > /dev/null <<EOF
-api_endpoint=https://api.samureye.com.br
-enrollment_token=${enrollmentData.enrollmentToken}
-collector_name=${enrollmentData.name}
-tenant_id=${enrollmentData.tenantId}
-EOF
+  const fullInstructions = `# PASSO 1: Instalar sistema base (apenas uma vez por servidor)
+${installCommand}
 
-# Start collector service
-sudo systemctl enable samureye-collector
-sudo systemctl start samureye-collector
+# PASSO 2: Registrar o collector com seu token (execute após criar na interface)
+${registerCommand}
 
-echo "✅ SamurEye Collector installed successfully!"
-echo "Check status with: sudo systemctl status samureye-collector"
-` : '';
+# PASSO 3: Verificar status
+/opt/samureye/collector/scripts/check-status.sh`;
 
-  const ubuntuInstructions = `# 1. Baixe e execute o script de instalação
-curl -sSL install.samureye.com.br | sudo bash
+  const stepByStepInstructions = `# Instruções Detalhadas - SamurEye Collector
 
-# 2. Configure o coletor com seu token
-sudo samureye-collector enroll --token ${enrollmentData?.enrollmentToken || 'YOUR_TOKEN'}
+## PASSO 1: Preparar o servidor (Ubuntu 20.04+)
+# Execute como root ou com sudo
 
-# 3. Inicie o serviço
-sudo systemctl enable samureye-collector
-sudo systemctl start samureye-collector
+## PASSO 2: Instalar sistema base (uma vez por servidor)
+curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/install-hard-reset.sh | bash
 
-# 4. Verifique o status
-sudo systemctl status samureye-collector`;
+# ⚠️ O script acima instala:
+# • Python 3.11 + dependências
+# • Node.js 20
+# • Ferramentas de segurança (nmap, nuclei, masscan, gobuster)
+# • Sistema base do collector
+# • Não registra automaticamente
+
+## PASSO 3: Registrar este collector específico
+# ⚠️ Token válido por apenas 15 minutos!
+${registerCommand}
+
+## PASSO 4: Verificar status
+/opt/samureye/collector/scripts/check-status.sh
+
+## PASSO 5: Monitorar logs (opcional)
+tail -f /var/log/samureye-collector/heartbeat.log
+
+# ✅ Collector aparecerá como 'ONLINE' na interface admin`;
 
   const handleClose = () => {
     setStep(1);
@@ -313,28 +322,62 @@ sudo systemctl status samureye-collector`;
 
             {/* Installation Methods */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Automated Script */}
+              {/* Quick Commands */}
               <Card>
                 <CardHeader>
                   <CardTitle className="text-lg flex items-center space-x-2">
-                    <Download className="h-5 w-5" />
-                    <span>Script Automatizado</span>
+                    <Terminal className="h-5 w-5" />
+                    <span>Comandos Rápidos</span>
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
+                  <div className="bg-yellow-500/10 border border-yellow-500/20 rounded p-3 text-sm">
+                    <p className="text-yellow-600 font-medium mb-2">⚠️ ATENÇÃO: Processo em 2 etapas</p>
+                    <p className="text-yellow-600">1. Instalar sistema base (uma vez por servidor)</p>
+                    <p className="text-yellow-600">2. Registrar collector com token específico</p>
+                  </div>
                   <p className="text-sm text-muted-foreground">
-                    Script completo para instalação e configuração automática:
+                    Cole os comandos abaixo no terminal do servidor de destino:
                   </p>
                   <div className="relative">
-                    <pre className="bg-muted p-3 rounded text-xs overflow-x-auto">
-                      {installScript}
+                    <pre className="bg-muted p-3 rounded text-xs overflow-x-auto whitespace-pre-wrap">
+                      {fullInstructions}
                     </pre>
                     <Button
                       size="sm"
                       variant="outline"
                       className="absolute top-2 right-2"
-                      onClick={() => copyToClipboard(installScript)}
-                      data-testid="copy-script-button"
+                      onClick={() => copyToClipboard(fullInstructions)}
+                      data-testid="copy-quick-commands-button"
+                    >
+                      <Copy className="h-3 w-3" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Detailed Instructions */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center space-x-2">
+                    <Package className="h-5 w-5" />
+                    <span>Instruções Detalhadas</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <p className="text-sm text-muted-foreground">
+                    Instruções passo a passo para instalação completa:
+                  </p>
+                  <div className="relative">
+                    <pre className="bg-muted p-3 rounded text-xs overflow-x-auto whitespace-pre-wrap">
+                      {stepByStepInstructions}
+                    </pre>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="absolute top-2 right-2"
+                      onClick={() => copyToClipboard(stepByStepInstructions)}
+                      data-testid="copy-detailed-instructions-button"
                     >
                       <Copy className="h-3 w-3" />
                     </Button>
@@ -343,47 +386,18 @@ sudo systemctl status samureye-collector`;
                     size="sm" 
                     className="w-full"
                     onClick={() => {
-                      const blob = new Blob([installScript], { type: 'text/plain' });
+                      const blob = new Blob([stepByStepInstructions], { type: 'text/plain' });
                       const url = URL.createObjectURL(blob);
                       const a = document.createElement('a');
                       a.href = url;
-                      a.download = `install-${enrollmentData?.name}.sh`;
+                      a.download = `install-${enrollmentData?.name}-instructions.txt`;
                       a.click();
                     }}
-                    data-testid="download-script-button"
+                    data-testid="download-instructions-button"
                   >
                     <Download className="mr-2 h-4 w-4" />
-                    Baixar Script
+                    Baixar Instruções
                   </Button>
-                </CardContent>
-              </Card>
-
-              {/* Manual Instructions */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg flex items-center space-x-2">
-                    <Terminal className="h-5 w-5" />
-                    <span>Instruções Manuais</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <p className="text-sm text-muted-foreground">
-                    Para instalação manual no Ubuntu:
-                  </p>
-                  <div className="relative">
-                    <pre className="bg-muted p-3 rounded text-xs overflow-x-auto">
-                      {ubuntuInstructions}
-                    </pre>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="absolute top-2 right-2"
-                      onClick={() => copyToClipboard(ubuntuInstructions)}
-                      data-testid="copy-instructions-button"
-                    >
-                      <Copy className="h-3 w-3" />
-                    </Button>
-                  </div>
                 </CardContent>
               </Card>
             </div>

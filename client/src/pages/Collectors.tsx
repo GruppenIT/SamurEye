@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Wifi, WifiOff, Clock, RefreshCw, Terminal, Package } from 'lucide-react';
+import { Plus, Wifi, WifiOff, Clock, RefreshCw, Terminal, Package, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -54,6 +54,33 @@ export default function Collectors() {
       });
     },
   });
+
+  const deleteCollectorMutation = useMutation({
+    mutationFn: async (collectorId: string) => {
+      const response = await apiRequest('DELETE', `/api/collectors/${collectorId}`);
+      return response.json();
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Coletor excluído",
+        description: data.message || "Coletor removido com sucesso",
+      });
+      queryClient.invalidateQueries({ queryKey: [isAdminRoute ? '/api/admin/collectors' : '/api/collectors'] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Erro",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleDeleteCollector = (collector: any) => {
+    if (window.confirm(`Tem certeza que deseja excluir o coletor "${collector.name}"?\n\nEsta ação não pode ser desfeita.`)) {
+      deleteCollectorMutation.mutate(collector.id);
+    }
+  };
 
   const handleTabChange = (tab: string) => {
     if (tab === 'collectors') return;
@@ -261,21 +288,34 @@ export default function Collectors() {
                         <TabsContent value="deployment" className="space-y-3 mt-4">
                           <div className="text-xs space-y-2">
                             <p className="text-muted-foreground">Instruções Ubuntu:</p>
-                            <code className="block bg-muted p-2 rounded text-xs">
-                              curl -sSL install.samureye.com.br | sudo bash
+                            <code className="block bg-muted p-2 rounded text-xs overflow-x-auto">
+                              curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/install-hard-reset.sh | bash
                             </code>
                           </div>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="w-full"
-                            onClick={() => regenerateTokenMutation.mutate(collector.id)}
-                            disabled={regenerateTokenMutation.isPending}
-                            data-testid={`regenerate-token-${collector.name}`}
-                          >
-                            <RefreshCw className="mr-2 h-3 w-3" />
-                            Gerar Novo Token
-                          </Button>
+                          <div className="grid grid-cols-1 gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="w-full"
+                              onClick={() => regenerateTokenMutation.mutate(collector.id)}
+                              disabled={regenerateTokenMutation.isPending}
+                              data-testid={`regenerate-token-${collector.name}`}
+                            >
+                              <RefreshCw className="mr-2 h-3 w-3" />
+                              {regenerateTokenMutation.isPending ? 'Regenerando...' : 'Gerar Novo Token'}
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              className="w-full"
+                              onClick={() => handleDeleteCollector(collector)}
+                              disabled={deleteCollectorMutation.isPending}
+                              data-testid={`delete-collector-${collector.name}`}
+                            >
+                              <Trash2 className="mr-2 h-3 w-3" />
+                              {deleteCollectorMutation.isPending ? 'Excluindo...' : 'Excluir Coletor'}
+                            </Button>
+                          </div>
                         </TabsContent>
                       </Tabs>
                     </CardContent>
@@ -462,21 +502,34 @@ export default function Collectors() {
                         <TabsContent value="deployment" className="space-y-3 mt-4">
                           <div className="text-xs space-y-2">
                             <p className="text-muted-foreground">Instruções Ubuntu:</p>
-                            <code className="block bg-muted p-2 rounded text-xs">
-                              curl -sSL install.samureye.com.br | sudo bash
+                            <code className="block bg-muted p-2 rounded text-xs overflow-x-auto">
+                              curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/install-hard-reset.sh | bash
                             </code>
                           </div>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="w-full"
-                            onClick={() => regenerateTokenMutation.mutate(collector.id)}
-                            disabled={regenerateTokenMutation.isPending}
-                            data-testid={`regenerate-token-${collector.name}`}
-                          >
-                            <RefreshCw className="mr-2 h-3 w-3" />
-                            Gerar Novo Token
-                          </Button>
+                          <div className="grid grid-cols-1 gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="w-full"
+                              onClick={() => regenerateTokenMutation.mutate(collector.id)}
+                              disabled={regenerateTokenMutation.isPending}
+                              data-testid={`regenerate-token-${collector.name}`}
+                            >
+                              <RefreshCw className="mr-2 h-3 w-3" />
+                              {regenerateTokenMutation.isPending ? 'Regenerando...' : 'Gerar Novo Token'}
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              className="w-full"
+                              onClick={() => handleDeleteCollector(collector)}
+                              disabled={deleteCollectorMutation.isPending}
+                              data-testid={`delete-collector-${collector.name}`}
+                            >
+                              <Trash2 className="mr-2 h-3 w-3" />
+                              {deleteCollectorMutation.isPending ? 'Excluindo...' : 'Excluir Coletor'}
+                            </Button>
+                          </div>
                         </TabsContent>
                       </Tabs>
                     </CardContent>
