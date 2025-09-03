@@ -51,6 +51,32 @@ const requireTenant: RequestHandler = async (req: any, res, next) => {
 export async function registerRoutes(app: Express): Promise<Server> {
   // Create memory store for session
   const MemoryStore = createMemoryStore(session);
+
+  // Collector status monitoring - check for offline collectors every 2 minutes
+  const HEARTBEAT_TIMEOUT = 5 * 60 * 1000; // 5 minutes timeout
+  setInterval(async () => {
+    try {
+      const tenants = await storage.getAllTenants();
+      const currentTime = new Date();
+      
+      for (const tenant of tenants) {
+        const collectors = await storage.getCollectorsByTenant(tenant.id);
+        
+        for (const collector of collectors) {
+          if (collector.status === 'online' && collector.lastSeen) {
+            const timeSinceLastSeen = currentTime.getTime() - collector.lastSeen.getTime();
+            
+            if (timeSinceLastSeen > HEARTBEAT_TIMEOUT) {
+              await storage.updateCollectorStatus(collector.id, 'offline', collector.lastSeen);
+              console.log(`Collector ${collector.name} marked as OFFLINE - no heartbeat for ${Math.round(timeSinceLastSeen / 60000)} minutes`);
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error checking collector status:', error);
+    }
+  }, 2 * 60 * 1000); // Check every 2 minutes
   
   // Session middleware
   app.use(session({
@@ -102,11 +128,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       if (!collector) {
+        console.log(`Heartbeat received for unknown collector: ${collector_id}`);
         return res.status(404).json({ message: "Collector not found" });
       }
 
-      // Update collector status to online
-      await storage.updateCollectorStatus(collector.id, 'online');
+      // Determine new status based on current status and heartbeat
+      let newStatus = 'online';
+      let wasEnrolling = false;
+      if (collector.status === 'enrolling') {
+        newStatus = 'online'; // Transition from enrolling to online on first heartbeat
+        wasEnrolling = true;
+        console.log(`Collector ${collector.name} transitioned from ENROLLING to ONLINE`);
+      }
+
+      // Update collector status to online with current timestamp
+      await storage.updateCollectorStatus(collector.id, newStatus, new Date());
 
       // Store telemetry if provided
       if (telemetry) {
@@ -122,12 +158,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Log collector activity
-      console.log(`Collector heartbeat: ${collector.name} (${collector.hostname}) - Status: ${status}`);
+      console.log(`Collector heartbeat: ${collector.name} (${collector.hostname}) - Status: ${newStatus}${wasEnrolling ? ' [Transitioned from ENROLLING]' : ''}`);
       
       res.json({ 
         message: "Heartbeat received", 
         collector_id: collector.id,
-        status: "online"
+        status: newStatus,
+        transitioned: wasEnrolling
       });
     } catch (error) {
       console.error("Error processing collector heartbeat:", error);
@@ -758,14 +795,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
         tenantId: defaultTenant.id
       });
 
-      const collector = await storage.createCollector(validatedData);
-      const enrollmentToken = await storage.generateEnrollmentToken(collector.id);
+      // Check if collector already exists (by name, hostname, or IP)
+      const existingCollectors = await storage.getCollectorsByTenant(defaultTenant.id);
+      const existingCollector = existingCollectors.find(c => 
+        c.name === validatedData.name ||
+        c.hostname === validatedData.hostname ||
+        c.ipAddress === validatedData.ipAddress
+      );
 
-      console.log(`Created collector ${collector.name} for tenant ${defaultTenant.id}`);
-      res.json({ ...collector, enrollmentToken });
+      if (existingCollector) {
+        // Update existing collector status for re-registration
+        await storage.updateCollectorStatus(existingCollector.id, 'enrolling', new Date());
+        
+        const enrollmentToken = await storage.generateEnrollmentToken(existingCollector.id);
+        console.log(`Updated existing collector ${existingCollector.name} for re-registration`);
+        res.json({ ...existingCollector, status: 'enrolling', enrollmentToken });
+      } else {
+        // Create new collector
+        const collector = await storage.createCollector(validatedData);
+        const enrollmentToken = await storage.generateEnrollmentToken(collector.id);
+        console.log(`Created new collector ${collector.name} for tenant ${defaultTenant.id}`);
+        res.json({ ...collector, enrollmentToken });
+      }
     } catch (error) {
-      console.error("Error creating collector:", error);
-      res.status(500).json({ message: "Failed to create collector" });
+      console.error("Error creating/updating collector:", error);
+      res.status(500).json({ message: "Failed to create or update collector" });
     }
   });
 

@@ -971,13 +971,16 @@ cat > "$COLLECTOR_DIR/scripts/register.sh" << 'EOF'
 # Script para registrar collector no servidor SamurEye
 
 API_URL="https://api.samureye.com.br"
-COLLECTOR_NAME="vlxsam04-collector"
 HOSTNAME=$(hostname)
 IP_ADDRESS=$(hostname -I | awk '{print $1}')
+COLLECTOR_NAME="${HOSTNAME}-collector"  # Use hostname to ensure uniqueness
 
 echo "🔗 Registrando collector no servidor SamurEye..."
+echo "   Nome: $COLLECTOR_NAME"
+echo "   Hostname: $HOSTNAME" 
+echo "   IP: $IP_ADDRESS"
 
-# Registrar collector via API
+# Registrar collector via API (will update existing if found)
 response=$(curl -s -k -X POST "$API_URL/api/collectors" \
     -H "Content-Type: application/json" \
     -d "{
@@ -985,7 +988,7 @@ response=$(curl -s -k -X POST "$API_URL/api/collectors" \
         \"hostname\": \"$HOSTNAME\",
         \"ipAddress\": \"$IP_ADDRESS\",
         \"status\": \"enrolling\",
-        \"description\": \"Collector agent on-premise vlxsam04\"
+        \"description\": \"Collector agent on-premise $HOSTNAME\"
     }")
 
 if echo "$response" | grep -q "enrollmentToken"; then
@@ -1000,8 +1003,21 @@ if echo "$response" | grep -q "enrollmentToken"; then
         
         echo "Token salvo em: /etc/samureye-collector/token.conf"
         echo "Para aplicar: systemctl restart samureye-collector"
+        
+        # Restart collector service to use new token
+        systemctl restart samureye-collector
+        sleep 3
+        echo "✅ Serviço collector reiniciado"
+        
+        # Show status
+        if systemctl is-active --quiet samureye-collector; then
+            echo "✅ Status: Ativo e enviando heartbeat"
+        else
+            echo "⚠️ Status: Verificar logs - systemctl status samureye-collector"
+        fi
     else
         echo "❌ Erro: Token não recebido"
+        echo "Resposta: $response"
     fi
 else
     echo "❌ Erro no registro:"
