@@ -579,36 +579,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get current user endpoint (for session-based auth) with tenant information - Public for on-premise
-  app.get('/api/user', async (req, res) => {
-    try {
-      // In on-premise environment, create a default tenant user
-      const allTenants = await storage.getAllTenants();
-      if (allTenants.length === 0) {
-        return res.status(400).json({ message: "No tenants available" });
-      }
-      
-      const defaultTenant = allTenants[0];
-      
-      res.json({
-        id: 'onpremise-user',
-        email: 'tenant@onpremise.local',
-        name: 'On-Premise Tenant User',
-        isSocUser: false,
-        isActive: true,
-        tenants: [{
-          tenantId: defaultTenant.id,
-          role: 'tenant_admin',
-          tenant: defaultTenant
-        }],
-        currentTenant: defaultTenant
-      });
-    } catch (error) {
-      console.error("Error in /api/user:", error);
-      res.status(500).json({ message: "Internal server error" });
-    }
-  });
-
   // Local user middleware (for session-based authentication)
   const isLocalUserAuthenticated = async (req: any, res: any, next: any) => {
     try {
@@ -632,6 +602,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Authentication error" });
     }
   };
+
+  // Get current user endpoint (for session-based auth) with tenant information - REQUIRES AUTHENTICATION
+  app.get('/api/user', isLocalUserAuthenticated, async (req: any, res) => {
+    try {
+      // Get authenticated user from middleware
+      const user = (req as any).localUser;
+      
+      if (!user) {
+        return res.status(401).json({ error: 'User not authenticated' });
+      }
+      
+      // Get tenants for the authenticated user
+      let userTenants = [];
+      
+      if (user.isSocUser) {
+        // SOC users can access all tenants
+        userTenants = await storage.getAllTenants();
+      } else {
+        // Regular users only see their tenants
+        const allTenants = await storage.getAllTenants();
+        userTenants = allTenants.filter(t => t.id === user.tenantId);
+      }
+      
+      res.json({
+        id: user.id,
+        email: user.email,
+        name: `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        isSocUser: user.isSocUser || false,
+        isActive: user.isActive !== false,
+        tenants: userTenants.map(t => ({
+          tenantId: t.id,
+          role: user.isSocUser ? 'soc_user' : 'tenant_admin',
+          tenant: t
+        })),
+        currentTenant: userTenants[0] || null
+      });
+    } catch (error) {
+      console.error("Error in /api/user:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
 
   // Tenant middleware for local users
   const requireLocalUserTenant = async (req: any, res: any, next: any) => {

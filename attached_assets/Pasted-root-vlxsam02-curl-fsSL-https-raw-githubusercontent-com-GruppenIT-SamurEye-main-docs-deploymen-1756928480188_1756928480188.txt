@@ -1,0 +1,34 @@
+root@vlxsam02:~# curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam02/fix-api-user-route.sh | bash
+
+🔧 CORREÇÃO DEFINITIVA ROTA /api/user
+====================================
+
+[16:41:37] INFO: Problema: Rota /api/user sem middleware cria usuário fictício automático
+[16:41:37] 📁 Criando backup do routes.ts atual...
+[16:41:37] ✅ Backup criado
+[16:41:37] 🔧 Aplicando correção cirúrgica na rota /api/user...
+🔧 Corrigindo rota /api/user sem middleware...
+✅ Middleware isLocalUserAuthenticated encontrado
+⚠️ Padrão da rota não encontrado, tentando localizar manualmente...
+✅ Rota /api/user localizada e substituída manualmente
+✅ Correção da rota /api/user aplicada com sucesso
+[16:41:37] 🧹 Limpando sessões existentes...
+[16:41:37] ✅ Arquivos de sessão temporários limpos
+[16:41:37] 🔄 Rebuilding aplicação...
+[16:41:44] WARNING: ⚠️ Build com warnings
+[16:41:44] 🔄 Reiniciando serviço...
+[16:41:44] ✅ Serviço reiniciado
+[16:41:44] ⏳ Aguardando aplicação...
+.[16:41:47] ✅ Aplicação online
+
+[16:41:47] 🧪 Testando correção...
+
+[16:41:47] ERROR: ❌ PROBLEMA PERSISTE - ainda retorna usuário sem autenticação
+   Resposta:
+{"id":"onpremise-user","email":"tenant@onpremise.local","name":"On-Premise Tenant User","isSocUser":false,"isActive":true,"tenants":[{"tenantId":"3ad0d4ee-e6fa-4690-af4b-8993dd412305","role":"tenant_admin","tenant":{"id":"3ad0d4ee-e6fa-4690-af4b-8993dd412305","name":"Gruppen it","slug":"gruppen-it","description":"","logoUrl":null,"settings":null,"isActive":true,"createdAt":"2025-09-03T19:29:02.768Z","updatedAt":"2025-09-03T19:29:02.768Z"}}],"currentTenant":{"id":"3ad0d4ee-e6fa-4690-af4b-8993dd412305","name":"Gruppen it","slug":"gruppen-it","description":"","logoUrl":null,"settings":null,"isActive":true,"createdAt":"2025-09-03T19:29:02.768Z","updatedAt":"2025-09-03T19:29:02.768Z"}}
+[16:41:47] ERROR: 🔍 INVESTIGAÇÃO ADICIONAL NECESSÁRIA
+   A rota pode não ter sido corrigida adequadamente
+
+[16:41:47] 🔧 Correção da rota /api/user finalizada
+====================================
+root@vlxsam02:~#
