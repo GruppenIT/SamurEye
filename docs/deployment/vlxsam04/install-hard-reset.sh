@@ -966,19 +966,8 @@ fi
 
 log "📝 Criando script de registro..."
 
-cat > "$COLLECTOR_DIR/scripts/register.sh" << 'EOF'
-#!/bin/bash
-# Script para registrar collector no servidor SamurEye
-
-API_URL="https://api.samureye.com.br"
-HOSTNAME=$(hostname)
-IP_ADDRESS=$(hostname -I | awk '{print $1}')
-COLLECTOR_NAME="${HOSTNAME}-collector"  # Use hostname to ensure uniqueness
-
-echo "🔗 Registrando collector no servidor SamurEye..."
-echo "   Nome: $COLLECTOR_NAME"
-echo "   Hostname: $HOSTNAME" 
-echo "   IP: $IP_ADDRESS"
+# Remover script register.sh antigo - será substituído pelo heartbeat integrado
+log "📝 Sistema de registro integrado ao heartbeat implementado"
 
 # ============================================================================
 # CORREÇÃO INTEGRADA DE DUPLICAÇÃO DE COLETORES
@@ -987,7 +976,7 @@ echo "   IP: $IP_ADDRESS"
 log "🔧 Implementando correção de duplicação de coletores..."
 
 # Criar configuração robusta para evitar duplicação
-cat > "$CONFIG_FILE" << EOF
+cat > "$CONFIG_FILE" << 'CONFIG_EOF'
 # Configuração do Collector SamurEye - Anti-duplicação
 COLLECTOR_ID=${HOSTNAME}
 COLLECTOR_NAME=${COLLECTOR_NAME}
@@ -998,7 +987,7 @@ HEARTBEAT_INTERVAL=30
 RETRY_ATTEMPTS=3
 RETRY_DELAY=5
 LOG_LEVEL=INFO
-EOF
+CONFIG_EOF
 
 # Criar script de heartbeat robusto integrado
 cat > "$COLLECTOR_DIR/heartbeat.py" << 'HEARTBEAT_EOF'
@@ -1207,7 +1196,7 @@ chmod +x "$COLLECTOR_DIR/heartbeat.py"
 chown "$COLLECTOR_USER:$COLLECTOR_USER" "$COLLECTOR_DIR/heartbeat.py"
 
 # Atualizar serviço systemd para usar heartbeat robusto
-cat > /etc/systemd/system/$SERVICE_NAME.service << EOF
+cat > /etc/systemd/system/$SERVICE_NAME.service << 'SERVICE_EOF'
 [Unit]
 Description=SamurEye Collector Agent
 After=network.target
@@ -1227,7 +1216,7 @@ Environment=PYTHONUNBUFFERED=1
 
 [Install]
 WantedBy=multi-user.target
-EOF
+SERVICE_EOF
 
 systemctl daemon-reload
 
@@ -1236,44 +1225,8 @@ log "✅ Sistema anti-duplicação integrado no install-hard-reset"
 # REGISTRO AUTOMÁTICO COM PROTEÇÃO ANTI-DUPLICAÇÃO
 log "🔗 Registrando collector com proteção anti-duplicação..."
 
-response='{"message":"Registration handled by heartbeat system"}'
-
-if echo "$response" | grep -q "enrollmentToken"; then
-    token=$(echo "$response" | jq -r '.enrollmentToken' 2>/dev/null)
-    if [ "$token" != "null" ] && [ -n "$token" ]; then
-        echo "✅ Collector registrado com sucesso!"
-        echo "Token: $token"
-        
-        # Salvar token no arquivo de configuração
-        echo "ENROLLMENT_TOKEN=$token" > /etc/samureye-collector/token.conf
-        chmod 600 /etc/samureye-collector/token.conf
-        
-        echo "Token salvo em: /etc/samureye-collector/token.conf"
-        echo "Para aplicar: systemctl restart samureye-collector"
-        
-        # Restart collector service to use new token
-        systemctl restart samureye-collector
-        sleep 3
-        echo "✅ Serviço collector reiniciado"
-        
-        # Show status
-        if systemctl is-active --quiet samureye-collector; then
-            echo "✅ Status: Ativo e enviando heartbeat"
-        else
-            echo "⚠️ Status: Verificar logs - systemctl status samureye-collector"
-        fi
-    else
-        echo "❌ Erro: Token não recebido"
-        echo "Resposta: $response"
-    fi
-else
-    echo "❌ Erro no registro:"
-    echo "$response"
-fi
-EOF
-
-chmod +x "$COLLECTOR_DIR/scripts/register.sh"
-chown "$COLLECTOR_USER:$COLLECTOR_USER" "$COLLECTOR_DIR/scripts/register.sh"
+# Registro será feito automaticamente pelo heartbeat system
+log "✅ Registro automático será realizado pelo sistema de heartbeat"
 
 # ============================================================================
 # SCRIPTS DE DIAGNÓSTICO INTEGRADOS NO INSTALL
@@ -1380,7 +1333,7 @@ echo "🔧 Comandos Úteis:"
 echo "   • Status:     systemctl status $SERVICE_NAME"
 echo "   • Logs:       tail -f /var/log/samureye-collector/collector.log"
 echo "   • Restart:    systemctl restart $SERVICE_NAME"
-echo "   • Register:   $COLLECTOR_DIR/scripts/register.sh"
+echo "   • Heartbeat:  $COLLECTOR_DIR/heartbeat.py"
 echo "   • Cleanup:    $COLLECTOR_DIR/scripts/cleanup.sh"
 echo "   • Test Conn:  $COLLECTOR_DIR/test-connectivity.sh"
 echo "   • Check Status: $COLLECTOR_DIR/scripts/check-status.sh"
