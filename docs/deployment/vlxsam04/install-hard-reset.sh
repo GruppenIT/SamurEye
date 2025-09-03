@@ -1001,6 +1001,17 @@ RETRY_DELAY=5
 LOG_LEVEL=INFO
 CONFIG_EOF
 
+# Aplicar permissões corretas ao arquivo .env
+chown root:$COLLECTOR_USER "$CONFIG_FILE"
+chmod 640 "$CONFIG_FILE"
+
+# Verificar se o usuário consegue ler o arquivo
+if ! sudo -u $COLLECTOR_USER cat "$CONFIG_FILE" >/dev/null 2>&1; then
+    warn "❌ Problema permissão .env - aplicando fallback"
+    chmod 644 "$CONFIG_FILE"
+    chown $COLLECTOR_USER:$COLLECTOR_USER "$CONFIG_FILE"
+fi
+
 # Criar script de heartbeat robusto integrado
 cat > "$COLLECTOR_DIR/heartbeat.py" << 'HEARTBEAT_EOF'
 #!/usr/bin/env python3

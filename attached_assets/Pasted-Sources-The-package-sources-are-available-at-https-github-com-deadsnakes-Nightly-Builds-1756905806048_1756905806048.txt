@@ -1,0 +1,229 @@
+Sources
+=======
+The package sources are available at:
+https://github.com/deadsnakes/
+
+Nightly Builds
+==============
+
+For nightly builds, see ppa:deadsnakes/nightly https://launchpad.net/~deadsnakes/+archive/ubuntu/nightly
+More info: https://launchpad.net/~deadsnakes/+archive/ubuntu/ppa
+Adding repository.
+Found existing deb entry in /etc/apt/sources.list.d/deadsnakes-ubuntu-ppa-noble.sources
+Hit:1 https://deb.nodesource.com/node_20.x nodistro InRelease
+Hit:2 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:3 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:4 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:5 https://ppa.launchpadcontent.net/deadsnakes/ppa/ubuntu noble InRelease
+Hit:6 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists... Done
+Hit:1 https://deb.nodesource.com/node_20.x nodistro InRelease
+Hit:2 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:3 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:4 https://ppa.launchpadcontent.net/deadsnakes/ppa/ubuntu noble InRelease
+Hit:5 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:6 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists... Done
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+python3.11 is already the newest version (3.11.13-1+noble1).
+python3.11-dev is already the newest version (3.11.13-1+noble1).
+python3.11-venv is already the newest version (3.11.13-1+noble1).
+python3.11-distutils is already the newest version (3.11.13-1+noble1).
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+[10:09:32] ✅ Python 3.11.13 instalado
+[10:09:32] ✅ Python padrão: 3.12.3
+[10:09:32] 📦 Instalando Node.js 20...
+2025-09-03 10:09:32 - Installing pre-requisites
+Hit:1 https://deb.nodesource.com/node_20.x nodistro InRelease
+Hit:2 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:3 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:4 https://ppa.launchpadcontent.net/deadsnakes/ppa/ubuntu noble InRelease
+Hit:5 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:6 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists... Done
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+apt-transport-https is already the newest version (2.8.3).
+ca-certificates is already the newest version (20240203).
+curl is already the newest version (8.5.0-2ubuntu10.6).
+gnupg is already the newest version (2.4.4-2ubuntu17.3).
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+Hit:1 https://deb.nodesource.com/node_20.x nodistro InRelease
+Hit:2 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:3 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:4 https://ppa.launchpadcontent.net/deadsnakes/ppa/ubuntu noble InRelease
+Hit:5 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:6 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists... Done
+2025-09-03 10:09:38 - Repository configured successfully.
+2025-09-03 10:09:38 - To install Node.js, run: apt-get install nodejs -y
+2025-09-03 10:09:38 - You can use N|solid Runtime as a node.js alternative
+2025-09-03 10:09:38 - To install N|solid Runtime, run: apt-get install nsolid -y
+
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+nodejs is already the newest version (20.19.4-1nodesource1).
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+[10:09:39] ✅ Node.js v20.19.4 instalado
+[10:09:39] 👤 Criando usuário e estrutura de diretórios...
+[10:09:39] ✅ Estrutura de diretórios criada
+[10:09:39] 🛡️ Instalando ferramentas de segurança...
+[10:09:39] 📡 Configurando Nmap...
+[10:09:39] 🔄 Instalando Nmap (OBRIGATÓRIO para collector)...
+[10:09:42] ✅ Nmap instalado via apt
+[10:09:42] WARNING: ❌ CRÍTICO: Nmap não disponível - collector pode falhar
+[10:09:42] ✅ Masscan configurado
+[10:09:42]    Versão:
+[10:09:42] 🔍 Instalando Nuclei...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+[10:09:43] WARNING: ⚠️ Nuclei via apt falhou, instalando via GitHub...
+[10:09:45] ✅ Nuclei instalado via GitHub
+[10:09:46] ✅ Nuclei configurado (vNuclei)
+[10:09:46] 📋 Atualizando templates Nuclei em background...
+[10:09:46] 🔍 Instalando Gobuster...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+gobuster is already the newest version (3.6.0-1ubuntu0.24.04.3).
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+[10:09:46] ✅ Gobuster instalado via apt
+[10:09:46] WARNING: ❌ Gobuster não está disponível após instalação
+[10:09:46] 🧹 Arquivos temporários removidos
+[10:09:46] 🤖 Instalando agente coletor...
+[10:09:46] 📦 Instalando dependências Python...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+python3-psutil is already the newest version (5.9.8-2build2).
+python3-requests is already the newest version (2.31.0+dfsg-1ubuntu1.1).
+python3-venv is already the newest version (3.12.3-0ubuntu2).
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+[10:09:47] ✅ Dependências Python instaladas
+[10:09:47] 🔧 Configurando serviço systemd...
+[10:09:48] ✅ Serviço systemd configurado
+[10:09:48] ⏰ Configurando cron jobs...
+[10:09:48] ✅ Cron jobs configurados
+[10:09:48] 🔒 Configurando firewall...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+ufw is already the newest version (0.36.2-6).
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+Backing up 'user.rules' to '/etc/ufw/user.rules.20250903_100950'
+Backing up 'before.rules' to '/etc/ufw/before.rules.20250903_100950'
+Backing up 'after.rules' to '/etc/ufw/after.rules.20250903_100950'
+Backing up 'user6.rules' to '/etc/ufw/user6.rules.20250903_100950'
+Backing up 'before6.rules' to '/etc/ufw/before6.rules.20250903_100950'
+Backing up 'after6.rules' to '/etc/ufw/after6.rules.20250903_100950'
+
+Default incoming policy changed to 'deny'
+(be sure to update your rules accordingly)
+Default outgoing policy changed to 'allow'
+(be sure to update your rules accordingly)
+Rules updated
+Rules updated (v6)
+Rules updated
+Rules updated
+Rules updated (v6)
+Firewall is active and enabled on system startup
+[10:09:51] ✅ Firewall configurado
+[10:09:51] 🚀 Iniciando serviço collector...
+Created symlink /etc/systemd/system/multi-user.target.wants/samureye-collector.service → /etc/systemd/system/samureye-collector.service.
+[10:09:59] ✅ Templates Nuclei atualizados
+[10:10:01] WARNING: ⚠️ Collector pode ter problemas - verificar logs
+[10:10:01] 🧪 Executando testes de validação...
+[10:10:01] WARNING: ⚠️ Serviço: Inativo
+[10:10:01] ✅ Python: Dependências OK
+[10:10:01] 🛡️ Ferramentas: nmap:❌ nuclei:✅ masscan:✅ gobuster:❌
+[10:10:01] ✅ API: Conectividade OK
+[10:10:01] ✅ Logs: Sendo gerados
+[10:10:01] 💓 Configurando correções de heartbeat e conectividade...
+[10:10:01] WARNING: ⚠️ Arquivo de configuração /etc/samureye-collector/.env não encontrado
+[10:10:01] ✅ Script de teste de conectividade criado: /opt/samureye/collector/test-connectivity.sh
+[10:10:01] WARNING: ⚠️ Certificados não encontrados - teste de conectividade pulado
+[10:10:01] 📝 Criando script de registro...
+[10:10:01] 📝 Sistema de registro integrado ao heartbeat implementado
+[10:10:01] 🔧 Implementando correção de duplicação de coletores...
+[10:10:02] ✅ Sistema anti-duplicação integrado no install-hard-reset
+[10:10:02] 🔗 Registrando collector com proteção anti-duplicação...
+[10:10:02] ✅ Registro automático será realizado pelo sistema de heartbeat
+[10:10:02] 📋 Criando scripts de diagnóstico integrados...
+[10:10:02] ✅ Script de diagnóstico integrado criado
+
+[10:10:02] 🎉 HARD RESET DO COLLECTOR AGENT CONCLUÍDO!
+
+📋 RESUMO DA INSTALAÇÃO:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🤖 Collector Agent:
+   • Status:  active
+   • User:    samureye-collector
+   • Dir:     /opt/samureye/collector
+   • Logs:    /var/log/samureye-collector/
+
+🐍 Python 3.11:
+   • Version: Python 3.12.3
+   • Libs:    psutil, requests
+
+📦 Node.js 20:
+   • Version: v20.19.4
+
+🛡️ Security Tools:
+   • Nmap:     ❌ Ausente
+   • Nuclei:   ✅ Instalado
+   • Masscan:  ✅ Instalado
+   • Gobuster: ❌ Ausente
+
+🔧 Comandos Úteis:
+   • Status:     systemctl status samureye-collector
+   • Logs:       tail -f /var/log/samureye-collector/collector.log
+   • Restart:    systemctl restart samureye-collector
+   • Heartbeat:  /opt/samureye/collector/heartbeat.py
+   • Cleanup:    /opt/samureye/collector/scripts/cleanup.sh
+   • Test Conn:  /opt/samureye/collector/test-connectivity.sh
+   • Check Status: /opt/samureye/collector/scripts/check-status.sh
+
+🔗 Conectividade:
+   • API:       https://api.samureye.com.br
+   • Gateway:   192.168.100.151
+
+💓 Heartbeat & Status:
+   • Intervalo: 30 segundos (configurável em /etc/samureye-collector/.env)
+   • Endpoint:  https://api.samureye.com.br/collector-api/heartbeat
+   • Retry:     3 tentativas automáticas por request
+   • Timeout:   30 segundos por request HTTP
+
+📝 Próximos Passos:
+   1. Monitorar logs: tail -f /var/log/samureye-collector/heartbeat.log
+   2. Verificar status: /opt/samureye/collector/scripts/check-status.sh
+   3. Interface admin: https://app.samureye.com.br/admin/collectors
+   4. Aguardar transição: ENROLLING → ONLINE (1-2 minutos)
+
+✅ SISTEMA ANTI-DUPLICAÇÃO INTEGRADO:
+   • Heartbeat robusto implementado para evitar coletores duplicados
+   • Registro automático com proteção anti-duplicação
+   • Transição automática: ENROLLING → ONLINE → (timeout) → OFFLINE
+   • Auto-recovery em caso de falhas de conexão
+
+🔧 COMANDOS DE EXECUÇÃO REMOTA:
+   curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/vlxsam04/install-hard-reset.sh | bash
+
+root@vlxsam04:~# tail -f /var/log/samureye-collector/collector.log
+2025-09-03 10:17:13,136 - ERROR - Erro ao carregar configuração: [Errno 13] Permission denied: '/etc/samureye-collector/.env'
+2025-09-03 10:17:23,354 - ERROR - Erro ao carregar configuração: [Errno 13] Permission denied: '/etc/samureye-collector/.env'
+2025-09-03 10:17:33,634 - ERROR - Erro ao carregar configuração: [Errno 13] Permission denied: '/etc/samureye-collector/.env'
+2025-09-03 10:17:43,884 - ERROR - Erro ao carregar configuração: [Errno 13] Permission denied: '/etc/samureye-collector/.env'
+2025-09-03 10:17:54,106 - ERROR - Erro ao carregar configuração: [Errno 13] Permission denied: '/etc/samureye-collector/.env'
+2025-09-03 10:18:04,368 - ERROR - Erro ao carregar configuração: [Errno 13] Permission denied: '/etc/samureye-collector/.env'
+2025-09-03 10:18:14,617 - ERROR - Erro ao carregar configuração: [Errno 13] Permission denied: '/etc/samureye-collector/.env'
+2025-09-03 10:18:24,874 - ERROR - Erro ao carregar configuração: [Errno 13] Permission denied: '/etc/samureye-collector/.env'
+2025-09-03 10:18:35,126 - ERROR - Erro ao carregar configuração: [Errno 13] Permission denied: '/etc/samureye-collector/.env'
+2025-09-03 10:18:45,361 - ERROR - Erro ao carregar configuração: [Errno 13] Permission denied: '/etc/samureye-collector/.env'
+2025-09-03 10:18:55,636 - ERROR - Erro ao carregar configuração: [Errno 13] Permission denied: '/etc/samureye-collector/.env'
+^C
+root@vlxsam04:~#
