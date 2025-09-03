@@ -603,6 +603,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   };
 
+  // Middleware that accepts both admin and local user authentication
+  const isLocalUserOrAdminAuthenticated = async (req: any, res: any, next: any) => {
+    try {
+      // Check for admin authentication first
+      const adminUser = (req.session as any)?.adminUser;
+      if (adminUser && adminUser.isAdmin) {
+        req.isAdmin = true;
+        req.adminUser = adminUser;
+        return next();
+      }
+      
+      // Check for local user authentication
+      const userId = (req.session as any)?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const user = await storage.getUserById(userId);
+      if (!user || !user.isActive) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      req.userId = userId;
+      req.localUser = user;
+      req.user = user;
+      next();
+    } catch (error) {
+      console.error("Authentication error:", error);
+      res.status(500).json({ message: "Authentication error" });
+    }
+  };
+
   // Get current user endpoint (for session-based auth) with tenant information - REQUIRES AUTHENTICATION
   app.get('/api/user', isLocalUserAuthenticated, async (req: any, res) => {
     try {
@@ -897,22 +929,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Delete collector (requires authentication)
-  app.delete('/api/collectors/:id', isLocalUserAuthenticated, async (req: any, res) => {
+  // Delete collector (requires authentication - admin or local user)
+  app.delete('/api/collectors/:id', isLocalUserOrAdminAuthenticated, async (req: any, res) => {
     try {
-      const user = req.localUser;
       const collector = await storage.getCollector(req.params.id);
       
       if (!collector) {
         return res.status(404).json({ message: "Collector not found" });
       }
       
-      // Verify user has access to this collector's tenant
+      // Check access permissions
       let hasAccess = false;
-      if (user.isSocUser) {
+      
+      if (req.isAdmin) {
+        // Admin has access to all collectors
         hasAccess = true;
       } else {
-        hasAccess = collector.tenantId === user.tenantId;
+        // Local user access check
+        const user = req.localUser;
+        if (user.isSocUser) {
+          hasAccess = true;
+        } else {
+          hasAccess = collector.tenantId === user.tenantId;
+        }
       }
       
       if (!hasAccess) {
@@ -920,6 +959,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       await storage.deleteCollector(req.params.id);
+      
+      console.log(`Collector deleted: ${collector.name} (${collector.id}) by ${req.isAdmin ? 'admin' : req.localUser?.email}`);
       
       res.json({ 
         message: "Collector deleted successfully",
