@@ -761,7 +761,183 @@ EOF
 chmod +x /usr/local/bin/test-samureye-db.sh
 
 # ============================================================================
-# 14. VALIDAÇÃO FINAL
+# 14. SINCRONIZAR SCHEMA DO BANCO DE DADOS  
+# ============================================================================
+
+log "📋 Sincronizando schema do banco de dados..."
+
+# Aguardar PostgreSQL estar completamente disponível
+sleep 5
+
+# Verificar se vlxsam02 está acessível e sincronizar schema
+if ping -c 1 172.24.1.152 >/dev/null 2>&1; then
+    log "🔗 vlxsam02 acessível, executando npm run db:push..."
+    
+    # Tentar executar db:push no vlxsam02 via SSH
+    if ssh -o ConnectTimeout=10 -o StrictHostKeyChecking=no root@172.24.1.152 << 'SCHEMA_EOF'
+set -e
+
+cd /opt/samureye
+
+# Verificar se existe package.json e drizzle.config.ts
+if [ ! -f "package.json" ] || [ ! -f "drizzle.config.ts" ]; then
+    echo "❌ Arquivos necessários não encontrados no vlxsam02"
+    exit 1
+fi
+
+# Configurar variável de ambiente
+export DATABASE_URL="postgresql://samureye_user:samureye_secure_2024@172.24.1.153:5432/samureye"
+
+# Testar conexão com banco
+echo "🔌 Testando conexão com PostgreSQL..."
+if ! echo "SELECT version();" | psql "$DATABASE_URL" >/dev/null 2>&1; then
+    echo "❌ Falha na conexão com PostgreSQL"
+    exit 1
+fi
+
+echo "✅ Conexão PostgreSQL OK"
+
+# Executar db:push
+echo "🚀 Executando npm run db:push..."
+if npm run db:push -- --force 2>/dev/null; then
+    echo "✅ Schema sincronizado com sucesso!"
+    
+    # Verificar se tabelas foram criadas
+    echo "📋 Verificando tabelas criadas..."
+    echo "SELECT tablename FROM pg_tables WHERE schemaname = 'public' ORDER BY tablename;" | psql "$DATABASE_URL" -t
+    
+else
+    echo "❌ Falha no db:push, tentando comandos alternativos..."
+    
+    # Tentar drizzle-kit diretamente
+    for cmd in "npx drizzle-kit push" "npx drizzle-kit push:pg"; do
+        echo "🔄 Tentando: $cmd"
+        if $cmd 2>/dev/null; then
+            echo "✅ Schema sincronizado com $cmd"
+            break
+        fi
+    done
+fi
+
+SCHEMA_EOF
+    then
+        log "✅ Schema sincronizado com sucesso via vlxsam02"
+    else
+        warn "⚠️ Falha na sincronização via SSH, criando tabelas essenciais manualmente..."
+        
+        # Fallback: Criar tabelas essenciais diretamente no PostgreSQL
+        log "📝 Criando tabelas essenciais manualmente..."
+        sudo -u postgres psql -d samureye << 'TABLES_EOF'
+-- Criar tabelas essenciais se não existirem
+CREATE TABLE IF NOT EXISTS tenants (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name VARCHAR(255) NOT NULL UNIQUE,
+    displayName VARCHAR(255) NOT NULL,
+    domain VARCHAR(255),
+    status VARCHAR(50) DEFAULT 'active',
+    settings JSONB DEFAULT '{}',
+    createdAt TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updatedAt TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS users (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    tenantId UUID REFERENCES tenants(id) ON DELETE CASCADE,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    name VARCHAR(255) NOT NULL,
+    role VARCHAR(50) DEFAULT 'user',
+    hashedPassword VARCHAR(255),
+    isActive BOOLEAN DEFAULT true,
+    lastLoginAt TIMESTAMP WITH TIME ZONE,
+    createdAt TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updatedAt TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS collectors (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    tenantId UUID REFERENCES tenants(id) ON DELETE CASCADE,
+    name VARCHAR(255) NOT NULL,
+    hostname VARCHAR(255) NOT NULL UNIQUE,
+    ipAddress INET NOT NULL,
+    status VARCHAR(50) DEFAULT 'enrolling',
+    lastSeen TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    version VARCHAR(50),
+    capabilities JSONB DEFAULT '{}',
+    telemetry JSONB DEFAULT '{}',
+    createdAt TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updatedAt TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Conceder privilégios
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO samureye_user;
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO samureye_user;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO samureye;
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO samureye;
+
+-- Verificar tabelas criadas
+SELECT 'Tabela criada: ' || tablename FROM pg_tables WHERE schemaname = 'public' ORDER BY tablename;
+TABLES_EOF
+        
+        log "✅ Tabelas essenciais criadas manualmente"
+    fi
+else
+    warn "⚠️ vlxsam02 não acessível, criando tabelas essenciais localmente..."
+    
+    # Criar tabelas essenciais diretamente
+    sudo -u postgres psql -d samureye << 'LOCAL_EOF'
+-- Criar tabelas essenciais
+CREATE TABLE IF NOT EXISTS tenants (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name VARCHAR(255) NOT NULL UNIQUE,
+    displayName VARCHAR(255) NOT NULL,
+    domain VARCHAR(255),
+    status VARCHAR(50) DEFAULT 'active',
+    settings JSONB DEFAULT '{}',
+    createdAt TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updatedAt TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS users (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    tenantId UUID REFERENCES tenants(id) ON DELETE CASCADE,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    name VARCHAR(255) NOT NULL,
+    role VARCHAR(50) DEFAULT 'user',
+    hashedPassword VARCHAR(255),
+    isActive BOOLEAN DEFAULT true,
+    lastLoginAt TIMESTAMP WITH TIME ZONE,
+    createdAt TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updatedAt TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS collectors (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    tenantId UUID REFERENCES tenants(id) ON DELETE CASCADE,
+    name VARCHAR(255) NOT NULL,
+    hostname VARCHAR(255) NOT NULL UNIQUE,
+    ipAddress INET NOT NULL,
+    status VARCHAR(50) DEFAULT 'enrolling',
+    lastSeen TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    version VARCHAR(50),
+    capabilities JSONB DEFAULT '{}',
+    telemetry JSONB DEFAULT '{}',
+    createdAt TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updatedAt TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO samureye_user;
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO samureye_user;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO samureye;
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO samureye;
+
+SELECT 'Tabela: ' || tablename FROM pg_tables WHERE schemaname = 'public' ORDER BY tablename;
+LOCAL_EOF
+    
+    log "✅ Tabelas criadas localmente"
+fi
+
+# ============================================================================
+# 15. VALIDAÇÃO FINAL
 # ============================================================================
 
 log "✅ Executando testes finais..."

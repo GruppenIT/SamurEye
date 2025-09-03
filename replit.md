@@ -16,6 +16,7 @@ Preferred communication style: Simple, everyday language.
 - **03/09/2025**: ✅ CORREÇÃO COMPLETA - fix-all-issues.sh master script para resolver todos os problemas vlxsam04
 - **03/09/2025**: ✅ CORREÇÃO VARIÁVEIS .ENV - expansão correta de ${HOSTNAME}, ${API_SERVER} no arquivo configuração
 - **03/09/2025**: ✅ CORREÇÃO PATHS FERRAMENTAS - nmap e gobuster linkagem automática quando instalados mas fora do PATH
+- **03/09/2025**: ✅ CORREÇÃO SCHEMA POSTGRESQL vlxsam03 - integração automática npm run db:push + criação manual tabelas tenants
 - **02/09/2025**: ✅ COLLECTOR HEARTBEAT SYSTEM IMPLEMENTADO - evita duplicação + status automático ENROLLING→ONLINE→OFFLINE  
 - **02/09/2025**: ✅ vlxsam04 INSTALAÇÃO COMPLETA - collector registrado, token gerado, status ENROLLING→ONLINE automático
 - **02/09/2025**: ✅ vlxsam04 PYTHON DEPENDENCIES CORRIGIDO - usa apt em vez de pip para Ubuntu 24.04 externally-managed-environment  
