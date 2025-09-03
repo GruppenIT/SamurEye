@@ -1439,7 +1439,7 @@ Correção aplicada: Token corrompido removido
 
 3. Collector voltará automaticamente para ONLINE
 
-REReg_EOF
+REREG_EOF
             
             chown "$COLLECTOR_USER:$COLLECTOR_USER" "$COLLECTOR_DIR/REREGISTER_REQUIRED.txt"
             

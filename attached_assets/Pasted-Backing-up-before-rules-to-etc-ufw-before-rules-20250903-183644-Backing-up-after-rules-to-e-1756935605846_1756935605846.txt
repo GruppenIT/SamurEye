@@ -1,0 +1,44 @@
+Backing up 'before.rules' to '/etc/ufw/before.rules.20250903_183644'
+Backing up 'after.rules' to '/etc/ufw/after.rules.20250903_183644'
+Backing up 'user6.rules' to '/etc/ufw/user6.rules.20250903_183644'
+Backing up 'before6.rules' to '/etc/ufw/before6.rules.20250903_183644'
+Backing up 'after6.rules' to '/etc/ufw/after6.rules.20250903_183644'
+
+Default incoming policy changed to 'deny'
+(be sure to update your rules accordingly)
+Default outgoing policy changed to 'allow'
+(be sure to update your rules accordingly)
+Rules updated
+Rules updated (v6)
+Rules updated
+Rules updated
+Rules updated (v6)
+Firewall is active and enabled on system startup
+[18:36:45] ✅ Firewall configurado
+[18:36:45] 🚀 Iniciando serviço collector...
+Created symlink /etc/systemd/system/multi-user.target.wants/samureye-collector.service → /etc/systemd/system/samureye-collector.service.
+[18:36:53] ✅ Templates Nuclei atualizados
+[18:36:56] WARNING: ⚠️ Collector pode ter problemas - verificar logs
+[18:36:56] 🧪 Executando testes de validação...
+[18:36:56] WARNING: ⚠️ Serviço: Inativo
+[18:36:56] ✅ Python: Dependências OK
+[18:36:56] 🛡️ Ferramentas: nmap:✅ nuclei:✅ masscan:✅ gobuster:❌
+[18:36:56] ✅ API: Conectividade OK
+[18:36:56] ✅ Logs: Sendo gerados
+[18:36:56] 💓 Configurando correções de heartbeat e conectividade...
+[18:36:56] WARNING: ⚠️ Arquivo de configuração /etc/samureye-collector/.env não encontrado
+[18:36:56] ✅ Script de teste de conectividade criado: /opt/samureye/collector/test-connectivity.sh
+[18:36:56] WARNING: ⚠️ Certificados não encontrados - teste de conectividade pulado
+[18:36:56] 📝 Criando script de registro...
+[18:36:56] 📝 Sistema de registro integrado ao heartbeat implementado
+[18:36:56] 🔧 Implementando correção de duplicação de coletores...
+[18:36:56] WARNING: ❌ Usuário não pode escrever no diretório config - corrigindo
+[18:36:56] ✅ Sistema anti-duplicação integrado no install-hard-reset
+[18:36:56] ⚠️ Sistema base instalado - registro manual necessário
+[18:36:56] 📋 Use o script de registro separado com token do tenant
+[18:36:56] 📋 Criando scripts de diagnóstico integrados...
+[18:36:56] ✅ Script de diagnóstico integrado criado
+[18:36:56] 🔧 Verificando e corrigindo problemas de autenticação...
+bash: line 1582: warning: here-document at line 1425 delimited by end-of-file (wanted `REREG_EOF')
+bash: line 1583: syntax error: unexpected end of file
+root@vlxsam04:~#
