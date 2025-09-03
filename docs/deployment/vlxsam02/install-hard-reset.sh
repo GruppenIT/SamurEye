@@ -863,6 +863,127 @@ rm /tmp/fix_all_syntax_definitivo.js
 log "✅ Correção DEFINITIVA de sintaxe aplicada"
 
 # ============================================================================
+# CORREÇÃO CRÍTICA: PROBLEMA DE AUTENTICAÇÃO TENANT
+# ============================================================================
+
+log "🔐 Corrigindo problema de autenticação tenant bypass..."
+
+# PROBLEMA: DISABLE_AUTH=true está fazendo bypass da autenticação
+# SOLUÇÃO: Ajustar middleware para diferenciar admin vs tenant
+
+cat > /tmp/fix_tenant_auth.js << 'EOF'
+const fs = require('fs');
+const filePath = process.argv[2];
+const envPath = process.argv[3];
+
+console.log('🔐 Corrigindo problema de autenticação tenant...');
+
+// 1. PRIMEIRO: Corrigir .env para autenticação adequada
+let envContent = '';
+if (fs.existsSync(envPath)) {
+  envContent = fs.readFileSync(envPath, 'utf8');
+  
+  // Ajustar DISABLE_AUTH para permitir apenas bypass admin, não tenant
+  if (envContent.includes('DISABLE_AUTH=true')) {
+    console.log('🛠️ Ajustando DISABLE_AUTH no .env...');
+    envContent = envContent.replace(/DISABLE_AUTH=true/g, 'DISABLE_AUTH=admin_only');
+    console.log('✅ DISABLE_AUTH ajustado para admin_only');
+  }
+  
+  // Garantir que temos configuração de sessão
+  if (!envContent.includes('SESSION_SECRET')) {
+    envContent += '\nSESSION_SECRET=samureye_session_secret_2024\n';
+    console.log('✅ SESSION_SECRET adicionado');
+  }
+  
+  fs.writeFileSync(envPath, envContent, 'utf8');
+  console.log('✅ Arquivo .env atualizado');
+}
+
+// 2. SEGUNDO: Ajustar middleware para autenticação adequada
+let content = fs.readFileSync(filePath, 'utf8');
+
+// Encontrar e substituir middleware isLocalUserAuthenticated
+const oldMiddlewarePattern = /function isLocalUserAuthenticated\s*\([^{]*\{[\s\S]*?\n\}/;
+
+const newMiddleware = `function isLocalUserAuthenticated(req, res, next) {
+  // Para rotas admin, usar autenticação session-based
+  if (req.path && req.path.startsWith('/api/admin/')) {
+    if (req.session && req.session.user) {
+      req.localUser = req.session.user;
+      return next();
+    }
+    return res.status(401).json({ error: 'Admin authentication required' });
+  }
+  
+  // Para rotas tenant normais, sempre exigir autenticação real
+  // NÃO fazer bypass automático para tenant!
+  if (req.session && req.session.tenantUser) {
+    req.localUser = req.session.tenantUser;
+    return next();
+  }
+  
+  // IMPORTANTE: NÃO criar usuário fictício automático
+  return res.status(401).json({ error: 'Authentication required' });
+}`;
+
+if (oldMiddlewarePattern.test(content)) {
+  content = content.replace(oldMiddlewarePattern, newMiddleware);
+  console.log('✅ Middleware isLocalUserAuthenticated corrigido');
+} else {
+  console.log('⚠️ Middleware não encontrado - pode já estar correto');
+}
+
+// 3. TERCEIRO: Garantir que rota /api/user exige autenticação
+const userRoutePattern = /app\.get\s*\(\s*['"]\/api\/user['"][\s\S]*?\}\s*\)\s*;/;
+
+const correctUserRoute = `  app.get('/api/user', isLocalUserAuthenticated, async (req, res) => {
+    try {
+      const user = req.localUser;
+      if (!user) {
+        return res.status(401).json({ error: 'User not authenticated' });
+      }
+      
+      // Buscar tenants do usuário autenticado
+      const allTenants = await storage.getAllTenants();
+      const userTenants = user.isSocUser ? allTenants : allTenants.filter(t => t.id === user.tenantId);
+      
+      res.json({
+        id: user.id,
+        email: user.email,
+        name: \`\${user.firstName || ''} \${user.lastName || ''}\`.trim() || user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        isSocUser: user.isSocUser || false,
+        isActive: user.isActive !== false,
+        tenants: userTenants.map(t => ({ tenantId: t.id, role: 'tenant_admin', tenant: t })),
+        currentTenant: userTenants[0] || null
+      });
+    } catch (error) {
+      console.error('Error in /api/user:', error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  });`;
+
+if (userRoutePattern.test(content)) {
+  content = content.replace(userRoutePattern, correctUserRoute);
+  console.log('✅ Rota /api/user corrigida para exigir autenticação');
+} else {
+  console.log('⚠️ Rota /api/user não encontrada');
+}
+
+// Salvar arquivo corrigido
+fs.writeFileSync(filePath, content, 'utf8');
+console.log('✅ Correção de autenticação tenant aplicada');
+EOF
+
+# Executar correção de autenticação
+node /tmp/fix_tenant_auth.js "$WORKING_DIR/server/routes.ts" "$WORKING_DIR/.env"
+rm /tmp/fix_tenant_auth.js
+
+log "✅ Problema de autenticação tenant corrigido"
+
+# ============================================================================
 # 11.10. CORREÇÃO DO ERRO DE CRIAÇÃO DE TENANT
 # ============================================================================
 

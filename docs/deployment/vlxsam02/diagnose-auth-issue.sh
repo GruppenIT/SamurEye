@@ -27,20 +27,28 @@ echo "DIAGNÓSTICO PROBLEMA AUTENTICAÇÃO - vlxsam02"
 echo "============================================="
 
 # Configurações
-API_BASE="http://localhost:3000"
-APP_WORKING_DIR="/opt/samureye"
+API_BASE="http://localhost:5000"
+APP_WORKING_DIR="/opt/samureye/SamurEye"
 
 echo ""
 print_status "INFO" "1. TESTANDO ROTAS DE AUTENTICAÇÃO"
 
-# Testar rota /api/user sem autenticação
+# Testar rota /api/user sem autenticação (porta 5000 corrigida)
 echo "Testando /api/user sem autenticação..."
-response=$(curl -s -w "%{http_code}" "$API_BASE/api/user" -o /tmp/user_response.txt)
+API_URL="http://localhost:5000/api/user"
+response=$(curl -s -w "%{http_code}" "$API_URL" -o /tmp/user_response.txt)
 http_code="${response: -3}"
 
 if [ "$http_code" = "200" ]; then
     print_status "FAIL" "Rota /api/user retorna 200 sem autenticação (PROBLEMA DE SEGURANÇA!)"
     echo "   Resposta: $(cat /tmp/user_response.txt)"
+    
+    # Verificar se é usuário fictício automático
+    if grep -q "tenant@onpremise.local\|onpremise-user" /tmp/user_response.txt 2>/dev/null; then
+        print_status "FAIL" "CONFIRMADO: Middleware retorna usuário fictício automático!"
+        echo "   • DISABLE_AUTH provavelmente está ativo"
+        echo "   • Middleware bypass authentication para todos usuários"
+    fi
 elif [ "$http_code" = "401" ]; then
     print_status "OK" "Rota /api/user corretamente protegida (401 Unauthorized)"
 else
@@ -107,15 +115,43 @@ else
 fi
 
 echo ""
-print_status "INFO" "4. VERIFICANDO CÓDIGO DA AUTENTICAÇÃO"
+print_status "INFO" "4. VERIFICANDO CONFIGURAÇÃO .ENV"
+
+# Verificar DISABLE_AUTH no .env
+if [ -f "$APP_WORKING_DIR/.env" ]; then
+    print_status "INFO" "Verificando DISABLE_AUTH no .env..."
+    
+    if grep -q "DISABLE_AUTH=true" "$APP_WORKING_DIR/.env"; then
+        print_status "FAIL" "DISABLE_AUTH=true encontrado! (CAUSA RAIZ DO PROBLEMA)"
+        echo "   • Middleware bypass autenticação quando DISABLE_AUTH=true"
+        echo "   • Usuários ficam automaticamente logados"
+    elif grep -q "DISABLE_AUTH" "$APP_WORKING_DIR/.env"; then
+        disable_value=$(grep "DISABLE_AUTH" "$APP_WORKING_DIR/.env" | cut -d'=' -f2)
+        print_status "OK" "DISABLE_AUTH=$disable_value (não está true)"
+    else
+        print_status "WARN" "DISABLE_AUTH não encontrado no .env"
+    fi
+else
+    print_status "WARN" "Arquivo .env não encontrado em $APP_WORKING_DIR"
+fi
+
+echo ""
+print_status "INFO" "5. VERIFICANDO CÓDIGO DA AUTENTICAÇÃO"
 
 if [ -f "$APP_WORKING_DIR/server/routes.ts" ]; then
     print_status "INFO" "Verificando rota /api/user no código..."
     
-    if grep -n "app.get('/api/user'" "$APP_WORKING_DIR/server/routes.ts" | grep -q "isAuthenticated"; then
-        print_status "OK" "Rota /api/user possui middleware isAuthenticated"
+    if grep -n "app.get('/api/user'" "$APP_WORKING_DIR/server/routes.ts" | grep -q "isLocalUserAuthenticated"; then
+        print_status "OK" "Rota /api/user possui middleware isLocalUserAuthenticated"
+        
+        # Verificar se middleware tem bypass DISABLE_AUTH
+        if grep -A15 "function isLocalUserAuthenticated" "$APP_WORKING_DIR/server/routes.ts" | grep -q "DISABLE_AUTH.*true"; then
+            print_status "FAIL" "Middleware tem bypass DISABLE_AUTH (PROBLEMA!)"
+            echo "   • Quando DISABLE_AUTH=true, cria usuário fictício automático"
+        fi
+        
     else
-        print_status "FAIL" "Rota /api/user NÃO possui middleware isAuthenticated (PROBLEMA!)"
+        print_status "FAIL" "Rota /api/user NÃO possui middleware isLocalUserAuthenticated (PROBLEMA!)"
         print_status "INFO" "Linha da rota /api/user:"
         grep -n "app.get('/api/user'" "$APP_WORKING_DIR/server/routes.ts" || echo "   Rota não encontrada"
     fi
@@ -124,7 +160,7 @@ else
 fi
 
 echo ""
-print_status "INFO" "5. RESUMO DO DIAGNÓSTICO"
+print_status "INFO" "6. RESUMO DO DIAGNÓSTICO"
 
 echo ""
 echo "🔧 POSSÍVEIS PROBLEMAS IDENTIFICADOS:"
