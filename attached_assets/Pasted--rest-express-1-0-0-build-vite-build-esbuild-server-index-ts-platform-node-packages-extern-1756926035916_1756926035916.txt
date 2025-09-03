@@ -1,0 +1,47 @@
+> rest-express@1.0.0 build
+> vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+
+vite v5.4.19 building for production...
+transforming (3) src/main.tsxBrowserslist: browsers data (caniuse-lite) is 11 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+✓ 2692 modules transformed.
+../dist/public/index.html                   2.20 kB │ gzip:   0.86 kB
+../dist/public/assets/index-3RvnZlKd.css   68.17 kB │ gzip:  11.88 kB
+../dist/public/assets/index-B6BClJbt.js   670.11 kB │ gzip: 192.33 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 7.15s
+✘ [ERROR] Unexpected "else"
+
+    server/routes.ts:236:8:
+      236 │       } else {
+          ╵         ~~~~
+
+1 error
+[16:00:42] WARNING: ⚠️ npm run build falhou - usando npx fallback
+vite v5.4.19 building for production...
+transforming (3) src/main.tsxBrowserslist: browsers data (caniuse-lite) is 11 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+✓ 2692 modules transformed.
+../dist/public/index.html                   2.20 kB │ gzip:   0.86 kB
+../dist/public/assets/index-3RvnZlKd.css   68.17 kB │ gzip:  11.88 kB
+../dist/public/assets/index-B6BClJbt.js   670.11 kB │ gzip: 192.33 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 6.97s
+✘ [ERROR] Unexpected "else"
+
+    server/routes.ts:236:8:
+      236 │       } else {
+          ╵         ~~~~
+
+1 error
+root@vlxsam02:~#
