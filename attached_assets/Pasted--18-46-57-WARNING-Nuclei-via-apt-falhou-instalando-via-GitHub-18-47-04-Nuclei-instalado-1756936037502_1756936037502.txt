@@ -1,0 +1,184 @@
+[18:46:57] WARNING: ⚠️ Nuclei via apt falhou, instalando via GitHub...
+[18:47:04] ✅ Nuclei instalado via GitHub
+[18:47:04] ✅ Nuclei configurado (vNuclei)
+[18:47:04] 📋 Atualizando templates Nuclei em background...
+[18:47:04] 🔍 Instalando Gobuster...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+gobuster is already the newest version (3.6.0-1ubuntu0.24.04.3).
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+[18:47:05] ✅ Gobuster instalado via apt
+[18:47:05] WARNING: ⚠️ Gobuster instalado mas não no PATH - corrigindo...
+[18:47:05] WARNING: ❌ Gobuster instalado mas binário não encontrado
+[18:47:05] 🧹 Arquivos temporários removidos
+[18:47:05] 🤖 Instalando agente coletor...
+[18:47:05] 📦 Instalando dependências Python...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+python3-psutil is already the newest version (5.9.8-2build2).
+python3-requests is already the newest version (2.31.0+dfsg-1ubuntu1.1).
+python3-venv is already the newest version (3.12.3-0ubuntu2).
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+[18:47:06] ✅ Dependências Python instaladas
+[18:47:06] 🔧 Configurando serviço systemd...
+[18:47:06] ✅ Serviço systemd configurado
+[18:47:06] ⏰ Configurando cron jobs...
+[18:47:06] ✅ Cron jobs configurados
+[18:47:06] 🔒 Configurando firewall...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+ufw is already the newest version (0.36.2-6).
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+Backing up 'user.rules' to '/etc/ufw/user.rules.20250903_184708'
+Backing up 'before.rules' to '/etc/ufw/before.rules.20250903_184708'
+Backing up 'after.rules' to '/etc/ufw/after.rules.20250903_184708'
+Backing up 'user6.rules' to '/etc/ufw/user6.rules.20250903_184708'
+Backing up 'before6.rules' to '/etc/ufw/before6.rules.20250903_184708'
+Backing up 'after6.rules' to '/etc/ufw/after6.rules.20250903_184708'
+
+Default incoming policy changed to 'deny'
+(be sure to update your rules accordingly)
+Default outgoing policy changed to 'allow'
+(be sure to update your rules accordingly)
+Rules updated
+Rules updated (v6)
+Rules updated
+Rules updated
+Rules updated (v6)
+Firewall is active and enabled on system startup
+[18:47:09] ✅ Firewall configurado
+[18:47:09] 🚀 Iniciando serviço collector...
+Created symlink /etc/systemd/system/multi-user.target.wants/samureye-collector.service → /etc/systemd/system/samureye-collector.service.
+[18:47:19] ✅ Templates Nuclei atualizados
+[18:47:20] WARNING: ⚠️ Collector pode ter problemas - verificar logs
+[18:47:20] 🧪 Executando testes de validação...
+[18:47:20] WARNING: ⚠️ Serviço: Inativo
+[18:47:20] ✅ Python: Dependências OK
+[18:47:20] 🛡️ Ferramentas: nmap:✅ nuclei:✅ masscan:✅ gobuster:❌
+[18:47:20] ✅ API: Conectividade OK
+[18:47:20] ✅ Logs: Sendo gerados
+[18:47:20] 💓 Configurando correções de heartbeat e conectividade...
+[18:47:20] WARNING: ⚠️ Arquivo de configuração /etc/samureye-collector/.env não encontrado
+[18:47:20] ✅ Script de teste de conectividade criado: /opt/samureye/collector/test-connectivity.sh
+[18:47:20] WARNING: ⚠️ Certificados não encontrados - teste de conectividade pulado
+[18:47:20] 📝 Criando script de registro...
+[18:47:20] 📝 Sistema de registro integrado ao heartbeat implementado
+[18:47:20] 🔧 Implementando correção de duplicação de coletores...
+[18:47:20] WARNING: ❌ Usuário não pode escrever no diretório config - corrigindo
+[18:47:20] ✅ Sistema anti-duplicação integrado no install-hard-reset
+[18:47:20] ⚠️ Sistema base instalado - registro manual necessário
+[18:47:20] 📋 Use o script de registro separado com token do tenant
+[18:47:20] 📋 Criando scripts de diagnóstico integrados...
+[18:47:20] ✅ Script de diagnóstico integrado criado
+[18:47:20] 🔧 Verificando e corrigindo problemas de autenticação...
+[18:47:20] ✅ Nenhum erro de autenticação detectado
+[18:47:20] ✅ Sistema de correção automática integrado
+
+[18:47:20] 🎉 HARD RESET DO COLLECTOR AGENT CONCLUÍDO!
+
+📋 RESUMO DA INSTALAÇÃO:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🤖 Collector Agent:
+   • Status:  active
+   • User:    samureye-collector
+   • Dir:     /opt/samureye/collector
+   • Logs:    /var/log/samureye-collector/
+
+🐍 Python 3.11:
+   • Version: Python 3.12.3
+   • Libs:    psutil, requests
+
+📦 Node.js 20:
+   • Version: v20.19.4
+
+🛡️ Security Tools:
+   • Nmap:     ✅ Instalado
+   • Nuclei:   ✅ Instalado
+   • Masscan:  ✅ Instalado
+   • Gobuster: ❌ Ausente
+
+🔧 Comandos Úteis:
+   • Status:     systemctl status samureye-collector
+   • Logs:       tail -f /var/log/samureye-collector/collector.log
+   • Restart:    systemctl restart samureye-collector
+   • Heartbeat:  /opt/samureye/collector/heartbeat.py
+   • Cleanup:    /opt/samureye/collector/scripts/cleanup.sh
+   • Test Conn:  /opt/samureye/collector/test-connectivity.sh
+   • Check Status: /opt/samureye/collector/scripts/check-status.sh
+
+🔗 Conectividade:
+   • API:       https://api.samureye.com.br
+   • Gateway:   192.168.100.151
+
+💓 Heartbeat & Status:
+   • Intervalo: 30 segundos (configurável em /etc/samureye-collector/.env)
+   • Endpoint:  https://api.samureye.com.br/collector-api/heartbeat
+   • Retry:     3 tentativas automáticas por request
+   • Timeout:   30 segundos por request HTTP
+
+📝 PRÓXIMOS PASSOS OBRIGATÓRIOS:
+   ⚠️  SISTEMA BASE INSTALADO - REGISTRO NECESSÁRIO ⚠️
+
+   1. Acesse a interface de administração:
+      https://app.samureye.com.br/admin/collectors
+
+   2. Faça login e vá para 'Gestão de Coletores'
+
+   3. Clique em 'Novo Coletor' e preencha:
+      • Nome: vlxsam04
+      • Hostname: vlxsam04
+      • IP: 192.168.100.151
+
+   4. Copie o TOKEN DE ENROLLMENT gerado (válido por 15 minutos)
+
+   5. Execute o comando de registro:
+      curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/register-collector.sh | bash -s -- <tenant-slug> <enrollment-token>
+
+   📌 EXEMPLO:
+      curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/register-collector.sh | bash -s -- gruppen-it abc123-def456-ghi789
+
+✅ APÓS O REGISTRO:
+   • Collector aparecerá como 'ONLINE' na interface
+   • Logs: tail -f /var/log/samureye-collector/heartbeat.log
+   • Status: /opt/samureye/collector/scripts/check-status.sh
+
+🔧 COMANDOS DISPONÍVEIS:
+   • Instalar sistema base:
+     curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/install-hard-reset.sh | bash
+
+   • Registrar collector (após criar na interface):
+     curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/register-collector.sh | bash -s -- <tenant-slug> <token>
+
+   • Verificar status:
+     /opt/samureye/collector/scripts/check-status.sh
+
+🔍 DIAGNÓSTICO E CORREÇÃO:
+   • Diagnóstico problema 401 Unauthorized:
+     curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/diagnose-collector-401-unauthorized.sh | bash
+
+   • Correção problema 401 Unauthorized:
+     curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/fix-collector-401-issue.sh | bash
+
+   • Diagnóstico rápido local:
+     /opt/samureye/collector/scripts/diagnose-401-issue.sh
+
+root@vlxsam04:~# tail -f /var/log/samureye-collector/collector.log
+2025-09-03 18:47:31,133 - INFO - Configuração carregada - ID: vlxsam04, Nome:
+2025-09-03 18:47:31,133 - INFO - Iniciando heartbeat collector...
+2025-09-03 18:47:31,134 - INFO - Token não encontrado, registrando collector...
+2025-09-03 18:47:31,134 - INFO - Registrando collector: {'name': '', 'hostname': 'vlxsam04', 'ipAddress': '', 'status': 'enrolling', 'description': 'Collector agent on-premise vlxsam04'}
+/usr/lib/python3/dist-packages/urllib3/connectionpool.py:1100: InsecureRequestWarning: Unverified HTTPS request is being made to host 'api.samureye.com.br'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+2025-09-03 18:47:31,195 - ERROR - Erro no registro: 401 - {"message":"Unauthorized"}
+2025-09-03 18:47:31,196 - ERROR - Falha no registro inicial
+2025-09-03 18:47:41,608 - INFO - Configuração carregada - ID: vlxsam04, Nome:
+2025-09-03 18:47:41,609 - INFO - Iniciando heartbeat collector...
+2025-09-03 18:47:41,609 - INFO - Token não encontrado, registrando collector...
+2025-09-03 18:47:41,609 - INFO - Registrando collector: {'name': '', 'hostname': 'vlxsam04', 'ipAddress': '', 'status': 'enrolling', 'description': 'Collector agent on-premise vlxsam04'}
+/usr/lib/python3/dist-packages/urllib3/connectionpool.py:1100: InsecureRequestWarning: Unverified HTTPS request is being made to host 'api.samureye.com.br'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+2025-09-03 18:47:41,658 - ERROR - Erro no registro: 401 - {"message":"Unauthorized"}
+2025-09-03 18:47:41,658 - ERROR - Falha no registro inicial
