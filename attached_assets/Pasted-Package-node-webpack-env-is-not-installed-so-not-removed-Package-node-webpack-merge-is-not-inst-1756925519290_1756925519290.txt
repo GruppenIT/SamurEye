@@ -1,0 +1,460 @@
+Package 'node-webpack-env' is not installed, so not removed
+Package 'node-webpack-merge' is not installed, so not removed
+Package 'node-webpack-stats-plugin' is not installed, so not removed
+Package 'node-webrtc-adapter' is not installed, so not removed
+Package 'node-websocket' is not installed, so not removed
+Package 'node-websocket-stream' is not installed, so not removed
+Package 'node-when' is not installed, so not removed
+Package 'node-which-module' is not installed, so not removed
+Package 'node-wikibase-cli' is not installed, so not removed
+Package 'node-wikibase-edit' is not installed, so not removed
+Package 'node-wikibase-sdk' is not installed, so not removed
+Package 'node-wikidata-lang' is not installed, so not removed
+Package 'node-wildemitter' is not installed, so not removed
+Package 'node-winston-compat' is not installed, so not removed
+Package 'node-winston-transport' is not installed, so not removed
+Package 'node-with' is not installed, so not removed
+Package 'node-worker-loader' is not installed, so not removed
+Package 'node-write-file-promise' is not installed, so not removed
+Package 'node-ws-iconv' is not installed, so not removed
+Package 'node-xmlhttprequest' is not installed, so not removed
+Package 'node-xoauth2' is not installed, so not removed
+Package 'node-xregexp' is not installed, so not removed
+Package 'node-xterm' is not installed, so not removed
+Package 'node-xxhashjs' is not installed, so not removed
+Package 'node-y-codemirror' is not installed, so not removed
+Package 'node-yjs' is not installed, so not removed
+Package 'node-y-protocols' is not installed, so not removed
+Package 'node-y-websocket' is not installed, so not removed
+Package 'node-y18n' is not installed, so not removed
+Package 'node-yajsml' is not installed, so not removed
+Package 'node-yamlish' is not installed, so not removed
+Package 'node-yazl' is not installed, so not removed
+Package 'node-yn' is not installed, so not removed
+Package 'node-ytdl-core' is not installed, so not removed
+Package 'node-zkochan-cmd-shim' is not installed, so not removed
+Package 'node-zrender' is not installed, so not removed
+The following packages will be REMOVED:
+  nodejs*
+0 upgraded, 0 newly installed, 1 to remove and 1 not upgraded.
+After this operation, 199 MB disk space will be freed.
+(Reading database ... 133277 files and directories currently installed.)
+Removing nodejs (20.19.4-1nodesource1) ...
+dpkg: warning: while removing nodejs, directory '/usr/lib/node_modules' not empty so not removed
+Processing triggers for man-db (2.12.0-4build2) ...
+[15:44:03] 🗃️ Limpando banco de dados...
+You are now connected to database "samureye" as user "samureye_user".
+DROP SCHEMA
+CREATE SCHEMA
+GRANT
+GRANT
+            status
+-------------------------------
+ Database cleaned successfully
+(1 row)
+
+[15:44:04] ✅ Banco de dados limpo
+[15:44:04] 🔄 Atualizando sistema...
+Hit:1 https://deb.nodesource.com/node_20.x nodistro InRelease
+Hit:2 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:3 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:4 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:5 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists... Done
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+Calculating upgrade... Done
+The following packages have been kept back:
+  sosreport
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[15:44:07] 📦 Instalando dependências básicas...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+curl is already the newest version (8.5.0-2ubuntu10.6).
+wget is already the newest version (1.21.4-1ubuntu4.1).
+git is already the newest version (1:2.43.0-1ubuntu7.3).
+unzip is already the newest version (6.0-28ubuntu4.1).
+build-essential is already the newest version (12.10ubuntu1).
+python3 is already the newest version (3.12.3-0ubuntu2).
+python3-pip is already the newest version (24.0+dfsg-1ubuntu1.2).
+postgresql-client is already the newest version (16+257build1.1).
+netcat-openbsd is already the newest version (1.226-1ubuntu2).
+jq is already the newest version (1.7.1-3ubuntu0.24.04.1).
+htop is already the newest version (3.3.0-4build1).
+nano is already the newest version (7.2-2ubuntu0.1).
+ca-certificates is already the newest version (20240203).
+gnupg is already the newest version (2.4.4-2ubuntu17.3).
+lsb-release is already the newest version (12.0-2).
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[15:44:08] ✅ Dependências básicas instaladas
+[15:44:08] 📦 Instalando Node.js 20...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+[15:44:10] 🔧 Configurando repositório NodeSource...
+Hit:1 https://deb.nodesource.com/node_20.x nodistro InRelease
+Hit:2 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:3 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:4 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:5 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists... Done
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following NEW packages will be installed:
+  nodejs
+0 upgraded, 1 newly installed, 0 to remove and 1 not upgraded.
+Need to get 32.0 MB of archives.
+After this operation, 199 MB of additional disk space will be used.
+Get:1 https://deb.nodesource.com/node_20.x nodistro/main amd64 nodejs amd64 20.19.4-1nodesource1 [32.0 MB]
+Fetched 32.0 MB in 1s (41.9 MB/s)
+Selecting previously unselected package nodejs.
+(Reading database ... 127914 files and directories currently installed.)
+Preparing to unpack .../nodejs_20.19.4-1nodesource1_amd64.deb ...
+Unpacking nodejs (20.19.4-1nodesource1) ...
+Setting up nodejs (20.19.4-1nodesource1) ...
+Processing triggers for man-db (2.12.0-4build2) ...
+Scanning processes...
+Scanning candidates...
+Scanning linux images...
+
+Pending kernel upgrade!
+Running kernel version:
+  6.8.0-41-generic
+Diagnostics:
+  The currently running kernel version is not the expected kernel version 6.8.0-79-generic.
+
+Restarting the system to load the new kernel will not be handled automatically, so you should consider rebooting.
+
+Restarting services...
+
+Service restarts being deferred:
+ /etc/needrestart/restart.d/dbus.service
+ systemctl restart getty@tty1.service
+ systemctl restart systemd-logind.service
+ systemctl restart unattended-upgrades.service
+
+No containers need to be restarted.
+
+No user sessions are running outdated binaries.
+
+No VM guests are running outdated hypervisor (qemu) binaries on this host.
+[15:44:22] 🔍 Verificando instalação Node.js...
+[15:44:22] ✅ Node.js instalado: v20.19.4
+[15:44:22] ✅ npm instalado: 10.8.2
+[15:44:22] 🔧 Instalando ferramentas globais...
+[15:44:30] ✅ Ferramentas globais instaladas
+[15:44:30] 👤 Criando usuário e estrutura de diretórios...
+[15:44:30] ✅ Estrutura de diretórios criada
+[15:44:30] 📥 Baixando aplicação SamurEye...
+Cloning into 'SamurEye'...
+remote: Enumerating objects: 2905, done.
+remote: Counting objects: 100% (306/306), done.
+remote: Compressing objects: 100% (168/168), done.
+remote: Total 2905 (delta 218), reused 191 (delta 106), pack-reused 2599 (from 2)
+Receiving objects: 100% (2905/2905), 3.44 MiB | 11.67 MiB/s, done.
+Resolving deltas: 100% (2010/2010), done.
+[15:44:31] ✅ Aplicação baixada com sucesso
+[15:44:31] ⚙️ Configurando ambiente...
+[15:44:31] ✅ Arquivo .env criado
+[15:44:31] 📦 Instalando dependências npm...
+npm warn deprecated node-domexception@1.0.0: Use your platform's native DOMException instead
+npm warn deprecated @esbuild-kit/core-utils@3.3.2: Merged into tsx: https://tsx.is
+npm warn deprecated @esbuild-kit/esm-loader@2.6.5: Merged into tsx: https://tsx.is
+
+added 635 packages, and audited 636 packages in 13s
+
+87 packages are looking for funding
+  run `npm fund` for details
+
+11 vulnerabilities (3 low, 8 moderate)
+
+To address issues that do not require attention, run:
+  npm audit fix
+
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+
+Run `npm audit` for details.
+npm notice
+npm notice New major version of npm available! 10.8.2 -> 11.5.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.5.2
+npm notice To update run: npm install -g npm@11.5.2
+npm notice
+[15:44:44] ✅ Dependências npm instaladas
+[15:44:45] 🔨 Fazendo build da aplicação...
+
+> rest-express@1.0.0 build
+> vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+
+vite v5.4.19 building for production...
+transforming (3) src/main.tsxBrowserslist: browsers data (caniuse-lite) is 11 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+✓ 2692 modules transformed.
+../dist/public/index.html                   2.20 kB │ gzip:   0.86 kB
+../dist/public/assets/index-3RvnZlKd.css   68.17 kB │ gzip:  11.88 kB
+../dist/public/assets/index-B6BClJbt.js   670.11 kB │ gzip: 192.33 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 7.06s
+
+  dist/index.js  100.5kb
+
+⚡ Done in 12ms
+[15:44:52] ✅ Build da aplicação concluído
+[15:44:52] 🔧 Corrigindo autenticação admin no código...
+✅ Endpoint /api/admin/me corrigido com sucesso
+[15:44:52] ✅ Endpoint /api/admin/me corrigido
+[15:44:52] 🔧 Corrigindo redirecionamento admin pós-login...
+⚠️ Redirecionamento já corrigido
+[15:44:52] ✅ Redirecionamento admin corrigido
+[15:44:52] 🔧 Corrigindo erros de autenticação do dashboard...
+✅ 1 correções de autenticação aplicadas
+[15:44:52] ✅ Erros de autenticação do dashboard corrigidos
+[15:44:52] 🔧 Corrigindo erro JavaScript no AttackSurfaceHeatmap...
+⚠️ Correção já aplicada
+[15:44:52] ✅ Erro JavaScript no heatmap corrigido
+[15:44:52] 🔒 Corrigindo erro crítico de sintaxe linha 656...
+🔍 Arquivo tem 1708 linhas
+🎯 Linha 656: 'if (tenants.length > 0) {'
+📋 Contexto da linha 656:
+     646:   const requireLocalUserTenant = async (req: any, res: any, next: any) => {
+     647:     try {
+     648:       const user = req.localUser;
+     649:
+     650:       if (user.isSocUser) {
+     651:         // SOC users can access all tenants - use currentTenantId if set
+     652:         let tenantId = user.currentTenantId;
+     653:         if (!tenantId) {
+     654:           // If no current tenant set, use first available
+     655:           const tenants = await storage.getAllTenants();
+ >>> 656:           if (tenants.length > 0) {
+     657:             tenantId = tenants[0].id;
+     658:           } else {
+     659:             return res.status(400).json({ message: "No tenants available" });
+     660:           }
+     661:         }
+     662:
+     663:         const tenant = await storage.getTenant(tenantId);
+     664:         if (!tenant) {
+     665:           return res.status(404).json({ message: "Tenant not found" });
+     666:         }
+🧹 Removendo todo middleware mal formado...
+✅ 0 padrões de middleware removidos
+📋 Pós-limpeza: 1708 linhas
+⚠️ Não foi possível encontrar local para middleware - inserindo no início
+📊 Final - Abertas: 413, Fechadas: 477
+🛠️ Removendo 64 chaves extras do final...
+✅ Arquivo cirurgicamente corrigido e salvo
+[15:44:52] ✅ Correção cirúrgica da linha 656 aplicada
+[15:44:52] 🔧 Corrigindo erro de criação de tenant...
+✅ Logging de criação de tenant melhorado
+[15:44:52] 🔍 Verificando conectividade com PostgreSQL...
+[15:44:52] 🔍 Diagnóstico completo de conectividade...
+[15:44:52] Host: 172.24.1.153
+[15:44:52] Port: 5432
+[15:44:52] Database: samureye
+[15:44:52] User: samureye_user
+[15:44:52] ✅ Host 172.24.1.153 respondendo ao ping
+[15:44:52] ✅ PostgreSQL acessível em 172.24.1.153:5432
+[15:44:52] ✅ Autenticação PostgreSQL funcionando
+[15:44:52] 🗃️ Verificando schema do banco de dados...
+[15:44:52] 🗃️ Sincronizando schema do banco de dados...
+
+> rest-express@1.0.0 db:push
+> drizzle-kit push
+
+No config path provided, using default 'drizzle.config.ts'
+Reading config file '/opt/samureye/SamurEye/drizzle.config.ts'
+Using 'pg' driver for database querying
+[✓] Pulling schema from database...
+[✓] Changes applied
+[15:44:54] ✅ Schema sincronizado com sucesso via npm run db:push
+[15:44:54] 📋 Verificando tabelas criadas...
+ activities
+ collector_telemetry
+ collectors
+ credentials
+ journeys
+ sessions
+ system_settings
+ tenant_user_auth
+ tenant_users
+ tenants
+ threat_intelligence
+ users
+
+[15:44:54] ✅ Tabelas verificadas com sucesso
+
+> rest-express@1.0.0 db:push
+> drizzle-kit push
+
+No config path provided, using default 'drizzle.config.ts'
+Reading config file '/opt/samureye/SamurEye/drizzle.config.ts'
+Using 'pg' driver for database querying
+[✓] Pulling schema from database...
+[i] No changes detected
+[15:44:55] ✅ Schema do banco de dados atualizado
+[15:44:55] ✅ Correções de criação de tenant aplicadas
+[15:44:55] 🔍 Verificando build atual...
+[15:44:55] ⚡ Testando importação do módulo atual...
+[15:44:55] ✅ Build atual está funcional
+[15:44:55] 🔨 Fazendo build final com todas as correções...
+
+> rest-express@1.0.0 build
+> vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+
+vite v5.4.19 building for production...
+transforming (3) src/main.tsxBrowserslist: browsers data (caniuse-lite) is 11 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+✓ 2692 modules transformed.
+../dist/public/index.html                   2.20 kB │ gzip:   0.86 kB
+../dist/public/assets/index-3RvnZlKd.css   68.17 kB │ gzip:  11.88 kB
+../dist/public/assets/index-B6BClJbt.js   670.11 kB │ gzip: 192.33 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 7.10s
+✘ [ERROR] Unexpected "else"
+
+    server/routes.ts:236:8:
+      236 │       } else {
+          ╵         ~~~~
+
+1 error
+[15:45:03] WARNING: ⚠️ npm run build falhou - usando npx fallback
+vite v5.4.19 building for production...
+transforming (3) src/main.tsxBrowserslist: browsers data (caniuse-lite) is 11 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+✓ 2692 modules transformed.
+../dist/public/index.html                   2.20 kB │ gzip:   0.86 kB
+../dist/public/assets/index-3RvnZlKd.css   68.17 kB │ gzip:  11.88 kB
+../dist/public/assets/index-B6BClJbt.js   670.11 kB │ gzip: 192.33 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 7.24s
+✘ [ERROR] Unexpected "else"
+
+    server/routes.ts:236:8:
+      236 │       } else {
+          ╵         ~~~~
+
+1 error
+root@vlxsam02:~# curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam02/diagnose-line-656-error.sh | bash
+
+🔍 DIAGNÓSTICO ESPECÍFICO LINHA 656 - vlxsam02
+==============================================
+
+[15:51:22] 🔍 Analisando linha 656 especificamente...
+[15:51:22] 📋 Contexto da linha 656 (±20 linhas):
+==========================================
+   636          req.tenant = tenant;
+   637          req.userTenantRole = userTenants.find(ut => ut.tenantId === tenantId)?.role;
+   638        }
+   639
+   640        next();
+   641      } catch (error) {
+   642        console.error("Tenant middleware error:", error);
+   643        res.status(500).json({ message: "Tenant access error" });
+   644      }
+   645    };
+
+   646    // User routes
+   647
+   648        }
+
+   649        const tenants = await storage.getUserTenants(userId);
+   650        const currentTenant = user.currentTenantId
+   651          ? await storage.getTenant(user.currentTenantId)
+   652          : null;
+
+   653        res.json({
+   654          ...user,
+   655          tenants,
+   656          currentTenant
+   657        });
+   658      } catch (error) {
+   659        console.error("Error fetching user:", error);
+   660        res.status(500).json({ message: "Failed to fetch user" });
+   661      }
+   662    });
+
+   663    app.post('/api/switch-tenant', isLocalUserAuthenticated, async (req: any, res) => {
+   664      try {
+   665        const userId = req.localUser.id;
+   666        const { tenantId } = req.body;
+
+   667        // Get user to check if they are SOC user
+   668        const user = await storage.getUserById(userId);
+   669        if (!user) {
+   670          return res.status(404).json({ message: "User not found" });
+   671        }
+==========================================
+
+[15:51:22] 🎯 Conteúdo da linha 656: '      res.json({'
+[15:51:22] 🔍 Analisando estrutura de rotas ao redor da linha 656...
+[15:51:22] 🔍 Procurando padrões específicos que causam 'Unexpected }'...
+[15:51:22] 🔍 Verificando se middleware isLocalUserAuthenticated está causando o problema...
+[15:51:22] ✅ Middleware isLocalUserAuthenticated encontrado
+[15:51:22] 📍 Middleware inicia na linha 3
+[15:51:22] 📋 Middleware completo:
+     3  function isLocalUserAuthenticated(req, res, next) {
+     4    if (process.env.DISABLE_AUTH === 'true') {
+     5      req.localUser = {
+     6        id: 'onpremise-user',
+     7        email: 'tenant@onpremise.local',
+     8        firstName: 'On-Premise',
+     9        lastName: 'User',
+    10        isSocUser: false,
+    11        isActive: true
+    12      };
+    13      return next();
+    14    }
+    15    const user = req?.session?.user;
+    16    if (user?.id) {
+    17      req.localUser = user;
+    18      return next();
+    19    }
+    20    return res.status(401).json({ error: 'Authentication required' });
+    21  }
+
+    22  function requireLocalUserTenant(req, res, next) {
+    23    return req.localUser ? next() : res.status(401).json({ error: 'Tenant access required' });
+    24  }
+
+    25  import type { Express, RequestHandler } from "express";
+    26  import { createServer, type Server } from "http";
+[15:51:22] 🔨 Executando teste específico de build para capturar erro...
+[15:51:30] 💡 Análise de solução baseada no diagnóstico:
+
+[15:51:30] WARNING: ⚠️ PROBLEMA: Estrutura de código complexa
+   • Erro de sintaxe não identificado por padrões comuns
+   • Necessária correção manual ou rebuild completo
+
+🔧 AÇÃO NECESSÁRIA:
+   Execute rebuild completo:
+   curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam02/install-hard-reset.sh | bash
+
+[15:51:30] 🔍 Diagnóstico da linha 656 concluído
+==============================================
+root@vlxsam02:~#
