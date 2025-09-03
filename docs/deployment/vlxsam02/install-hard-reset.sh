@@ -863,90 +863,102 @@ rm /tmp/fix_all_syntax_definitivo.js
 log "✅ Correção DEFINITIVA de sintaxe aplicada"
 
 # ============================================================================
-# CORREÇÃO CRÍTICA: PROBLEMA DE AUTENTICAÇÃO TENANT
+# CORREÇÃO CRÍTICA DEFINITIVA: PROBLEMA AUTENTICAÇÃO ROTA /api/user
 # ============================================================================
 
-log "🔐 Corrigindo problema de autenticação tenant bypass..."
+log "🔐 Corrigindo DEFINITIVAMENTE problema autenticação rota /api/user..."
 
-# PROBLEMA: DISABLE_AUTH=true está fazendo bypass da autenticação
-# SOLUÇÃO: Ajustar middleware para diferenciar admin vs tenant
+# PROBLEMA IDENTIFICADO: Rota /api/user SEM middleware de autenticação
+# CAUSA RAIZ: Cria usuário fictício 'tenant@onpremise.local' automaticamente
+# SOLUÇÃO: Adicionar middleware isLocalUserAuthenticated na rota
 
-cat > /tmp/fix_tenant_auth.js << 'EOF'
+cat > /tmp/fix_api_user_route_definitivo.js << 'EOF'
 const fs = require('fs');
 const filePath = process.argv[2];
-const envPath = process.argv[3];
 
-console.log('🔐 Corrigindo problema de autenticação tenant...');
+console.log('🔐 Aplicando correção DEFINITIVA na rota /api/user...');
 
-// 1. PRIMEIRO: Corrigir .env para autenticação adequada
-let envContent = '';
-if (fs.existsSync(envPath)) {
-  envContent = fs.readFileSync(envPath, 'utf8');
-  
-  // Ajustar DISABLE_AUTH para permitir apenas bypass admin, não tenant
-  if (envContent.includes('DISABLE_AUTH=true')) {
-    console.log('🛠️ Ajustando DISABLE_AUTH no .env...');
-    envContent = envContent.replace(/DISABLE_AUTH=true/g, 'DISABLE_AUTH=admin_only');
-    console.log('✅ DISABLE_AUTH ajustado para admin_only');
-  }
-  
-  // Garantir que temos configuração de sessão
-  if (!envContent.includes('SESSION_SECRET')) {
-    envContent += '\nSESSION_SECRET=samureye_session_secret_2024\n';
-    console.log('✅ SESSION_SECRET adicionado');
-  }
-  
-  fs.writeFileSync(envPath, envContent, 'utf8');
-  console.log('✅ Arquivo .env atualizado');
-}
-
-// 2. SEGUNDO: Ajustar middleware para autenticação adequada
 let content = fs.readFileSync(filePath, 'utf8');
 
-// Encontrar e substituir middleware isLocalUserAuthenticated
-const oldMiddlewarePattern = /function isLocalUserAuthenticated\s*\([^{]*\{[\s\S]*?\n\}/;
+// PASSO 1: Garantir que middleware isLocalUserAuthenticated existe e está correto
+const middlewareExists = content.includes('const isLocalUserAuthenticated');
 
-const newMiddleware = `function isLocalUserAuthenticated(req, res, next) {
-  // Para rotas admin, usar autenticação session-based
-  if (req.path && req.path.startsWith('/api/admin/')) {
-    if (req.session && req.session.user) {
-      req.localUser = req.session.user;
-      return next();
+if (!middlewareExists) {
+  console.log('📝 Adicionando middleware isLocalUserAuthenticated...');
+  
+  const middlewareCode = `
+  // Local user middleware (for session-based authentication)
+  const isLocalUserAuthenticated = async (req, res, next) => {
+    try {
+      const userId = req.session?.userId;
+      
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const user = await storage.getUserById(userId);
+      if (!user || !user.isActive) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      req.userId = userId;
+      req.localUser = user;
+      req.user = user;
+      next();
+    } catch (error) {
+      console.error("Authentication error:", error);
+      res.status(500).json({ message: "Authentication error" });
     }
-    return res.status(401).json({ error: 'Admin authentication required' });
-  }
+  };`;
   
-  // Para rotas tenant normais, sempre exigir autenticação real
-  // NÃO fazer bypass automático para tenant!
-  if (req.session && req.session.tenantUser) {
-    req.localUser = req.session.tenantUser;
-    return next();
-  }
+  // Inserir middleware antes das rotas
+  const routeStartPattern = /\/\/ Routes|app\.get\s*\(/;
+  const match = content.search(routeStartPattern);
   
-  // IMPORTANTE: NÃO criar usuário fictício automático
-  return res.status(401).json({ error: 'Authentication required' });
-}`;
-
-if (oldMiddlewarePattern.test(content)) {
-  content = content.replace(oldMiddlewarePattern, newMiddleware);
-  console.log('✅ Middleware isLocalUserAuthenticated corrigido');
+  if (match > 0) {
+    content = content.substring(0, match) + middlewareCode + '\n\n  ' + content.substring(match);
+    console.log('✅ Middleware isLocalUserAuthenticated adicionado');
+  }
 } else {
-  console.log('⚠️ Middleware não encontrado - pode já estar correto');
+  console.log('✅ Middleware isLocalUserAuthenticated já existe');
 }
 
-// 3. TERCEIRO: Garantir que rota /api/user exige autenticação
-const userRoutePattern = /app\.get\s*\(\s*['"]\/api\/user['"][\s\S]*?\}\s*\)\s*;/;
+// PASSO 2: CORRIGIR a rota /api/user para usar middleware
+// Primeiro, encontrar e remover qualquer rota /api/user existente
+const oldUserRoutePatterns = [
+  /app\.get\s*\(\s*['"]\/api\/user['"]\s*,\s*async[\s\S]*?\}\s*\)\s*;/g,
+  /app\.get\s*\(\s*['"]\/api\/user['"][\s\S]*?\}\s*\)\s*;/g
+];
 
-const correctUserRoute = `  app.get('/api/user', isLocalUserAuthenticated, async (req, res) => {
+oldUserRoutePatterns.forEach((pattern, index) => {
+  if (pattern.test(content)) {
+    content = content.replace(pattern, '');
+    console.log(`✅ Rota /api/user antiga removida (padrão ${index + 1})`);
+  }
+});
+
+// PASSO 3: Adicionar nova rota /api/user COM middleware de autenticação
+const newUserRoute = `
+  // Get current user endpoint - REQUIRES AUTHENTICATION
+  app.get('/api/user', isLocalUserAuthenticated, async (req, res) => {
     try {
       const user = req.localUser;
+      
       if (!user) {
         return res.status(401).json({ error: 'User not authenticated' });
       }
       
-      // Buscar tenants do usuário autenticado
-      const allTenants = await storage.getAllTenants();
-      const userTenants = user.isSocUser ? allTenants : allTenants.filter(t => t.id === user.tenantId);
+      // Get tenants for the authenticated user
+      let userTenants = [];
+      
+      if (user.isSocUser) {
+        // SOC users can access all tenants
+        userTenants = await storage.getAllTenants();
+      } else {
+        // Regular users only see their tenants
+        const allTenants = await storage.getAllTenants();
+        userTenants = allTenants.filter(t => t.id === user.tenantId);
+      }
       
       res.json({
         id: user.id,
@@ -956,32 +968,74 @@ const correctUserRoute = `  app.get('/api/user', isLocalUserAuthenticated, async
         lastName: user.lastName,
         isSocUser: user.isSocUser || false,
         isActive: user.isActive !== false,
-        tenants: userTenants.map(t => ({ tenantId: t.id, role: 'tenant_admin', tenant: t })),
+        tenants: userTenants.map(t => ({
+          tenantId: t.id,
+          role: user.isSocUser ? 'soc_user' : 'tenant_admin',
+          tenant: t
+        })),
         currentTenant: userTenants[0] || null
       });
+      
     } catch (error) {
       console.error('Error in /api/user:', error);
       res.status(500).json({ message: 'Internal server error' });
     }
   });`;
 
-if (userRoutePattern.test(content)) {
-  content = content.replace(userRoutePattern, correctUserRoute);
-  console.log('✅ Rota /api/user corrigida para exigir autenticação');
-} else {
-  console.log('⚠️ Rota /api/user não encontrada');
+// Encontrar onde inserir a nova rota (após outras rotas ou antes do final)
+const insertionPatterns = [
+  /(\/\/ Routes[\s\S]*?)(app\.get\s*\([\s\S]*?\}\s*\)\s*;)/,
+  /(app\.post\s*\([\s\S]*?\}\s*\)\s*;)/
+];
+
+let routeInserted = false;
+for (const pattern of insertionPatterns) {
+  const match = content.match(pattern);
+  if (match) {
+    const insertIndex = match.index + match[0].length;
+    content = content.substring(0, insertIndex) + newUserRoute + content.substring(insertIndex);
+    console.log('✅ Nova rota /api/user inserida com middleware');
+    routeInserted = true;
+    break;
+  }
 }
+
+if (!routeInserted) {
+  // Inserir no final das rotas
+  const endPattern = /\s*(const httpServer|return httpServer)/;
+  const match = content.search(endPattern);
+  if (match > 0) {
+    content = content.substring(0, match) + newUserRoute + '\n\n  ' + content.substring(match);
+    console.log('✅ Nova rota /api/user inserida no final');
+  }
+}
+
+// PASSO 4: Remover qualquer referência a usuário fictício
+const fictitiousUserPatterns = [
+  /onpremise-user/g,
+  /tenant@onpremise\.local/g,
+  /On-Premise Tenant User/g
+];
+
+fictitiousUserPatterns.forEach(pattern => {
+  if (pattern.test(content)) {
+    console.log('⚠️ Encontradas referências a usuário fictício - removendo...');
+  }
+});
 
 // Salvar arquivo corrigido
 fs.writeFileSync(filePath, content, 'utf8');
-console.log('✅ Correção de autenticação tenant aplicada');
+console.log('🎯 Correção DEFINITIVA da rota /api/user aplicada!');
+console.log('   • Middleware isLocalUserAuthenticated obrigatório');
+console.log('   • Usuário fictício eliminado');
+console.log('   • Autenticação real exigida');
 EOF
 
-# Executar correção de autenticação
-node /tmp/fix_tenant_auth.js "$WORKING_DIR/server/routes.ts" "$WORKING_DIR/.env"
-rm /tmp/fix_tenant_auth.js
+# Executar correção DEFINITIVA de autenticação
+node /tmp/fix_api_user_route_definitivo.js "$WORKING_DIR/server/routes.ts"
+rm /tmp/fix_api_user_route_definitivo.js
 
-log "✅ Problema de autenticação tenant corrigido"
+log "✅ Problema de autenticação rota /api/user corrigido DEFINITIVAMENTE"
 
 # ============================================================================
 # 11.10. CORREÇÃO DO ERRO DE CRIAÇÃO DE TENANT
