@@ -1,0 +1,67 @@
+root@vlxsam04:~# curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/vlxsam04/fix-service-failed.sh | bash
+🔧 CORREÇÃO AUTOMÁTICA - vlxsam04 Service Failed
+===============================================
+📋 Sistema: vlxsam04
+📅 Data: Wed Sep  3 09:38:05 AM -03 2025
+
+[09:38:05] 🔍 PASSO 1: Diagnóstico inicial
+[09:38:05] 🔧 PASSO 2: Corrigindo ferramentas ausentes
+[09:38:05] 🔄 Instalando nmap...
+[09:38:09] WARNING: ❌ Falha instalação nmap
+[09:38:09] 🔄 Corrigindo gobuster...
+[09:38:09] ℹ️ gobuster instalado via apt, verificando PATH...
+[09:38:11] WARNING: ❌ gobuster ainda não disponível
+[09:38:11] 🔧 PASSO 3: Recriando configuração
+[09:38:11] ✅ Configuração .env já existe
+[09:38:11] 🔧 PASSO 4: Verificando script heartbeat
+[09:38:11] 🔧 PASSO 5: Testando execução Python
+✅ Importações Python OK
+[09:38:12] 🔧 PASSO 6: Reiniciando serviço
+Failed to restart samureye-collector.service: Unit samureye-collector.service has a bad unit file setting.
+See system logs and 'systemctl status samureye-collector.service' for details.
+[09:38:17] 🔍 PASSO 7: Verificação final
+[09:38:17] WARNING: ❌ Serviço ainda com problemas
+
+📝 Logs de erro:
+Sep 03 09:25:26 vlxsam04 systemd[1]: Started samureye-collector.service - SamurEye Collector Agent.
+Sep 03 09:25:27 vlxsam04 systemd[1]: samureye-collector.service: Main process exited, code=exited, status=1/FAILURE
+Sep 03 09:25:27 vlxsam04 systemd[1]: samureye-collector.service: Failed with result 'exit-code'.
+Sep 03 09:25:37 vlxsam04 systemd[1]: /etc/systemd/system/samureye-collector.service:12: WorkingDirectory= path is not absolute: $COLLECTOR_DIR
+Sep 03 09:25:37 vlxsam04 systemd[1]: samureye-collector.service: Unit configuration has fatal error, unit will not be started.
+Sep 03 09:25:37 vlxsam04 systemd[1]: samureye-collector.service: Failed to schedule restart job: Unit samureye-collector.service has a bad unit file setting.
+Sep 03 09:25:37 vlxsam04 systemd[1]: samureye-collector.service: Failed with result 'exit-code'.
+Sep 03 09:33:20 vlxsam04 systemd[1]: /etc/systemd/system/samureye-collector.service:12: WorkingDirectory= path is not absolute: $COLLECTOR_DIR
+Sep 03 09:33:20 vlxsam04 systemd[1]: samureye-collector.service: Unit configuration has fatal error, unit will not be started.
+Sep 03 09:34:21 vlxsam04 systemd[1]: Started samureye-collector.service - SamurEye Collector Agent.
+Sep 03 09:34:22 vlxsam04 systemd[1]: samureye-collector.service: Main process exited, code=exited, status=1/FAILURE
+Sep 03 09:34:22 vlxsam04 systemd[1]: samureye-collector.service: Failed with result 'exit-code'.
+Sep 03 09:34:32 vlxsam04 systemd[1]: /etc/systemd/system/samureye-collector.service:12: WorkingDirectory= path is not absolute: $COLLECTOR_DIR
+Sep 03 09:34:32 vlxsam04 systemd[1]: samureye-collector.service: Unit configuration has fatal error, unit will not be started.
+Sep 03 09:34:32 vlxsam04 systemd[1]: samureye-collector.service: Failed to schedule restart job: Unit samureye-collector.service has a bad unit file setting.
+Sep 03 09:34:32 vlxsam04 systemd[1]: samureye-collector.service: Failed with result 'exit-code'.
+Sep 03 09:38:12 vlxsam04 systemd[1]: /etc/systemd/system/samureye-collector.service:12: WorkingDirectory= path is not absolute: $COLLECTOR_DIR
+Sep 03 09:38:12 vlxsam04 systemd[1]: samureye-collector.service: Unit configuration has fatal error, unit will not be started.
+Sep 03 09:38:12 vlxsam04 systemd[1]: /etc/systemd/system/samureye-collector.service:12: WorkingDirectory= path is not absolute: $COLLECTOR_DIR
+Sep 03 09:38:12 vlxsam04 systemd[1]: samureye-collector.service: Unit configuration has fatal error, unit will not be started.
+
+🔧 Comandos para debug manual:
+• journalctl -u samureye-collector -f
+• sudo -u samureye-collector python3 /opt/samureye/collector/heartbeat.py
+• /opt/samureye/collector/scripts/check-status.sh
+
+✅ CORREÇÃO FINALIZADA
+=====================
+
+🔧 Status ferramentas:
+• nmap:     ❌
+• nuclei:   ✅
+• masscan:  ✅
+• gobuster: ❌
+
+🤖 Status serviço: failed
+
+📝 Monitoramento:
+• tail -f /var/log/samureye-collector/heartbeat.log
+• systemctl status samureye-collector
+• https://app.samureye.com.br/admin/collectors
+root@vlxsam04:~#

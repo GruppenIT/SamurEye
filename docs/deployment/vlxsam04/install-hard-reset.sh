@@ -1207,7 +1207,7 @@ HEARTBEAT_EOF
 chmod +x "$COLLECTOR_DIR/heartbeat.py"
 chown "$COLLECTOR_USER:$COLLECTOR_USER" "$COLLECTOR_DIR/heartbeat.py"
 
-# Atualizar serviço systemd para usar heartbeat robusto
+# Atualizar serviço systemd para usar heartbeat robusto - PATHS ABSOLUTOS
 cat > /etc/systemd/system/$SERVICE_NAME.service << 'SERVICE_EOF'
 [Unit]
 Description=SamurEye Collector Agent
@@ -1218,10 +1218,10 @@ StartLimitIntervalSec=0
 Type=simple
 Restart=always
 RestartSec=10
-User=$COLLECTOR_USER
-Group=$COLLECTOR_USER
-WorkingDirectory=$COLLECTOR_DIR
-ExecStart=/usr/bin/python3 $COLLECTOR_DIR/heartbeat.py
+User=samureye-collector
+Group=samureye-collector
+WorkingDirectory=/opt/samureye/collector
+ExecStart=/usr/bin/python3 /opt/samureye/collector/heartbeat.py
 StandardOutput=append:/var/log/samureye-collector/collector.log
 StandardError=append:/var/log/samureye-collector/collector.log
 Environment=PYTHONUNBUFFERED=1
@@ -1229,6 +1229,31 @@ Environment=PYTHONUNBUFFERED=1
 [Install]
 WantedBy=multi-user.target
 SERVICE_EOF
+
+# Verificar integridade do arquivo systemd
+if ! systemd-analyze verify /etc/systemd/system/$SERVICE_NAME.service 2>/dev/null; then
+    warn "❌ Arquivo systemd inválido - corrigindo..."
+    # Fallback com paths absolutos garantidos
+    cat > /etc/systemd/system/$SERVICE_NAME.service << 'FALLBACK_EOF'
+[Unit]
+Description=SamurEye Collector Agent
+After=network.target
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=10
+User=samureye-collector
+Group=samureye-collector
+WorkingDirectory=/opt/samureye/collector
+ExecStart=/usr/bin/python3 /opt/samureye/collector/heartbeat.py
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
+FALLBACK_EOF
+fi
 
 systemctl daemon-reload
 
