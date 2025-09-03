@@ -300,9 +300,7 @@ export type InsertCollector = typeof collectors.$inferInsert;
 export const insertCollectorSchema = createInsertSchema(collectors).omit({ 
   id: true, 
   createdAt: true, 
-  updatedAt: true,
-  enrollmentToken: true,
-  enrollmentTokenExpires: true 
+  updatedAt: true
 });
 
 export type CollectorTelemetry = typeof collectorTelemetry.$inferSelect;

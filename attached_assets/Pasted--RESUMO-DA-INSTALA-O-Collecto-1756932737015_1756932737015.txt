@@ -1,0 +1,77 @@
+📋 RESUMO DA INSTALAÇÃO:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🤖 Collector Agent:
+   • Status:  active
+   • User:    samureye-collector
+   • Dir:     /opt/samureye/collector
+   • Logs:    /var/log/samureye-collector/
+
+🐍 Python 3.11:
+   • Version: Python 3.12.3
+   • Libs:    psutil, requests
+
+📦 Node.js 20:
+   • Version: v20.19.4
+
+🛡️ Security Tools:
+   • Nmap:     ✅ Instalado
+   • Nuclei:   ✅ Instalado
+   • Masscan:  ✅ Instalado
+   • Gobuster: ❌ Ausente
+
+🔧 Comandos Úteis:
+   • Status:     systemctl status samureye-collector
+   • Logs:       tail -f /var/log/samureye-collector/collector.log
+   • Restart:    systemctl restart samureye-collector
+   • Heartbeat:  /opt/samureye/collector/heartbeat.py
+   • Cleanup:    /opt/samureye/collector/scripts/cleanup.sh
+   • Test Conn:  /opt/samureye/collector/test-connectivity.sh
+   • Check Status: /opt/samureye/collector/scripts/check-status.sh
+
+🔗 Conectividade:
+   • API:       https://api.samureye.com.br
+   • Gateway:   192.168.100.151
+
+💓 Heartbeat & Status:
+   • Intervalo: 30 segundos (configurável em /etc/samureye-collector/.env)
+   • Endpoint:  https://api.samureye.com.br/collector-api/heartbeat
+   • Retry:     3 tentativas automáticas por request
+   • Timeout:   30 segundos por request HTTP
+
+📝 PRÓXIMOS PASSOS OBRIGATÓRIOS:
+   ⚠️  SISTEMA BASE INSTALADO - REGISTRO NECESSÁRIO ⚠️
+
+   1. Acesse a interface de administração:
+      https://app.samureye.com.br/admin/collectors
+
+   2. Faça login e vá para 'Gestão de Coletores'
+
+   3. Clique em 'Novo Coletor' e preencha:
+      • Nome: vlxsam04
+      • Hostname: vlxsam04
+      • IP: 192.168.100.151
+
+   4. Copie o TOKEN DE ENROLLMENT gerado (válido por 15 minutos)
+
+   5. Execute o comando de registro:
+      curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/register-collector.sh | bash -s -- <tenant-slug> <enrollment-token>
+
+   📌 EXEMPLO:
+      curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/register-collector.sh | bash -s -- gruppen-it abc123-def456-ghi789
+
+✅ APÓS O REGISTRO:
+   • Collector aparecerá como 'ONLINE' na interface
+   • Logs: tail -f /var/log/samureye-collector/heartbeat.log
+   • Status: /opt/samureye/collector/scripts/check-status.sh
+
+🔧 COMANDOS DISPONÍVEIS:
+   • Instalar sistema base:
+     curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/install-hard-reset.sh | bash
+
+   • Registrar collector (após criar na interface):
+     curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/register-collector.sh | bash -s -- <tenant-slug> <token>
+
+   • Verificar status:
+     /opt/samureye/collector/scripts/check-status.sh
+
+root@vlxsam04:~#
