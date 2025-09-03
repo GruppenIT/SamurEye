@@ -980,16 +980,17 @@ echo "   Nome: $COLLECTOR_NAME"
 echo "   Hostname: $HOSTNAME" 
 echo "   IP: $IP_ADDRESS"
 
-# Registrar collector via API (will update existing if found)
-response=$(curl -s -k -X POST "$API_URL/api/collectors" \
-    -H "Content-Type: application/json" \
-    -d "{
-        \"name\": \"$COLLECTOR_NAME\",
-        \"hostname\": \"$HOSTNAME\",
-        \"ipAddress\": \"$IP_ADDRESS\",
-        \"status\": \"enrolling\",
-        \"description\": \"Collector agent on-premise $HOSTNAME\"
-    }")
+# IMPORTANTE: Não auto-registrar durante install para evitar duplicação
+# O registro deve ser feito manualmente após limpeza de duplicatas
+echo "⚠️ ATENÇÃO: Registro automático desabilitado para evitar duplicação"
+echo "   Execute manualmente após limpeza:"
+echo "   1. /opt/samureye/collector/scripts/debug-duplicates.sh"
+echo "   2. /opt/samureye/collector/scripts/fix-duplicates.sh"
+echo "   3. Verificar interface admin para confirmar collector único"
+echo ""
+echo "   Ou registrar manualmente:"
+
+response='{"message":"Auto-registration disabled to prevent duplicates"}'
 
 if echo "$response" | grep -q "enrollmentToken"; then
     token=$(echo "$response" | jq -r '.enrollmentToken' 2>/dev/null)
@@ -1028,6 +1029,29 @@ EOF
 chmod +x "$COLLECTOR_DIR/scripts/register.sh"
 chown "$COLLECTOR_USER:$COLLECTOR_USER" "$COLLECTOR_DIR/scripts/register.sh"
 
+# Copiar scripts de diagnóstico e correção
+log "📋 Adicionando scripts de diagnóstico e correção..."
+
+cp "$(dirname "$0")/debug-collector-duplicate.sh" "$COLLECTOR_DIR/scripts/debug-duplicates.sh" 2>/dev/null || {
+    warn "Script debug-collector-duplicate.sh não encontrado no mesmo diretório"
+}
+
+cp "$(dirname "$0")/fix-collector-duplicates.sh" "$COLLECTOR_DIR/scripts/fix-duplicates.sh" 2>/dev/null || {
+    warn "Script fix-collector-duplicates.sh não encontrado no mesmo diretório"
+}
+
+if [ -f "$COLLECTOR_DIR/scripts/debug-duplicates.sh" ]; then
+    chmod +x "$COLLECTOR_DIR/scripts/debug-duplicates.sh"
+    chown "$COLLECTOR_USER:$COLLECTOR_USER" "$COLLECTOR_DIR/scripts/debug-duplicates.sh"
+    log "✅ Script de diagnóstico adicionado"
+fi
+
+if [ -f "$COLLECTOR_DIR/scripts/fix-duplicates.sh" ]; then
+    chmod +x "$COLLECTOR_DIR/scripts/fix-duplicates.sh"
+    chown "$COLLECTOR_USER:$COLLECTOR_USER" "$COLLECTOR_DIR/scripts/fix-duplicates.sh"
+    log "✅ Script de correção adicionado"
+fi
+
 # ============================================================================
 # 16. INFORMAÇÕES FINAIS
 # ============================================================================
@@ -1057,12 +1081,14 @@ echo "   • Masscan:  $(command -v masscan >/dev/null && echo "✅ Instalado" |
 echo "   • Gobuster: $(command -v gobuster >/dev/null && echo "✅ Instalado" || echo "❌ Ausente")"
 echo ""
 echo "🔧 Comandos Úteis:"
-echo "   • Status:    systemctl status $SERVICE_NAME"
-echo "   • Logs:      tail -f /var/log/samureye-collector/collector.log"
-echo "   • Restart:   systemctl restart $SERVICE_NAME"
-echo "   • Register:  $COLLECTOR_DIR/scripts/register.sh"
-echo "   • Cleanup:   $COLLECTOR_DIR/scripts/cleanup.sh"
-echo "   • Test Conn: $COLLECTOR_DIR/test-connectivity.sh"
+echo "   • Status:     systemctl status $SERVICE_NAME"
+echo "   • Logs:       tail -f /var/log/samureye-collector/collector.log"
+echo "   • Restart:    systemctl restart $SERVICE_NAME"
+echo "   • Register:   $COLLECTOR_DIR/scripts/register.sh"
+echo "   • Cleanup:    $COLLECTOR_DIR/scripts/cleanup.sh"
+echo "   • Test Conn:  $COLLECTOR_DIR/test-connectivity.sh"
+echo "   • Debug Dup:  $COLLECTOR_DIR/scripts/debug-duplicates.sh"
+echo "   • Fix Dup:    $COLLECTOR_DIR/scripts/fix-duplicates.sh"
 echo ""
 echo "🔗 Conectividade:"
 echo "   • API:       $API_SERVER"
@@ -1075,16 +1101,19 @@ echo "   • Retry:     3 tentativas automáticas por request"
 echo "   • Timeout:   30 segundos por request HTTP"
 echo ""
 echo "📝 Próximos Passos:"
-echo "   1. Registrar collector: $COLLECTOR_DIR/scripts/register.sh"
-echo "   2. Verificar logs: tail -f /var/log/samureye-collector/collector.log"
-echo "   3. Testar scans: Usar interface web SamurEye"
+echo "   1. DIAGNÓSTICO: $COLLECTOR_DIR/scripts/debug-duplicates.sh"
+echo "   2. CORREÇÃO:    $COLLECTOR_DIR/scripts/fix-duplicates.sh"
+echo "   3. Verificar logs: tail -f /var/log/samureye-collector/collector.log"
 echo "   4. Monitorar status: systemctl status $SERVICE_NAME"
+echo "   5. Interface: https://app.samureye.com.br/admin/collectors"
 echo ""
-echo "⚠️ IMPORTANTE:"
-echo "   • Collector configurado para enviar heartbeat a cada 30s"
-echo "   • Limpeza automática configurada para 02:00 diário"
-echo "   • Firewall configurado para acesso apenas rede interna"
-echo "   • Use o script register.sh para conectar ao servidor"
+echo "⚠️ IMPORTANTE - PROBLEMA DE DUPLICAÇÃO DETECTADO:"
+echo "   • AUTO-REGISTRO DESABILITADO para evitar duplicação de coletores"
+echo "   • Execute PRIMEIRO os scripts de diagnóstico e correção:"
+echo "     - $COLLECTOR_DIR/scripts/debug-duplicates.sh"
+echo "     - $COLLECTOR_DIR/scripts/fix-duplicates.sh"
+echo "   • Apenas depois: systemctl restart $SERVICE_NAME"
+echo "   • Monitorar transição: ENROLLING → ONLINE → (timeout) → OFFLINE"
 echo ""
 
 exit 0
