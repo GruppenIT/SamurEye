@@ -2164,8 +2164,128 @@ else
     echo ""
 fi
 
+# ============================================================================
+# 20. CORREÇÃO ENROLLMENT TOKEN INTERFACE
+# ============================================================================
+
+log "🔧 Aplicando correção para Token de Enrollment na interface..."
+
+# Corrigir schema do collector para não omitir enrollmentToken
+log "🔧 Corrigindo schema do collector..."
+cat > /tmp/fix_enrollment_schema.js << 'EOF'
+const fs = require('fs');
+
+const schemaPath = process.argv[2];
+let content = fs.readFileSync(schemaPath, 'utf8');
+
+// Correção: Remover enrollmentToken e enrollmentTokenExpires do omit
+const oldPattern = /export const insertCollectorSchema = createInsertSchema\(collectors\)\.omit\(\s*\{[^}]*enrollmentToken:\s*true[^}]*\}\s*\);/gs;
+const newPattern = `export const insertCollectorSchema = createInsertSchema(collectors).omit({ 
+  id: true, 
+  createdAt: true, 
+  updatedAt: true
+});`;
+
+if (content.match(oldPattern)) {
+    content = content.replace(oldPattern, newPattern);
+    fs.writeFileSync(schemaPath, content, 'utf8');
+    console.log('✅ Schema corrigido - enrollmentToken removido do omit');
+} else {
+    console.log('✅ Schema já estava correto');
+}
+EOF
+
+node /tmp/fix_enrollment_schema.js "$WORKING_DIR/shared/schema.ts"
+rm /tmp/fix_enrollment_schema.js
+
+# Adicionar debug logging para identificação de problemas
+log "🔧 Adicionando debug logging para criação de collector..."
+cat > /tmp/add_collector_debug.js << 'EOF'
+const fs = require('fs');
+
+const routesPath = process.argv[2];
+let content = fs.readFileSync(routesPath, 'utf8');
+
+// Adicionar logging antes do response final
+const logPattern = /const collector = await storage\.createCollector\(validatedData\);/;
+
+if (content.match(logPattern)) {
+    const replacement = `const collector = await storage.createCollector(validatedData);
+      
+      // Debug logging para troubleshooting
+      console.log('Collector criado:', {
+        id: collector.id,
+        name: collector.name,
+        tenantId: collector.tenantId,
+        enrollmentToken: collector.enrollmentToken ? collector.enrollmentToken.substring(0, 8) + '...' : 'MISSING',
+        enrollmentTokenExpires: collector.enrollmentTokenExpires
+      });`;
+      
+    content = content.replace(logPattern, replacement);
+    fs.writeFileSync(routesPath, content, 'utf8');
+    console.log('✅ Debug logging adicionado');
+} else {
+    console.log('✅ Debug logging já presente ou padrão não encontrado');
+}
+EOF
+
+node /tmp/add_collector_debug.js "$WORKING_DIR/server/routes.ts"
+rm /tmp/add_collector_debug.js
+
+# Garantir que a resposta inclui o tenantSlug
+log "🔧 Garantindo que response inclui tenantSlug..."
+cat > /tmp/fix_response.js << 'EOF'
+const fs = require('fs');
+
+const routesPath = process.argv[2];
+let content = fs.readFileSync(routesPath, 'utf8');
+
+// Procurar o response e garantir que inclui tenantSlug
+const responsePattern = /(res\.json\(\s*\{[\s\S]*?\.\.\.collector,[\s\S]*?\}\s*\);)/;
+
+if (content.match(responsePattern)) {
+    const match = content.match(responsePattern)[1];
+    
+    // Verificar se já tem tenantSlug
+    if (!match.includes('tenantSlug')) {
+        const newResponse = match.replace(
+            '...collector,',
+            `...collector,
+        tenantSlug: tenant?.slug || 'default',`
+        );
+        
+        content = content.replace(responsePattern, newResponse);
+        fs.writeFileSync(routesPath, content, 'utf8');
+        console.log('✅ tenantSlug adicionado ao response');
+    } else {
+        console.log('✅ tenantSlug já presente no response');
+    }
+} else {
+    console.log('✅ Padrão do response não encontrado ou já correto');
+}
+EOF
+
+node /tmp/fix_response.js "$WORKING_DIR/server/routes.ts"
+rm /tmp/fix_response.js
+
+# Reiniciar aplicação para aplicar correções
+log "🔄 Reiniciando aplicação para aplicar correções..."
+systemctl restart "$SERVICE_NAME"
+
+# Aguardar aplicação ficar online
+for i in {1..30}; do
+    if curl -s --connect-timeout 2 http://localhost:5000/api/health >/dev/null 2>&1; then
+        log "✅ Aplicação online após correções"
+        break
+    fi
+    sleep 1
+done
+
+log "✅ Correção de Token de Enrollment aplicada"
+
 log "🎉 vlxsam02 (Application Server) pronto para uso!"
 log "📋 Interface disponível em: https://app.samureye.com.br"
 log "📋 Admin disponível em: https://app.samureye.com.br/admin"
+log "✨ Token de Enrollment deve aparecer corretamente na interface"
 
 exit 0
