@@ -1656,6 +1656,112 @@ chown "$COLLECTOR_USER:$COLLECTOR_USER" "$COLLECTOR_DIR/scripts/diagnose-401-iss
 log "✅ Sistema de correção automática integrado"
 
 # ============================================================================
+# 16.1. CORREÇÃO FINAL: GARANTIR FUNCIONAMENTO APÓS INSTALAÇÃO  
+# ============================================================================
+
+log "🔧 Verificação e correção final do status do serviço..."
+
+# Verificar se arquivo .env existe
+if [ ! -f "$CONFIG_FILE" ]; then
+    warn "❌ Arquivo .env ausente após instalação - criando..."
+    
+    cat > "$CONFIG_FILE" << CONFIG_EOF
+# Configuração do Collector SamurEye - Pós Instalação
+COLLECTOR_ID=$HOSTNAME
+COLLECTOR_NAME=$HOSTNAME
+HOSTNAME=$HOSTNAME
+IP_ADDRESS=$(hostname -I | awk '{print $1}')
+API_BASE_URL=$API_SERVER
+HEARTBEAT_INTERVAL=30
+RETRY_ATTEMPTS=3
+RETRY_DELAY=5
+LOG_LEVEL=INFO
+
+# Tokens de autenticação (serão preenchidos durante registro)
+COLLECTOR_TOKEN=
+ENROLLMENT_TOKEN=
+
+# Status do collector
+STATUS=offline
+
+# Configurações adicionais
+VERIFY_SSL=false
+TIMEOUT=30
+MAX_RETRIES=5
+CONFIG_EOF
+
+    chown root:"$COLLECTOR_USER" "$CONFIG_FILE"
+    chmod 640 "$CONFIG_FILE"
+    log "✅ Arquivo .env criado automaticamente"
+else
+    log "✅ Arquivo .env existe"
+fi
+
+# Verificar e corrigir permissões finais
+log "🔧 Aplicando permissões finais..."
+chown -R root:root /opt/samureye/collector 2>/dev/null || true
+chown -R root:"$COLLECTOR_USER" /etc/samureye-collector 2>/dev/null || true
+chown -R "$COLLECTOR_USER":"$COLLECTOR_USER" /var/log/samureye-collector 2>/dev/null || true
+chmod -R 755 /opt/samureye/collector 2>/dev/null || true
+chmod -R 750 /etc/samureye-collector 2>/dev/null || true
+chmod -R 755 /var/log/samureye-collector 2>/dev/null || true
+if [ -f "$CONFIG_FILE" ]; then
+    chmod 640 "$CONFIG_FILE"
+fi
+log "✅ Permissões finais aplicadas"
+
+# Recarregar systemd e tentar iniciar serviço
+systemctl daemon-reload
+systemctl enable "$SERVICE_NAME" 2>/dev/null || true
+
+# Tentar iniciar serviço com mais tentativas
+RETRY_START=0
+MAX_START_RETRIES=3
+
+while [ $RETRY_START -lt $MAX_START_RETRIES ]; do
+    if systemctl start "$SERVICE_NAME" 2>/dev/null; then
+        log "✅ Serviço iniciado (tentativa $((RETRY_START + 1)))"
+        sleep 5
+        
+        if systemctl is-active --quiet "$SERVICE_NAME"; then
+            log "✅ Serviço está rodando corretamente"
+            
+            # Verificar se está gerando logs
+            sleep 3
+            if [ -f "/var/log/samureye-collector/heartbeat.log" ] || [ -f "/var/log/samureye-collector/collector.log" ]; then
+                log "✅ Sistema funcionando - logs sendo gerados"
+            else
+                log "ℹ️ Serviço rodando - aguardando geração de logs"
+            fi
+            break
+        else
+            warn "⚠️ Serviço não está ativo após inicialização (tentativa $((RETRY_START + 1)))"
+            RETRY_START=$((RETRY_START + 1))
+            
+            if [ $RETRY_START -lt $MAX_START_RETRIES ]; then
+                log "🔄 Tentando novamente em 3 segundos..."
+                sleep 3
+                systemctl daemon-reload
+            fi
+        fi
+    else
+        warn "⚠️ Falha ao iniciar serviço (tentativa $((RETRY_START + 1)))"
+        RETRY_START=$((RETRY_START + 1))
+        
+        if [ $RETRY_START -lt $MAX_START_RETRIES ]; then
+            log "🔄 Tentando novamente..."
+            sleep 2
+        fi
+    fi
+done
+
+if [ $RETRY_START -eq $MAX_START_RETRIES ]; then
+    warn "⚠️ Serviço não conseguiu iniciar após $MAX_START_RETRIES tentativas"
+    log "📋 Use diagnóstico para identificar problema:"
+    log "   curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/diagnose-current-status.sh | bash"
+fi
+
+# ============================================================================
 # 17. INFORMAÇÕES FINAIS
 # ============================================================================
 
@@ -1774,6 +1880,13 @@ echo "   ✅ Extração robusta de token no register-collector.sh"
 echo "   ✅ Heartbeat corrigido usa collector_id (não collectorId)"
 echo "   ✅ API 400 'collector_id required' resolvido"
 echo ""
+echo "🔍 DIAGNÓSTICO ATUAL (se ainda há problemas):"
+echo "   • Diagnóstico completo do status atual:"
+echo "     curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/diagnose-current-status.sh | bash"
+echo ""
+echo "   • Correção de problemas atuais:"
+echo "     curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/fix-current-issues.sh | bash"
+echo ""
 echo "   • Diagnóstico rápido local:"
 echo "     $COLLECTOR_DIR/scripts/check-status.sh"
 echo ""
@@ -1790,6 +1903,9 @@ echo "   ✅ Extrator robusto de token da API integrado"
 echo "   ✅ Teste de permissões automático durante instalação"
 echo "   ✅ Heartbeat corrigido - usa collector_id (não collectorId)"
 echo "   ✅ Extração robusta de token em register-collector.sh"
+echo "   ✅ Correção automática de arquivo .env ausente"
+echo "   ✅ Verificação e correção final do status do serviço"
+echo "   ✅ Múltiplas tentativas de inicialização do serviço"
 echo ""
 
 exit 0
