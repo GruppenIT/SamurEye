@@ -226,10 +226,27 @@ if [ "$HTTP_STATUS" = "200" ]; then
     
     log "💾 Salvando token de autenticação..."
     
-    # Extrair collector token da resposta
-    COLLECTOR_TOKEN=$(echo "$RESPONSE_BODY" | jq -r '.collector.token // ""')
+    # Extrair collector token da resposta (múltiplos métodos para robustez)
+    COLLECTOR_TOKEN=""
     
-    if [ -n "$COLLECTOR_TOKEN" ] && [ "$COLLECTOR_TOKEN" != "null" ]; then
+    # Método 1: jq com múltiplos caminhos
+    if command -v jq >/dev/null 2>&1; then
+        COLLECTOR_TOKEN=$(echo "$RESPONSE_BODY" | jq -r '.collector.token // .token // .authToken // .collectorToken // .auth.token // .data.token // ""' 2>/dev/null)
+    fi
+    
+    # Método 2: grep se jq falhar ou não encontrar
+    if [ -z "$COLLECTOR_TOKEN" ] || [ "$COLLECTOR_TOKEN" = "null" ]; then
+        COLLECTOR_TOKEN=$(echo "$RESPONSE_BODY" | grep -oE '[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}' | head -1)
+    fi
+    
+    # Método 3: grep por campo token genérico
+    if [ -z "$COLLECTOR_TOKEN" ] || [ "$COLLECTOR_TOKEN" = "null" ]; then
+        COLLECTOR_TOKEN=$(echo "$RESPONSE_BODY" | grep -o '"token":"[^"]*"' | head -1 | cut -d'"' -f4 2>/dev/null)
+    fi
+    
+    log "🔍 Token encontrado: ${COLLECTOR_TOKEN:0:8}...${COLLECTOR_TOKEN: -8}"
+    
+    if [ -n "$COLLECTOR_TOKEN" ] && [ "$COLLECTOR_TOKEN" != "null" ] && [ ${#COLLECTOR_TOKEN} -ge 16 ]; then
         CONFIG_FILE="/etc/samureye-collector/.env"
         
         if [ -f "$CONFIG_FILE" ]; then

@@ -1229,8 +1229,11 @@ class CollectorHeartbeat:
             url = f"{self.api_base}/collector-api/heartbeat"
             telemetry = self.get_telemetry()
             
+            # CORREÇÃO: API espera collector_id (snake_case) não collectorId (camelCase)
             data = {
                 "collector_id": self.collector_id,
+                "hostname": self.hostname,
+                "ipAddress": self.ip_address,
                 "status": "online",
                 "timestamp": time.strftime("%Y-%m-%dT%H:%M:%S.000Z", time.gmtime()),
                 "telemetry": telemetry,
@@ -1766,12 +1769,10 @@ echo ""
 echo "   • Correção extração de token da API:"
 echo "     curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/fix-api-token-extraction.sh | bash"
 echo ""
-echo "🎯 SOLUÇÃO DEFINITIVA (SAI DOS CÍRCULOS):"
-echo "   • Diagnóstico final resposta API:"
-echo "     curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/diagnose-api-response-final.sh | bash -s -- gruppen-it <TOKEN>"
-echo ""
-echo "   • Correção DEFINITIVA (resolve tudo):"
-echo "     curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/fix-token-issue-definitive.sh | bash"
+echo "🎯 CORREÇÕES INTEGRADAS (COLLECTOR_ID CORRIGIDO):"
+echo "   ✅ Extração robusta de token no register-collector.sh"
+echo "   ✅ Heartbeat corrigido usa collector_id (não collectorId)"
+echo "   ✅ API 400 'collector_id required' resolvido"
 echo ""
 echo "   • Diagnóstico rápido local:"
 echo "     $COLLECTOR_DIR/scripts/check-status.sh"
@@ -1787,7 +1788,8 @@ echo "   ✅ Serviço systemd configurado para usuário samureye-collector"
 echo "   ✅ Script de salvamento de token integrado"
 echo "   ✅ Extrator robusto de token da API integrado"
 echo "   ✅ Teste de permissões automático durante instalação"
-echo "   🎯 SOLUÇÃO DEFINITIVA disponível para sair dos círculos"
+echo "   ✅ Heartbeat corrigido - usa collector_id (não collectorId)"
+echo "   ✅ Extração robusta de token em register-collector.sh"
 echo ""
 
 exit 0

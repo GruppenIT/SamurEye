@@ -1,0 +1,96 @@
+root@vlxsam04:~# curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/fix-token-issue-definitive.sh | bash
+🎯 CORREÇÃO DEFINITIVA - TOKEN ISSUE
+====================================
+[11:25:44] 🎯 Implementando correção definitiva para vlxsam04...
+
+🛑 1. PARANDO SERVIÇO:
+=====================
+
+🔧 2. IMPLEMENTANDO SOLUÇÃO ROBUSTA:
+===================================
+[11:25:46] 📄 Criando script de registro definitivo...
+[11:25:46] ✅ Script de registro definitivo criado
+
+🔧 3. ATUALIZANDO HEARTBEAT PARA FUNCIONAR COM QUALQUER TOKEN:
+==============================================================
+[11:25:46] 🐍 Criando heartbeat robusto...
+[11:25:46] ✅ Heartbeat definitivo criado
+
+🔧 4. CONFIGURANDO ARQUIVO .ENV ROBUSTO:
+========================================
+
+🚀 5. REINICIANDO SERVIÇO:
+==========================
+[11:25:50] ✅ Serviço está rodando
+
+🎯 CORREÇÃO DEFINITIVA APLICADA!
+================================
+
+✅ COMPONENTES INSTALADOS:
+   📄 Script de registro definitivo: /opt/samureye/collector/scripts/register-collector-definitive.sh
+   🐍 Heartbeat robusto: /opt/samureye/collector/heartbeat.py
+   📁 Configuração: /etc/samureye-collector/.env
+   🤖 Serviço: samureye-collector
+
+🚀 COMO USAR:
+============
+1. Registrar collector (sempre funciona):
+   /opt/samureye/collector/scripts/register-collector-definitive.sh gruppen-it <ENROLLMENT-TOKEN>
+
+2. Verificar status:
+   systemctl status samureye-collector
+
+3. Monitorar logs:
+   tail -f /var/log/samureye-collector/heartbeat.log
+
+[11:25:50] ✅ Problema dos círculos RESOLVIDO definitivamente!
+root@vlxsam04:~# 1836c881-30e1-4f45-8ecd-e004a07114b6^C
+root@vlxsam04:~# 1836c881-30e1-4f45-8ecd-e004a07114b6^C
+root@vlxsam04:~# 1836c881-30e1-4f45-8ecd-e004a07114b6^C
+root@vlxsam04:~# /opt/samureye/collector/scripts/register-collector-definitive.sh gruppen-it 1836c881-30e1-4f45-8ecd-e004a07114b6
+🎯 REGISTRO DEFINITIVO - vlxsam04
+=================================
+
+📤 ESTRATÉGIA 1: Registro via API...
+✅ API retornou sucesso
+✅ Token extraído da API: 0f61f03f...7700d92e
+
+💾 SALVANDO TOKEN...
+✅ Token salvo com sucesso
+
+🚀 REINICIANDO SERVIÇO...
+✅ Serviço ativo
+
+📝 Verificando logs iniciais...
+Últimos logs:
+   2025-09-04 11:26:41,987 - INFO - Configuração carregada - ID: vlxsam04
+   2025-09-04 11:26:41,987 - INFO - Iniciando heartbeat definitivo...
+   2025-09-04 11:26:41,988 - INFO - Configuração carregada - ID: vlxsam04
+   2025-09-04 11:26:43,065 - WARNING - Heartbeat retornou status 400: {"message":"collector_id required"}
+   2025-09-04 11:26:43,066 - WARNING - Falha #1 no heartbeat
+
+🎉 SUCESSO! Collector funcionando sem erro 401
+
+🎯 REGISTRO DEFINITIVO CONCLUÍDO!
+=================================
+• Token configurado: 0f61f03f...7700d92e
+• Arquivo: /etc/samureye-collector/.env
+• Serviço: samureye-collector
+• Status: active
+root@vlxsam04:~# tail -f /var/log/samureye-collector/collector.log
+2025-09-04 11:25:47,229 - WARNING - Falha #1 no heartbeat
+2025-09-04 11:26:17,229 - WARNING - Token não configurado - heartbeat será enviado sem autenticação
+2025-09-04 11:26:17,229 - WARNING - Falha #2 no heartbeat
+2025-09-04 11:26:41,987 - INFO - Configuração carregada - ID: vlxsam04
+2025-09-04 11:26:41,987 - INFO - Iniciando heartbeat definitivo...
+2025-09-04 11:26:41,988 - INFO - Configuração carregada - ID: vlxsam04
+/usr/lib/python3/dist-packages/urllib3/connectionpool.py:1100: InsecureRequestWarning: Unverified HTTPS request is being made to host 'api.samureye.com.br'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+2025-09-04 11:26:43,065 - WARNING - Heartbeat retornou status 400: {"message":"collector_id required"}
+2025-09-04 11:26:43,066 - WARNING - Falha #1 no heartbeat
+/usr/lib/python3/dist-packages/urllib3/connectionpool.py:1100: InsecureRequestWarning: Unverified HTTPS request is being made to host 'api.samureye.com.br'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+2025-09-04 11:27:14,121 - WARNING - Heartbeat retornou status 400: {"message":"collector_id required"}
+2025-09-04 11:27:14,122 - WARNING - Falha #2 no heartbeat
+^C
+root@vlxsam04:~#
