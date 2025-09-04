@@ -6,7 +6,7 @@
 # Sistema completo de reset e reinstalação do Agente Coletor SamurEye
 # Inclui: Python + Node.js + Security Tools + Collector Agent + Automation
 #
-# Servidor: vlxsam04 (192.168.100.154)
+# Servidor: vlxsam04 (192.168.100.151)
 # Função: Agente Coletor de Dados e Ferramentas de Segurança
 # Dependências: vlxsam02 (API), vlxsam01 (Certificates)
 # ============================================================================

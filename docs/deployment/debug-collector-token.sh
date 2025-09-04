@@ -95,7 +95,7 @@ elif [ "$HTTP_CODE_PENDING" = "401" ]; then
     
     # Verificar se token existe no banco de dados
     log "📊 Consultando banco de dados..."
-    PGPASSWORD="SamurEye2024!" psql -h 192.168.100.153 -U samureye -d samureye -t -c \
+    PGPASSWORD="SamurEye2024!" psql -h 172.24.1.153 -U samureye -d samureye -t -c \
         "SELECT id, name, status, enrollment_token, enrollment_token_expires FROM collectors WHERE enrollment_token = '$COLLECTOR_TOKEN';" 2>/dev/null || error "Falha ao consultar banco"
         
 else
@@ -104,7 +104,7 @@ fi
 
 # Verificar logs do servidor se possível
 log "📋 Verificando logs do servidor de aplicação..."
-ssh -o ConnectTimeout=5 root@192.168.100.152 "tail -20 /var/log/samureye/app.log 2>/dev/null | grep -i 'collector\|token\|401'" 2>/dev/null || log "⚠️ Não foi possível acessar logs do servidor"
+ssh -o ConnectTimeout=5 root@172.24.1.152 "tail -20 /var/log/samureye/app.log 2>/dev/null | grep -i 'collector\|token\|401'" 2>/dev/null || log "⚠️ Não foi possível acessar logs do servidor"
 
 log "🎯 DIAGNÓSTICO CONCLUÍDO"
 

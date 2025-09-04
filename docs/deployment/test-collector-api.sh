@@ -90,8 +90,8 @@ esac
 if [ "$HTTP_CODE" = "401" ]; then
     log "🔍 Teste 3: Consultando banco de dados diretamente..."
     
-    # Conectar no banco para ver status do token
-    PGPASSWORD="SamurEye2024!" psql -h 192.168.100.153 -U samureye -d samureye -c \
+    # Conectar no banco para ver status do token  
+    PGPASSWORD="SamurEye2024!" psql -h 172.24.1.153 -U samureye -d samureye -c \
         "SELECT id, name, status, 
                 enrollment_token, 
                 enrollment_token_expires,
