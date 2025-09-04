@@ -275,8 +275,16 @@ fi
 
 log "👤 Criando usuário e estrutura de diretórios..."
 
-# Criar usuário samureye-collector
-useradd -r -s /bin/bash -d "$COLLECTOR_DIR" -m "$COLLECTOR_USER"
+# Criar usuário samureye-collector com grupos corretos
+if ! id "$COLLECTOR_USER" &>/dev/null; then
+    useradd -r -s /bin/false -d "$COLLECTOR_DIR" "$COLLECTOR_USER"
+    log "✅ Usuário $COLLECTOR_USER criado"
+else
+    log "ℹ️  Usuário $COLLECTOR_USER já existe"
+fi
+
+# Adicionar usuário aos grupos necessários
+usermod -a -G adm,systemd-journal "$COLLECTOR_USER" 2>/dev/null || true
 
 # Criar estrutura de diretórios
 mkdir -p "$COLLECTOR_DIR"/{agent,certs,tools,logs,temp,uploads,scripts,config,backups}
@@ -289,11 +297,19 @@ mkdir -p /var/log/samureye-collector
 # Estrutura de ferramentas
 mkdir -p "$TOOLS_DIR"/{nmap,nuclei,masscan,gobuster,custom}
 
-# Definir permissões
+# Definir permissões corretas (root:collector para config)
 chown -R "$COLLECTOR_USER:$COLLECTOR_USER" "$COLLECTOR_DIR"
-chown -R "$COLLECTOR_USER:$COLLECTOR_USER" /var/log/samureye-collector
-chmod 750 "$COLLECTOR_DIR" "$CONFIG_DIR"
+chown -R root:"$COLLECTOR_USER" "$CONFIG_DIR"
+chown -R root:"$COLLECTOR_USER" /var/log/samureye-collector
+chmod 750 "$COLLECTOR_DIR" "$CONFIG_DIR" /var/log/samureye-collector
 chmod 700 "$CERTS_DIR"
+
+# Teste de permissões de leitura
+if ! sudo -u "$COLLECTOR_USER" test -r "$CONFIG_DIR" 2>/dev/null; then
+    warn "⚠️  Ajustando permissões de emergência para $CONFIG_DIR"
+    chown -R "$COLLECTOR_USER:$COLLECTOR_USER" "$CONFIG_DIR"
+    chmod 755 "$CONFIG_DIR"
+fi
 
 log "✅ Estrutura de diretórios criada"
 
@@ -1025,27 +1041,37 @@ HEARTBEAT_INTERVAL=30
 RETRY_ATTEMPTS=3
 RETRY_DELAY=5
 LOG_LEVEL=INFO
+
+# Tokens de autenticação (preenchidos durante registro)
+COLLECTOR_TOKEN=
+ENROLLMENT_TOKEN=
+
+# Status do collector
+STATUS=offline
 CONFIG_EOF
 
 # Aplicar permissões corretas ao diretório e arquivo .env
-chown -R root:$COLLECTOR_USER "$CONFIG_DIR"
+chown root:"$COLLECTOR_USER" "$CONFIG_DIR"
+chown root:"$COLLECTOR_USER" "$CONFIG_FILE"
 chmod 750 "$CONFIG_DIR"
 chmod 640 "$CONFIG_FILE"
 
-# Verificar se o usuário consegue ler e escrever no diretório
-if ! sudo -u $COLLECTOR_USER cat "$CONFIG_FILE" >/dev/null 2>&1; then
-    warn "❌ Problema permissão .env - aplicando fallback"
-    chmod 644 "$CONFIG_FILE"
-    chown $COLLECTOR_USER:$COLLECTOR_USER "$CONFIG_FILE"
-fi
-
-# Garantir que o usuário pode criar arquivos no diretório (para token.conf)
-if ! sudo -u $COLLECTOR_USER touch "$CONFIG_DIR/test_write" 2>/dev/null; then
-    warn "❌ Usuário não pode escrever no diretório config - corrigindo"
-    chown -R $COLLECTOR_USER:$COLLECTOR_USER "$CONFIG_DIR"
-    chmod 755 "$CONFIG_DIR"
+# Teste de permissões crítico
+log "🔍 Testando permissões de leitura do arquivo de configuração..."
+if sudo -u "$COLLECTOR_USER" cat "$CONFIG_FILE" >/dev/null 2>&1; then
+    log "✅ Permissões de leitura: OK"
 else
-    rm -f "$CONFIG_DIR/test_write"
+    warn "⚠️  Permissões de leitura: FALHOU - aplicando correção de emergência"
+    # Fallback para garantir funcionalidade
+    chown "$COLLECTOR_USER":"$COLLECTOR_USER" "$CONFIG_FILE"
+    chmod 644 "$CONFIG_FILE"
+    
+    # Verificar novamente
+    if sudo -u "$COLLECTOR_USER" cat "$CONFIG_FILE" >/dev/null 2>&1; then
+        log "✅ Permissões corrigidas com fallback"
+    else
+        error "❌ FALHA CRÍTICA: Usuário não consegue ler arquivo de configuração"
+    fi
 fi
 
 # Criar script de heartbeat robusto integrado
@@ -1314,7 +1340,65 @@ log "📋 Use o script de registro separado com token do tenant"
 # SCRIPTS DE DIAGNÓSTICO INTEGRADOS NO INSTALL
 # ============================================================================
 
-log "📋 Criando scripts de diagnóstico integrados..."
+log "📋 Criando scripts de diagnóstico e utilitários integrados..."
+
+# Script para salvar tokens corretamente (integrado)
+cat > "$COLLECTOR_DIR/scripts/save-token.sh" << 'SAVE_TOKEN_EOF'
+#!/bin/bash
+
+# Script para salvar token no arquivo de configuração
+# Uso: save-token.sh <collector_token> [enrollment_token]
+
+CONFIG_FILE="/etc/samureye-collector/.env"
+
+if [ $# -lt 1 ]; then
+    echo "Erro: Token do collector é obrigatório"
+    echo "Uso: $0 <collector_token> [enrollment_token]"
+    exit 1
+fi
+
+COLLECTOR_TOKEN="$1"
+ENROLLMENT_TOKEN="${2:-}"
+
+if [ ! -f "$CONFIG_FILE" ]; then
+    echo "Erro: Arquivo de configuração não encontrado: $CONFIG_FILE"
+    exit 1
+fi
+
+# Fazer backup
+cp "$CONFIG_FILE" "$CONFIG_FILE.backup.$(date +%Y%m%d_%H%M%S)"
+
+# Salvar tokens
+if grep -q "^COLLECTOR_TOKEN=" "$CONFIG_FILE"; then
+    sed -i "s/^COLLECTOR_TOKEN=.*/COLLECTOR_TOKEN=$COLLECTOR_TOKEN/" "$CONFIG_FILE"
+else
+    echo "COLLECTOR_TOKEN=$COLLECTOR_TOKEN" >> "$CONFIG_FILE"
+fi
+
+if [ -n "$ENROLLMENT_TOKEN" ]; then
+    if grep -q "^ENROLLMENT_TOKEN=" "$CONFIG_FILE"; then
+        sed -i "s/^ENROLLMENT_TOKEN=.*/ENROLLMENT_TOKEN=$ENROLLMENT_TOKEN/" "$CONFIG_FILE"
+    else
+        echo "ENROLLMENT_TOKEN=$ENROLLMENT_TOKEN" >> "$CONFIG_FILE"
+    fi
+fi
+
+echo "Token salvo com sucesso no arquivo $CONFIG_FILE"
+echo "COLLECTOR_TOKEN: ${COLLECTOR_TOKEN:0:8}...${COLLECTOR_TOKEN: -8}"
+if [ -n "$ENROLLMENT_TOKEN" ]; then
+    echo "ENROLLMENT_TOKEN: ${ENROLLMENT_TOKEN:0:8}...${ENROLLMENT_TOKEN: -8}"
+fi
+
+# Reiniciar serviço se estiver rodando
+if systemctl is-active --quiet samureye-collector; then
+    echo "Reiniciando serviço collector para aplicar novo token..."
+    systemctl restart samureye-collector
+fi
+SAVE_TOKEN_EOF
+
+chmod +x "$COLLECTOR_DIR/scripts/save-token.sh"
+chown root:root "$COLLECTOR_DIR/scripts/save-token.sh"
+log "✅ Script de salvamento de token criado: $COLLECTOR_DIR/scripts/save-token.sh"
 
 # Script de diagnóstico integrado
 cat > "$COLLECTOR_DIR/scripts/check-status.sh" << 'DIAG_EOF'
@@ -1594,7 +1678,17 @@ echo "   • Correção permissões e salvamento token:"
 echo "     curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/fix-permissions-token-save.sh | bash"
 echo ""
 echo "   • Diagnóstico rápido local:"
-echo "     $COLLECTOR_DIR/scripts/diagnose-401-issue.sh"
+echo "     $COLLECTOR_DIR/scripts/check-status.sh"
+echo ""
+echo "   • Salvar token manualmente (se necessário):"
+echo "     $COLLECTOR_DIR/scripts/save-token.sh <collector-token>"
+echo ""
+echo "💡 CORREÇÕES INTEGRADAS NO INSTALL-HARD-RESET:"
+echo "   ✅ Usuário com permissões corretas"
+echo "   ✅ Arquivo .env com permissões 640 (root:collector)"
+echo "   ✅ Serviço systemd configurado para usuário samureye-collector"
+echo "   ✅ Script de salvamento de token integrado"
+echo "   ✅ Teste de permissões automático durante instalação"
 echo ""
 
 exit 0
