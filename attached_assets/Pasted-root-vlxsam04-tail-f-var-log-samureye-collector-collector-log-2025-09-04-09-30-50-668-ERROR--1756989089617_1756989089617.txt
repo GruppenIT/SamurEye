@@ -1,0 +1,25 @@
+root@vlxsam04:~# tail -f /var/log/samureye-collector/collector.log
+2025-09-04 09:30:50,668 - ERROR - Erro no registro: 401 - {"message":"Unauthorized"}
+2025-09-04 09:30:50,668 - ERROR - Falha no registro inicial
+2025-09-04 09:31:01,155 - INFO - Configuração carregada - ID: vlxsam04, Nome:
+2025-09-04 09:31:01,155 - INFO - Iniciando heartbeat collector...
+2025-09-04 09:31:01,155 - INFO - Token não encontrado, registrando collector...
+2025-09-04 09:31:01,155 - INFO - Registrando collector: {'name': '', 'hostname': 'vlxsam04', 'ipAddress': '', 'status': 'enrolling', 'description': 'Collector agent on-premise vlxsam04'}
+/usr/lib/python3/dist-packages/urllib3/connectionpool.py:1100: InsecureRequestWarning: Unverified HTTPS request is being made to host 'api.samureye.com.br'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+2025-09-04 09:31:01,211 - ERROR - Erro no registro: 401 - {"message":"Unauthorized"}
+2025-09-04 09:31:01,211 - ERROR - Falha no registro inicial
+2025-09-04 09:31:11,609 - INFO - Configuração carregada - ID: vlxsam04, Nome:
+2025-09-04 09:31:11,610 - INFO - Iniciando heartbeat collector...
+2025-09-04 09:31:11,610 - INFO - Token não encontrado, registrando collector...
+2025-09-04 09:31:11,610 - INFO - Registrando collector: {'name': '', 'hostname': 'vlxsam04', 'ipAddress': '', 'status': 'enrolling', 'description': 'Collector agent on-premise vlxsam04'}
+/usr/lib/python3/dist-packages/urllib3/connectionpool.py:1100: InsecureRequestWarning: Unverified HTTPS request is being made to host 'api.samureye.com.br'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+2025-09-04 09:31:11,656 - ERROR - Erro no registro: 401 - {"message":"Unauthorized"}
+2025-09-04 09:31:11,656 - ERROR - Falha no registro inicial
+2025-09-04 09:31:21,869 - INFO - Configuração carregada - ID: vlxsam04, Nome:
+2025-09-04 09:31:21,869 - INFO - Iniciando heartbeat collector...
+2025-09-04 09:31:21,870 - INFO - Token não encontrado, registrando collector...
+2025-09-04 09:31:21,870 - INFO - Registrando collector: {'name': '', 'hostname': 'vlxsam04', 'ipAddress': '', 'status': 'enrolling', 'description': 'Collector agent on-premise vlxsam04'}
+/usr/lib/python3/dist-packages/urllib3/connectionpool.py:1100: InsecureRequestWarning: Unverified HTTPS request is being made to host 'api.samureye.com.br'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
