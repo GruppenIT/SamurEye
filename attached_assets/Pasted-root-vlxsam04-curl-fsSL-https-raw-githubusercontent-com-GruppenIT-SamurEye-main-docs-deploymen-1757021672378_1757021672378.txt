@@ -1,0 +1,57 @@
+root@vlxsam04:~# curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/register-collector.sh | bash -s -- gruppen-it 25793d69-b218-400d-9400-20bb488aa8af
+
+🔧 REGISTRO COLLECTOR SAMUREYE
+==============================
+
+[18:33:16] 🔍 Parâmetros recebidos:
+   • Tenant Slug: gruppen-it
+   • Token: 25793d69...488aa8af
+[18:33:16] 🔍 Verificando prerequisitos...
+[18:33:16] ✅ Prerequisitos verificados
+[18:33:16] 🔍 Coletando informações do sistema...
+[18:33:16]    • Hostname: vlxsam04
+[18:33:16]    • IP Address: 192.168.100.151
+[18:33:16] 🌐 Testando conectividade com API...
+[18:33:16] ✅ Conectividade OK
+[18:33:16] 🔧 Registrando collector...
+[18:33:16] 📤 Enviando registro para API...
+[18:33:16] 📥 Processando resposta da API...
+[18:33:16] 🎉 COLLECTOR REGISTRADO COM SUCESSO!
+
+[18:33:16] 📋 DETALHES DO REGISTRO:
+   • Nome do Collector: vlxsam04
+   • Tenant: Gruppen it
+   • Status: online
+   • Hostname: vlxsam04
+   • IP: 192.168.100.151
+
+[18:33:16] 💾 Salvando token de autenticação...
+[18:33:16] 🔍 Token encontrado: 25de9e9f...3da4746c
+[18:33:16] ✅ Token salvo com sucesso no arquivo de configuração
+   📁 Arquivo: /etc/samureye-collector/.env
+   🔑 Token: 25de9e9f...3da4746c
+[18:33:16] 🔄 Reiniciando serviço collector para aplicar novo token...
+[18:33:19] ✅ Serviço collector reiniciado com sucesso
+[18:33:19] ✅ Collector está online e enviando telemetria
+
+[18:33:19] 🎯 REGISTRO CONCLUÍDO COM SUCESSO!
+
+📋 PRÓXIMOS PASSOS:
+   • O collector já está enviando telemetria automaticamente
+   • Verifique o status na interface de administração
+   • O collector aparecerá como 'ONLINE' na gestão de coletores
+
+[18:33:19] ✅ Script de registro finalizado
+root@vlxsam04:~# tail -f /var/log/samureye-collector/collector.log
+2025-09-04 18:31:42,817 - INFO - Configuração carregada - ID: vlxsam04, Token: NÃO CONFIGURADO
+2025-09-04 18:33:12,818 - INFO - Configuração carregada - ID: vlxsam04, Token: NÃO CONFIGURADO
+2025-09-04 18:33:17,067 - INFO - Configuração carregada - ID: vlxsam04, Token: 25de9e9f...3da4746c
+2025-09-04 18:33:17,067 - INFO - Iniciando heartbeat collector...
+2025-09-04 18:33:17,067 - INFO - Configuração carregada - ID: vlxsam04, Token: 25de9e9f...3da4746c
+2025-09-04 18:33:18,112 - WARNING - Token inválido ao buscar jornadas pendentes
+2025-09-04 18:33:48,113 - INFO - Configuração carregada - ID: vlxsam04, Token: 25de9e9f...3da4746c
+2025-09-04 18:33:49,130 - WARNING - Token inválido ao buscar jornadas pendentes
+2025-09-04 18:34:19,131 - INFO - Configuração carregada - ID: vlxsam04, Token: 25de9e9f...3da4746c
+2025-09-04 18:34:20,149 - WARNING - Token inválido ao buscar jornadas pendentes
+2025-09-04 18:34:50,149 - INFO - Configuração carregada - ID: vlxsam04, Token: 25de9e9f...3da4746c
+2025-09-04 18:34:51,163 - WARNING - Token inválido ao buscar jornadas pendentes
