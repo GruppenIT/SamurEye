@@ -1,0 +1,120 @@
+root@vlxsam04:~# curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/fix-token-disconnect.sh | bash
+🛠️  CORREÇÃO: Sincronização Token Registro vs Serviço
+====================================================
+Data/Hora: Thu Sep  4 09:51:00 AM -03 2025
+
+🔍 1. ANÁLISE INICIAL DO PROBLEMA
+--------------------------------
+✅ Arquivo de configuração encontrado
+❌ Token não encontrado no arquivo
+ℹ️  Serviço está parado
+
+⏹️ 2. PARANDO SERVIÇO PARA SINCRONIZAÇÃO
+----------------------------------------
+ℹ️  Serviço já estava parado
+
+🔧 3. VERIFICANDO E CORRIGINDO CONFIGURAÇÃO
+------------------------------------------
+📁 Fazendo backup da configuração atual...
+📁 Backup criado: /var/backups/samureye-collector/.env.backup.20250904_095100
+🔍 Verificando configuração atual...
+❌ Token não encontrado na configuração
+🧹 Limpando configuração inválida...
+✅ Configuração limpa criada
+
+📝 4. LIMPANDO LOGS COM PROBLEMA
+-------------------------------
+📄 Fazendo backup e limpeza do log...
+📁 Backup criado: /var/backups/samureye-collector/collector.log.backup.20250904_095100
+✅ Log limpo e marcado
+
+🔄 5. RECARREGANDO CONFIGURAÇÃO DO SYSTEMD
+------------------------------------------
+🔄 Recarregando daemon do systemd...
+✅ Daemon recarregado
+🔄 Resetando falhas do serviço...
+✅ Falhas resetadas
+
+⚙️  6. PREPARANDO SERVIÇO PARA NOVO REGISTRO
+-------------------------------------------
+ℹ️  Serviço permanecerá parado para novo registro manual
+ℹ️  Isso evita conflitos durante o processo de registro
+✅ Serviço preparado para novo registro
+
+✅ 7. VERIFICAÇÃO FINAL
+----------------------
+📊 Status final:
+   🔴 Serviço: activating
+inactive
+   📁 Config: presente
+   📝 Log: presente
+   🔒 Permissões config: -rw------- root root
+
+🎯 CORREÇÃO CONCLUÍDA COM SUCESSO!
+=================================
+
+📋 PRÓXIMOS PASSOS OBRIGATÓRIOS:
+  1️⃣  O serviço está parado para evitar conflitos
+  2️⃣  A configuração foi limpa e preparada
+  3️⃣  Execute NOVO REGISTRO com o comando completo:
+
+🔧 COMANDO DE REGISTRO:
+curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/register-collector.sh | bash -s -- <tenant-slug> <enrollment-token>
+
+💡 IMPORTANTE:
+  ➤ Use um NOVO token de enrollment (gere na interface)
+  ➤ O token anterior pode ter expirado (15 minutos)
+  ➤ O serviço será iniciado automaticamente após registro bem-sucedido
+
+✅ Não haverá mais conflitos entre registro e serviço!
+
+Conclusão: Thu Sep  4 09:51:00 AM -03 2025
+root@vlxsam04:~# curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/register-collector.sh | bash -s -- gruppen-it 2e07d1c7-f270-49a8-b2fc-7efc28522041
+
+🔧 REGISTRO COLLECTOR SAMUREYE
+==============================
+
+[09:51:34] 🔍 Parâmetros recebidos:
+   • Tenant Slug: gruppen-it
+   • Token: 2e07d1c7...28522041
+[09:51:34] 🔍 Verificando prerequisitos...
+[09:51:35] ✅ Prerequisitos verificados
+[09:51:35] 🔍 Coletando informações do sistema...
+[09:51:35]    • Hostname: vlxsam04
+[09:51:35]    • IP Address: 192.168.100.151
+[09:51:35] 🌐 Testando conectividade com API...
+[09:51:35] ✅ Conectividade OK
+[09:51:35] 🔧 Registrando collector...
+[09:51:35] 📤 Enviando registro para API...
+[09:51:35] 📥 Processando resposta da API...
+[09:51:35] 🎉 COLLECTOR REGISTRADO COM SUCESSO!
+
+[09:51:35] 📋 DETALHES DO REGISTRO:
+   • Nome do Collector: vlxsam04
+   • Tenant: Gruppen it
+   • Status: online
+   • Hostname: vlxsam04
+   • IP: 192.168.100.151
+
+[09:51:35] ✅ Collector está online e enviando telemetria
+
+[09:51:35] 🎯 REGISTRO CONCLUÍDO COM SUCESSO!
+
+📋 PRÓXIMOS PASSOS:
+   • O collector já está enviando telemetria automaticamente
+   • Verifique o status na interface de administração
+   • O collector aparecerá como 'ONLINE' na gestão de coletores
+
+[09:51:35] ✅ Script de registro finalizado
+root@vlxsam04:~# tail -f /var/log/samureye-collector/collector.log
+2025-09-04 09:50:59,605 - INFO - Registrando collector: {'name': '', 'hostname': 'vlxsam04', 'ipAddress': '', 'status': 'enrolling', 'description': 'Collector agent on-premise vlxsam04'}
+/usr/lib/python3/dist-packages/urllib3/connectionpool.py:1100: InsecureRequestWarning: Unverified HTTPS request is being made to host 'api.samureye.com.br'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+2025-09-04 09:50:59,652 - ERROR - Erro no registro: 401 - {"message":"Unauthorized"}
+2025-09-04 09:50:59,653 - ERROR - Falha no registro inicial
+2025-09-04 09:51:00 - INFO - === CORREÇÃO APLICADA: Sincronização Token ===
+2025-09-04 09:51:00 - INFO - Configuração limpa, pronto para novo registro
+2025-09-04 09:51:09,867 - ERROR - Erro ao carregar configuração: [Errno 13] Permission denied: '/etc/samureye-collector/.env'
+2025-09-04 09:51:20,108 - ERROR - Erro ao carregar configuração: [Errno 13] Permission denied: '/etc/samureye-collector/.env'
+2025-09-04 09:51:30,353 - ERROR - Erro ao carregar configuração: [Errno 13] Permission denied: '/etc/samureye-collector/.env'
+2025-09-04 09:51:40,627 - ERROR - Erro ao carregar configuração: [Errno 13] Permission denied: '/etc/samureye-collector/.env'

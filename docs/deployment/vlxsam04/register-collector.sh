@@ -220,6 +220,82 @@ if [ "$HTTP_STATUS" = "200" ]; then
     echo "   • IP: $IP_ADDRESS"
     echo ""
     
+    # ========================================================================
+    # SALVAR TOKEN NO ARQUIVO DE CONFIGURAÇÃO
+    # ========================================================================
+    
+    log "💾 Salvando token de autenticação..."
+    
+    # Extrair collector token da resposta
+    COLLECTOR_TOKEN=$(echo "$RESPONSE_BODY" | jq -r '.collector.token // ""')
+    
+    if [ -n "$COLLECTOR_TOKEN" ] && [ "$COLLECTOR_TOKEN" != "null" ]; then
+        CONFIG_FILE="/etc/samureye-collector/.env"
+        
+        if [ -f "$CONFIG_FILE" ]; then
+            # Fazer backup da configuração atual
+            cp "$CONFIG_FILE" "$CONFIG_FILE.backup.$(date +%Y%m%d_%H%M%S)"
+            
+            # Salvar collector token
+            if grep -q "^COLLECTOR_TOKEN=" "$CONFIG_FILE"; then
+                sed -i "s/^COLLECTOR_TOKEN=.*/COLLECTOR_TOKEN=$COLLECTOR_TOKEN/" "$CONFIG_FILE"
+            else
+                echo "COLLECTOR_TOKEN=$COLLECTOR_TOKEN" >> "$CONFIG_FILE"
+            fi
+            
+            # Salvar enrollment token também
+            if grep -q "^ENROLLMENT_TOKEN=" "$CONFIG_FILE"; then
+                sed -i "s/^ENROLLMENT_TOKEN=.*/ENROLLMENT_TOKEN=$ENROLLMENT_TOKEN/" "$CONFIG_FILE"
+            else
+                echo "ENROLLMENT_TOKEN=$ENROLLMENT_TOKEN" >> "$CONFIG_FILE"
+            fi
+            
+            # Verificar se foi salvo corretamente
+            SAVED_TOKEN=$(grep "^COLLECTOR_TOKEN=" "$CONFIG_FILE" | cut -d'=' -f2)
+            if [ "$SAVED_TOKEN" = "$COLLECTOR_TOKEN" ]; then
+                log "✅ Token salvo com sucesso no arquivo de configuração"
+                echo "   📁 Arquivo: $CONFIG_FILE"
+                echo "   🔑 Token: ${COLLECTOR_TOKEN:0:8}...${COLLECTOR_TOKEN: -8}"
+                
+                # Iniciar serviço collector se não estiver rodando
+                if ! systemctl is-active --quiet samureye-collector; then
+                    log "🚀 Iniciando serviço collector..."
+                    systemctl start samureye-collector
+                    
+                    # Aguardar serviço iniciar
+                    sleep 3
+                    
+                    if systemctl is-active --quiet samureye-collector; then
+                        log "✅ Serviço collector iniciado com sucesso"
+                    else
+                        warn "⚠️  Serviço collector não iniciou automaticamente"
+                        echo "   Execute manualmente: systemctl start samureye-collector"
+                    fi
+                else
+                    log "🔄 Reiniciando serviço collector para aplicar novo token..."
+                    systemctl restart samureye-collector
+                    sleep 3
+                    
+                    if systemctl is-active --quiet samureye-collector; then
+                        log "✅ Serviço collector reiniciado com sucesso"
+                    else
+                        warn "⚠️  Falha ao reiniciar serviço collector"
+                    fi
+                fi
+                
+            else
+                warn "⚠️  Token pode não ter sido salvo corretamente"
+                echo "   Verificar manualmente: $CONFIG_FILE"
+            fi
+        else
+            warn "⚠️  Arquivo de configuração não encontrado: $CONFIG_FILE"
+            echo "   Execute install-hard-reset.sh primeiro"
+        fi
+    else
+        warn "⚠️  Token não encontrado na resposta da API"
+        echo "   Registro reportado como sucesso mas token não recebido"
+    fi
+    
     log "✅ Collector está online e enviando telemetria"
     echo ""
     
