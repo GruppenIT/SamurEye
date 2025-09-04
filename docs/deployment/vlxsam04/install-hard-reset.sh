@@ -300,15 +300,35 @@ mkdir -p "$TOOLS_DIR"/{nmap,nuclei,masscan,gobuster,custom}
 # Definir permissões corretas (root:collector para config)
 chown -R "$COLLECTOR_USER:$COLLECTOR_USER" "$COLLECTOR_DIR"
 chown -R root:"$COLLECTOR_USER" "$CONFIG_DIR"
-chown -R root:"$COLLECTOR_USER" /var/log/samureye-collector
-chmod 750 "$COLLECTOR_DIR" "$CONFIG_DIR" /var/log/samureye-collector
+
+# CORREÇÃO INTEGRADA: Permissões de log para heartbeat.py
+log "🔧 Aplicando correção integrada de permissões de log..."
+chown -R "$COLLECTOR_USER:$COLLECTOR_USER" /var/log/samureye-collector
+chmod 755 /var/log/samureye-collector
+
+# Criar arquivo de log inicial com permissões corretas
+touch /var/log/samureye-collector/heartbeat.log
+chown "$COLLECTOR_USER:$COLLECTOR_USER" /var/log/samureye-collector/heartbeat.log
+chmod 644 /var/log/samureye-collector/heartbeat.log
+
+chmod 750 "$COLLECTOR_DIR" "$CONFIG_DIR"
 chmod 700 "$CERTS_DIR"
 
-# Teste de permissões de leitura
+# Teste de permissões crítico (config + log)
+log "🧪 Testando permissões críticas..."
 if ! sudo -u "$COLLECTOR_USER" test -r "$CONFIG_DIR" 2>/dev/null; then
     warn "⚠️  Ajustando permissões de emergência para $CONFIG_DIR"
     chown -R "$COLLECTOR_USER:$COLLECTOR_USER" "$CONFIG_DIR"
     chmod 755 "$CONFIG_DIR"
+fi
+
+if ! sudo -u "$COLLECTOR_USER" touch "/var/log/samureye-collector/test_write" 2>/dev/null; then
+    warn "⚠️  Ajustando permissões de emergência para logs"
+    chmod 777 /var/log/samureye-collector
+    chmod 666 /var/log/samureye-collector/heartbeat.log
+else
+    rm -f "/var/log/samureye-collector/test_write"
+    log "✅ Permissões de log: OK"
 fi
 
 log "✅ Estrutura de diretórios criada"

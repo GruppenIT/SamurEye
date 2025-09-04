@@ -1,0 +1,97 @@
+root@vlxsam04:~# curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/register-collector.sh | bash -s -- gruppen-it 97433dfa-498e-43c7-91f1-6e8d0a016b13
+
+🔧 REGISTRO COLLECTOR SAMUREYE
+==============================
+
+[10:42:58] 🔍 Parâmetros recebidos:
+   • Tenant Slug: gruppen-it
+   • Token: 97433dfa...0a016b13
+[10:42:58] 🔍 Verificando prerequisitos...
+[10:42:58] ✅ Prerequisitos verificados
+[10:42:58] 🔍 Coletando informações do sistema...
+[10:42:58]    • Hostname: vlxsam04
+[10:42:58]    • IP Address: 192.168.100.151
+[10:42:58] 🌐 Testando conectividade com API...
+[10:42:58] ✅ Conectividade OK
+[10:42:58] 🔧 Registrando collector...
+[10:42:58] 📤 Enviando registro para API...
+[10:42:58] 📥 Processando resposta da API...
+[10:42:58] 🎉 COLLECTOR REGISTRADO COM SUCESSO!
+
+[10:42:58] 📋 DETALHES DO REGISTRO:
+   • Nome do Collector: vlxsam04
+   • Tenant: Gruppen it
+   • Status: online
+   • Hostname: vlxsam04
+   • IP: 192.168.100.151
+
+[10:42:58] 💾 Salvando token de autenticação...
+[10:42:58] WARNING: ⚠️  Token não encontrado na resposta da API
+   Registro reportado como sucesso mas token não recebido
+[10:42:58] ✅ Collector está online e enviando telemetria
+
+[10:42:58] 🎯 REGISTRO CONCLUÍDO COM SUCESSO!
+
+📋 PRÓXIMOS PASSOS:
+   • O collector já está enviando telemetria automaticamente
+   • Verifique o status na interface de administração
+   • O collector aparecerá como 'ONLINE' na gestão de coletores
+
+[10:42:58] ✅ Script de registro finalizado
+root@vlxsam04:~# tail -f /var/log/samureye-collector/collector.log
+  File "/opt/samureye/collector/heartbeat.py", line 22, in <module>
+    logging.FileHandler('/var/log/samureye-collector/heartbeat.log'),
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/logging/__init__.py", line 1231, in __init__
+    StreamHandler.__init__(self, self._open())
+                                 ^^^^^^^^^^^^
+  File "/usr/lib/python3.12/logging/__init__.py", line 1263, in _open
+    return open_func(self.baseFilename, self.mode,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+PermissionError: [Errno 13] Permission denied: '/var/log/samureye-collector/heartbeat.log'
+Traceback (most recent call last):
+  File "/opt/samureye/collector/heartbeat.py", line 22, in <module>
+    logging.FileHandler('/var/log/samureye-collector/heartbeat.log'),
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/logging/__init__.py", line 1231, in __init__
+    StreamHandler.__init__(self, self._open())
+                                 ^^^^^^^^^^^^
+  File "/usr/lib/python3.12/logging/__init__.py", line 1263, in _open
+    return open_func(self.baseFilename, self.mode,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+PermissionError: [Errno 13] Permission denied: '/var/log/samureye-collector/heartbeat.log'
+^C
+root@vlxsam04:~# /opt/samureye/collector/scripts/check-status.sh
+🔍 DIAGNÓSTICO COLLECTOR vlxsam04
+================================
+📋 Sistema: vlxsam04 (192.168.100.151)
+
+🤖 Status do Serviço:
+● samureye-collector.service - SamurEye Collector Agent
+     Loaded: loaded (/etc/systemd/system/samureye-collector.service; enabled; preset: enabled)
+     Active: activating (auto-restart) (Result: exit-code) since Thu 2025-09-04 10:43:11 -03; 6s ago
+    Process: 286687 ExecStart=/usr/bin/python3 /opt/samureye/collector/heartbeat.py (code=exited, status=1/FAILURE)
+   Main PID: 286687 (code=exited, status=1/FAILURE)
+        CPU: 356ms
+
+📝 Logs Recentes (Heartbeat):
+❌ Log de heartbeat não encontrado
+
+🔗 Teste de Conectividade:
+✅ API acessível (porta 443)
+✅ DNS funcionando
+
+📊 Configuração:
+✅ Arquivo .env existe
+COLLECTOR_ID=vlxsam04
+COLLECTOR_NAME=
+HOSTNAME=vlxsam04
+IP_ADDRESS=
+COLLECTOR_TOKEN=
+❌ Token não encontrado
+
+🔍 Recomendações:
+• Verificar interface: https://app.samureye.com.br/admin/collectors
+• Monitorar logs: tail -f /var/log/samureye-collector/heartbeat.log
+• Reiniciar se necessário: systemctl restart samureye-collector
+root@vlxsam04:~#
