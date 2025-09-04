@@ -1,0 +1,65 @@
+root@vlxsam04:~# curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/register-collector.sh | bash -s -- gruppen-it 9dbf0763-a1b0-4611-8d9c-8de0427e21ce
+
+🔧 REGISTRO COLLECTOR SAMUREYE
+==============================
+
+[17:23:12] 🔍 Parâmetros recebidos:
+   • Tenant Slug: gruppen-it
+   • Token: 9dbf0763...427e21ce
+[17:23:12] 🔍 Verificando prerequisitos...
+[17:23:12] ✅ Prerequisitos verificados
+[17:23:12] 🔍 Coletando informações do sistema...
+[17:23:13]    • Hostname: vlxsam04
+[17:23:13]    • IP Address: 192.168.100.151
+[17:23:13] 🌐 Testando conectividade com API...
+[17:23:13] ✅ Conectividade OK
+[17:23:13] 🔧 Registrando collector...
+[17:23:13] 📤 Enviando registro para API...
+[17:23:13] 📥 Processando resposta da API...
+[17:23:13] 🎉 COLLECTOR REGISTRADO COM SUCESSO!
+
+[17:23:13] 📋 DETALHES DO REGISTRO:
+   • Nome do Collector: vlxsam04
+   • Tenant: Gruppen it
+   • Status: online
+   • Hostname: vlxsam04
+   • IP: 192.168.100.151
+
+[17:23:13] 💾 Salvando token de autenticação...
+[17:23:13] 🔍 Token encontrado: 2f8fb448...a16b2cc8
+[17:23:13] ✅ Token salvo com sucesso no arquivo de configuração
+   📁 Arquivo: /etc/samureye-collector/.env
+   🔑 Token: 2f8fb448...a16b2cc8
+[17:23:13] 🔄 Reiniciando serviço collector para aplicar novo token...
+[17:23:16] ✅ Serviço collector reiniciado com sucesso
+[17:23:16] ✅ Collector está online e enviando telemetria
+
+[17:23:16] 🎯 REGISTRO CONCLUÍDO COM SUCESSO!
+
+📋 PRÓXIMOS PASSOS:
+   • O collector já está enviando telemetria automaticamente
+   • Verifique o status na interface de administração
+   • O collector aparecerá como 'ONLINE' na gestão de coletores
+
+[17:23:16] ✅ Script de registro finalizado
+root@vlxsam04:~# tail -f /var/log/samureye-collector/collector.log
+2025-09-04 17:22:32,833 - INFO - Configuração carregada - ID: vlxsam04, Token: NÃO CONFIGURADO
+2025-09-04 17:22:32,833 - INFO - Iniciando heartbeat collector...
+2025-09-04 17:22:32,833 - WARNING - COLLECTOR_TOKEN não encontrado - collector precisa ser registrado
+2025-09-04 17:22:32,833 - INFO - Execute: curl -fsSL .../register-collector.sh | bash -s -- <tenant> <token>
+2025-09-04 17:22:32,833 - ERROR - Nenhum token disponível - aguardando registro manual
+2025-09-04 17:22:32,834 - INFO - Configuração carregada - ID: vlxsam04, Token: NÃO CONFIGURADO
+2025-09-04 17:23:13,256 - INFO - Configuração carregada - ID: vlxsam04, Token: 2f8fb448...a16b2cc8
+2025-09-04 17:23:13,256 - INFO - Iniciando heartbeat collector...
+2025-09-04 17:23:13,256 - INFO - Configuração carregada - ID: vlxsam04, Token: 2f8fb448...a16b2cc8
+2025-09-04 17:23:14,304 - WARNING - Token inválido ao buscar jornadas pendentes
+2025-09-04 17:23:44,304 - INFO - Configuração carregada - ID: vlxsam04, Token: 2f8fb448...a16b2cc8
+2025-09-04 17:23:45,320 - WARNING - Token inválido ao buscar jornadas pendentes
+2025-09-04 17:24:15,321 - INFO - Configuração carregada - ID: vlxsam04, Token: 2f8fb448...a16b2cc8
+2025-09-04 17:24:16,337 - WARNING - Token inválido ao buscar jornadas pendentes
+2025-09-04 17:24:46,338 - INFO - Configuração carregada - ID: vlxsam04, Token: 2f8fb448...a16b2cc8
+2025-09-04 17:24:47,353 - WARNING - Token inválido ao buscar jornadas pendentes
+2025-09-04 17:25:17,355 - INFO - Configuração carregada - ID: vlxsam04, Token: 2f8fb448...a16b2cc8
+2025-09-04 17:25:18,377 - WARNING - Token inválido ao buscar jornadas pendentes
+2025-09-04 17:25:48,377 - INFO - Configuração carregada - ID: vlxsam04, Token: 2f8fb448...a16b2cc8
+2025-09-04 17:25:49,391 - WARNING - Token inválido ao buscar jornadas pendentes

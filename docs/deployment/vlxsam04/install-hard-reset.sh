@@ -1300,7 +1300,7 @@ class CollectorHeartbeat:
             url = f"{self.api_base}/collector-api/journeys/pending"
             params = {
                 "collector_id": self.collector_id,
-                "token": self.enrollment_token or self.collector_token
+                "token": self.collector_token  # Usar apenas collector_token permanente
             }
             
             response = self.session.get(url, params=params, timeout=30)
@@ -1507,7 +1507,7 @@ class CollectorHeartbeat:
             
             data = {
                 "collector_id": self.collector_id,
-                "token": self.enrollment_token or self.collector_token,
+                "token": self.collector_token,  # Usar apenas collector_token permanente
                 "execution_id": execution_id,
                 "status": status,
                 "results": results,

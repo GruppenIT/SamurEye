@@ -1196,8 +1196,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Collector ID and token required" });
       }
 
-      // Verify collector token
-      const collector = await storage.getCollectorByEnrollmentToken(token as string);
+      // Verify collector token (allow expired tokens for registered collectors)
+      let collector = await storage.getCollectorByEnrollmentToken(token as string);
+      if (!collector) {
+        // For existing collectors, check token even if expired
+        const { db } = await import('./db');
+        const { collectors } = await import('@shared/schema');
+        const { eq } = await import('drizzle-orm');
+        
+        const [collectorIgnoreExpiry] = await db
+          .select()
+          .from(collectors)
+          .where(eq(collectors.enrollmentToken, token as string));
+        collector = collectorIgnoreExpiry;
+      }
       if (!collector || collector.id !== collector_id) {
         return res.status(401).json({ message: "Invalid collector or token" });
       }
@@ -1222,8 +1234,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Collector ID, token and execution ID required" });
       }
 
-      // Verify collector token
-      const collector = await storage.getCollectorByEnrollmentToken(token as string);
+      // Verify collector token (allow expired tokens for registered collectors)
+      let collector = await storage.getCollectorByEnrollmentToken(token as string);
+      if (!collector) {
+        // For existing collectors, check token even if expired
+        const { db } = await import('./db');
+        const { collectors } = await import('@shared/schema');
+        const { eq } = await import('drizzle-orm');
+        
+        const [collectorIgnoreExpiry] = await db
+          .select()
+          .from(collectors)
+          .where(eq(collectors.enrollmentToken, token as string));
+        collector = collectorIgnoreExpiry;
+      }
       if (!collector || collector.id !== collector_id) {
         return res.status(401).json({ message: "Invalid collector or token" });
       }
