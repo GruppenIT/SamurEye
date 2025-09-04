@@ -1,0 +1,40 @@
+root@vlxsam04:~# tail -f /var/log/samureye-collector/collector.log
+2025-09-04 18:45:02,995 - WARNING - COLLECTOR_TOKEN não encontrado - collector precisa ser registrado
+2025-09-04 18:45:02,995 - INFO - Execute: curl -fsSL .../register-collector.sh | bash -s -- <tenant> <token>
+2025-09-04 18:45:02,995 - ERROR - Nenhum token disponível - aguardando registro manual
+2025-09-04 18:45:02,995 - INFO - Configuração carregada - ID: vlxsam04, Token: NÃO CONFIGURADO
+2025-09-04 18:45:44,140 - INFO - Configuração carregada - ID: vlxsam04, Token: f2ff898f...cd692b78
+2025-09-04 18:45:44,140 - INFO - Iniciando heartbeat collector...
+2025-09-04 18:45:44,140 - INFO - Configuração carregada - ID: vlxsam04, Token: f2ff898f...cd692b78
+2025-09-04 18:45:45,185 - WARNING - Token inválido ao buscar jornadas pendentes
+2025-09-04 18:46:15,186 - INFO - Configuração carregada - ID: vlxsam04, Token: f2ff898f...cd692b78
+2025-09-04 18:46:16,204 - WARNING - Token inválido ao buscar jornadas pendentes
+2025-09-04 18:46:46,205 - INFO - Configuração carregada - ID: vlxsam04, Token: f2ff898f...cd692b78
+2025-09-04 18:46:47,221 - WARNING - Token inválido ao buscar jornadas pendentes
+^C
+root@vlxsam04:~# tail -f /var/log/samureye-collector/collector.log^C
+root@vlxsam04:~# curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/quick-test-api.sh | bash
+🧪 TESTE RÁPIDO API COLLECTOR
+==============================
+✅ Configurações carregadas:
+   • COLLECTOR_ID: vlxsam04
+   • COLLECTOR_TOKEN: f2ff898f...cd692b78
+
+🔍 Testando heartbeat...
+   • Heartbeat: 200 - {"message":"Heartbeat received","collector_id":"f2ff898f-706e-4756-98ad-3517cd692b78","status":"online","transitioned":false}
+
+🎯 Testando journeys/pending...
+   • Pending: 401 - {"message":"Invalid collector or token"}
+
+🔍 Testando se endpoint existe...
+   • Endpoint sem params: 401 - {"message":"Collector ID and token required"}
+
+📊 Verificando banco de dados...
+
+❌ PROBLEMA CONFIRMADO: Token rejeitado (401)
+💡 CAUSA PROVÁVEL: vlxsam02 não foi atualizado com as correções
+
+🔧 SOLUÇÃO:
+   ssh root@172.24.1.152
+   curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/vlxsam02/install-hard-reset.sh | bash
+root@vlxsam04:~#
