@@ -6,7 +6,13 @@ SamurEye is a cloud-based Breach & Attack Simulation (BAS) platform designed for
 ## User Preferences
 Preferred communication style: Simple, everyday language.
 
-## Recent Changes
+## Recent Changes  
+- **04/09/2025**: ✅ SISTEMA JORNADAS COMPLETO - agendamento avançado (on-demand/one-shot/recurring) integrado
+- **04/09/2025**: ✅ EXECUÇÃO DISTRIBUÍDA - collectors executam nmap/nuclei automaticamente via polling
+- **04/09/2025**: ✅ API ENDPOINTS EXPANDIDOS - /journeys/:id/schedule, executions, collector-api integrada
+- **04/09/2025**: ✅ SCHEMA POSTGRESQL EXPANDIDO - journey_executions + campos agendamento + vlxsam03 integrado
+- **04/09/2025**: ✅ VLXSAM04 EXECUÇÃO JORNADAS - heartbeat expandido com sistema completo de execução
+- **04/09/2025**: ✅ DOCUMENTAÇÃO ATUALIZADA - READMEs vlxsam02/vlxsam03/vlxsam04 com funcionalidades jornadas
 - **02/09/2025**: ✅ PROBLEMA DUPLICAÇÃO DIAGNOSTICADO - scripts debug + fix criados para vlxsam04
 - **02/09/2025**: ✅ CORREÇÕES INTEGRADAS NO install-hard-reset.sh - heartbeat robusto + anti-duplicação + curl commands
 - **03/09/2025**: ✅ SCRIPTS DIAGNÓSTICO CRIADOS - diagnose-service-failed.sh + fix-service-failed.sh para vlxsam04

@@ -2268,6 +2268,282 @@ EOF
 node /tmp/fix_response.js "$WORKING_DIR/server/routes.ts"
 rm /tmp/fix_response.js
 
+# Expandir sistema de jornadas com agendamento avançado
+log "🚀 Expandindo sistema de jornadas com agendamento avançado..."
+cat > /tmp/expand_journey_scheduling.js << 'EOF'
+const fs = require('fs');
+
+const routesPath = process.argv[2];
+let content = fs.readFileSync(routesPath, 'utf8');
+
+// Adicionar novos endpoints de agendamento após o endpoint de start
+const startJourneyPattern = /(app\.post\('\/api\/journeys\/:id\/start'[\s\S]*?\}\);)/;
+
+if (content.match(startJourneyPattern) && !content.includes('/api/journeys/:id/schedule')) {
+    const journeySchedulingEndpoints = `
+
+  // Update journey scheduling
+  app.put('/api/journeys/:id/schedule', isLocalUserAuthenticated, requireLocalUserTenant, async (req: any, res) => {
+    try {
+      const journey = await storage.getJourney(req.params.id);
+      if (!journey || journey.tenantId !== req.tenant.id) {
+        return res.status(404).json({ message: "Journey not found" });
+      }
+
+      const { scheduleType, scheduledAt, scheduleConfig } = req.body;
+      await storage.updateJourneySchedule(
+        journey.id, 
+        scheduleType, 
+        scheduledAt ? new Date(scheduledAt) : undefined, 
+        scheduleConfig
+      );
+
+      // Log activity
+      await storage.createActivity({
+        tenantId: req.tenant.id,
+        userId: req.localUser.id,
+        action: 'schedule_update',
+        resource: 'journey',
+        resourceId: journey.id,
+        metadata: { journeyName: journey.name, scheduleType }
+      });
+
+      res.json({ message: "Journey schedule updated" });
+    } catch (error) {
+      console.error("Error updating journey schedule:", error);
+      res.status(500).json({ message: "Failed to update journey schedule" });
+    }
+  });
+
+  // Get journey executions
+  app.get('/api/journeys/:id/executions', isLocalUserAuthenticated, requireLocalUserTenant, async (req: any, res) => {
+    try {
+      const journey = await storage.getJourney(req.params.id);
+      if (!journey || journey.tenantId !== req.tenant.id) {
+        return res.status(404).json({ message: "Journey not found" });
+      }
+
+      const executions = await storage.getJourneyExecutions(journey.id);
+      res.json(executions);
+    } catch (error) {
+      console.error("Error fetching journey executions:", error);
+      res.status(500).json({ message: "Failed to fetch journey executions" });
+    }
+  });
+
+  // Collector Journey Execution API (for collector to pick up jobs)
+  app.get('/collector-api/journeys/pending', async (req, res) => {
+    try {
+      const { collector_id, token } = req.query;
+      
+      if (!token || !collector_id) {
+        return res.status(401).json({ message: "Collector ID and token required" });
+      }
+
+      // Verify collector token
+      const collector = await storage.getCollectorByEnrollmentToken(token as string);
+      if (!collector || collector.id !== collector_id) {
+        return res.status(401).json({ message: "Invalid collector or token" });
+      }
+
+      // Get pending executions for this collector
+      const pendingExecutions = await storage.getExecutionsByStatus('queued');
+      const collectorExecutions = pendingExecutions.filter(e => e.collectorId === collector.id);
+      
+      res.json(collectorExecutions);
+    } catch (error) {
+      console.error("Error fetching pending executions for collector:", error);
+      res.status(500).json({ message: "Failed to fetch pending executions" });
+    }
+  });
+
+  // Collector Journey Result Submission
+  app.post('/collector-api/journeys/results', async (req, res) => {
+    try {
+      const { collector_id, token, execution_id, status, results, error_message } = req.body;
+      
+      if (!token || !collector_id || !execution_id) {
+        return res.status(401).json({ message: "Collector ID, token and execution ID required" });
+      }
+
+      // Verify collector token
+      const collector = await storage.getCollectorByEnrollmentToken(token as string);
+      if (!collector || collector.id !== collector_id) {
+        return res.status(401).json({ message: "Invalid collector or token" });
+      }
+
+      // Update execution status
+      await storage.updateJourneyExecutionStatus(
+        execution_id, 
+        status, 
+        results, 
+        error_message
+      );
+
+      console.log(\`Collector \${collector.name} submitted results for execution \${execution_id} - Status: \${status}\`);
+      
+      res.json({ message: "Results received successfully" });
+    } catch (error) {
+      console.error("Error processing collector results:", error);
+      res.status(500).json({ message: "Failed to process results" });
+    }
+  });`;
+
+    content = content.replace(startJourneyPattern, '$1' + journeySchedulingEndpoints);
+    fs.writeFileSync(routesPath, content, 'utf8');
+    console.log('✅ Endpoints de agendamento de jornadas adicionados');
+} else {
+    console.log('✅ Endpoints de agendamento já presentes ou padrão não encontrado');
+}
+EOF
+
+node /tmp/expand_journey_scheduling.js "$WORKING_DIR/server/routes.ts"
+rm /tmp/expand_journey_scheduling.js
+
+# Expandir storage com métodos de agendamento de jornadas
+log "🔧 Expandindo storage com métodos de agendamento..."
+cat > /tmp/expand_journey_storage.js << 'EOF'
+const fs = require('fs');
+
+const storagePath = process.argv[2];
+let content = fs.readFileSync(storagePath, 'utf8');
+
+// Adicionar novos métodos na interface IStorage
+const storageInterfacePattern = /(\/\/ Journey operations[\s\S]*?updateJourneyStatus\([^;]*\): Promise<void>;)/;
+
+if (content.match(storageInterfacePattern) && !content.includes('updateJourneySchedule')) {
+    const newJourneyMethods = `$1
+  updateJourneySchedule(id: string, scheduleType: string, scheduledAt?: Date, scheduleConfig?: any): Promise<void>;
+  getScheduledJourneys(): Promise<Journey[]>; // For scheduler
+  
+  // Journey Execution operations
+  createJourneyExecution(execution: InsertJourneyExecution): Promise<JourneyExecution>;
+  getJourneyExecutions(journeyId: string): Promise<JourneyExecution[]>;
+  updateJourneyExecutionStatus(id: string, status: string, results?: any, errorMessage?: string): Promise<void>;
+  getExecutionsByStatus(status: string): Promise<JourneyExecution[]>;`;
+
+    content = content.replace(storageInterfacePattern, newJourneyMethods);
+}
+
+// Adicionar novos imports se não existirem
+if (!content.includes('type JourneyExecution')) {
+    const importPattern = /(import \{[\s\S]*?type InsertJourney,)/;
+    if (content.match(importPattern)) {
+        content = content.replace(importPattern, '$1\n  journeyExecutions,\n  type JourneyExecution,\n  type InsertJourneyExecution,');
+    }
+}
+
+// Adicionar 'or' ao import do drizzle-orm se não existir
+if (!content.includes(', or') && content.includes('from "drizzle-orm"')) {
+    content = content.replace(
+        /import \{ ([^}]*) \} from "drizzle-orm"/,
+        'import { $1, or } from "drizzle-orm"'
+    );
+}
+
+// Adicionar implementações dos novos métodos após updateJourneyStatus
+const updateJourneyStatusPattern = /(async updateJourneyStatus\([\s\S]*?\n  \})/;
+
+if (content.match(updateJourneyStatusPattern) && !content.includes('updateJourneySchedule')) {
+    const newImplementations = `$1
+
+  async updateJourneySchedule(id: string, scheduleType: string, scheduledAt?: Date, scheduleConfig?: any): Promise<void> {
+    const updates: any = {
+      scheduleType: scheduleType as any,
+      scheduledAt,
+      scheduleConfig,
+      updatedAt: new Date()
+    };
+
+    await db.update(journeys).set(updates).where(eq(journeys.id, id));
+  }
+
+  async getScheduledJourneys(): Promise<Journey[]> {
+    const now = new Date();
+    return await db
+      .select()
+      .from(journeys)
+      .where(
+        and(
+          eq(journeys.isActive, true),
+          or(
+            and(
+              eq(journeys.scheduleType, 'one_shot'),
+              eq(journeys.status, 'pending'),
+              isNotNull(journeys.scheduledAt)
+            ),
+            and(
+              eq(journeys.scheduleType, 'recurring'),
+              eq(journeys.isActive, true),
+              isNotNull(journeys.nextExecutionAt)
+            )
+          )
+        )
+      );
+  }
+
+  // Journey Execution operations
+  async createJourneyExecution(execution: InsertJourneyExecution): Promise<JourneyExecution> {
+    const [newExecution] = await db.insert(journeyExecutions).values(execution).returning();
+    return newExecution;
+  }
+
+  async getJourneyExecutions(journeyId: string): Promise<JourneyExecution[]> {
+    return await db
+      .select()
+      .from(journeyExecutions)
+      .where(eq(journeyExecutions.journeyId, journeyId))
+      .orderBy(desc(journeyExecutions.createdAt));
+  }
+
+  async updateJourneyExecutionStatus(id: string, status: string, results?: any, errorMessage?: string): Promise<void> {
+    const updates: any = { 
+      status: status as any, 
+      updatedAt: new Date() 
+    };
+
+    if (status === 'running') {
+      updates.startedAt = new Date();
+    } else if (status === 'completed' || status === 'failed') {
+      updates.completedAt = new Date();
+      
+      // Calculate duration if we have both start and completion times
+      const [execution] = await db.select().from(journeyExecutions).where(eq(journeyExecutions.id, id));
+      if (execution && execution.startedAt) {
+        updates.duration = Math.floor((new Date().getTime() - execution.startedAt.getTime()) / 1000);
+      }
+    }
+
+    if (results) {
+      updates.results = results;
+    }
+
+    if (errorMessage) {
+      updates.errorMessage = errorMessage;
+    }
+
+    await db.update(journeyExecutions).set(updates).where(eq(journeyExecutions.id, id));
+  }
+
+  async getExecutionsByStatus(status: string): Promise<JourneyExecution[]> {
+    return await db
+      .select()
+      .from(journeyExecutions)
+      .where(eq(journeyExecutions.status, status as any))
+      .orderBy(desc(journeyExecutions.scheduledFor));
+  }`;
+
+    content = content.replace(updateJourneyStatusPattern, newImplementations);
+    fs.writeFileSync(storagePath, content, 'utf8');
+    console.log('✅ Métodos de agendamento de jornadas adicionados ao storage');
+} else {
+    console.log('✅ Métodos de agendamento já presentes ou padrão não encontrado');
+}
+EOF
+
+node /tmp/expand_journey_storage.js "$WORKING_DIR/server/storage.ts"
+rm /tmp/expand_journey_storage.js
+
 # Reiniciar aplicação para aplicar correções
 log "🔄 Reiniciando aplicação para aplicar correções..."
 systemctl restart "$SERVICE_NAME"

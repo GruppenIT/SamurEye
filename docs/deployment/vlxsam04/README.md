@@ -72,6 +72,34 @@ curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/
 - **Python 3.11**: Scanner engine e automação
 - **Node.js 20**: Ferramentas auxiliares e integração
 
+## 🚀 Sistema de Execução de Jornadas
+
+### Funcionalidades de Execução
+
+**Polling Automático:**
+- Verifica periodicamente por jornadas pendentes no servidor
+- Execução automática baseada no agendamento
+- Relatório automático de resultados
+
+**Ferramentas Integradas:**
+- **Nmap**: Scanning avançado de rede e portas
+- **Nuclei**: Detecção de vulnerabilidades
+- **Masscan**: Scanning de alta velocidade
+- **Gobuster**: Brute-force de diretórios
+
+**Capacidades Técnicas:**
+- Timeouts configuráveis (15min nmap, 20min nuclei)
+- Parse automático de resultados JSON
+- Logging detalhado de execuções
+- Retry automático em falhas de comunicação
+
+### API de Execução
+
+O collector se comunica com o servidor via HTTPS:
+- **Polling**: `GET /collector-api/journeys/pending`
+- **Resultados**: `POST /collector-api/journeys/results`
+- **Heartbeat**: `POST /collector-api/heartbeat`
+
 ## 🤖 SamurEye Collector Agent
 
 ### Serviço Principal

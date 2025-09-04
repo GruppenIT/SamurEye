@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Play, Globe, Users, Shield, Target, Network, Server } from 'lucide-react';
+import { Play, Globe, Users, Shield, Target, Network, Server, Clock, Calendar, Repeat } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -24,6 +24,9 @@ const baseJourneySchema = z.object({
   type: z.enum(['attack_surface', 'ad_hygiene', 'edr_testing']),
   collectorId: z.string().optional(),
   config: z.record(z.any()),
+  scheduleType: z.enum(['on_demand', 'one_shot', 'recurring']).default('on_demand'),
+  scheduledAt: z.date().optional(),
+  scheduleConfig: z.record(z.any()).optional(),
 });
 
 interface JourneyFormProps {
@@ -53,6 +56,9 @@ export function JourneyForm({ isOpen, onClose, journey }: JourneyFormProps) {
       type: journey?.type || 'attack_surface',
       collectorId: journey?.collectorId || '',
       config: journey?.config || {},
+      scheduleType: journey?.scheduleType || 'on_demand',
+      scheduledAt: journey?.scheduledAt ? new Date(journey.scheduledAt) : undefined,
+      scheduleConfig: journey?.scheduleConfig || {},
     },
   });
 
@@ -147,6 +153,7 @@ export function JourneyForm({ isOpen, onClose, journey }: JourneyFormProps) {
   };
 
   const watchedType = form.watch('type');
+  const watchedScheduleType = form.watch('scheduleType');
 
   const renderAttackSurfaceConfig = () => (
     <div className="space-y-4">
@@ -364,6 +371,198 @@ export function JourneyForm({ isOpen, onClose, journey }: JourneyFormProps) {
     </div>
   );
 
+  const renderSchedulingConfig = () => (
+    <div className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {[
+          {
+            id: 'on_demand',
+            name: 'Sob Demanda',
+            icon: Play,
+            description: 'Executa imediatamente quando solicitado',
+            color: 'text-blue-500',
+            bgColor: 'bg-blue-500/20'
+          },
+          {
+            id: 'one_shot',
+            name: 'Agendado Único',
+            icon: Clock,
+            description: 'Executa uma vez em data/hora específica',
+            color: 'text-orange-500',
+            bgColor: 'bg-orange-500/20'
+          },
+          {
+            id: 'recurring',
+            name: 'Recorrente',
+            icon: Repeat,
+            description: 'Executa automaticamente em intervalos',
+            color: 'text-green-500',
+            bgColor: 'bg-green-500/20'
+          }
+        ].map((schedule) => {
+          const IconComponent = schedule.icon;
+          const isSelected = watchedScheduleType === schedule.id;
+          
+          return (
+            <Card 
+              key={schedule.id}
+              className={`cursor-pointer transition-all ${
+                isSelected 
+                  ? 'ring-2 ring-accent bg-accent/10' 
+                  : 'hover:bg-secondary/80'
+              }`}
+              onClick={() => form.setValue('scheduleType', schedule.id as any)}
+              data-testid={`schedule-type-${schedule.id}`}
+            >
+              <CardContent className="p-4">
+                <div className={`w-10 h-10 rounded-lg flex items-center justify-center mb-3 ${schedule.bgColor}`}>
+                  <IconComponent className={schedule.color} size={20} />
+                </div>
+                <h4 className="font-semibold text-white mb-2">{schedule.name}</h4>
+                <p className="text-xs text-muted-foreground">{schedule.description}</p>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+
+      {/* One-shot scheduling options */}
+      {watchedScheduleType === 'one_shot' && (
+        <div className="grid grid-cols-2 gap-4 p-4 bg-card rounded-lg">
+          <div>
+            <Label>Data de Execução</Label>
+            <Input 
+              type="date"
+              min={new Date().toISOString().split('T')[0]}
+              value={form.watch('scheduledAt') ? 
+                form.watch('scheduledAt')?.toISOString().split('T')[0] : ''}
+              onChange={(e) => {
+                if (e.target.value) {
+                  const currentTime = form.watch('scheduledAt') || new Date();
+                  const newDate = new Date(e.target.value);
+                  newDate.setHours(currentTime.getHours());
+                  newDate.setMinutes(currentTime.getMinutes());
+                  form.setValue('scheduledAt', newDate);
+                }
+              }}
+              data-testid="scheduled-date-input"
+            />
+          </div>
+          <div>
+            <Label>Hora de Execução</Label>
+            <Input 
+              type="time"
+              value={form.watch('scheduledAt') ? 
+                form.watch('scheduledAt')?.toTimeString().slice(0, 5) : ''}
+              onChange={(e) => {
+                if (e.target.value) {
+                  const currentDate = form.watch('scheduledAt') || new Date();
+                  const [hours, minutes] = e.target.value.split(':');
+                  const newDateTime = new Date(currentDate);
+                  newDateTime.setHours(parseInt(hours));
+                  newDateTime.setMinutes(parseInt(minutes));
+                  form.setValue('scheduledAt', newDateTime);
+                }
+              }}
+              data-testid="scheduled-time-input"
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Recurring scheduling options */}
+      {watchedScheduleType === 'recurring' && (
+        <div className="space-y-4 p-4 bg-card rounded-lg">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label>Frequência</Label>
+              <Select 
+                value={form.watch('scheduleConfig.frequency')} 
+                onValueChange={(value) => form.setValue('scheduleConfig.frequency', value)}
+                data-testid="recurring-frequency-select"
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione a frequência" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="daily">Diariamente</SelectItem>
+                  <SelectItem value="weekly">Semanalmente</SelectItem>
+                  <SelectItem value="monthly">Mensalmente</SelectItem>
+                  <SelectItem value="custom">Personalizado (cron)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Hora de Execução</Label>
+              <Input 
+                type="time"
+                value={form.watch('scheduleConfig.time') || ''}
+                onChange={(e) => form.setValue('scheduleConfig.time', e.target.value)}
+                data-testid="recurring-time-input"
+              />
+            </div>
+          </div>
+
+          {form.watch('scheduleConfig.frequency') === 'weekly' && (
+            <div>
+              <Label>Dias da Semana</Label>
+              <div className="grid grid-cols-7 gap-2 mt-2">
+                {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map((day, index) => (
+                  <div key={day} className="text-center">
+                    <Checkbox 
+                      id={`day-${index}`}
+                      checked={form.watch('scheduleConfig.weekDays')?.includes(index) || false}
+                      onCheckedChange={(checked) => {
+                        const currentDays = form.watch('scheduleConfig.weekDays') || [];
+                        if (checked) {
+                          form.setValue('scheduleConfig.weekDays', [...currentDays, index]);
+                        } else {
+                          form.setValue('scheduleConfig.weekDays', currentDays.filter((d: number) => d !== index));
+                        }
+                      }}
+                      data-testid={`weekday-${index}`}
+                    />
+                    <Label htmlFor={`day-${index}`} className="text-xs block mt-1">{day}</Label>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {form.watch('scheduleConfig.frequency') === 'monthly' && (
+            <div>
+              <Label>Dia do Mês</Label>
+              <Input 
+                type="number"
+                min="1"
+                max="31"
+                placeholder="1-31"
+                value={form.watch('scheduleConfig.dayOfMonth') || ''}
+                onChange={(e) => form.setValue('scheduleConfig.dayOfMonth', parseInt(e.target.value))}
+                data-testid="monthly-day-input"
+              />
+            </div>
+          )}
+
+          {form.watch('scheduleConfig.frequency') === 'custom' && (
+            <div>
+              <Label>Expressão Cron</Label>
+              <Input 
+                placeholder="0 9 * * 1-5 (segunda a sexta às 9h)"
+                value={form.watch('scheduleConfig.cronExpression') || ''}
+                onChange={(e) => form.setValue('scheduleConfig.cronExpression', e.target.value)}
+                data-testid="cron-expression-input"
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Formato: minuto hora dia mês dia-da-semana
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+
   const renderConfigForType = (type: string) => {
     switch (type) {
       case 'attack_surface':
@@ -459,6 +658,16 @@ export function JourneyForm({ isOpen, onClose, journey }: JourneyFormProps) {
                     </FormItem>
                   )}
                 />
+              </CardContent>
+            </Card>
+
+            {/* Scheduling Configuration */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Agendamento</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {renderSchedulingConfig()}
               </CardContent>
             </Card>
 

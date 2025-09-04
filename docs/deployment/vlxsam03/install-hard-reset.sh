@@ -812,6 +812,100 @@ CREATE TABLE IF NOT EXISTS collectors (
     updatedAt TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Criar tabelas de jornadas de segurança
+CREATE TABLE IF NOT EXISTS journeys (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    tenantId UUID REFERENCES tenants(id) ON DELETE CASCADE,
+    name VARCHAR(255) NOT NULL,
+    type VARCHAR(50) NOT NULL DEFAULT 'attack_surface',
+    status VARCHAR(50) NOT NULL DEFAULT 'pending',
+    config JSONB NOT NULL DEFAULT '{}',
+    results JSONB DEFAULT '{}',
+    collectorId UUID REFERENCES collectors(id),
+    scheduleType VARCHAR(50) NOT NULL DEFAULT 'on_demand',
+    scheduledAt TIMESTAMP WITH TIME ZONE,
+    scheduleConfig JSONB DEFAULT '{}',
+    isActive BOOLEAN DEFAULT true,
+    nextExecutionAt TIMESTAMP WITH TIME ZONE,
+    lastExecutionAt TIMESTAMP WITH TIME ZONE,
+    executionCount INTEGER DEFAULT 0,
+    createdBy UUID REFERENCES users(id),
+    startedAt TIMESTAMP WITH TIME ZONE,
+    completedAt TIMESTAMP WITH TIME ZONE,
+    createdAt TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updatedAt TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS journey_executions (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    journeyId UUID REFERENCES journeys(id) ON DELETE CASCADE,
+    status VARCHAR(50) NOT NULL DEFAULT 'queued',
+    executionNumber INTEGER NOT NULL,
+    scheduledFor TIMESTAMP WITH TIME ZONE NOT NULL,
+    startedAt TIMESTAMP WITH TIME ZONE,
+    completedAt TIMESTAMP WITH TIME ZONE,
+    duration INTEGER,
+    results JSONB DEFAULT '{}',
+    errorMessage TEXT,
+    collectorId UUID REFERENCES collectors(id),
+    metadata JSONB DEFAULT '{}',
+    createdAt TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updatedAt TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Criar tabelas de suporte para jornadas
+CREATE TABLE IF NOT EXISTS credentials (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    tenantId UUID REFERENCES tenants(id) ON DELETE CASCADE,
+    name VARCHAR(255) NOT NULL,
+    type VARCHAR(50) NOT NULL,
+    description TEXT,
+    credentialData JSONB NOT NULL DEFAULT '{}',
+    isActive BOOLEAN DEFAULT true,
+    createdBy UUID REFERENCES users(id),
+    createdAt TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updatedAt TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS threat_intelligence (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    tenantId UUID REFERENCES tenants(id) ON DELETE CASCADE,
+    type VARCHAR(100) NOT NULL,
+    source VARCHAR(255) NOT NULL,
+    severity VARCHAR(50) NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    data JSONB DEFAULT '{}',
+    score INTEGER,
+    createdAt TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updatedAt TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS activities (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    tenantId UUID REFERENCES tenants(id) ON DELETE CASCADE,
+    userId UUID REFERENCES users(id) NOT NULL,
+    action VARCHAR(100) NOT NULL,
+    resource VARCHAR(100) NOT NULL,
+    resourceId UUID,
+    metadata JSONB DEFAULT '{}',
+    ipAddress INET,
+    userAgent TEXT,
+    timestamp TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Criar índices para melhor performance
+CREATE INDEX IF NOT EXISTS idx_journeys_tenant ON journeys(tenantId);
+CREATE INDEX IF NOT EXISTS idx_journeys_collector ON journeys(collectorId);
+CREATE INDEX IF NOT EXISTS idx_journeys_schedule_type ON journeys(scheduleType);
+CREATE INDEX IF NOT EXISTS idx_journeys_next_execution ON journeys(nextExecutionAt);
+CREATE INDEX IF NOT EXISTS idx_journey_executions_journey ON journey_executions(journeyId);
+CREATE INDEX IF NOT EXISTS idx_journey_executions_status ON journey_executions(status);
+CREATE INDEX IF NOT EXISTS idx_journey_executions_scheduled ON journey_executions(scheduledFor);
+CREATE INDEX IF NOT EXISTS idx_collectors_status ON collectors(status);
+CREATE INDEX IF NOT EXISTS idx_activities_timestamp ON activities(timestamp);
+CREATE INDEX IF NOT EXISTS idx_threat_intelligence_severity ON threat_intelligence(severity);
+
 -- Conceder privilégios
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO samureye_user;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO samureye_user;
@@ -823,6 +917,7 @@ SELECT 'Tabela criada: ' || tablename FROM pg_tables WHERE schemaname = 'public'
 TABLES_EOF
 
 log "✅ Tabelas essenciais criadas no PostgreSQL"
+log "✅ Schema completo de jornadas com agendamento criado"
 log "ℹ️  IMPORTANTE: Execute também o hard-reset no vlxsam02 para sincronizar schema completo"
 
 # ============================================================================

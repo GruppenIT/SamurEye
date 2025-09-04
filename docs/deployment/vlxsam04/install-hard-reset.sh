@@ -1250,8 +1250,8 @@ class CollectorHeartbeat:
                 "status": "online",
                 "timestamp": time.strftime("%Y-%m-%dT%H:%M:%S.000Z", time.gmtime()),
                 "telemetry": telemetry,
-                "capabilities": ["nmap", "nuclei", "masscan"],
-                "version": "1.0.0"
+                "capabilities": ["nmap", "nuclei", "masscan", "journey_execution"],
+                "version": "1.0.1"
             }
             
             # CORREÇÃO CRÍTICA: Não usar enrollment_token para heartbeat
@@ -1290,6 +1290,260 @@ class CollectorHeartbeat:
         except Exception as e:
             logger.error(f"Erro ao enviar heartbeat: {e}")
             return False
+
+    def get_pending_journeys(self):
+        """Busca jornadas pendentes para este collector"""
+        try:
+            if not self.collector_token or not self.collector_id:
+                return []
+
+            url = f"{self.api_base}/collector-api/journeys/pending"
+            params = {
+                "collector_id": self.collector_id,
+                "token": self.enrollment_token or self.collector_token
+            }
+            
+            response = self.session.get(url, params=params, timeout=30)
+            
+            if response.status_code == 200:
+                journeys = response.json()
+                logger.debug(f"Encontradas {len(journeys)} jornadas pendentes")
+                return journeys
+            elif response.status_code == 401:
+                logger.warning("Token inválido ao buscar jornadas pendentes")
+                return []
+            else:
+                logger.warning(f"Erro ao buscar jornadas: {response.status_code}")
+                return []
+                
+        except Exception as e:
+            logger.error(f"Erro ao buscar jornadas pendentes: {e}")
+            return []
+
+    def execute_nmap_scan(self, target, options=None):
+        """Executa scan nmap no target especificado"""
+        try:
+            # Verificar se nmap está disponível
+            nmap_path = "/usr/bin/nmap"
+            if not os.path.exists(nmap_path):
+                # Tentar encontrar nmap no PATH
+                import shutil
+                nmap_path = shutil.which("nmap")
+                if not nmap_path:
+                    return {"error": "Nmap não encontrado no sistema"}
+
+            # Construir comando nmap baseado nas opções
+            cmd = [nmap_path]
+            
+            # Opções padrão
+            default_options = ["-sS", "-O", "-sV", "--version-light", "-T4"]
+            
+            if options and isinstance(options, dict):
+                # Personalizar scan baseado nas opções
+                if options.get("service_scan"):
+                    cmd.extend(["-sV"])
+                if options.get("os_detection"):
+                    cmd.extend(["-O"])
+                if options.get("script_scan"):
+                    cmd.extend(["--script=default"])
+                if options.get("port_range"):
+                    cmd.extend(["-p", options["port_range"]])
+                else:
+                    cmd.extend(["-p", "1-1000"])  # Top 1000 ports por padrão
+            else:
+                cmd.extend(default_options)
+                cmd.extend(["-p", "1-1000"])
+
+            cmd.append(target)
+            
+            logger.info(f"Executando nmap scan: {' '.join(cmd)}")
+            
+            # Executar comando com timeout
+            import subprocess
+            result = subprocess.run(
+                cmd, 
+                capture_output=True, 
+                text=True, 
+                timeout=900,  # 15 minutos timeout
+                cwd="/tmp"
+            )
+            
+            return {
+                "tool": "nmap",
+                "target": target,
+                "command": ' '.join(cmd),
+                "exit_code": result.returncode,
+                "stdout": result.stdout,
+                "stderr": result.stderr,
+                "success": result.returncode == 0
+            }
+            
+        except subprocess.TimeoutExpired:
+            logger.error(f"Nmap scan timeout para {target}")
+            return {"error": f"Nmap scan timeout para {target}"}
+        except Exception as e:
+            logger.error(f"Erro ao executar nmap scan: {e}")
+            return {"error": str(e)}
+
+    def execute_nuclei_scan(self, target, options=None):
+        """Executa scan nuclei no target especificado"""
+        try:
+            # Verificar se nuclei está disponível
+            nuclei_path = "/usr/local/bin/nuclei"
+            if not os.path.exists(nuclei_path):
+                import shutil
+                nuclei_path = shutil.which("nuclei")
+                if not nuclei_path:
+                    return {"error": "Nuclei não encontrado no sistema"}
+
+            cmd = [nuclei_path, "-u", target]
+            
+            # Opções padrão
+            cmd.extend(["-t", "/opt/nuclei-templates/", "-json", "-silent"])
+            
+            if options and isinstance(options, dict):
+                if options.get("severity"):
+                    cmd.extend(["-severity", options["severity"]])
+                if options.get("tags"):
+                    cmd.extend(["-tags", options["tags"]])
+                if options.get("exclude_tags"):
+                    cmd.extend(["-exclude-tags", options["exclude_tags"]])
+            
+            logger.info(f"Executando nuclei scan: {' '.join(cmd)}")
+            
+            import subprocess
+            result = subprocess.run(
+                cmd,
+                capture_output=True,
+                text=True,
+                timeout=1200,  # 20 minutos timeout
+                cwd="/tmp"
+            )
+            
+            # Parse JSON output
+            findings = []
+            if result.stdout:
+                for line in result.stdout.strip().split('\\n'):
+                    if line.strip():
+                        try:
+                            import json
+                            finding = json.loads(line)
+                            findings.append(finding)
+                        except json.JSONDecodeError:
+                            continue
+            
+            return {
+                "tool": "nuclei",
+                "target": target,
+                "command": ' '.join(cmd),
+                "exit_code": result.returncode,
+                "findings": findings,
+                "stderr": result.stderr,
+                "success": result.returncode == 0
+            }
+            
+        except subprocess.TimeoutExpired:
+            logger.error(f"Nuclei scan timeout para {target}")
+            return {"error": f"Nuclei scan timeout para {target}"}
+        except Exception as e:
+            logger.error(f"Erro ao executar nuclei scan: {e}")
+            return {"error": str(e)}
+
+    def execute_journey(self, journey_execution):
+        """Executa uma jornada de segurança"""
+        try:
+            execution_id = journey_execution.get("id")
+            journey_config = journey_execution.get("config", {})
+            target = journey_config.get("target")
+            scan_types = journey_config.get("scanTypes", [])
+            
+            if not target:
+                return {"error": "Target não especificado na jornada"}
+            
+            logger.info(f"Executando jornada {execution_id} para target {target}")
+            
+            results = {
+                "execution_id": execution_id,
+                "target": target,
+                "start_time": time.strftime("%Y-%m-%dT%H:%M:%S.000Z", time.gmtime()),
+                "scans": {}
+            }
+            
+            # Executar scans baseado na configuração
+            for scan_type in scan_types:
+                if scan_type == "nmap":
+                    nmap_options = journey_config.get("nmapOptions")
+                    results["scans"]["nmap"] = self.execute_nmap_scan(target, nmap_options)
+                elif scan_type == "nuclei":
+                    nuclei_options = journey_config.get("nucleiOptions")
+                    results["scans"]["nuclei"] = self.execute_nuclei_scan(target, nuclei_options)
+            
+            results["end_time"] = time.strftime("%Y-%m-%dT%H:%M:%S.000Z", time.gmtime())
+            results["success"] = True
+            
+            logger.info(f"Jornada {execution_id} concluída com sucesso")
+            return results
+            
+        except Exception as e:
+            logger.error(f"Erro ao executar jornada: {e}")
+            return {
+                "execution_id": journey_execution.get("id"),
+                "error": str(e),
+                "success": False
+            }
+
+    def submit_journey_results(self, execution_id, results):
+        """Envia resultados da jornada para o servidor"""
+        try:
+            if not self.collector_token or not self.collector_id:
+                logger.warning("Token ou ID do collector ausente - não enviando resultados")
+                return False
+
+            url = f"{self.api_base}/collector-api/journeys/results"
+            
+            # Determinar status baseado nos resultados
+            status = "completed" if results.get("success") else "failed"
+            error_message = results.get("error") if not results.get("success") else None
+            
+            data = {
+                "collector_id": self.collector_id,
+                "token": self.enrollment_token or self.collector_token,
+                "execution_id": execution_id,
+                "status": status,
+                "results": results,
+                "error_message": error_message
+            }
+            
+            response = self.session.post(url, json=data, timeout=60)
+            
+            if response.status_code == 200:
+                logger.info(f"Resultados da jornada {execution_id} enviados com sucesso")
+                return True
+            else:
+                logger.error(f"Erro ao enviar resultados: {response.status_code} - {response.text}")
+                return False
+                
+        except Exception as e:
+            logger.error(f"Erro ao enviar resultados da jornada: {e}")
+            return False
+
+    def process_pending_journeys(self):
+        """Processa jornadas pendentes"""
+        try:
+            pending_journeys = self.get_pending_journeys()
+            
+            for journey_execution in pending_journeys:
+                execution_id = journey_execution.get("id")
+                logger.info(f"Processando jornada {execution_id}")
+                
+                # Executar jornada
+                results = self.execute_journey(journey_execution)
+                
+                # Enviar resultados
+                self.submit_journey_results(execution_id, results)
+                
+        except Exception as e:
+            logger.error(f"Erro ao processar jornadas pendentes: {e}")
             
     def run(self):
         logger.info("Iniciando heartbeat collector...")
@@ -1319,6 +1573,7 @@ class CollectorHeartbeat:
                 
                 # Só tentar heartbeat se há token
                 if self.collector_token:
+                    # Enviar heartbeat
                     if self.send_heartbeat():
                         consecutive_failures = 0
                     else:
@@ -1328,6 +1583,12 @@ class CollectorHeartbeat:
                             logger.warning("Muitas falhas consecutivas - recarregando configuração")
                             self.load_config()
                             consecutive_failures = 0
+                    
+                    # Processar jornadas pendentes a cada ciclo
+                    try:
+                        self.process_pending_journeys()
+                    except Exception as e:
+                        logger.error(f"Erro no processamento de jornadas: {e}")
                 else:
                     logger.debug("Aguardando COLLECTOR_TOKEN...")
                     consecutive_failures += 1

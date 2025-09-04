@@ -5,6 +5,7 @@ import {
   collectors,
   collectorTelemetry,
   journeys,
+  journeyExecutions,
   credentials,
   threatIntelligence,
   activities,
@@ -22,6 +23,8 @@ import {
   type InsertCollectorTelemetry,
   type Journey,
   type InsertJourney,
+  type JourneyExecution,
+  type InsertJourneyExecution,
   type Credential,
   type InsertCredential,
   type ThreatIntelligence,
@@ -34,7 +37,7 @@ import {
   type InsertTenantUserAuth,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, desc, gte, isNotNull, sql } from "drizzle-orm";
+import { eq, and, desc, gte, isNotNull, sql, or } from "drizzle-orm";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
@@ -79,6 +82,14 @@ export interface IStorage {
   getJourney(id: string): Promise<Journey | undefined>;
   createJourney(journey: InsertJourney): Promise<Journey>;
   updateJourneyStatus(id: string, status: string, results?: any): Promise<void>;
+  updateJourneySchedule(id: string, scheduleType: string, scheduledAt?: Date, scheduleConfig?: any): Promise<void>;
+  getScheduledJourneys(): Promise<Journey[]>; // For scheduler
+  
+  // Journey Execution operations
+  createJourneyExecution(execution: InsertJourneyExecution): Promise<JourneyExecution>;
+  getJourneyExecutions(journeyId: string): Promise<JourneyExecution[]>;
+  updateJourneyExecutionStatus(id: string, status: string, results?: any, errorMessage?: string): Promise<void>;
+  getExecutionsByStatus(status: string): Promise<JourneyExecution[]>;
 
   // Credential operations
   getCredentialsByTenant(tenantId: string): Promise<Credential[]>;
@@ -450,6 +461,92 @@ export class DatabaseStorage implements IStorage {
     }
 
     await db.update(journeys).set(updates).where(eq(journeys.id, id));
+  }
+
+  async updateJourneySchedule(id: string, scheduleType: string, scheduledAt?: Date, scheduleConfig?: any): Promise<void> {
+    const updates: any = {
+      scheduleType: scheduleType as any,
+      scheduledAt,
+      scheduleConfig,
+      updatedAt: new Date()
+    };
+
+    await db.update(journeys).set(updates).where(eq(journeys.id, id));
+  }
+
+  async getScheduledJourneys(): Promise<Journey[]> {
+    const now = new Date();
+    return await db
+      .select()
+      .from(journeys)
+      .where(
+        and(
+          eq(journeys.isActive, true),
+          or(
+            and(
+              eq(journeys.scheduleType, 'one_shot'),
+              eq(journeys.status, 'pending'),
+              isNotNull(journeys.scheduledAt)
+            ),
+            and(
+              eq(journeys.scheduleType, 'recurring'),
+              eq(journeys.isActive, true),
+              isNotNull(journeys.nextExecutionAt)
+            )
+          )
+        )
+      );
+  }
+
+  // Journey Execution operations
+  async createJourneyExecution(execution: InsertJourneyExecution): Promise<JourneyExecution> {
+    const [newExecution] = await db.insert(journeyExecutions).values(execution).returning();
+    return newExecution;
+  }
+
+  async getJourneyExecutions(journeyId: string): Promise<JourneyExecution[]> {
+    return await db
+      .select()
+      .from(journeyExecutions)
+      .where(eq(journeyExecutions.journeyId, journeyId))
+      .orderBy(desc(journeyExecutions.createdAt));
+  }
+
+  async updateJourneyExecutionStatus(id: string, status: string, results?: any, errorMessage?: string): Promise<void> {
+    const updates: any = { 
+      status: status as any, 
+      updatedAt: new Date() 
+    };
+
+    if (status === 'running') {
+      updates.startedAt = new Date();
+    } else if (status === 'completed' || status === 'failed') {
+      updates.completedAt = new Date();
+      
+      // Calculate duration if we have both start and completion times
+      const [execution] = await db.select().from(journeyExecutions).where(eq(journeyExecutions.id, id));
+      if (execution && execution.startedAt) {
+        updates.duration = Math.floor((new Date().getTime() - execution.startedAt.getTime()) / 1000);
+      }
+    }
+
+    if (results) {
+      updates.results = results;
+    }
+
+    if (errorMessage) {
+      updates.errorMessage = errorMessage;
+    }
+
+    await db.update(journeyExecutions).set(updates).where(eq(journeyExecutions.id, id));
+  }
+
+  async getExecutionsByStatus(status: string): Promise<JourneyExecution[]> {
+    return await db
+      .select()
+      .from(journeyExecutions)
+      .where(eq(journeyExecutions.status, status as any))
+      .orderBy(desc(journeyExecutions.scheduledFor));
   }
 
   // Credential operations

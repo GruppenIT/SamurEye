@@ -72,6 +72,29 @@ curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/
 - **Credentials**: `minio` / `minio123`
 - **Storage**: `/opt/minio/data`
 
+## 🗂️ Schema de Jornadas de Segurança
+
+### Tabelas Principais
+
+**journeys:**
+- Configuração e agendamento de jornadas
+- Suporte a scheduleType: on_demand, one_shot, recurring
+- Configurações JSON flexíveis (scheduleConfig)
+
+**journey_executions:**
+- Histórico completo de execuções
+- Status tracking: queued → running → completed/failed
+- Armazenamento de resultados detalhados
+- Métricas de performance (duração, timestamps)
+
+### Auto-Criação
+
+O schema é criado automaticamente durante o install-hard-reset.sh:
+```sql
+-- Executado automaticamente:
+npm run db:push --force
+```
+
 ### Grafana (Port 3000)
 - **Dashboard**: Monitoramento e métricas
 - **Database**: PostgreSQL (próprio)

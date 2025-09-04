@@ -1138,6 +1138,113 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update journey scheduling
+  app.put('/api/journeys/:id/schedule', isLocalUserAuthenticated, requireLocalUserTenant, async (req: any, res) => {
+    try {
+      const journey = await storage.getJourney(req.params.id);
+      if (!journey || journey.tenantId !== req.tenant.id) {
+        return res.status(404).json({ message: "Journey not found" });
+      }
+
+      const { scheduleType, scheduledAt, scheduleConfig } = req.body;
+      await storage.updateJourneySchedule(
+        journey.id, 
+        scheduleType, 
+        scheduledAt ? new Date(scheduledAt) : undefined, 
+        scheduleConfig
+      );
+
+      // Log activity
+      await storage.createActivity({
+        tenantId: req.tenant.id,
+        userId: req.localUser.id,
+        action: 'schedule_update',
+        resource: 'journey',
+        resourceId: journey.id,
+        metadata: { journeyName: journey.name, scheduleType }
+      });
+
+      res.json({ message: "Journey schedule updated" });
+    } catch (error) {
+      console.error("Error updating journey schedule:", error);
+      res.status(500).json({ message: "Failed to update journey schedule" });
+    }
+  });
+
+  // Get journey executions
+  app.get('/api/journeys/:id/executions', isLocalUserAuthenticated, requireLocalUserTenant, async (req: any, res) => {
+    try {
+      const journey = await storage.getJourney(req.params.id);
+      if (!journey || journey.tenantId !== req.tenant.id) {
+        return res.status(404).json({ message: "Journey not found" });
+      }
+
+      const executions = await storage.getJourneyExecutions(journey.id);
+      res.json(executions);
+    } catch (error) {
+      console.error("Error fetching journey executions:", error);
+      res.status(500).json({ message: "Failed to fetch journey executions" });
+    }
+  });
+
+  // Collector Journey Execution API (for collector to pick up jobs)
+  app.get('/collector-api/journeys/pending', async (req, res) => {
+    try {
+      const { collector_id, token } = req.query;
+      
+      if (!token || !collector_id) {
+        return res.status(401).json({ message: "Collector ID and token required" });
+      }
+
+      // Verify collector token
+      const collector = await storage.getCollectorByEnrollmentToken(token as string);
+      if (!collector || collector.id !== collector_id) {
+        return res.status(401).json({ message: "Invalid collector or token" });
+      }
+
+      // Get pending executions for this collector
+      const pendingExecutions = await storage.getExecutionsByStatus('queued');
+      const collectorExecutions = pendingExecutions.filter(e => e.collectorId === collector.id);
+      
+      res.json(collectorExecutions);
+    } catch (error) {
+      console.error("Error fetching pending executions for collector:", error);
+      res.status(500).json({ message: "Failed to fetch pending executions" });
+    }
+  });
+
+  // Collector Journey Result Submission
+  app.post('/collector-api/journeys/results', async (req, res) => {
+    try {
+      const { collector_id, token, execution_id, status, results, error_message } = req.body;
+      
+      if (!token || !collector_id || !execution_id) {
+        return res.status(401).json({ message: "Collector ID, token and execution ID required" });
+      }
+
+      // Verify collector token
+      const collector = await storage.getCollectorByEnrollmentToken(token as string);
+      if (!collector || collector.id !== collector_id) {
+        return res.status(401).json({ message: "Invalid collector or token" });
+      }
+
+      // Update execution status
+      await storage.updateJourneyExecutionStatus(
+        execution_id, 
+        status, 
+        results, 
+        error_message
+      );
+
+      console.log(`Collector ${collector.name} submitted results for execution ${execution_id} - Status: ${status}`);
+      
+      res.json({ message: "Results received successfully" });
+    } catch (error) {
+      console.error("Error processing collector results:", error);
+      res.status(500).json({ message: "Failed to process results" });
+    }
+  });
+
   // Credential routes
   app.get('/api/credentials', isLocalUserAuthenticated, requireLocalUserTenant, async (req: any, res) => {
     try {

@@ -106,6 +106,8 @@ export const collectorTelemetry = pgTable("collector_telemetry", {
 // Journey types
 export const journeyTypeEnum = pgEnum("journey_type", ["attack_surface", "ad_hygiene", "edr_testing"]);
 export const journeyStatusEnum = pgEnum("journey_status", ["pending", "running", "completed", "failed", "cancelled"]);
+export const scheduleTypeEnum = pgEnum("schedule_type", ["on_demand", "one_shot", "recurring"]);
+export const executionStatusEnum = pgEnum("execution_status", ["queued", "running", "completed", "failed", "cancelled"]);
 
 // Journeys
 export const journeys = pgTable("journeys", {
@@ -117,9 +119,35 @@ export const journeys = pgTable("journeys", {
   config: jsonb("config").notNull(),
   results: jsonb("results"),
   collectorId: varchar("collector_id").references(() => collectors.id),
+  // Scheduling fields
+  scheduleType: scheduleTypeEnum("schedule_type").notNull().default('on_demand'),
+  scheduledAt: timestamp("scheduled_at"), // For one-shot scheduled journeys
+  scheduleConfig: jsonb("schedule_config"), // For recurring: cron, interval, etc
+  isActive: boolean("is_active").default(true), // Can pause/unpause recurring
+  nextExecutionAt: timestamp("next_execution_at"), // Next scheduled execution
+  lastExecutionAt: timestamp("last_execution_at"), // Last successful execution
+  executionCount: integer("execution_count").default(0), // Total executions
   createdBy: varchar("created_by").notNull().references(() => users.id),
   startedAt: timestamp("started_at"),
   completedAt: timestamp("completed_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Journey Executions - Individual execution instances
+export const journeyExecutions = pgTable("journey_executions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  journeyId: varchar("journey_id").notNull().references(() => journeys.id, { onDelete: 'cascade' }),
+  status: executionStatusEnum("status").notNull().default('queued'),
+  executionNumber: integer("execution_number").notNull(), // Sequential execution number
+  scheduledFor: timestamp("scheduled_for").notNull(), // When it was supposed to run
+  startedAt: timestamp("started_at"),
+  completedAt: timestamp("completed_at"),
+  duration: integer("duration_seconds"), // Execution time in seconds
+  results: jsonb("results"), // Execution-specific results
+  errorMessage: text("error_message"), // If failed, why
+  collectorId: varchar("collector_id").references(() => collectors.id),
+  metadata: jsonb("metadata"), // Execution context/debug info
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -250,10 +278,16 @@ export const collectorTelemetryRelations = relations(collectorTelemetry, ({ one 
   collector: one(collectors, { fields: [collectorTelemetry.collectorId], references: [collectors.id] }),
 }));
 
-export const journeysRelations = relations(journeys, ({ one }) => ({
+export const journeysRelations = relations(journeys, ({ one, many }) => ({
   tenant: one(tenants, { fields: [journeys.tenantId], references: [tenants.id] }),
   collector: one(collectors, { fields: [journeys.collectorId], references: [collectors.id] }),
   createdBy: one(users, { fields: [journeys.createdBy], references: [users.id] }),
+  executions: many(journeyExecutions),
+}));
+
+export const journeyExecutionsRelations = relations(journeyExecutions, ({ one }) => ({
+  journey: one(journeys, { fields: [journeyExecutions.journeyId], references: [journeys.id] }),
+  collector: one(collectors, { fields: [journeyExecutions.collectorId], references: [collectors.id] }),
 }));
 
 export const credentialsRelations = relations(credentials, ({ one }) => ({
@@ -314,7 +348,18 @@ export const insertJourneySchema = createInsertSchema(journeys).omit({
   updatedAt: true,
   startedAt: true,
   completedAt: true,
-  createdBy: true
+  createdBy: true,
+  executionCount: true,
+  lastExecutionAt: true,
+  nextExecutionAt: true
+});
+
+export type JourneyExecution = typeof journeyExecutions.$inferSelect;
+export type InsertJourneyExecution = typeof journeyExecutions.$inferInsert;
+export const insertJourneyExecutionSchema = createInsertSchema(journeyExecutions).omit({ 
+  id: true, 
+  createdAt: true, 
+  updatedAt: true
 });
 
 export type Credential = typeof credentials.$inferSelect;

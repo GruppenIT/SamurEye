@@ -108,6 +108,49 @@ systemctl daemon-reload
 systemctl restart samureye-app
 ```
 
+## 🚀 Sistema de Jornadas de Segurança
+
+### Funcionalidades Avançadas
+
+**Agendamento Inteligente:**
+- **On-demand**: Execução imediata de jornadas
+- **One-shot**: Agendamento para data/hora específica  
+- **Recurring**: Execução recorrente (diária, semanal, mensal)
+
+**Execução Distribuída:**
+- Polling automático de jobs pelos collectors
+- Execução distribuída usando nmap, nuclei, masscan
+- Coleta automática e centralizada de resultados
+
+**API Endpoints:**
+- `GET /api/journeys` - Listar jornadas do tenant
+- `POST /api/journeys` - Criar nova jornada
+- `POST /api/journeys/:id/start` - Iniciar jornada manualmente
+- `PUT /api/journeys/:id/schedule` - Atualizar agendamento
+- `GET /api/journeys/:id/executions` - Histórico de execuções
+
+**API para Collectors:**
+- `GET /collector-api/journeys/pending` - Buscar jobs pendentes
+- `POST /collector-api/journeys/results` - Submeter resultados
+
+### Exemplo de Configuração
+
+```json
+{
+  "name": "Network Security Assessment",
+  "type": "surface_attack",
+  "target": "192.168.1.0/24",
+  "scheduleType": "recurring", 
+  "scheduleConfig": {
+    "pattern": "daily",
+    "time": "02:00",
+    "timezone": "America/Sao_Paulo"
+  },
+  "scanTypes": ["nmap", "nuclei"],
+  "collectorId": "collector-001"
+}
+```
+
 ## URLs de Acesso
 
 Após configuração completa com vlxsam01:
