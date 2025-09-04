@@ -1,0 +1,56 @@
+root@vlxsam04:~# curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/register-collector.sh | bash -s -- gruppen-it 027020b1-f311-45b2-911a-b80a9fa2b6a8
+
+🔧 REGISTRO COLLECTOR SAMUREYE
+==============================
+
+[09:46:39] 🔍 Parâmetros recebidos:
+   • Tenant Slug: gruppen-it
+   • Token: 027020b1...9fa2b6a8
+[09:46:39] 🔍 Verificando prerequisitos...
+[09:46:39] ✅ Prerequisitos verificados
+[09:46:39] 🔍 Coletando informações do sistema...
+[09:46:39]    • Hostname: vlxsam04
+[09:46:39]    • IP Address: 192.168.100.151
+[09:46:39] 🌐 Testando conectividade com API...
+[09:46:39] ✅ Conectividade OK
+[09:46:39] 🔧 Registrando collector...
+[09:46:39] 📤 Enviando registro para API...
+[09:46:39] 📥 Processando resposta da API...
+[09:46:39] 🎉 COLLECTOR REGISTRADO COM SUCESSO!
+
+[09:46:39] 📋 DETALHES DO REGISTRO:
+   • Nome do Collector: vlxsam04
+   • Tenant: Gruppen it
+   • Status: online
+   • Hostname: vlxsam04
+   • IP: 192.168.100.151
+
+[09:46:39] ✅ Collector está online e enviando telemetria
+
+[09:46:39] 🎯 REGISTRO CONCLUÍDO COM SUCESSO!
+
+📋 PRÓXIMOS PASSOS:
+   • O collector já está enviando telemetria automaticamente
+   • Verifique o status na interface de administração
+   • O collector aparecerá como 'ONLINE' na gestão de coletores
+
+[09:46:39] ✅ Script de registro finalizado
+root@vlxsam04:~# tail -f /var/log/samureye-collector/collector.log
+2025-09-04 09:46:29,684 - ERROR - Erro no registro: 401 - {"message":"Unauthorized"}
+2025-09-04 09:46:29,684 - ERROR - Falha no registro inicial
+2025-09-04 09:46:40,147 - INFO - Configuração carregada - ID: vlxsam04, Nome:
+2025-09-04 09:46:40,148 - INFO - Iniciando heartbeat collector...
+2025-09-04 09:46:40,148 - INFO - Token não encontrado, registrando collector...
+2025-09-04 09:46:40,148 - INFO - Registrando collector: {'name': '', 'hostname': 'vlxsam04', 'ipAddress': '', 'status': 'enrolling', 'description': 'Collector agent on-premise vlxsam04'}
+/usr/lib/python3/dist-packages/urllib3/connectionpool.py:1100: InsecureRequestWarning: Unverified HTTPS request is being made to host 'api.samureye.com.br'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+2025-09-04 09:46:40,205 - ERROR - Erro no registro: 401 - {"message":"Unauthorized"}
+2025-09-04 09:46:40,206 - ERROR - Falha no registro inicial
+2025-09-04 09:46:50,613 - INFO - Configuração carregada - ID: vlxsam04, Nome:
+2025-09-04 09:46:50,613 - INFO - Iniciando heartbeat collector...
+2025-09-04 09:46:50,613 - INFO - Token não encontrado, registrando collector...
+2025-09-04 09:46:50,613 - INFO - Registrando collector: {'name': '', 'hostname': 'vlxsam04', 'ipAddress': '', 'status': 'enrolling', 'description': 'Collector agent on-premise vlxsam04'}
+/usr/lib/python3/dist-packages/urllib3/connectionpool.py:1100: InsecureRequestWarning: Unverified HTTPS request is being made to host 'api.samureye.com.br'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+2025-09-04 09:46:50,661 - ERROR - Erro no registro: 401 - {"message":"Unauthorized"}
+2025-09-04 09:46:50,662 - ERROR - Falha no registro inicial
