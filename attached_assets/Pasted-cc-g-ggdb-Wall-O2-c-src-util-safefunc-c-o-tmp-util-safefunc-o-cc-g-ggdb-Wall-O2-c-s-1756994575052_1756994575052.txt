@@ -1,0 +1,410 @@
+cc -g -ggdb    -Wall -O2 -c src/util-safefunc.c -o tmp/util-safefunc.o
+cc -g -ggdb    -Wall -O2 -c src/vulncheck-heartbleed.c -o tmp/vulncheck-heartbleed.o
+cc -g -ggdb    -Wall -O2 -c src/vulncheck-ntp-monlist.c -o tmp/vulncheck-ntp-monlist.o
+cc -g -ggdb    -Wall -O2 -c src/vulncheck-sslv3.c -o tmp/vulncheck-sslv3.o
+cc -g -ggdb    -Wall -O2 -c src/vulncheck.c -o tmp/vulncheck.o
+cc -g -ggdb    -Wall -O2 -c src/xring.c -o tmp/xring.o
+cc -g -ggdb    -Wall -O2 -o bin/masscan tmp/crypto-base64.o tmp/crypto-blackrock.o tmp/crypto-blackrock2.o tmp/crypto-lcg.o tmp/crypto-primegen.o tmp/crypto-siphash24.o tmp/event-timeout.o tmp/in-binary.o tmp/in-filter.o tmp/in-report.o tmp/main-conf.o tmp/main-dedup.o tmp/main-initadapter.o tmp/main-listscan.o tmp/main-ptrace.o tmp/main-readrange.o tmp/main-status.o tmp/main-throttle.o tmp/main.o tmp/masscan-app.o tmp/massip-addr.o tmp/massip-parse.o tmp/massip-rangesv4.o tmp/massip-rangesv6.o tmp/massip.o tmp/misc-rstfilter.o tmp/out-binary.o tmp/out-certs.o tmp/out-grepable.o tmp/out-hostonly.o tmp/out-json.o tmp/out-ndjson.o tmp/out-null.o tmp/out-redis.o tmp/out-tcp-services.o tmp/out-text.o tmp/out-unicornscan.o tmp/out-xml.o tmp/output.o tmp/pixie-backtrace.o tmp/pixie-file.o tmp/pixie-threads.o tmp/pixie-timer.o tmp/proto-arp.o tmp/proto-banner1.o tmp/proto-banout.o tmp/proto-coap.o tmp/proto-dns.o tmp/proto-ftp.o tmp/proto-http.o tmp/proto-icmp.o tmp/proto-imap4.o tmp/proto-isakmp.o tmp/proto-mc.o tmp/proto-memcached.o tmp/proto-netbios.o tmp/proto-ntlmssp.o tmp/proto-ntp.o tmp/proto-oproto.o tmp/proto-pop3.o tmp/proto-preprocess.o tmp/proto-sctp.o tmp/proto-smb.o tmp/proto-smtp.o tmp/proto-snmp.o tmp/proto-ssh.o tmp/proto-ssl-test.o tmp/proto-ssl.o tmp/proto-tcp-rdp.o tmp/proto-tcp-telnet.o tmp/proto-udp.o tmp/proto-versioning.o tmp/proto-vnc.o tmp/proto-x509.o tmp/proto-zeroaccess.o tmp/rawsock-getif.o tmp/rawsock-getip.o tmp/rawsock-getip6.o tmp/rawsock-getmac.o tmp/rawsock-getroute.o tmp/rawsock-pcapfile.o tmp/rawsock.o tmp/read-service-probes.o tmp/rte-ring.o tmp/scripting-banner.o tmp/scripting-masscan.o tmp/scripting.o tmp/smack1.o tmp/smackqueue.o tmp/stack-arpv4.o tmp/stack-if.o tmp/stack-ndpv6.o tmp/stack-queue.o tmp/stack-src.o tmp/stack-tcp-app.o tmp/stack-tcp-core.o tmp/stub-lua.o tmp/stub-pcap.o tmp/stub-pfring.o tmp/syn-cookie.o tmp/templ-nmap-payloads.o tmp/templ-payloads.o tmp/templ-pkt.o tmp/templ-tcp-hdr.o tmp/util-checksum.o tmp/util-errormsg.o tmp/util-extract.o tmp/util-logger.o tmp/util-malloc.o tmp/util-safefunc.o tmp/vulncheck-heartbleed.o tmp/vulncheck-ntp-monlist.o tmp/vulncheck-sslv3.o tmp/vulncheck.o tmp/xring.o   -lm -lrt -ldl -lpthread
+install -pDm755 bin/masscan /usr/bin/masscan
+[11:00:25] ✅ Masscan compilado e instalado do código fonte
+[11:00:25] 🐍 Instalando Python 3.11...
+Repository: 'Types: deb
+URIs: https://ppa.launchpadcontent.net/deadsnakes/ppa/ubuntu/
+Suites: noble
+Components: main
+'
+Description:
+This PPA contains more recent Python versions packaged for Ubuntu.
+
+Disclaimer: there's no guarantee of timely updates in case of security problems or other issues. If you want to use them in a security-or-otherwise-critical environment (say, on a production server), you do so at your own risk.
+
+Update Note
+===========
+Please use this repository instead of ppa:fkrull/deadsnakes.
+
+Reporting Issues
+================
+
+Issues can be reported in the master issue tracker at:
+https://github.com/deadsnakes/issues/issues
+
+Supported Ubuntu and Python Versions
+====================================
+
+- Ubuntu 20.04 (focal) Python3.5 - Python3.7, Python3.9 - Python3.13
+- Ubuntu 22.04 (jammy) Python3.7 - Python3.9, Python3.11 - Python3.13
+- Ubuntu 24.04 (noble) Python3.7 - Python3.11, Python3.13
+- Note: Python2.7 (focal, jammy), Python 3.8 (focal), Python 3.10 (jammy), Python3.12 (noble) are not provided by deadsnakes as upstream ubuntu provides those packages.
+
+Why some packages aren't built:
+- Note: for focal, older python versions require libssl<1.1 so they are not currently built
+- Note: for jammy and noble, older python versions requre libssl<3 so they are not currently built
+- If you need these, reach out to asottile to set up a private ppa
+
+The packages may also work on other versions of Ubuntu or Debian, but that is not tested or supported.
+
+Packages
+========
+
+The packages provided here are loosely based on the debian upstream packages with some modifications to make them more usable as non-default pythons and on ubuntu.  As such, the packages follow debian's patterns and often do not include a full python distribution with just `apt install python#.#`.  Here is a list of packages that may be useful along with the default install:
+
+- `python#.#-dev`: includes development headers for building C extensions
+- `python#.#-venv`: provides the standard library `venv` module
+- `python#.#-distutils`: provides the standard library `distutils` module
+- `python#.#-lib2to3`: provides the `2to3-#.#` utility as well as the standard library `lib2to3` module
+- `python#.#-gdbm`: provides the standard library `dbm.gnu` module
+- `python#.#-tk`: provides the standard library `tkinter` module
+
+Third-Party Python Modules
+==========================
+
+Python modules in the official Ubuntu repositories are packaged to work with the Python interpreters from the official repositories. Accordingly, they generally won't work with the Python interpreters from this PPA. As an exception, pure-Python modules for Python 3 will work, but any compiled extension modules won't.
+
+To install 3rd-party Python modules, you should use the common Python packaging tools.  For an introduction into the Python packaging ecosystem and its tools, refer to the Python Packaging User Guide:
+https://packaging.python.org/installing/
+
+Sources
+=======
+The package sources are available at:
+https://github.com/deadsnakes/
+
+Nightly Builds
+==============
+
+For nightly builds, see ppa:deadsnakes/nightly https://launchpad.net/~deadsnakes/+archive/ubuntu/nightly
+More info: https://launchpad.net/~deadsnakes/+archive/ubuntu/ppa
+Adding repository.
+Found existing deb entry in /etc/apt/sources.list.d/deadsnakes-ubuntu-ppa-noble.sources
+Hit:1 https://deb.nodesource.com/node_20.x nodistro InRelease
+Hit:2 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:3 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:4 https://ppa.launchpadcontent.net/deadsnakes/ppa/ubuntu noble InRelease
+Hit:5 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:6 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists... Done
+Hit:1 https://deb.nodesource.com/node_20.x nodistro InRelease
+Hit:2 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:3 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:4 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:5 https://ppa.launchpadcontent.net/deadsnakes/ppa/ubuntu noble InRelease
+Hit:6 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists... Done
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+python3.11 is already the newest version (3.11.13-1+noble1).
+python3.11-dev is already the newest version (3.11.13-1+noble1).
+python3.11-venv is already the newest version (3.11.13-1+noble1).
+python3.11-distutils is already the newest version (3.11.13-1+noble1).
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+[11:01:33] ✅ Python 3.11.13 instalado
+[11:01:33] ✅ Python padrão: 3.12.3
+[11:01:33] 📦 Instalando Node.js 20...
+2025-09-04 11:01:33 - Installing pre-requisites
+Hit:1 https://deb.nodesource.com/node_20.x nodistro InRelease
+Hit:2 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:3 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:4 https://ppa.launchpadcontent.net/deadsnakes/ppa/ubuntu noble InRelease
+Hit:5 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:6 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists... Done
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+apt-transport-https is already the newest version (2.8.3).
+ca-certificates is already the newest version (20240203).
+curl is already the newest version (8.5.0-2ubuntu10.6).
+gnupg is already the newest version (2.4.4-2ubuntu17.3).
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+Hit:1 https://deb.nodesource.com/node_20.x nodistro InRelease
+Hit:2 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:3 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:4 https://ppa.launchpadcontent.net/deadsnakes/ppa/ubuntu noble InRelease
+Hit:5 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:6 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists... Done
+2025-09-04 11:01:39 - Repository configured successfully.
+2025-09-04 11:01:39 - To install Node.js, run: apt-get install nodejs -y
+2025-09-04 11:01:39 - You can use N|solid Runtime as a node.js alternative
+2025-09-04 11:01:39 - To install N|solid Runtime, run: apt-get install nsolid -y
+
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+nodejs is already the newest version (20.19.5-1nodesource1).
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+[11:01:40] ✅ Node.js v20.19.5 instalado
+[11:01:40] 👤 Criando usuário e estrutura de diretórios...
+[11:01:40] ✅ Usuário samureye-collector criado
+[11:01:40] 🔧 Aplicando correção integrada de permissões de log...
+[11:01:40] 🧪 Testando permissões críticas...
+[11:01:40] ✅ Permissões de log: OK
+[11:01:40] ✅ Estrutura de diretórios criada
+[11:01:40] 🛡️ Instalando ferramentas de segurança...
+[11:01:40] 📡 Configurando Nmap...
+[11:01:40] ✅ Nmap configurado:
+[11:01:40] ✅ Masscan configurado
+[11:01:40]    Versão:
+[11:01:40] 🔍 Instalando Nuclei...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+[11:01:41] WARNING: ⚠️ Nuclei via apt falhou, instalando via GitHub...
+[11:01:43] ✅ Nuclei instalado via GitHub
+[11:01:43] ✅ Nuclei configurado (vNuclei)
+[11:01:43] 📋 Atualizando templates Nuclei em background...
+[11:01:43] 🔍 Instalando Gobuster...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+gobuster is already the newest version (3.6.0-1ubuntu0.24.04.3).
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+[11:01:44] ✅ Gobuster instalado via apt
+[11:01:44] WARNING: ⚠️ Gobuster instalado mas não no PATH - corrigindo...
+[11:01:44] WARNING: ❌ Gobuster instalado mas binário não encontrado
+[11:01:44] 🧹 Arquivos temporários removidos
+[11:01:44] 🤖 Instalando agente coletor...
+[11:01:44] 📦 Instalando dependências Python...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+python3-psutil is already the newest version (5.9.8-2build2).
+python3-requests is already the newest version (2.31.0+dfsg-1ubuntu1.1).
+python3-venv is already the newest version (3.12.3-0ubuntu2).
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+[11:01:45] ✅ Dependências Python instaladas
+[11:01:45] 🔧 Configurando serviço systemd...
+[11:01:46] ✅ Serviço systemd configurado
+[11:01:46] ⏰ Configurando cron jobs...
+[11:01:46] ✅ Cron jobs configurados
+[11:01:46] 🔒 Configurando firewall...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+ufw is already the newest version (0.36.2-6).
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+Backing up 'user.rules' to '/etc/ufw/user.rules.20250904_110147'
+Backing up 'before.rules' to '/etc/ufw/before.rules.20250904_110147'
+Backing up 'after.rules' to '/etc/ufw/after.rules.20250904_110147'
+Backing up 'user6.rules' to '/etc/ufw/user6.rules.20250904_110147'
+Backing up 'before6.rules' to '/etc/ufw/before6.rules.20250904_110147'
+Backing up 'after6.rules' to '/etc/ufw/after6.rules.20250904_110147'
+
+Default incoming policy changed to 'deny'
+(be sure to update your rules accordingly)
+Default outgoing policy changed to 'allow'
+(be sure to update your rules accordingly)
+Rules updated
+Rules updated (v6)
+Rules updated
+Rules updated
+Rules updated (v6)
+Firewall is active and enabled on system startup
+[11:01:49] ✅ Firewall configurado
+[11:01:49] 🚀 Iniciando serviço collector...
+Created symlink /etc/systemd/system/multi-user.target.wants/samureye-collector.service → /etc/systemd/system/samureye-collector.service.
+[11:01:56] ✅ Templates Nuclei atualizados
+[11:01:59] WARNING: ⚠️ Collector pode ter problemas - verificar logs
+[11:01:59] 🧪 Executando testes de validação...
+[11:01:59] WARNING: ⚠️ Serviço: Inativo
+[11:01:59] ✅ Python: Dependências OK
+[11:01:59] 🛡️ Ferramentas: nmap:✅ nuclei:✅ masscan:✅ gobuster:❌
+[11:01:59] ✅ API: Conectividade OK
+[11:01:59] ✅ Logs: Sendo gerados
+[11:01:59] 💓 Configurando correções de heartbeat e conectividade...
+[11:01:59] WARNING: ⚠️ Arquivo de configuração /etc/samureye-collector/.env não encontrado
+[11:01:59] ✅ Script de teste de conectividade criado: /opt/samureye/collector/test-connectivity.sh
+[11:01:59] WARNING: ⚠️ Certificados não encontrados - teste de conectividade pulado
+[11:01:59] 📝 Criando script de registro...
+[11:01:59] 📝 Sistema de registro integrado ao heartbeat implementado
+[11:01:59] 🔧 Implementando correção de duplicação de coletores...
+[11:01:59] 🔍 Testando permissões de leitura do arquivo de configuração...
+[11:01:59] ✅ Permissões de leitura: OK
+[11:02:00] ✅ Sistema anti-duplicação integrado no install-hard-reset
+[11:02:00] ⚠️ Sistema base instalado - registro manual necessário
+[11:02:00] 📋 Use o script de registro separado com token do tenant
+[11:02:00] 📋 Criando scripts de diagnóstico e utilitários integrados...
+[11:02:00] ✅ Script de salvamento de token criado: /opt/samureye/collector/scripts/save-token.sh
+[11:02:00] ✅ Extrator robusto de token criado: /opt/samureye/collector/scripts/extract-token.sh
+[11:02:00] ✅ Script de diagnóstico integrado criado
+[11:02:00] 🔧 Verificando e corrigindo problemas de autenticação...
+[11:02:00] ✅ Nenhum erro de autenticação detectado
+[11:02:00] ✅ Sistema de correção automática integrado
+
+[11:02:00] 🎉 HARD RESET DO COLLECTOR AGENT CONCLUÍDO!
+
+📋 RESUMO DA INSTALAÇÃO:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🤖 Collector Agent:
+   • Status:  active
+   • User:    samureye-collector
+   • Dir:     /opt/samureye/collector
+   • Logs:    /var/log/samureye-collector/
+
+🐍 Python 3.11:
+   • Version: Python 3.12.3
+   • Libs:    psutil, requests
+
+📦 Node.js 20:
+   • Version: v20.19.5
+
+🛡️ Security Tools:
+   • Nmap:     ✅ Instalado
+   • Nuclei:   ✅ Instalado
+   • Masscan:  ✅ Instalado
+   • Gobuster: ❌ Ausente
+
+🔧 Comandos Úteis:
+   • Status:     systemctl status samureye-collector
+   • Logs:       tail -f /var/log/samureye-collector/collector.log
+   • Restart:    systemctl restart samureye-collector
+   • Heartbeat:  /opt/samureye/collector/heartbeat.py
+   • Cleanup:    /opt/samureye/collector/scripts/cleanup.sh
+   • Test Conn:  /opt/samureye/collector/test-connectivity.sh
+   • Check Status: /opt/samureye/collector/scripts/check-status.sh
+
+🔗 Conectividade:
+   • API:       https://api.samureye.com.br
+   • Gateway:   192.168.100.151
+
+💓 Heartbeat & Status:
+   • Intervalo: 30 segundos (configurável em /etc/samureye-collector/.env)
+   • Endpoint:  https://api.samureye.com.br/collector-api/heartbeat
+   • Retry:     3 tentativas automáticas por request
+   • Timeout:   30 segundos por request HTTP
+
+📝 PRÓXIMOS PASSOS OBRIGATÓRIOS:
+   ⚠️  SISTEMA BASE INSTALADO - REGISTRO NECESSÁRIO ⚠️
+
+   1. Acesse a interface de administração:
+      https://app.samureye.com.br/admin/collectors
+
+   2. Faça login e vá para 'Gestão de Coletores'
+
+   3. Clique em 'Novo Coletor' e preencha:
+      • Nome: vlxsam04
+      • Hostname: vlxsam04
+      • IP: 192.168.100.151
+
+   4. Copie o TOKEN DE ENROLLMENT gerado (válido por 15 minutos)
+
+   5. Execute o comando de registro:
+      curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/register-collector.sh | bash -s -- <tenant-slug> <enrollment-token>
+
+   📌 EXEMPLO:
+      curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/register-collector.sh | bash -s -- gruppen-it abc123-def456-ghi789
+
+✅ APÓS O REGISTRO:
+   • Collector aparecerá como 'ONLINE' na interface
+   • Logs: tail -f /var/log/samureye-collector/heartbeat.log
+   • Status: /opt/samureye/collector/scripts/check-status.sh
+
+🔧 COMANDOS DISPONÍVEIS:
+   • Instalar sistema base:
+     curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/install-hard-reset.sh | bash
+
+   • Registrar collector (após criar na interface):
+     curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/register-collector.sh | bash -s -- <tenant-slug> <token>
+
+   • Verificar status:
+     /opt/samureye/collector/scripts/check-status.sh
+
+🔍 DIAGNÓSTICO E CORREÇÃO:
+   • Diagnóstico problema 401 Unauthorized:
+     curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/diagnose-collector-401-unauthorized.sh | bash
+
+   • Correção problema 401 Unauthorized:
+     curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/fix-collector-401-issue.sh | bash
+
+   • Diagnóstico auto-registro após exclusão:
+     curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/diagnose-collector-auto-register.sh | bash
+
+   • Correção após exclusão do collector:
+     curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/fix-collector-after-deletion.sh | bash
+
+   • Diagnóstico desconexão registro vs serviço:
+     curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/diagnose-token-disconnect.sh | bash
+
+   • Correção desconexão registro vs serviço:
+     curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/fix-token-disconnect.sh | bash
+
+   • Diagnóstico permissões e salvamento token:
+     curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/diagnose-permissions-token-save.sh | bash
+
+   • Correção permissões e salvamento token:
+     curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/fix-permissions-token-save.sh | bash
+
+   • Diagnóstico resposta API token:
+     curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/diagnose-api-token-response.sh | bash -s -- gruppen-it <TOKEN>
+
+   • Correção extração de token da API:
+     curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/fix-api-token-extraction.sh | bash
+
+   • Diagnóstico rápido local:
+     /opt/samureye/collector/scripts/check-status.sh
+
+   • Salvar token manualmente (se necessário):
+     /opt/samureye/collector/scripts/save-token.sh <collector-token>
+
+💡 CORREÇÕES INTEGRADAS NO INSTALL-HARD-RESET:
+   ✅ Usuário com permissões corretas
+   ✅ Arquivo .env com permissões 640 (root:collector)
+   ✅ Permissões de log corrigidas automaticamente
+   ✅ Serviço systemd configurado para usuário samureye-collector
+   ✅ Script de salvamento de token integrado
+   ✅ Extrator robusto de token da API integrado
+   ✅ Teste de permissões automático durante instalação
+
+root@vlxsam04:~# curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/register-collector.sh | bash -s -- gruppen-it debefe91-fd29-4381-a57b-3e677d3391c2
+
+🔧 REGISTRO COLLECTOR SAMUREYE
+==============================
+
+[11:02:42] 🔍 Parâmetros recebidos:
+   • Tenant Slug: gruppen-it
+   • Token: debefe91...7d3391c2
+[11:02:42] 🔍 Verificando prerequisitos...
+[11:02:42] ✅ Prerequisitos verificados
+[11:02:42] 🔍 Coletando informações do sistema...
+[11:02:42]    • Hostname: vlxsam04
+[11:02:42]    • IP Address: 192.168.100.151
+[11:02:42] 🌐 Testando conectividade com API...
+[11:02:42] ✅ Conectividade OK
+[11:02:42] 🔧 Registrando collector...
+[11:02:42] 📤 Enviando registro para API...
+[11:02:42] 📥 Processando resposta da API...
+[11:02:42] 🎉 COLLECTOR REGISTRADO COM SUCESSO!
+
+[11:02:42] 📋 DETALHES DO REGISTRO:
+   • Nome do Collector: vlxsam04
+   • Tenant: Gruppen it
+   • Status: online
+   • Hostname: vlxsam04
+   • IP: 192.168.100.151
+
+[11:02:42] 💾 Salvando token de autenticação...
+[11:02:42] WARNING: ⚠️  Token não encontrado na resposta da API
+   Registro reportado como sucesso mas token não recebido
+[11:02:42] ✅ Collector está online e enviando telemetria
+
+[11:02:42] 🎯 REGISTRO CONCLUÍDO COM SUCESSO!
+
+📋 PRÓXIMOS PASSOS:
+   • O collector já está enviando telemetria automaticamente
+   • Verifique o status na interface de administração
+   • O collector aparecerá como 'ONLINE' na gestão de coletores
+
+[11:02:42] ✅ Script de registro finalizado
+root@vlxsam04:~# tail -f /var/log/samureye-collector/collector.log
+2025-09-04 11:02:42,177 - ERROR - Erro no registro: 401 - {"message":"Unauthorized"}
+2025-09-04 11:02:42,177 - ERROR - Falha no registro inicial
+2025-09-04 11:02:52,627 - INFO - Configuração carregada - ID: vlxsam04, Nome:
+2025-09-04 11:02:52,627 - INFO - Iniciando heartbeat collector...
+2025-09-04 11:02:52,627 - INFO - Token não encontrado, registrando collector...
+2025-09-04 11:02:52,627 - INFO - Registrando collector: {'name': '', 'hostname': 'vlxsam04', 'ipAddress': '', 'status': 'enrolling', 'description': 'Collector agent on-premise vlxsam04'}
+/usr/lib/python3/dist-packages/urllib3/connectionpool.py:1100: InsecureRequestWarning: Unverified HTTPS request is being made to host 'api.samureye.com.br'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+2025-09-04 11:02:52,677 - ERROR - Erro no registro: 401 - {"message":"Unauthorized"}
+2025-09-04 11:02:52,677 - ERROR - Falha no registro inicial
+^C
+root@vlxsam04:~#
