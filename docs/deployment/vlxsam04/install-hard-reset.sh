@@ -1420,6 +1420,69 @@ chmod +x "$COLLECTOR_DIR/scripts/save-token.sh"
 chown root:root "$COLLECTOR_DIR/scripts/save-token.sh"
 log "✅ Script de salvamento de token criado: $COLLECTOR_DIR/scripts/save-token.sh"
 
+# Script de extração robusta de token da API (correção integrada)
+cat > "$COLLECTOR_DIR/scripts/extract-token.sh" << 'EXTRACT_TOKEN_EOF'
+#!/bin/bash
+
+# Script auxiliar para extrair token de resposta da API
+# Tenta múltiplas formas de extração - CORREÇÃO INTEGRADA VLXSAM04
+
+RESPONSE_BODY="$1"
+
+if [ -z "$RESPONSE_BODY" ]; then
+    echo ""
+    exit 1
+fi
+
+# Múltiplas tentativas de extração
+TOKEN=""
+
+# Método 1: jq com múltiplos caminhos
+if command -v jq >/dev/null 2>&1; then
+    TOKEN=$(echo "$RESPONSE_BODY" | jq -r '.collector.token // .token // .authToken // .collectorToken // .auth.token // .data.token // ""' 2>/dev/null)
+fi
+
+# Método 2: grep com padrões diferentes
+if [ -z "$TOKEN" ] || [ "$TOKEN" = "null" ]; then
+    TOKEN=$(echo "$RESPONSE_BODY" | grep -o '"token":"[^"]*"' | head -1 | cut -d'"' -f4 2>/dev/null)
+fi
+
+if [ -z "$TOKEN" ] || [ "$TOKEN" = "null" ]; then
+    TOKEN=$(echo "$RESPONSE_BODY" | grep -o '"authToken":"[^"]*"' | head -1 | cut -d'"' -f4 2>/dev/null)
+fi
+
+if [ -z "$TOKEN" ] || [ "$TOKEN" = "null" ]; then
+    TOKEN=$(echo "$RESPONSE_BODY" | grep -o '"collectorToken":"[^"]*"' | head -1 | cut -d'"' -f4 2>/dev/null)
+fi
+
+# Método 3: sed para extração mais agressiva
+if [ -z "$TOKEN" ] || [ "$TOKEN" = "null" ]; then
+    TOKEN=$(echo "$RESPONSE_BODY" | sed -n 's/.*"token":"\([^"]*\)".*/\1/p' | head -1)
+fi
+
+# Método 4: awk para busca por padrões UUID-like
+if [ -z "$TOKEN" ] || [ "$TOKEN" = "null" ]; then
+    TOKEN=$(echo "$RESPONSE_BODY" | awk -F'"' '/token.*[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/ {for(i=1;i<=NF;i++) if($i ~ /[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/) print $i}' | head -1)
+fi
+
+# Validar se token tem formato válido (UUID ou similar)
+if [ -n "$TOKEN" ] && [ "$TOKEN" != "null" ]; then
+    # Verificar se parece com UUID ou token válido (pelo menos 16 caracteres)
+    if [ ${#TOKEN} -ge 16 ]; then
+        echo "$TOKEN"
+        exit 0
+    fi
+fi
+
+# Nenhum token válido encontrado
+echo ""
+exit 1
+EXTRACT_TOKEN_EOF
+
+chmod +x "$COLLECTOR_DIR/scripts/extract-token.sh"
+chown root:root "$COLLECTOR_DIR/scripts/extract-token.sh"
+log "✅ Extrator robusto de token criado: $COLLECTOR_DIR/scripts/extract-token.sh"
+
 # Script de diagnóstico integrado
 cat > "$COLLECTOR_DIR/scripts/check-status.sh" << 'DIAG_EOF'
 #!/bin/bash
@@ -1697,6 +1760,12 @@ echo ""
 echo "   • Correção permissões e salvamento token:"
 echo "     curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/fix-permissions-token-save.sh | bash"
 echo ""
+echo "   • Diagnóstico resposta API token:"
+echo "     curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/diagnose-api-token-response.sh | bash -s -- gruppen-it <TOKEN>"
+echo ""
+echo "   • Correção extração de token da API:"
+echo "     curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/fix-api-token-extraction.sh | bash"
+echo ""
 echo "   • Diagnóstico rápido local:"
 echo "     $COLLECTOR_DIR/scripts/check-status.sh"
 echo ""
@@ -1706,8 +1775,10 @@ echo ""
 echo "💡 CORREÇÕES INTEGRADAS NO INSTALL-HARD-RESET:"
 echo "   ✅ Usuário com permissões corretas"
 echo "   ✅ Arquivo .env com permissões 640 (root:collector)"
+echo "   ✅ Permissões de log corrigidas automaticamente"
 echo "   ✅ Serviço systemd configurado para usuário samureye-collector"
 echo "   ✅ Script de salvamento de token integrado"
+echo "   ✅ Extrator robusto de token da API integrado"
 echo "   ✅ Teste de permissões automático durante instalação"
 echo ""
 
