@@ -1,0 +1,61 @@
+root@vlxsam04:~# curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/register-collector.sh | bash -s -- gruppen-it 6e8a0529-165b-431c-a551-e65db26a4800
+
+🔧 REGISTRO COLLECTOR SAMUREYE
+==============================
+
+[16:36:09] 🔍 Parâmetros recebidos:
+   • Tenant Slug: gruppen-it
+   • Token: 6e8a0529...b26a4800
+[16:36:09] 🔍 Verificando prerequisitos...
+[16:36:09] ✅ Prerequisitos verificados
+[16:36:09] 🔍 Coletando informações do sistema...
+[16:36:09]    • Hostname: vlxsam04
+[16:36:09]    • IP Address: 192.168.100.151
+[16:36:09] 🌐 Testando conectividade com API...
+[16:36:09] ✅ Conectividade OK
+[16:36:09] 🔧 Registrando collector...
+[16:36:09] 📤 Enviando registro para API...
+[16:36:09] 📥 Processando resposta da API...
+[16:36:09] 🎉 COLLECTOR REGISTRADO COM SUCESSO!
+
+[16:36:09] 📋 DETALHES DO REGISTRO:
+   • Nome do Collector: vlxsam04
+   • Tenant: Gruppen it
+   • Status: online
+   • Hostname: vlxsam04
+   • IP: 192.168.100.151
+
+[16:36:09] 💾 Salvando token de autenticação...
+[16:36:09] 🔍 Token encontrado: 850d2e19...e4b44d50
+[16:36:09] ✅ Token salvo com sucesso no arquivo de configuração
+   📁 Arquivo: /etc/samureye-collector/.env
+   🔑 Token: 850d2e19...e4b44d50
+[16:36:09] 🔄 Reiniciando serviço collector para aplicar novo token...
+[16:36:12] ✅ Serviço collector reiniciado com sucesso
+[16:36:12] ✅ Collector está online e enviando telemetria
+
+[16:36:12] 🎯 REGISTRO CONCLUÍDO COM SUCESSO!
+
+📋 PRÓXIMOS PASSOS:
+   • O collector já está enviando telemetria automaticamente
+   • Verifique o status na interface de administração
+   • O collector aparecerá como 'ONLINE' na gestão de coletores
+
+[16:36:12] ✅ Script de registro finalizado
+root@vlxsam04:~# tail -f /var/log/samureye-collector/collector.log
+2025-09-04 16:33:38,219 - WARNING - Falha no heartbeat: 404
+2025-09-04 16:34:09,227 - WARNING - Falha no heartbeat: 404
+2025-09-04 16:34:40,237 - WARNING - Falha no heartbeat: 404
+2025-09-04 16:35:11,245 - WARNING - Falha no heartbeat: 404
+2025-09-04 16:35:42,253 - WARNING - Falha no heartbeat: 404
+2025-09-04 16:36:10,060 - INFO - Configuração carregada - ID: vlxsam04, Token: 850d2e19...e4b44d50
+2025-09-04 16:36:10,060 - INFO - Iniciando heartbeat collector...
+2025-09-04 16:36:10,061 - INFO - Configuração carregada - ID: vlxsam04, Token: 850d2e19...e4b44d50
+/usr/lib/python3/dist-packages/urllib3/connectionpool.py:1100: InsecureRequestWarning: Unverified HTTPS request is being made to host 'api.samureye.com.br'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+2025-09-04 16:36:41,122 - INFO - Configuração carregada - ID: vlxsam04, Token: 850d2e19...e4b44d50
+/usr/lib/python3/dist-packages/urllib3/connectionpool.py:1100: InsecureRequestWarning: Unverified HTTPS request is being made to host 'api.samureye.com.br'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+2025-09-04 16:37:12,134 - INFO - Configuração carregada - ID: vlxsam04, Token: 850d2e19...e4b44d50
+/usr/lib/python3/dist-packages/urllib3/connectionpool.py:1100: InsecureRequestWarning: Unverified HTTPS request is being made to host 'api.samureye.com.br'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(

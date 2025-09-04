@@ -1111,6 +1111,10 @@ import requests
 import logging
 import psutil
 from pathlib import Path
+import urllib3
+
+# Suprimir warning SSL para ambiente on-premise
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # Configuração de logging
 logging.basicConfig(
@@ -1950,6 +1954,7 @@ echo "   ✅ Verificação e correção final do status do serviço"
 echo "   ✅ Múltiplas tentativas de inicialização do serviço"
 echo "   ✅ CORREÇÃO CRÍTICA - Heartbeat usa COLLECTOR_TOKEN do registro externo"
 echo "   ✅ Eliminada desconexão entre registro externo e heartbeat interno"
+echo "   ✅ Warning SSL suprimido para logs mais limpos"
 echo ""
 
 exit 0
