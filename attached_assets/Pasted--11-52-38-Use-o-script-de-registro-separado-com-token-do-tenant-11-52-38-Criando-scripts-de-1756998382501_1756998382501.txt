@@ -1,0 +1,222 @@
+[11:52:38] 📋 Use o script de registro separado com token do tenant
+[11:52:38] 📋 Criando scripts de diagnóstico e utilitários integrados...
+[11:52:38] ✅ Script de salvamento de token criado: /opt/samureye/collector/scripts/save-token.sh
+[11:52:38] ✅ Extrator robusto de token criado: /opt/samureye/collector/scripts/extract-token.sh
+[11:52:38] ✅ Script de diagnóstico integrado criado
+[11:52:38] 🔧 Verificando e corrigindo problemas de autenticação...
+[11:52:38] ✅ Nenhum erro de autenticação detectado
+[11:52:38] ✅ Sistema de correção automática integrado
+[11:52:38] 🔧 Verificação e correção final do status do serviço...
+[11:52:38] ✅ Arquivo .env existe
+[11:52:38] 🔧 Aplicando permissões finais...
+[11:52:38] ✅ Permissões finais aplicadas
+[11:52:39] ✅ Serviço iniciado (tentativa 1)
+[11:52:44] ✅ Serviço está rodando corretamente
+[11:52:47] ✅ Sistema funcionando - logs sendo gerados
+
+[11:52:47] 🎉 HARD RESET DO COLLECTOR AGENT CONCLUÍDO!
+
+📋 RESUMO DA INSTALAÇÃO:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🤖 Collector Agent:
+   • Status:  active
+   • User:    samureye-collector
+   • Dir:     /opt/samureye/collector
+   • Logs:    /var/log/samureye-collector/
+
+🐍 Python 3.11:
+   • Version: Python 3.12.3
+   • Libs:    psutil, requests
+
+📦 Node.js 20:
+   • Version: v20.19.5
+
+🛡️ Security Tools:
+   • Nmap:     ✅ Instalado
+   • Nuclei:   ✅ Instalado
+   • Masscan:  ✅ Instalado
+   • Gobuster: ❌ Ausente
+
+🔧 Comandos Úteis:
+   • Status:     systemctl status samureye-collector
+   • Logs:       tail -f /var/log/samureye-collector/collector.log
+   • Restart:    systemctl restart samureye-collector
+   • Heartbeat:  /opt/samureye/collector/heartbeat.py
+   • Cleanup:    /opt/samureye/collector/scripts/cleanup.sh
+   • Test Conn:  /opt/samureye/collector/test-connectivity.sh
+   • Check Status: /opt/samureye/collector/scripts/check-status.sh
+
+🔗 Conectividade:
+   • API:       https://api.samureye.com.br
+   • Gateway:   192.168.100.151
+
+💓 Heartbeat & Status:
+   • Intervalo: 30 segundos (configurável em /etc/samureye-collector/.env)
+   • Endpoint:  https://api.samureye.com.br/collector-api/heartbeat
+   • Retry:     3 tentativas automáticas por request
+   • Timeout:   30 segundos por request HTTP
+
+📝 PRÓXIMOS PASSOS OBRIGATÓRIOS:
+   ⚠️  SISTEMA BASE INSTALADO - REGISTRO NECESSÁRIO ⚠️
+
+   1. Acesse a interface de administração:
+      https://app.samureye.com.br/admin/collectors
+
+   2. Faça login e vá para 'Gestão de Coletores'
+
+   3. Clique em 'Novo Coletor' e preencha:
+      • Nome: vlxsam04
+      • Hostname: vlxsam04
+      • IP: 192.168.100.151
+
+   4. Copie o TOKEN DE ENROLLMENT gerado (válido por 15 minutos)
+
+   5. Execute o comando de registro:
+      curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/register-collector.sh | bash -s -- <tenant-slug> <enrollment-token>
+
+   📌 EXEMPLO:
+      curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/register-collector.sh | bash -s -- gruppen-it abc123-def456-ghi789
+
+✅ APÓS O REGISTRO:
+   • Collector aparecerá como 'ONLINE' na interface
+   • Logs: tail -f /var/log/samureye-collector/heartbeat.log
+   • Status: /opt/samureye/collector/scripts/check-status.sh
+
+🔧 COMANDOS DISPONÍVEIS:
+   • Instalar sistema base:
+     curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/install-hard-reset.sh | bash
+
+   • Registrar collector (após criar na interface):
+     curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/register-collector.sh | bash -s -- <tenant-slug> <token>
+
+   • Verificar status:
+     /opt/samureye/collector/scripts/check-status.sh
+
+🔍 DIAGNÓSTICO E CORREÇÃO:
+   • Diagnóstico problema 401 Unauthorized:
+     curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/diagnose-collector-401-unauthorized.sh | bash
+
+   • Correção problema 401 Unauthorized:
+     curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/fix-collector-401-issue.sh | bash
+
+   • Diagnóstico auto-registro após exclusão:
+     curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/diagnose-collector-auto-register.sh | bash
+
+   • Correção após exclusão do collector:
+     curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/fix-collector-after-deletion.sh | bash
+
+   • Diagnóstico desconexão registro vs serviço:
+     curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/diagnose-token-disconnect.sh | bash
+
+   • Correção desconexão registro vs serviço:
+     curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/fix-token-disconnect.sh | bash
+
+   • Diagnóstico permissões e salvamento token:
+     curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/diagnose-permissions-token-save.sh | bash
+
+   • Correção permissões e salvamento token:
+     curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/fix-permissions-token-save.sh | bash
+
+   • Diagnóstico resposta API token:
+     curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/diagnose-api-token-response.sh | bash -s -- gruppen-it <TOKEN>
+
+   • Correção extração de token da API:
+     curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/fix-api-token-extraction.sh | bash
+
+🎯 CORREÇÕES INTEGRADAS (COLLECTOR_ID CORRIGIDO):
+   ✅ Extração robusta de token no register-collector.sh
+   ✅ Heartbeat corrigido usa collector_id (não collectorId)
+   ✅ API 400 'collector_id required' resolvido
+
+🔍 DIAGNÓSTICO ATUAL (se ainda há problemas):
+   • Diagnóstico completo do status atual:
+     curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/diagnose-current-status.sh | bash
+
+   • Correção de problemas atuais:
+     curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/fix-current-issues.sh | bash
+
+   • Diagnóstico rápido local:
+     /opt/samureye/collector/scripts/check-status.sh
+
+   • Salvar token manualmente (se necessário):
+     /opt/samureye/collector/scripts/save-token.sh <collector-token>
+
+💡 CORREÇÕES INTEGRADAS NO INSTALL-HARD-RESET:
+   ✅ Usuário com permissões corretas
+   ✅ Arquivo .env com permissões 640 (root:collector)
+   ✅ Permissões de log corrigidas automaticamente
+   ✅ Serviço systemd configurado para usuário samureye-collector
+   ✅ Script de salvamento de token integrado
+   ✅ Extrator robusto de token da API integrado
+   ✅ Teste de permissões automático durante instalação
+   ✅ Heartbeat corrigido - usa collector_id (não collectorId)
+   ✅ Extração robusta de token em register-collector.sh
+   ✅ Correção automática de arquivo .env ausente
+   ✅ Verificação e correção final do status do serviço
+   ✅ Múltiplas tentativas de inicialização do serviço
+
+root@vlxsam04:~# curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/register-collector.sh | bash -s -- gruppen-it c0947126-c9e4-4832-8e44-c62e0e05cb0e
+
+🔧 REGISTRO COLLECTOR SAMUREYE
+==============================
+
+[12:06:16] 🔍 Parâmetros recebidos:
+   • Tenant Slug: gruppen-it
+   • Token: c0947126...0e05cb0e
+[12:06:16] 🔍 Verificando prerequisitos...
+[12:06:16] ✅ Prerequisitos verificados
+[12:06:16] 🔍 Coletando informações do sistema...
+[12:06:16]    • Hostname: vlxsam04
+[12:06:16]    • IP Address: 192.168.100.151
+[12:06:16] 🌐 Testando conectividade com API...
+[12:06:16] ✅ Conectividade OK
+[12:06:16] 🔧 Registrando collector...
+[12:06:16] 📤 Enviando registro para API...
+[12:06:16] 📥 Processando resposta da API...
+[12:06:16] 🎉 COLLECTOR REGISTRADO COM SUCESSO!
+
+[12:06:16] 📋 DETALHES DO REGISTRO:
+   • Nome do Collector: vlxsam04
+   • Tenant: Gruppen it
+   • Status: online
+   • Hostname: vlxsam04
+   • IP: 192.168.100.151
+
+[12:06:16] 💾 Salvando token de autenticação...
+[12:06:16] 🔍 Token encontrado: 7f7ef2d5...b10a5562
+[12:06:16] ✅ Token salvo com sucesso no arquivo de configuração
+   📁 Arquivo: /etc/samureye-collector/.env
+   🔑 Token: 7f7ef2d5...b10a5562
+[12:06:16] 🔄 Reiniciando serviço collector para aplicar novo token...
+[12:06:19] WARNING: ⚠️  Falha ao reiniciar serviço collector
+[12:06:19] ✅ Collector está online e enviando telemetria
+
+[12:06:19] 🎯 REGISTRO CONCLUÍDO COM SUCESSO!
+
+📋 PRÓXIMOS PASSOS:
+   • O collector já está enviando telemetria automaticamente
+   • Verifique o status na interface de administração
+   • O collector aparecerá como 'ONLINE' na gestão de coletores
+
+[12:06:19] ✅ Script de registro finalizado
+root@vlxsam04:~# tail -f /var/log/samureye-collector/collector.log
+2025-09-04 12:05:34,976 - WARNING - Falha no heartbeat: 404
+2025-09-04 12:06:05,985 - WARNING - Falha no heartbeat: 404
+2025-09-04 12:06:17,164 - INFO - Configuração carregada - ID: vlxsam04, Nome:
+2025-09-04 12:06:17,164 - INFO - Iniciando heartbeat collector...
+2025-09-04 12:06:17,164 - INFO - Token não encontrado, registrando collector...
+2025-09-04 12:06:17,164 - INFO - Registrando collector: {'name': '', 'hostname': 'vlxsam04', 'ipAddress': '', 'status': 'enrolling', 'description': 'Collector agent on-premise vlxsam04'}
+/usr/lib/python3/dist-packages/urllib3/connectionpool.py:1100: InsecureRequestWarning: Unverified HTTPS request is being made to host 'api.samureye.com.br'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+2025-09-04 12:06:17,219 - ERROR - Erro no registro: 401 - {"message":"Unauthorized"}
+2025-09-04 12:06:17,219 - ERROR - Falha no registro inicial
+2025-09-04 12:06:27,648 - INFO - Configuração carregada - ID: vlxsam04, Nome:
+2025-09-04 12:06:27,648 - INFO - Iniciando heartbeat collector...
+2025-09-04 12:06:27,648 - INFO - Token não encontrado, registrando collector...
+2025-09-04 12:06:27,648 - INFO - Registrando collector: {'name': '', 'hostname': 'vlxsam04', 'ipAddress': '', 'status': 'enrolling', 'description': 'Collector agent on-premise vlxsam04'}
+/usr/lib/python3/dist-packages/urllib3/connectionpool.py:1100: InsecureRequestWarning: Unverified HTTPS request is being made to host 'api.samureye.com.br'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+2025-09-04 12:06:27,700 - ERROR - Erro no registro: 401 - {"message":"Unauthorized"}
+2025-09-04 12:06:27,700 - ERROR - Falha no registro inicial
+^C
+root@vlxsam04:~#

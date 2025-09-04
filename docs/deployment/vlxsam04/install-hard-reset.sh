@@ -1132,6 +1132,7 @@ class CollectorHeartbeat:
         
     def load_config(self):
         try:
+            # Carregar arquivo .env principal
             env_file = Path("/etc/samureye-collector/.env")
             if env_file.exists():
                 with open(env_file) as f:
@@ -1147,6 +1148,10 @@ class CollectorHeartbeat:
             self.api_base = os.environ.get('API_BASE_URL', 'https://api.samureye.com.br')
             self.heartbeat_interval = int(os.environ.get('HEARTBEAT_INTERVAL', '30'))
             
+            # CORREÇÃO: Ler COLLECTOR_TOKEN do arquivo .env (salvo pelo registro externo)
+            self.collector_token = os.environ.get('COLLECTOR_TOKEN', '').strip()
+            
+            # Manter compatibilidade com token.conf para enrollment
             token_file = Path("/etc/samureye-collector/token.conf")
             self.enrollment_token = None
             if token_file.exists():
@@ -1155,8 +1160,12 @@ class CollectorHeartbeat:
                         if line.startswith('ENROLLMENT_TOKEN='):
                             self.enrollment_token = line.strip().split('=', 1)[1]
                             break
-                            
-            logger.info(f"Configuração carregada - ID: {self.collector_id}, Nome: {self.collector_name}")
+            
+            # Status do token
+            if self.collector_token:
+                logger.info(f"Configuração carregada - ID: {self.collector_id}, Token: {self.collector_token[:8]}...{self.collector_token[-8:]}")
+            else:
+                logger.info(f"Configuração carregada - ID: {self.collector_id}, Token: NÃO CONFIGURADO")
             
         except Exception as e:
             logger.error(f"Erro ao carregar configuração: {e}")
@@ -1241,19 +1250,35 @@ class CollectorHeartbeat:
                 "version": "1.0.0"
             }
             
-            if self.enrollment_token:
-                data["token"] = self.enrollment_token
+            # CORREÇÃO CRÍTICA: Não usar enrollment_token para heartbeat
+            # O heartbeat deve usar COLLECTOR_TOKEN do registro externo
+            if not self.collector_token:
+                logger.debug("COLLECTOR_TOKEN ausente - não enviando heartbeat")
+                return False
+            
+            # Usar COLLECTOR_TOKEN com Authorization Bearer
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {self.collector_token}",
+                "X-Collector-Token": self.collector_token
+            }
                 
-            response = self.session.post(url, json=data, timeout=30)
+            response = self.session.post(url, json=data, headers=headers, timeout=30)
             
             if response.status_code == 200:
                 result = response.json()
-                logger.info(f"Heartbeat enviado - Status: {result.get('status', 'unknown')}")
+                logger.debug(f"Heartbeat enviado - Status: {result.get('status', 'unknown')}")
                 
                 if result.get('transitioned'):
                     logger.info("✅ Collector transicionou de ENROLLING para ONLINE")
                     
                 return True
+            elif response.status_code == 401:
+                logger.warning("Token inválido ou expirado - collector precisa ser re-registrado")
+                return False
+            elif response.status_code == 404:
+                logger.warning("Collector não encontrado na API")
+                return False
             else:
                 logger.error(f"Erro no heartbeat: {response.status_code} - {response.text}")
                 return False
@@ -1265,26 +1290,43 @@ class CollectorHeartbeat:
     def run(self):
         logger.info("Iniciando heartbeat collector...")
         
-        if not self.enrollment_token:
-            logger.info("Token não encontrado, registrando collector...")
-            if not self.register_collector():
-                logger.error("Falha no registro inicial")
-                return
+        # CORREÇÃO: Verificar COLLECTOR_TOKEN em vez de enrollment_token
+        if not self.collector_token:
+            logger.warning("COLLECTOR_TOKEN não encontrado - collector precisa ser registrado")
+            logger.info("Execute: curl -fsSL .../register-collector.sh | bash -s -- <tenant> <token>")
+            
+            # Tentar auto-registro como fallback se há enrollment_token
+            if self.enrollment_token:
+                logger.info("Tentando auto-registro com enrollment_token...")
+                if not self.register_collector():
+                    logger.error("Falha no auto-registro - aguardando token válido")
+                    # Não fazer return, continuar loop aguardando token
+            else:
+                logger.error("Nenhum token disponível - aguardando registro manual")
                 
         consecutive_failures = 0
         max_failures = 5
         
         while True:
             try:
-                if self.send_heartbeat():
-                    consecutive_failures = 0
-                else:
-                    consecutive_failures += 1
-                    
-                    if consecutive_failures >= max_failures:
-                        logger.warning("Muitas falhas consecutivas, tentando re-registrar...")
-                        self.register_collector()
+                # Recarregar configuração periodicamente para pegar novo token
+                if consecutive_failures % 3 == 0:
+                    self.load_config()
+                
+                # Só tentar heartbeat se há token
+                if self.collector_token:
+                    if self.send_heartbeat():
                         consecutive_failures = 0
+                    else:
+                        consecutive_failures += 1
+                        
+                        if consecutive_failures >= max_failures:
+                            logger.warning("Muitas falhas consecutivas - recarregando configuração")
+                            self.load_config()
+                            consecutive_failures = 0
+                else:
+                    logger.debug("Aguardando COLLECTOR_TOKEN...")
+                    consecutive_failures += 1
                         
                 time.sleep(self.heartbeat_interval)
                 
@@ -1906,6 +1948,8 @@ echo "   ✅ Extração robusta de token em register-collector.sh"
 echo "   ✅ Correção automática de arquivo .env ausente"
 echo "   ✅ Verificação e correção final do status do serviço"
 echo "   ✅ Múltiplas tentativas de inicialização do serviço"
+echo "   ✅ CORREÇÃO CRÍTICA - Heartbeat usa COLLECTOR_TOKEN do registro externo"
+echo "   ✅ Eliminada desconexão entre registro externo e heartbeat interno"
 echo ""
 
 exit 0
