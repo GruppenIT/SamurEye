@@ -167,7 +167,7 @@ rm -f /tmp/cleanup_database.sql
 # ============================================================================
 
 log "🔄 Atualizando sistema..."
-apt-get update && apt-get upgrade -y
+#apt-get update && apt-get upgrade -y
 
 # Configurar timezone
 timedatectl set-timezone America/Sao_Paulo
