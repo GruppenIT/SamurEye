@@ -1,0 +1,47 @@
+root@vlxsam02:/opt/samureye/SamurEye# curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/fix-journey-execution.sh | bash
+🔧 CORREÇÃO DEFINITIVA - CRIAÇÃO EXECUÇÃO COM TODOS OS CAMPOS
+============================================================
+🔍 Collector ID: b6d6c21f...da951b22
+🔍 Jornada ID: 43c05c11...58b64036
+
+🧹 Limpando execuções antigas...
+DELETE 0
+
+✅ Criando execução com todos os campos obrigatórios...
+✅ Execução criada com sucesso!
+                  id
+--------------------------------------
+ 8418be1f-d4ca-44df-aec6-c78b70d9f1d9
+(1 row)
+
+INSERT 0 1
+
+🔍 Verificando se execução persistiu...
+ total_queued |       ultima_criacao
+--------------+----------------------------
+            1 | 2025-09-06 20:55:10.525086
+(1 row)
+
+
+📋 Execuções pendentes:
+                  id                  |              journey_id              |             collector_id             | status | execution_number |       scheduled_for        |         created_at
+--------------------------------------+--------------------------------------+--------------------------------------+--------+------------------+----------------------------+----------------------------
+ 8418be1f-d4ca-44df-aec6-c78b70d9f1d9 | 43c05c11-557f-4233-a195-137758b64036 | b6d6c21f-cf49-43a0-ba22-68e3da951b22 | queued |                1 | 2025-09-06 20:55:10.525086 | 2025-09-06 20:55:10.525086
+(1 row)
+
+
+🧪 Testando endpoint após correção...
+HTTP Code: 200
+Response: [{"id":"8418be1f-d4ca-44df-aec6-c78b70d9f1d9","journeyId":"43c05c11-557f-4233-a195-137758b64036","status":"queued","executionNumber":1,"scheduledFor":"2025-09-06T20:55:10.525Z","startedAt":null,"completedAt":null,"duration":null,"results":null,"errorMessage":null,"collectorId":"b6d6c21f-cf49-43a0-ba22-68e3da951b22","metadata":null,"createdAt":"2025-09-06T20:55:10.525Z","updatedAt":"2025-09-06T20:55:10.525Z"}]
+
+🎯 RESULTADO:
+🎉 SUCESSO TOTAL! Endpoint retornando execuções!
+   ✅ Collector deve parar de mostrar erro em 30 segundos
+   ✅ Logs devem mostrar execução de jornada
+
+📊 RESUMO DA CORREÇÃO:
+   🔧 Corrigido: execution_number = 1
+   🔧 Corrigido: scheduled_for = NOW()
+   ✅ Todos os campos NOT NULL preenchidos
+   🎯 Execução deve persistir e aparecer no endpoint
+root@vlxsam02:/opt/samureye/SamurEye#
