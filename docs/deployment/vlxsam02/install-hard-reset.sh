@@ -2605,6 +2605,184 @@ EOF
 node /tmp/expand_journey_scheduling.js "$WORKING_DIR/server/routes.ts"
 rm /tmp/expand_journey_scheduling.js
 
+# ============================================================================
+# CORREÇÃO CRÍTICA: AUTENTICAÇÃO COLLECTOR - ACEITAR ID OU NOME
+# ============================================================================
+
+log "🔧 Aplicando correção crítica de autenticação collector..."
+
+cat > /tmp/fix_collector_authentication.js << 'EOF'
+const fs = require('fs');
+
+function fixCollectorAuthentication(filePath) {
+    console.log(`🔧 Corrigindo autenticação collector em ${filePath}...`);
+    
+    let content = fs.readFileSync(filePath, 'utf8');
+    
+    // Correção 1: Endpoint /collector-api/journeys/pending
+    const oldPending = `// CORREÇÃO: Verificar token tanto como enrollment_token quanto como collector ID
+      let collector = await storage.getCollectorByEnrollmentToken(token as string);
+      
+      if (!collector) {
+        // Se não encontrou por enrollment_token, tentar por ID do collector
+        const { db } = await import('./db');
+        const { collectors } = await import('@shared/schema');
+        const { eq, or } = await import('drizzle-orm');
+        
+        const [collectorByToken] = await db
+          .select()
+          .from(collectors)
+          .where(
+            or(
+              eq(collectors.enrollmentToken, token as string),
+              eq(collectors.id, token as string)  // CORREÇÃO: Aceitar token como ID do collector
+            )
+          );
+        collector = collectorByToken;
+      }
+      
+      if (!collector) {
+        console.log(\`DEBUG: Collector not found for token: \${token}\`);
+        return res.status(401).json({ message: "Invalid collector or token" });
+      }
+      
+      if (collector.id !== collector_id) {
+        console.log(\`DEBUG: Collector ID mismatch: expected \${collector_id}, got \${collector.id}\`);
+        return res.status(401).json({ message: "Invalid collector or token" });
+      }`;
+
+    const newPending = `// CORREÇÃO COMPLETA: Verificar token E collector_id de múltiplas formas
+      let collector = await storage.getCollectorByEnrollmentToken(token as string);
+      
+      if (!collector) {
+        // Se não encontrou por enrollment_token, buscar de múltiplas formas
+        const { db } = await import('./db');
+        const { collectors } = await import('@shared/schema');
+        const { eq, or } = await import('drizzle-orm');
+        
+        const [collectorByToken] = await db
+          .select()
+          .from(collectors)
+          .where(
+            or(
+              eq(collectors.enrollmentToken, token as string),
+              eq(collectors.id, token as string),  // Buscar por ID
+              eq(collectors.name, token as string)  // Buscar por nome também
+            )
+          );
+        collector = collectorByToken;
+      }
+      
+      if (!collector) {
+        console.log(\`DEBUG: Collector not found for token: \${token}\`);
+        return res.status(401).json({ message: "Invalid collector or token" });
+      }
+      
+      // CORREÇÃO CRÍTICA: Aceitar collector_id como ID OU NOME
+      const isValidCollector = collector.id === collector_id || collector.name === collector_id;
+      if (!isValidCollector) {
+        console.log(\`DEBUG: Collector mismatch - expected: \${collector_id}, got ID: \${collector.id}, name: \${collector.name}\`);
+        return res.status(401).json({ message: "Invalid collector or token" });
+      }
+      
+      console.log(\`DEBUG: Collector validated - ID: \${collector.id}, name: \${collector.name}, requested: \${collector_id}\`);`;
+
+    // Aplicar correção 1
+    if (content.includes(oldPending)) {
+        content = content.replace(oldPending, newPending);
+        console.log('✅ Correção 1 aplicada: /collector-api/journeys/pending');
+    } else {
+        console.log('⚠️ Correção 1: Padrão não encontrado para /collector-api/journeys/pending');
+    }
+
+    // Correção 2: Endpoint /collector-api/journeys/results
+    const oldResults = `// CORREÇÃO: Verificar token tanto como enrollment_token quanto como collector ID
+      let collector = await storage.getCollectorByEnrollmentToken(token as string);
+      
+      if (!collector) {
+        // Se não encontrou por enrollment_token, tentar por ID do collector
+        const { db } = await import('./db');
+        const { collectors } = await import('@shared/schema');
+        const { eq, or } = await import('drizzle-orm');
+        
+        const [collectorByToken] = await db
+          .select()
+          .from(collectors)
+          .where(
+            or(
+              eq(collectors.enrollmentToken, token as string),
+              eq(collectors.id, token as string)  // CORREÇÃO: Aceitar token como ID do collector
+            )
+          );
+        collector = collectorByToken;
+      }
+      
+      if (!collector || collector.id !== collector_id) {
+        return res.status(401).json({ message: "Invalid collector or token" });
+      }`;
+
+    const newResults = `// CORREÇÃO COMPLETA: Verificar token E collector_id de múltiplas formas
+      let collector = await storage.getCollectorByEnrollmentToken(token as string);
+      
+      if (!collector) {
+        // Se não encontrou por enrollment_token, buscar de múltiplas formas
+        const { db } = await import('./db');
+        const { collectors } = await import('@shared/schema');
+        const { eq, or } = await import('drizzle-orm');
+        
+        const [collectorByToken] = await db
+          .select()
+          .from(collectors)
+          .where(
+            or(
+              eq(collectors.enrollmentToken, token as string),
+              eq(collectors.id, token as string),  // Buscar por ID
+              eq(collectors.name, token as string)  // Buscar por nome também
+            )
+          );
+        collector = collectorByToken;
+      }
+      
+      if (!collector) {
+        return res.status(401).json({ message: "Invalid collector or token" });
+      }
+      
+      // CORREÇÃO CRÍTICA: Aceitar collector_id como ID OU NOME
+      const isValidCollector = collector.id === collector_id || collector.name === collector_id;
+      if (!isValidCollector) {
+        console.log(\`DEBUG: Collector mismatch - expected: \${collector_id}, got ID: \${collector.id}, name: \${collector.name}\`);
+        return res.status(401).json({ message: "Invalid collector or token" });
+      }`;
+
+    // Aplicar correção 2
+    if (content.includes(oldResults)) {
+        content = content.replace(oldResults, newResults);
+        console.log('✅ Correção 2 aplicada: /collector-api/journeys/results');
+    } else {
+        console.log('⚠️ Correção 2: Padrão não encontrado para /collector-api/journeys/results');
+    }
+
+    // Salvar arquivo corrigido
+    fs.writeFileSync(filePath, content, 'utf8');
+    console.log('💾 Arquivo salvo com correções aplicadas');
+}
+
+// Aplicar correções
+const filePath = process.argv[2];
+if (!filePath) {
+    console.error('❌ Caminho do arquivo não fornecido');
+    process.exit(1);
+}
+
+fixCollectorAuthentication(filePath);
+EOF
+
+# Aplicar correção de autenticação collector
+node /tmp/fix_collector_authentication.js "$WORKING_DIR/server/routes.ts"
+rm -f /tmp/fix_collector_authentication.js
+
+log "✅ Correção de autenticação collector aplicada com sucesso"
+
 # Expandir storage com métodos de agendamento de jornadas
 log "🔧 Expandindo storage com métodos de agendamento..."
 cat > /tmp/expand_journey_storage.js << 'EOF'
