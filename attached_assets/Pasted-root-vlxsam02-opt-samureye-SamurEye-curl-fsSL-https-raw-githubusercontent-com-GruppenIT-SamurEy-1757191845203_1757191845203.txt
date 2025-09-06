@@ -1,0 +1,114 @@
+root@vlxsam02:/opt/samureye/SamurEye# curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/debug-executions-table.sh | bash
+🔍 INVESTIGAÇÃO TABELA journey_executions
+========================================
+🔍 Collector ID: b6d6c21f...da951b22
+
+📋 Teste 1: Estrutura da tabela journey_executions...
+                                 Table "public.journey_executions"
+      Column      |            Type             | Collation | Nullable |          Default    
+------------------+-----------------------------+-----------+----------+----------------------------
+ id               | character varying           |           | not null | gen_random_uuid()
+ journey_id       | character varying           |           | not null |
+ status           | execution_status            |           | not null | 'queued'::execution_status
+ execution_number | integer                     |           | not null |
+ scheduled_for    | timestamp without time zone |           | not null |
+ started_at       | timestamp without time zone |           |          |
+ completed_at     | timestamp without time zone |           |          |
+ duration_seconds | integer                     |           |          |
+ results          | jsonb                       |           |          |
+ error_message    | text                        |           |          |
+ collector_id     | character varying           |           |          |
+ metadata         | jsonb                       |           |          |
+ created_at       | timestamp without time zone |           |          | now()
+ updated_at       | timestamp without time zone |           |          | now()
+Indexes:
+    "journey_executions_pkey" PRIMARY KEY, btree (id)
+Foreign-key constraints:
+    "journey_executions_collector_id_collectors_id_fk" FOREIGN KEY (collector_id) REFERENCES collectors(id)
+    "journey_executions_journey_id_journeys_id_fk" FOREIGN KEY (journey_id) REFERENCES journeys(id) ON DELETE CASCADE
+
+
+📋 Teste 2: Constraints da tabela...
+                     conname                      | contype |                             definition
+--------------------------------------------------+---------+--------------------------------------------------------------------
+ journey_executions_collector_id_collectors_id_fk | f       | FOREIGN KEY (collector_id) REFERENCES collectors(id)
+ journey_executions_journey_id_journeys_id_fk     | f       | FOREIGN KEY (journey_id) REFERENCES journeys(id) ON DELETE CASCADE
+ journey_executions_pkey                          | p       | PRIMARY KEY (id)
+(3 rows)
+
+
+📋 Teste 3: Verificando jornada existente...
+Jornada ID: 43c05c11-557f-4233-a195-137758b64036
+                  id                  |    name    |             collector_id             |              tenant_id               | status
+--------------------------------------+------------+--------------------------------------+--------------------------------------+---------
+ 43c05c11-557f-4233-a195-137758b64036 | Teste-scan | b6d6c21f-cf49-43a0-ba22-68e3da951b22 | 94758e13-e3b5-4324-b9e0-6338db0ff5e1 | running
+(1 row)
+
+
+📋 Teste 4: Inserção manual com verbose...
+Tentando inserir execução passo a passo...
+
+4.1: Verificando execuções existentes...
+ total
+-------
+     0
+(1 row)
+
+
+4.2: Tentando inserção simples...
+ERROR:  null value in column "execution_number" of relation "journey_executions" violates not-null constraint
+DETAIL:  Failing row contains (test-exec-001, 43c05c11-557f-4233-a195-137758b64036, queued, null, null, null, null, null, null, null, b6d6c21f-cf49-43a0-ba22-68e3da951b22, null, 2025-09-06 20:50:25.293265, 2025-09-06 20:50:25.293265).
+
+4.3: Verificando após inserção...
+ total_after
+-------------
+           0
+(1 row)
+
+
+4.4: Tentando com gen_random_uuid()...
+ERROR:  null value in column "execution_number" of relation "journey_executions" violates not-null constraint
+DETAIL:  Failing row contains (203703d0-3234-499f-8341-8c291e005262, 43c05c11-557f-4233-a195-137758b64036, queued, null, null, null, null, null, null, null, b6d6c21f-cf49-43a0-ba22-68e3da951b22, null, 2025-09-06 20:50:25.386483, 2025-09-06 20:50:25.386483).
+
+4.5: Verificando após segunda inserção...
+ total_final
+-------------
+           0
+(1 row)
+
+
+4.6: Mostrando todos os registros...
+ id | journey_id | status | execution_number | scheduled_for | started_at | completed_at | duration_seconds | results | error_message | collector_id | metadata | created_at | updated_at
+----+------------+--------+------------------+---------------+------------+--------------+------------------+---------+---------------+--------------+----------+------------+------------
+(0 rows)
+
+
+4.7: Verificando configurações de transação...
+ current_setting
+-----------------
+ read committed
+(1 row)
+
+
+📋 Teste 5: Verificando permissões do usuário...
+ can_insert | can_select
+------------+------------
+ t          | t
+(1 row)
+
+
+📋 Teste 6: Verificando triggers na tabela...
+            tgname            | tgtype | tgenabled
+------------------------------+--------+-----------
+ RI_ConstraintTrigger_c_19305 |      5 | O
+ RI_ConstraintTrigger_c_19306 |     17 | O
+ RI_ConstraintTrigger_c_19310 |      5 | O
+ RI_ConstraintTrigger_c_19311 |     17 | O
+(4 rows)
+
+
+🎯 INVESTIGAÇÃO COMPLETA!
+   📊 Se inserções falharam: problema de constraint/foreign key
+   📊 Se inserções passaram: problema de transação/rollback
+   📊 Se contagem ainda 0: problema de isolation/commit
+root@vlxsam02:/opt/samureye/SamurEye#
