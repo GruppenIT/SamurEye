@@ -1,0 +1,64 @@
+root@vlxsam02:/opt/samureye/SamurEye# curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/test-endpoint-direct.sh | bash
+🧪 TESTE DIRETO DO ENDPOINT - collector-api/journeys/pending
+===========================================================
+🔍 Collector ID: b6d6c21f...da951b22
+🔍 Token: b6d6c21f...da951b22
+
+📋 Teste 1: Chamada direta ao endpoint...
+URL: https://api.samureye.com.br/collector-api/journeys/pending?collector_id=b6d6c21f-cf49-43a0-ba22-68e3da951b22&token=b6d6c21f-cf49-43a0-ba22-68e3da951b22
+HTTP Code: 200
+Response: []
+
+📋 Teste 2: Verificando dados que o endpoint deveria retornar...
+
+🔍 Collector no banco:
+                  id                  |   name   | has_token | token_valid
+--------------------------------------+----------+-----------+-------------
+ b6d6c21f-cf49-43a0-ba22-68e3da951b22 | vlxsam04 | t         | t
+(1 row)
+
+
+🔍 Execuções pendentes (o que o endpoint deveria retornar):
+ id | journey_id | collector_id | status | created_at | journey_name
+----+------------+--------------+--------+------------+--------------
+(0 rows)
+
+
+🔍 Simulando lógica do endpoint:
+1. Buscar collector por enrollment_token...
+                  id                  |   name   | status
+--------------------------------------+----------+--------
+ b6d6c21f-cf49-43a0-ba22-68e3da951b22 | vlxsam04 | FOUND
+(1 row)
+
+
+2. Buscar execuções pendentes...
+ id | journey_id | status | execution_number | scheduled_for | started_at | completed_at | duration_seconds | results | error_message | collector_id | metadata | created_at | updated_at
+----+------------+--------+------------------+---------------+------------+--------------+------------------+---------+---------------+--------------+----------+------------+------------
+(0 rows)
+
+
+3. Filtrar execuções para este collector...
+ id | journey_id | status | execution_number | scheduled_for | started_at | completed_at | duration_seconds | results | error_message | collector_id | metadata | created_at | updated_at
+----+------------+--------+------------------+---------------+------------+--------------+------------------+---------+---------------+--------------+----------+------------+------------
+(0 rows)
+
+
+📋 Teste 3: Forçando criação de execução correta...
+Jornada encontrada: 43c05c11-557f-4233-a195-137758b64036
+DELETE 0
+✅ Nova execução criada!
+Verificando...
+ total_queued
+--------------
+            0
+(1 row)
+
+
+📋 Teste 4: Testando endpoint após correção...
+HTTP Code: 200
+Response: []
+
+🎯 ANÁLISE:
+⚠️ Endpoint OK mas sem execuções pendentes
+root@vlxsam02:/opt/samureye/SamurEye#
