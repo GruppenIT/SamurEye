@@ -1,0 +1,275 @@
+root@vlxsam02:~# curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/diagnose-collector-authentication.sh | bash
+
+🔍 DIAGNÓSTICO COMPLETO - AUTENTICAÇÃO COLLECTOR
+==============================================
+
+[18:54:49] 📋 1. VERIFICANDO CÓDIGO DOS ENDPOINTS NO vlxsam02...
+[18:54:49] 🔍 Verificando endpoint /collector-api/journeys/pending...
+[18:54:49] ❌ ❌ CORREÇÃO AUSENTE: Endpoint NÃO aceita token como collector ID
+
+🔧 Código atual do endpoint:
+  app.get('/collector-api/journeys/pending', async (req, res) => {
+    try {
+      const { collector_id, token } = req.query;
+
+      if (!token || !collector_id) {
+        return res.status(401).json({ message: "Collector ID and token required" });
+      }
+
+      // CORREÇÃO: Verificar token tanto como enrollment_token quanto como collector ID
+      let collector = await storage.getCollectorByEnrollmentToken(token as string);
+
+      if (!collector) {
+        // Se não encontrou por enrollment_token, tentar por ID do collector
+        const { db } = await import('./db');
+        const { collectors } = await import('@shared/schema');
+        const { eq, or } = await import('drizzle-orm');
+
+        const [collectorByToken] = await db
+          .select()
+          .from(collectors)
+          .where(
+[18:54:49] ⚠️ ⚠️ IMPORT MISSING: 'or' pode não estar importado
+
+🔍 Imports atuais do drizzle-orm:
+        const { eq, or } = await import('drizzle-orm');
+        const { eq, or } = await import('drizzle-orm');
+[18:54:49] 🗃️ 2. VERIFICANDO BANCO DE DADOS...
+Connection to 172.24.1.153 5432 port [tcp/postgresql] succeeded!
+[18:54:49] ✅ PostgreSQL acessível
+[18:54:49] 🔍 Verificando tabela collectors...
+"=== ESTRUTURA DA TABELA COLLECTORS ==="
+                                          Table "public.collectors"
+          Column          |            Type             | Collation | Nullable |           Default
+--------------------------+-----------------------------+-----------+----------+-----------------------------
+ id                       | character varying           |           | not null | gen_random_uuid()
+ tenant_id                | character varying           |           | not null |
+ name                     | character varying           |           | not null |
+ hostname                 | character varying           |           |          |
+ ip_address               | character varying           |           |          |
+ status                   | collector_status            |           | not null | 'offline'::collector_status
+ version                  | character varying           |           |          |
+ last_seen                | timestamp without time zone |           |          |
+ enrollment_token         | character varying           |           |          |
+ enrollment_token_expires | timestamp without time zone |           |          |
+ metadata                 | jsonb                       |           |          |
+ created_at               | timestamp without time zone |           |          | now()
+ updated_at               | timestamp without time zone |           |          | now()
+Indexes:
+    "collectors_pkey" PRIMARY KEY, btree (id)
+Foreign-key constraints:
+    "collectors_tenant_id_tenants_id_fk" FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
+Referenced by:
+    TABLE "collector_telemetry" CONSTRAINT "collector_telemetry_collector_id_collectors_id_fk" FOREIGN KEY (collector_id) REFERENCES collectors(id) ON DELETE CASCADE
+    TABLE "journey_executions" CONSTRAINT "journey_executions_collector_id_collectors_id_fk" FOREIGN KEY (collector_id) REFERENCES collectors(id)
+    TABLE "journeys" CONSTRAINT "journeys_collector_id_collectors_id_fk" FOREIGN KEY (collector_id) REFERENCES collectors(id)
+
+""
+"=== TODOS OS COLLECTORS ==="
+ERROR:  column "enrollmentToken" does not exist
+LINE 1: SELECT id, name, status, "enrollmentToken", "createdAt", "la...
+                                 ^
+HINT:  Perhaps you meant to reference the column "collectors.enrollment_token".
+""
+"=== COLLECTOR vlxsam04 ESPECÍFICO ==="
+ERROR:  column "enrollmentToken" does not exist
+LINE 1: SELECT id, name, status, "enrollmentToken", "createdAt", "la...
+                                 ^
+HINT:  Perhaps you meant to reference the column "collectors.enrollment_token".
+""
+"=== BUSCAR POR TOKEN PARCIAL ==="
+ERROR:  column "enrollmentToken" does not exist
+LINE 1: SELECT id, name, status, "enrollmentToken", "createdAt", "la...
+                                 ^
+HINT:  Perhaps you meant to reference the column "collectors.enrollment_token".
+[18:54:49] 🌐 3. TESTANDO ENDPOINT DIRETAMENTE...
+[18:54:49] 🔍 Buscando token real do vlxsam04...
+ERROR:  column "enrollmentToken" does not exist
+LINE 1: SELECT "enrollmentToken" FROM collectors WHERE id = 'vlxsam0...
+               ^
+HINT:  Perhaps you meant to reference the column "collectors.enrollment_token".
+[18:54:49] ⚠️ ⚠️ Token não encontrado no banco para vlxsam04
+[18:54:49] 🔍 Testando endpoint com token do log...
+* Host api.samureye.com.br:443 was resolved.
+* IPv6: (none)
+* IPv4: 172.24.1.151
+*   Trying 172.24.1.151:443...
+* Connected to api.samureye.com.br (172.24.1.151) port 443
+* ALPN: curl offers h2,http/1.1
+* TLSv1.3 (OUT), TLS handshake, Client hello (1):
+*  CAfile: /etc/ssl/certs/ca-certificates.crt
+*  CApath: /etc/ssl/certs
+* TLSv1.3 (IN), TLS handshake, Server hello (2):
+* TLSv1.3 (IN), TLS handshake, Encrypted Extensions (8):
+* TLSv1.3 (IN), TLS handshake, Certificate (11):
+* TLSv1.3 (IN), TLS handshake, CERT verify (15):
+* TLSv1.3 (IN), TLS handshake, Finished (20):
+* TLSv1.3 (OUT), TLS change cipher, Change cipher spec (1):
+* TLSv1.3 (OUT), TLS handshake, Finished (20):
+* SSL connection using TLSv1.3 / TLS_AES_256_GCM_SHA384 / X25519 / id-ecPublicKey
+* ALPN: server accepted h2
+* Server certificate:
+*  subject: CN=samureye.com.br
+*  start date: Aug 31 15:23:34 2025 GMT
+*  expire date: Nov 29 15:23:33 2025 GMT
+*  subjectAltName: host "api.samureye.com.br" matched cert's "*.samureye.com.br"
+*  issuer: C=US; O=Let's Encrypt; CN=E7
+*  SSL certificate verify ok.
+*   Certificate level 0: Public key type EC/prime256v1 (256/128 Bits/secBits), signed using ecdsa-with-SHA384
+*   Certificate level 1: Public key type EC/secp384r1 (384/192 Bits/secBits), signed using sha256WithRSAEncryption
+*   Certificate level 2: Public key type RSA (4096/152 Bits/secBits), signed using sha256WithRSAEncryption
+* using HTTP/2
+* [HTTP/2] [1] OPENED stream for https://api.samureye.com.br/collector-api/journeys/pending?collector_id=vlxsam04&token=f47ce480-9b7acf84-2025-09-06-1757195483628
+* [HTTP/2] [1] [:method: GET]
+* [HTTP/2] [1] [:scheme: https]
+* [HTTP/2] [1] [:authority: api.samureye.com.br]
+* [HTTP/2] [1] [:path: /collector-api/journeys/pending?collector_id=vlxsam04&token=f47ce480-9b7acf84-2025-09-06-1757195483628]
+* [HTTP/2] [1] [user-agent: curl/8.5.0]
+* [HTTP/2] [1] [accept: */*]
+> GET /collector-api/journeys/pending?collector_id=vlxsam04&token=f47ce480-9b7acf84-2025-09-06-1757195483628 HTTP/2
+> Host: api.samureye.com.br
+> User-Agent: curl/8.5.0
+> Accept: */*
+>
+* TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
+* TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
+* old SSL session ID is stale, removing
+< HTTP/2 401
+< server: nginx
+< date: Sat, 06 Sep 2025 21:54:49 GMT
+< content-type: application/json; charset=utf-8
+< content-length: 40
+< x-powered-by: Express
+< access-control-allow-origin: *
+< access-control-allow-methods: GET, POST, PUT, DELETE, PATCH, OPTIONS
+< access-control-allow-headers: Origin, X-Requested-With, Content-Type, Accept, Authorization
+< access-control-allow-credentials: true
+< etag: W/"28-N8PGAMIO2LFC0fdRAU58E4gQ5mo"
+< strict-transport-security: max-age=63072000; includeSubDomains; preload
+< x-frame-options: DENY
+< x-content-type-options: nosniff
+< x-xss-protection: 1; mode=block
+< referrer-policy: strict-origin-when-cross-origin
+< content-security-policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' ws: wss:;
+<
+* Connection #0 to host api.samureye.com.br left intact
+{"message":"Invalid collector or token"}[18:54:49] 🔍 Testando endpoint com collector_id como token...
+* Host api.samureye.com.br:443 was resolved.
+* IPv6: (none)
+* IPv4: 172.24.1.151
+*   Trying 172.24.1.151:443...
+* Connected to api.samureye.com.br (172.24.1.151) port 443
+* ALPN: curl offers h2,http/1.1
+* TLSv1.3 (OUT), TLS handshake, Client hello (1):
+*  CAfile: /etc/ssl/certs/ca-certificates.crt
+*  CApath: /etc/ssl/certs
+* TLSv1.3 (IN), TLS handshake, Server hello (2):
+* TLSv1.3 (IN), TLS handshake, Encrypted Extensions (8):
+* TLSv1.3 (IN), TLS handshake, Certificate (11):
+* TLSv1.3 (IN), TLS handshake, CERT verify (15):
+* TLSv1.3 (IN), TLS handshake, Finished (20):
+* TLSv1.3 (OUT), TLS change cipher, Change cipher spec (1):
+* TLSv1.3 (OUT), TLS handshake, Finished (20):
+* SSL connection using TLSv1.3 / TLS_AES_256_GCM_SHA384 / X25519 / id-ecPublicKey
+* ALPN: server accepted h2
+* Server certificate:
+*  subject: CN=samureye.com.br
+*  start date: Aug 31 15:23:34 2025 GMT
+*  expire date: Nov 29 15:23:33 2025 GMT
+*  subjectAltName: host "api.samureye.com.br" matched cert's "*.samureye.com.br"
+*  issuer: C=US; O=Let's Encrypt; CN=E7
+*  SSL certificate verify ok.
+*   Certificate level 0: Public key type EC/prime256v1 (256/128 Bits/secBits), signed using ecdsa-with-SHA384
+*   Certificate level 1: Public key type EC/secp384r1 (384/192 Bits/secBits), signed using sha256WithRSAEncryption
+*   Certificate level 2: Public key type RSA (4096/152 Bits/secBits), signed using sha256WithRSAEncryption
+* using HTTP/2
+* [HTTP/2] [1] OPENED stream for https://api.samureye.com.br/collector-api/journeys/pending?collector_id=vlxsam04&token=vlxsam04
+* [HTTP/2] [1] [:method: GET]
+* [HTTP/2] [1] [:scheme: https]
+* [HTTP/2] [1] [:authority: api.samureye.com.br]
+* [HTTP/2] [1] [:path: /collector-api/journeys/pending?collector_id=vlxsam04&token=vlxsam04]
+* [HTTP/2] [1] [user-agent: curl/8.5.0]
+* [HTTP/2] [1] [accept: */*]
+> GET /collector-api/journeys/pending?collector_id=vlxsam04&token=vlxsam04 HTTP/2
+> Host: api.samureye.com.br
+> User-Agent: curl/8.5.0
+> Accept: */*
+>
+* TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
+* TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
+* old SSL session ID is stale, removing
+< HTTP/2 401
+< server: nginx
+< date: Sat, 06 Sep 2025 21:54:49 GMT
+< content-type: application/json; charset=utf-8
+< content-length: 40
+< x-powered-by: Express
+< access-control-allow-origin: *
+< access-control-allow-methods: GET, POST, PUT, DELETE, PATCH, OPTIONS
+< access-control-allow-headers: Origin, X-Requested-With, Content-Type, Accept, Authorization
+< access-control-allow-credentials: true
+< etag: W/"28-N8PGAMIO2LFC0fdRAU58E4gQ5mo"
+< strict-transport-security: max-age=63072000; includeSubDomains; preload
+< x-frame-options: DENY
+< x-content-type-options: nosniff
+< x-xss-protection: 1; mode=block
+< referrer-policy: strict-origin-when-cross-origin
+< content-security-policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' ws: wss:;
+<
+* Connection #0 to host api.samureye.com.br left intact
+{"message":"Invalid collector or token"}[18:54:49] 📋 4. VERIFICANDO LOGS DO SERVIDOR...
+[18:54:49] 🔍 Últimas linhas do log da aplicação:
+6:52:57 PM [express] GET /api/dashboard/metrics 304 in 4ms :: {"collectors":{"online":1,"total":1},"…
+DEBUG: Collector ID mismatch: expected vlxsam04, got f47ce480-c4dc-4e3a-b87f-083a9b7acf84
+6:53:27 PM [express] GET /api/dashboard/metrics 304 in 4ms :: {"collectors":{"online":1,"total":1},"…
+DEBUG: Collector ID mismatch: expected vlxsam04, got f47ce480-c4dc-4e3a-b87f-083a9b7acf84
+6:53:57 PM [express] GET /api/dashboard/metrics 304 in 4ms :: {"collectors":{"online":1,"total":1},"…
+DEBUG: Collector ID mismatch: expected vlxsam04, got f47ce480-c4dc-4e3a-b87f-083a9b7acf84
+DEBUG: Collector not found for token: f47ce480-9b7acf84-2025-09-06-1757195483628
+DEBUG: Collector not found for token: vlxsam04
+6:54:27 PM [express] GET /api/dashboard/metrics 304 in 4ms :: {"collectors":{"online":1,"total":1},"…
+DEBUG: Collector ID mismatch: expected vlxsam04, got f47ce480-c4dc-4e3a-b87f-083a9b7acf84
+DEBUG: Collector not found for token: f47ce480-9b7acf84-2025-09-06-1757195483628
+DEBUG: Collector not found for token: vlxsam04
+[18:54:49] 🔍 Logs do systemd (últimos 10):
+[18:54:49] 🔄 5. VERIFICANDO SE SERVIDOR USA CÓDIGO ATUALIZADO...
+[18:54:49] ✅ Serviço samureye-app está rodando
+[18:54:49] 📅 routes.ts modificado há 585 segundos
+[18:54:49] ⚠️ ⚠️ Arquivo pode estar desatualizado
+[18:54:49] 🕒 Serviço iniciado em: Sat 2025-09-06 18:45:17 -03
+[18:54:49] 🔧 6. TESTE MANUAL DO CÓDIGO JAVASCRIPT...
+[18:54:49] 🔍 Executando teste de validação...
+node:internal/modules/cjs/loader:1210
+  throw err;
+  ^
+
+Error: Cannot find module 'pg'
+Require stack:
+- /tmp/test_token_validation.js
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1207:15)
+    at Module._load (node:internal/modules/cjs/loader:1038:27)
+    at Module.require (node:internal/modules/cjs/loader:1289:19)
+    at require (node:internal/modules/helpers:182:18)
+    at Object.<anonymous> (/tmp/test_token_validation.js:1:18)
+    at Module._compile (node:internal/modules/cjs/loader:1521:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1623:10)
+    at Module.load (node:internal/modules/cjs/loader:1266:32)
+    at Module._load (node:internal/modules/cjs/loader:1091:12)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:164:12) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [ '/tmp/test_token_validation.js' ]
+}
+
+Node.js v20.19.5
+
+🎯 RESUMO DO DIAGNÓSTICO:
+========================
+1. Verificar se correções estão no código
+2. Verificar dados no banco de dados
+3. Testar endpoints diretamente
+4. Verificar logs do servidor
+5. Confirmar se código está sendo usado
+6. Teste manual da lógica de validação
+
+📋 Analise os resultados acima para identificar o problema!
+root@vlxsam02:~#

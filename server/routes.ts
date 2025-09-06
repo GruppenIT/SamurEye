@@ -1196,11 +1196,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Collector ID and token required" });
       }
 
-      // CORREÇÃO: Verificar token tanto como enrollment_token quanto como collector ID
+      // CORREÇÃO COMPLETA: Verificar token E collector_id de múltiplas formas
       let collector = await storage.getCollectorByEnrollmentToken(token as string);
       
       if (!collector) {
-        // Se não encontrou por enrollment_token, tentar por ID do collector
+        // Se não encontrou por enrollment_token, buscar de múltiplas formas
         const { db } = await import('./db');
         const { collectors } = await import('@shared/schema');
         const { eq, or } = await import('drizzle-orm');
@@ -1211,7 +1211,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .where(
             or(
               eq(collectors.enrollmentToken, token as string),
-              eq(collectors.id, token as string)  // CORREÇÃO: Aceitar token como ID do collector
+              eq(collectors.id, token as string),  // Buscar por ID
+              eq(collectors.name, token as string)  // Buscar por nome também
             )
           );
         collector = collectorByToken;
@@ -1222,10 +1223,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Invalid collector or token" });
       }
       
-      if (collector.id !== collector_id) {
-        console.log(`DEBUG: Collector ID mismatch: expected ${collector_id}, got ${collector.id}`);
+      // CORREÇÃO CRÍTICA: Aceitar collector_id como ID OU NOME
+      const isValidCollector = collector.id === collector_id || collector.name === collector_id;
+      if (!isValidCollector) {
+        console.log(`DEBUG: Collector mismatch - expected: ${collector_id}, got ID: ${collector.id}, name: ${collector.name}`);
         return res.status(401).json({ message: "Invalid collector or token" });
       }
+      
+      console.log(`DEBUG: Collector validated - ID: ${collector.id}, name: ${collector.name}, requested: ${collector_id}`);
 
       // Get pending executions for this collector
       const pendingExecutions = await storage.getExecutionsByStatus('queued');
@@ -1247,11 +1252,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Collector ID, token and execution ID required" });
       }
 
-      // CORREÇÃO: Verificar token tanto como enrollment_token quanto como collector ID
+      // CORREÇÃO COMPLETA: Verificar token E collector_id de múltiplas formas
       let collector = await storage.getCollectorByEnrollmentToken(token as string);
       
       if (!collector) {
-        // Se não encontrou por enrollment_token, tentar por ID do collector
+        // Se não encontrou por enrollment_token, buscar de múltiplas formas
         const { db } = await import('./db');
         const { collectors } = await import('@shared/schema');
         const { eq, or } = await import('drizzle-orm');
@@ -1262,13 +1267,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .where(
             or(
               eq(collectors.enrollmentToken, token as string),
-              eq(collectors.id, token as string)  // CORREÇÃO: Aceitar token como ID do collector
+              eq(collectors.id, token as string),  // Buscar por ID
+              eq(collectors.name, token as string)  // Buscar por nome também
             )
           );
         collector = collectorByToken;
       }
       
-      if (!collector || collector.id !== collector_id) {
+      if (!collector) {
+        return res.status(401).json({ message: "Invalid collector or token" });
+      }
+      
+      // CORREÇÃO CRÍTICA: Aceitar collector_id como ID OU NOME
+      const isValidCollector = collector.id === collector_id || collector.name === collector_id;
+      if (!isValidCollector) {
+        console.log(`DEBUG: Collector mismatch - expected: ${collector_id}, got ID: ${collector.id}, name: ${collector.name}`);
         return res.status(401).json({ message: "Invalid collector or token" });
       }
 
