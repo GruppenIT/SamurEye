@@ -1,0 +1,53 @@
+root@vlxsam04:~# curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/debug-real-data.sh | bash -s -- b6d6c21f-69c7-4e2a-8dfc-1e3da951b22
+🔍 DIAGNÓSTICO DADOS REAIS - SamurEye
+====================================
+🔍 Token do collector: b6d6c21f...da951b22
+
+📋 Teste 1: Buscando collector por enrollment_token...
+
+📋 Teste 2: Todos os collectors registrados...
+
+📋 Teste 3: Todos os tenants...
+
+📋 Teste 4: Jornadas existentes...
+
+📋 Teste 5: Execuções pendentes (status = 'queued')...
+
+❌ Collector não encontrado com o token fornecido
+
+🔍 Tokens disponíveis no banco (primeiros 8 caracteres):
+
+🎯 RESUMO PARA ANÁLISE:
+💡 Verifique se:
+   • Collector existe com o token correto
+   • Collector tem tenant_id definido
+   • Existem jornadas no mesmo tenant
+   • Há execuções pendentes direcionadas ao collector
+root@vlxsam04:~# curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/debug-real-data.sh | bash -s -- b6d6c21f-69c7-4e2a-8dfc-1e3da951b22^C
+root@vlxsam04:~# curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/main/docs/deployment/vlxsam04/register-collector.sh | bash -s -- gruppen-it 86e8f7e3-0859-4ad5-88ff-67120174ab93^C
+root@vlxsam04:~# curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/debug-real-data.sh | bash -s -- 86e8f7e3-0859-4ad5-88ff-67120174ab93^C
+🔍 DIAGNÓSTICO DADOS REAIS - SamurEye
+====================================
+🔍 Token do collector: 86e8f7e3...74ab93^C
+
+📋 Teste 1: Buscando collector por enrollment_token...
+
+📋 Teste 2: Todos os collectors registrados...
+
+📋 Teste 3: Todos os tenants...
+
+📋 Teste 4: Jornadas existentes...
+
+📋 Teste 5: Execuções pendentes (status = 'queued')...
+
+❌ Collector não encontrado com o token fornecido
+
+🔍 Tokens disponíveis no banco (primeiros 8 caracteres):
+
+🎯 RESUMO PARA ANÁLISE:
+💡 Verifique se:
+   • Collector existe com o token correto
+   • Collector tem tenant_id definido
+   • Existem jornadas no mesmo tenant
+   • Há execuções pendentes direcionadas ao collector
+root@vlxsam04:~#
