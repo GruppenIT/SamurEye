@@ -197,12 +197,30 @@ DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
 log "✅ Dependências básicas instaladas"
 
 # ============================================================================
-# 6. INSTALAÇÃO NODE.JS
+# 6. INSTALAÇÃO NODE.JS ROBUSTA (MÚLTIPLOS MÉTODOS)
 # ============================================================================
 
 log "📦 Instalando Node.js $NODE_VERSION..."
 
+# Diagnóstico inicial
+log "🔍 Diagnosticando sistema..."
+df -h /tmp | head -n 2
+FREE_SPACE=$(df /tmp | awk 'NR==2 {print $4}' | sed 's/[^0-9]*//g' 2>/dev/null || echo "1000000")
+if [ "$FREE_SPACE" -lt 100000 ]; then  # Menos de 100MB em /tmp
+    warn "Pouco espaço em /tmp, limpando..."
+    rm -rf /tmp/npm-* /tmp/node-* 2>/dev/null || true
+fi
+
+# Verificar e corrigir permissões
+if [ ! -w /tmp ]; then
+    chmod 1777 /tmp
+    log "✅ Permissões de /tmp corrigidas"
+fi
+
 # Remover Node.js antigo completamente
+log "🗑️ Removendo Node.js anterior..."
+pkill -f node 2>/dev/null || true
+pkill -f npm 2>/dev/null || true
 apt-get remove -y nodejs npm node 2>/dev/null || true
 apt-get purge -y nodejs npm node 2>/dev/null || true
 apt-get autoremove -y 2>/dev/null || true
@@ -210,35 +228,105 @@ apt-get autoremove -y 2>/dev/null || true
 # Limpar repositórios e caches
 rm -f /etc/apt/sources.list.d/nodesource.list*
 rm -f /etc/apt/trusted.gpg.d/nodesource.gpg*
+rm -f /usr/share/keyrings/nodesource.gpg*
+rm -rf /usr/local/lib/node_modules /usr/local/bin/node /usr/local/bin/npm /usr/local/bin/npx
+rm -rf ~/.npm ~/.node-gyp /tmp/npm-*
 apt-get clean
 
-# Instalar NodeSource repository (método mais direto)
-log "🔧 Configurando repositório NodeSource..."
-curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/trusted.gpg.d/nodesource.gpg
-echo "deb [signed-by=/etc/apt/trusted.gpg.d/nodesource.gpg] https://deb.nodesource.com/node_${NODE_VERSION}.x nodistro main" > /etc/apt/sources.list.d/nodesource.list
+# MÉTODO 1: Tentar NodeSource Repository
+log "🔧 MÉTODO 1: Tentando repositório NodeSource..."
+if curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key 2>/dev/null | gpg --dearmor -o /etc/apt/trusted.gpg.d/nodesource.gpg 2>/dev/null; then
+    echo "deb [signed-by=/etc/apt/trusted.gpg.d/nodesource.gpg] https://deb.nodesource.com/node_${NODE_VERSION}.x nodistro main" > /etc/apt/sources.list.d/nodesource.list
+    
+    if apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends nodejs; then
+        log "✅ MÉTODO 1: NodeSource repository funcionou"
+        METHOD_USED="NodeSource"
+    else
+        warn "⚠️ MÉTODO 1: Falhou, tentando método alternativo..."
+        rm -f /etc/apt/sources.list.d/nodesource.list*
+        rm -f /etc/apt/trusted.gpg.d/nodesource.gpg*
+        METHOD_USED=""
+    fi
+else
+    warn "⚠️ MÉTODO 1: curl falhou, tentando método alternativo..."
+    METHOD_USED=""
+fi
 
-# Atualizar repositórios
-apt-get update
+# MÉTODO 2: Download direto se método 1 falhou
+if [ -z "$METHOD_USED" ]; then
+    log "🔧 MÉTODO 2: Download direto do Node.js..."
+    
+    # Detectar arquitetura
+    ARCH=$(uname -m)
+    case $ARCH in
+        x86_64) NODE_ARCH="x64" ;;
+        aarch64) NODE_ARCH="arm64" ;;
+        armv7l) NODE_ARCH="armv7l" ;;
+        *) error "Arquitetura não suportada: $ARCH" ;;
+    esac
+    
+    NODE_TARBALL="node-v20.19.5-linux-${NODE_ARCH}.tar.xz"
+    NODE_URL="https://nodejs.org/dist/v20.19.5/${NODE_TARBALL}"
+    
+    cd /tmp
+    log "📥 Baixando: $NODE_URL"
+    
+    # Tentar wget primeiro, depois curl
+    if wget --timeout=30 --tries=3 "$NODE_URL" 2>/dev/null || curl -L --connect-timeout 30 --max-time 300 "$NODE_URL" -o "$NODE_TARBALL"; then
+        if [ -s "$NODE_TARBALL" ]; then
+            log "✅ Download concluído: $(du -h $NODE_TARBALL | cut -f1)"
+            
+            # Extrair e instalar
+            tar -xf "$NODE_TARBALL"
+            NODE_DIR="node-v20.19.5-linux-${NODE_ARCH}"
+            
+            if [ -d "$NODE_DIR" ]; then
+                cp -r "$NODE_DIR"/* /usr/local/
+                ln -sf /usr/local/bin/node /usr/bin/node
+                ln -sf /usr/local/bin/npm /usr/bin/npm
+                ln -sf /usr/local/bin/npx /usr/bin/npx
+                
+                log "✅ MÉTODO 2: Instalação manual concluída"
+                METHOD_USED="Manual"
+                
+                # Limpeza
+                rm -rf /tmp/node-* /tmp/*.tar.xz
+            else
+                error "Falha na extração do Node.js"
+            fi
+        else
+            error "Arquivo baixado está vazio ou corrompido"
+        fi
+    else
+        error "Falha no download do Node.js após múltiplas tentativas"
+    fi
+fi
 
-# Instalar apenas Node.js essencial
-DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends nodejs
-
-# Verificar instalação
+# Verificar instalação final
 sleep 2
 node_version=$(node --version 2>/dev/null || echo "not found")
 npm_version=$(npm --version 2>/dev/null || echo "not found")
 
 log "🔍 Verificando instalação Node.js..."
 if [[ "$node_version" != "not found" ]] && [[ "$npm_version" != "not found" ]]; then
-    log "✅ Node.js instalado: $node_version"
+    log "✅ Node.js instalado: $node_version (método: $METHOD_USED)"
     log "✅ npm instalado: $npm_version"
+    
+    # Configurar npm
+    npm config set fund false 2>/dev/null || true
+    npm config set audit false 2>/dev/null || true
+    npm config set fund false --global 2>/dev/null || true
+    npm config set audit false --global 2>/dev/null || true
     
     # Instalar ferramentas globais essenciais
     log "🔧 Instalando ferramentas globais..."
-    npm install -g pm2 tsx --silent
-    log "✅ Ferramentas globais instaladas"
+    if npm install -g pm2 tsx --silent 2>/dev/null; then
+        log "✅ Ferramentas globais instaladas"
+    else
+        warn "⚠️ Ferramentas globais falharam, mas Node.js está funcionando"
+    fi
 else
-    error "❌ Falha na instalação do Node.js"
+    error "❌ Falha na instalação do Node.js - nenhum método funcionou"
 fi
 
 # ============================================================================
