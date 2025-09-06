@@ -1,0 +1,112 @@
+root@vlxsam02:/opt/samureye/SamurEye# curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/test-simple-query.sh | bash
+🔍 TESTE SIMPLES - CONECTIVIDADE E DADOS
+========================================
+🧪 Teste 1: Conectividade básica...
+      teste
+------------------
+ Conectividade OK
+(1 row)
+
+✅ Conectividade funcionando
+
+🔍 Teste 2: Contagem de tabelas...
+ total_tabelas
+---------------
+            13
+(1 row)
+
+
+🔍 Teste 3: Contagem de collectors...
+ total_collectors
+------------------
+                1
+(1 row)
+
+
+🔍 Teste 4: Listar todos os collectors (simples)...
+                  id                  |   name
+--------------------------------------+----------
+ b6d6c21f-cf49-43a0-ba22-68e3da951b22 | vlxsam04
+(1 row)
+
+
+🔍 Teste 5: Primeiros 8 chars dos tokens...
+ token_preview |   name   | status
+---------------+----------+--------
+               | vlxsam04 | online
+(1 row)
+
+
+🔍 Teste 6: Verificar token atual do collector vlxsam04...
+❌ Arquivo .env do collector não encontrado
+
+🔍 Teste 7: Contar tenants e jornadas...
+ total_tenants | total_journeys | total_executions
+---------------+----------------+------------------
+             1 |              1 |                0
+(1 row)
+
+root@vlxsam02:/opt/samureye/SamurEye# curl -fsSL https://raw.githubusercontent.com/GruppenIT/SamurEye/refs/heads/main/docs/deployment/debug-collector-details.sh | bash
+🔍 DIAGNÓSTICO DETALHADO - COLLECTOR E JORNADAS
+==============================================
+🔍 Token do collector: b6d6c21f...da951b22
+
+📋 Teste 1: Dados completos do collector...
+                  id                  |   name   | hostname |              tenant_id               | status | enrollment_token | enrollment_token_expires |        created_at         |       updated_at
+--------------------------------------+----------+----------+--------------------------------------+--------+------------------+--------------------------+---------------------------+-------------------------
+ b6d6c21f-cf49-43a0-ba22-68e3da951b22 | vlxsam04 | vlxsam04 | 94758e13-e3b5-4324-b9e0-6338db0ff5e1 | online |                  |                          | 2025-09-06 20:10:42.72822 | 2025-09-06 20:40:06.219
+(1 row)
+
+
+📋 Teste 2: Detalhes da jornada existente...
+
+📋 Teste 3: Verificando associação jornada-collector...
+              journey_id              | journey_name |         journey_collector_id         |         actual_collector_id          | collector_name | association_status
+--------------------------------------+--------------+--------------------------------------+--------------------------------------+----------------+--------------------
+ 43c05c11-557f-4233-a195-137758b64036 | Teste-scan   | b6d6c21f-cf49-43a0-ba22-68e3da951b22 | b6d6c21f-cf49-43a0-ba22-68e3da951b22 | vlxsam04       | MATCH ✅
+(1 row)
+
+
+📋 Teste 4: Histórico de atualizações do collector...
+                  id                  |              tenant_id               |   name   | hostname |   ip_address    | status | version |        last_seen        | enrollment_token | enrollment_token_expires | metadata |        created_at         |       updated_at
+--------------------------------------+--------------------------------------+----------+----------+-----------------+--------+---------+-------------------------+------------------+--------------------------+----------+---------------------------+-------------------------
+ b6d6c21f-cf49-43a0-ba22-68e3da951b22 | 94758e13-e3b5-4324-b9e0-6338db0ff5e1 | vlxsam04 | vlxsam04 | 192.168.100.151 | online |         | 2025-09-06 20:40:06.219 |                  |                          |          | 2025-09-06 20:10:42.72822 | 2025-09-06 20:40:06.219
+(1 row)
+
+
+📋 Teste 5: Verificando se jornada é on-demand...
+                  id                  |    name    | schedule_type | status  | execution_status
+--------------------------------------+------------+---------------+---------+------------------
+ 43c05c11-557f-4233-a195-137758b64036 | Teste-scan | on_demand     | running | OK ✅
+(1 row)
+
+
+📋 Teste 6: CORREÇÃO - Atualizando enrollment_token do collector...
+UPDATE 1
+✅ Token atualizado!
+
+📋 Teste 7: Verificando correção do token...
+                  id                  |   name   | token_preview | token_valid
+--------------------------------------+----------+---------------+-------------
+ b6d6c21f-cf49-43a0-ba22-68e3da951b22 | vlxsam04 | b6d6c21f...   | t
+(1 row)
+
+
+📋 Teste 8: Criando execução manual para jornada on-demand...
+Criando execução para jornada: 43c05c11-557f-4233-a195-137758b64036
+✅ Execução criada!
+
+📋 Teste 9: Verificação final...
+ collectors_with_token | pending_executions
+-----------------------+--------------------
+                     1 |                  0
+(1 row)
+
+
+🎯 CORREÇÕES APLICADAS:
+   ✅ enrollment_token definido para o collector
+   ✅ Token com expiração de 30 dias
+   ✅ Execução criada para jornada on-demand (se existir)
+
+🧪 PRÓXIMO PASSO: Testar o collector novamente!
+root@vlxsam02:/opt/samureye/SamurEye#
