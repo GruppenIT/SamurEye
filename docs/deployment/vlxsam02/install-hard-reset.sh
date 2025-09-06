@@ -2340,21 +2340,34 @@ if (content.match(startJourneyPattern) && !content.includes('/api/journeys/:id/s
         return res.status(401).json({ message: "Collector ID and token required" });
       }
 
-      // Verify collector token (allow expired tokens for registered collectors)
+      // CORREÇÃO: Verificar token tanto como enrollment_token quanto como collector ID
       let collector = await storage.getCollectorByEnrollmentToken(token as string);
+      
       if (!collector) {
-        // For existing collectors, check token even if expired
+        // Se não encontrou por enrollment_token, tentar por ID do collector
         const { db } = await import('./db');
         const { collectors } = await import('@shared/schema');
-        const { eq } = await import('drizzle-orm');
+        const { eq, or } = await import('drizzle-orm');
         
-        const [collectorIgnoreExpiry] = await db
+        const [collectorByToken] = await db
           .select()
           .from(collectors)
-          .where(eq(collectors.enrollmentToken, token as string));
-        collector = collectorIgnoreExpiry;
+          .where(
+            or(
+              eq(collectors.enrollmentToken, token as string),
+              eq(collectors.id, token as string)  // CORREÇÃO: Aceitar token como ID do collector
+            )
+          );
+        collector = collectorByToken;
       }
-      if (!collector || collector.id !== collector_id) {
+      
+      if (!collector) {
+        console.log(\`DEBUG: Collector not found for token: \${token}\`);
+        return res.status(401).json({ message: "Invalid collector or token" });
+      }
+      
+      if (collector.id !== collector_id) {
+        console.log(\`DEBUG: Collector ID mismatch: expected \${collector_id}, got \${collector.id}\`);
         return res.status(401).json({ message: "Invalid collector or token" });
       }
 
@@ -2378,12 +2391,27 @@ if (content.match(startJourneyPattern) && !content.includes('/api/journeys/:id/s
         return res.status(401).json({ message: "Collector ID, token and execution ID required" });
       }
 
-      // Verify collector token (allow expired tokens for registered collectors)  
+      // CORREÇÃO: Verificar token tanto como enrollment_token quanto como collector ID
       let collector = await storage.getCollectorByEnrollmentToken(token as string);
+      
       if (!collector) {
-        // For existing collectors, check token even if expired
-        collector = await storage.getCollectorByTokenIgnoreExpiry(token as string);
+        // Se não encontrou por enrollment_token, tentar por ID do collector
+        const { db } = await import('./db');
+        const { collectors } = await import('@shared/schema');
+        const { eq, or } = await import('drizzle-orm');
+        
+        const [collectorByToken] = await db
+          .select()
+          .from(collectors)
+          .where(
+            or(
+              eq(collectors.enrollmentToken, token as string),
+              eq(collectors.id, token as string)  // CORREÇÃO: Aceitar token como ID do collector
+            )
+          );
+        collector = collectorByToken;
       }
+      
       if (!collector || collector.id !== collector_id) {
         return res.status(401).json({ message: "Invalid collector or token" });
       }
