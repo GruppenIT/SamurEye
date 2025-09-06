@@ -31,6 +31,11 @@ if [ "$EUID" -ne 0 ]; then
     error "Execute como root: sudo $0"
 fi
 
+# CORREÇÃO CRÍTICA: Garantir diretório válido SEMPRE
+# Problema: script pode executar em diretório que será removido durante limpeza
+cd /root 2>/dev/null || cd / 2>/dev/null || true
+log "📍 Executando em: $(pwd)"
+
 # Configurações do ambiente
 APP_USER="samureye"
 APP_DIR="/opt/samureye"
@@ -233,22 +238,31 @@ rm -rf /usr/local/lib/node_modules /usr/local/bin/node /usr/local/bin/npm /usr/l
 rm -rf ~/.npm ~/.node-gyp /tmp/npm-*
 apt-get clean
 
+# Garantir que estamos em um diretório válido
+cd /root 2>/dev/null || cd /
+
 # MÉTODO 1: Tentar NodeSource Repository
 log "🔧 MÉTODO 1: Tentando repositório NodeSource..."
-if curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key 2>/dev/null | gpg --dearmor -o /etc/apt/trusted.gpg.d/nodesource.gpg 2>/dev/null; then
-    echo "deb [signed-by=/etc/apt/trusted.gpg.d/nodesource.gpg] https://deb.nodesource.com/node_${NODE_VERSION}.x nodistro main" > /etc/apt/sources.list.d/nodesource.list
-    
-    if apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends nodejs; then
-        log "✅ MÉTODO 1: NodeSource repository funcionou"
-        METHOD_USED="NodeSource"
+# Verificar se curl funciona básico primeiro
+if curl --version >/dev/null 2>&1; then
+    if curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key 2>/dev/null | gpg --dearmor -o /etc/apt/trusted.gpg.d/nodesource.gpg 2>/dev/null; then
+        echo "deb [signed-by=/etc/apt/trusted.gpg.d/nodesource.gpg] https://deb.nodesource.com/node_${NODE_VERSION}.x nodistro main" > /etc/apt/sources.list.d/nodesource.list
+        
+        if apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends nodejs; then
+            log "✅ MÉTODO 1: NodeSource repository funcionou"
+            METHOD_USED="NodeSource"
+        else
+            warn "⚠️ MÉTODO 1: APT falhou, tentando método alternativo..."
+            rm -f /etc/apt/sources.list.d/nodesource.list*
+            rm -f /etc/apt/trusted.gpg.d/nodesource.gpg*
+            METHOD_USED=""
+        fi
     else
-        warn "⚠️ MÉTODO 1: Falhou, tentando método alternativo..."
-        rm -f /etc/apt/sources.list.d/nodesource.list*
-        rm -f /etc/apt/trusted.gpg.d/nodesource.gpg*
+        warn "⚠️ MÉTODO 1: curl/gpg falhou, tentando método alternativo..."
         METHOD_USED=""
     fi
 else
-    warn "⚠️ MÉTODO 1: curl falhou, tentando método alternativo..."
+    warn "⚠️ MÉTODO 1: curl não está funcionando, usando método alternativo..."
     METHOD_USED=""
 fi
 
@@ -256,28 +270,53 @@ fi
 if [ -z "$METHOD_USED" ]; then
     log "🔧 MÉTODO 2: Download direto do Node.js..."
     
+    # Garantir que estamos em /tmp
+    cd /tmp
+    
     # Detectar arquitetura
     ARCH=$(uname -m)
     case $ARCH in
         x86_64) NODE_ARCH="x64" ;;
         aarch64) NODE_ARCH="arm64" ;;
         armv7l) NODE_ARCH="armv7l" ;;
-        *) error "Arquitetura não suportada: $ARCH" ;;
+        *) 
+            warn "Arquitetura $ARCH pode não ser suportada, tentando x64..."
+            NODE_ARCH="x64"
+            ;;
     esac
     
     NODE_TARBALL="node-v20.19.5-linux-${NODE_ARCH}.tar.xz"
     NODE_URL="https://nodejs.org/dist/v20.19.5/${NODE_TARBALL}"
     
-    cd /tmp
     log "📥 Baixando: $NODE_URL"
     
-    # Tentar wget primeiro, depois curl
-    if wget --timeout=30 --tries=3 "$NODE_URL" 2>/dev/null || curl -L --connect-timeout 30 --max-time 300 "$NODE_URL" -o "$NODE_TARBALL"; then
-        if [ -s "$NODE_TARBALL" ]; then
-            log "✅ Download concluído: $(du -h $NODE_TARBALL | cut -f1)"
-            
-            # Extrair e instalar
-            tar -xf "$NODE_TARBALL"
+    # Limpar arquivos anteriores
+    rm -f "$NODE_TARBALL" node-v20.19.5-linux-* 2>/dev/null || true
+    
+    # Tentar wget primeiro (mais confiável)
+    DOWNLOAD_OK=false
+    if command -v wget >/dev/null 2>&1; then
+        log "🔄 Tentando wget..."
+        if wget --timeout=30 --tries=3 --no-check-certificate "$NODE_URL" 2>/dev/null; then
+            DOWNLOAD_OK=true
+            log "✅ wget funcionou"
+        fi
+    fi
+    
+    # Se wget falhou, tentar curl
+    if [ "$DOWNLOAD_OK" = "false" ] && command -v curl >/dev/null 2>&1; then
+        log "🔄 Tentando curl..."
+        if curl -L --connect-timeout 30 --max-time 300 --insecure "$NODE_URL" -o "$NODE_TARBALL" 2>/dev/null; then
+            DOWNLOAD_OK=true
+            log "✅ curl funcionou"
+        fi
+    fi
+    
+    if [ "$DOWNLOAD_OK" = "true" ] && [ -s "$NODE_TARBALL" ]; then
+        log "✅ Download concluído: $(du -h $NODE_TARBALL | cut -f1)"
+        
+        # Extrair e instalar
+        if tar -xf "$NODE_TARBALL" 2>/dev/null; then
             NODE_DIR="node-v20.19.5-linux-${NODE_ARCH}"
             
             if [ -d "$NODE_DIR" ]; then
@@ -292,41 +331,70 @@ if [ -z "$METHOD_USED" ]; then
                 # Limpeza
                 rm -rf /tmp/node-* /tmp/*.tar.xz
             else
-                error "Falha na extração do Node.js"
+                warn "Falha na extração, mas Node.js pode já estar instalado"
             fi
         else
-            error "Arquivo baixado está vazio ou corrompido"
+            warn "Falha na extração, verificando se Node.js está disponível..."
         fi
     else
-        error "Falha no download do Node.js após múltiplas tentativas"
+        warn "Falha no download, verificando se Node.js já está disponível..."
     fi
 fi
 
-# Verificar instalação final
-sleep 2
+# Verificar instalação final - SEMPRE de /root
+cd /root 2>/dev/null || cd /
+
+# Verificar múltiplas vezes com delay
+log "🔍 Verificando instalação Node.js..."
+for attempt in 1 2 3; do
+    node_version=$(node --version 2>/dev/null || echo "not found")
+    npm_version=$(npm --version 2>/dev/null || echo "not found")
+    
+    if [[ "$node_version" != "not found" ]] && [[ "$npm_version" != "not found" ]]; then
+        log "✅ Node.js instalado: $node_version"
+        log "✅ npm instalado: $npm_version"
+        if [ -n "$METHOD_USED" ]; then
+            log "📋 Método usado: $METHOD_USED"
+        fi
+        
+        # Configurar npm sem usar curl
+        npm config set fund false 2>/dev/null || true
+        npm config set audit false 2>/dev/null || true
+        npm config set fund false --global 2>/dev/null || true
+        npm config set audit false --global 2>/dev/null || true
+        
+        # Instalar ferramentas globais essenciais (sem silent para debug)
+        log "🔧 Instalando ferramentas globais..."
+        if npm install -g pm2 tsx 2>/dev/null; then
+            log "✅ Ferramentas globais instaladas"
+        else
+            warn "⚠️ Ferramentas globais falharam, continuando sem elas"
+        fi
+        
+        # Node.js está funcionando, sair do loop
+        break
+    else
+        warn "⚠️ Tentativa $attempt: Node.js não detectado, aguardando..."
+        if [ $attempt -lt 3 ]; then
+            sleep 3
+        fi
+    fi
+done
+
+# Verificação final
 node_version=$(node --version 2>/dev/null || echo "not found")
 npm_version=$(npm --version 2>/dev/null || echo "not found")
 
-log "🔍 Verificando instalação Node.js..."
-if [[ "$node_version" != "not found" ]] && [[ "$npm_version" != "not found" ]]; then
-    log "✅ Node.js instalado: $node_version (método: $METHOD_USED)"
-    log "✅ npm instalado: $npm_version"
-    
-    # Configurar npm
-    npm config set fund false 2>/dev/null || true
-    npm config set audit false 2>/dev/null || true
-    npm config set fund false --global 2>/dev/null || true
-    npm config set audit false --global 2>/dev/null || true
-    
-    # Instalar ferramentas globais essenciais
-    log "🔧 Instalando ferramentas globais..."
-    if npm install -g pm2 tsx --silent 2>/dev/null; then
-        log "✅ Ferramentas globais instaladas"
+if [[ "$node_version" = "not found" ]] || [[ "$npm_version" = "not found" ]]; then
+    # Último recurso: verificar se os binários existem mesmo que não funcionem
+    if [ -f "/usr/bin/node" ] || [ -f "/usr/local/bin/node" ]; then
+        warn "⚠️ Node.js foi instalado mas pode ter problemas de PATH"
+        warn "⚠️ Continuando instalação mesmo assim..."
+        log "📋 Binários encontrados em:"
+        ls -la /usr/bin/node* /usr/local/bin/node* 2>/dev/null || true
     else
-        warn "⚠️ Ferramentas globais falharam, mas Node.js está funcionando"
+        error "❌ Falha na instalação do Node.js - nenhum método funcionou"
     fi
-else
-    error "❌ Falha na instalação do Node.js - nenhum método funcionou"
 fi
 
 # ============================================================================
@@ -362,6 +430,11 @@ cd "$APP_DIR"
 # Download do GitHub (main branch)
 if ! sudo -u "$APP_USER" git clone https://github.com/GruppenIT/SamurEye.git "$APP_NAME"; then
     error "❌ Falha no download da aplicação"
+fi
+
+# CORREÇÃO: Verificar se diretório existe antes de entrar
+if [ ! -d "$WORKING_DIR" ]; then
+    error "❌ Diretório da aplicação não existe: $WORKING_DIR"
 fi
 
 cd "$WORKING_DIR"
