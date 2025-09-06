@@ -1295,6 +1295,9 @@ class CollectorHeartbeat:
         """Busca jornadas pendentes para este collector"""
         try:
             if not self.collector_token or not self.collector_id:
+                logger.error("🚨 DEBUG: collector_token ou collector_id ausente!")
+                logger.error(f"   collector_token: {'SET' if self.collector_token else 'MISSING'}")
+                logger.error(f"   collector_id: {'SET' if self.collector_id else 'MISSING'}")
                 return []
 
             url = f"{self.api_base}/collector-api/journeys/pending"
@@ -1303,21 +1306,50 @@ class CollectorHeartbeat:
                 "token": self.collector_token  # Usar apenas collector_token permanente
             }
             
+            # 🔍 DEBUG DETALHADO
+            logger.info("🔍 DEBUG: Fazendo requisição para buscar jornadas pendentes...")
+            logger.info(f"   URL: {url}")
+            logger.info(f"   collector_id: {self.collector_id}")
+            logger.info(f"   token: {self.collector_token[:8]}...{self.collector_token[-8:] if len(self.collector_token) > 16 else self.collector_token}")
+            logger.info(f"   URL completa: {url}?collector_id={self.collector_id}&token={self.collector_token[:8]}...{self.collector_token[-8:]}")
+            
+            start_time = time.time()
             response = self.session.get(url, params=params, timeout=30)
+            duration = time.time() - start_time
+            
+            # 🔍 DEBUG RESPOSTA
+            logger.info(f"🔍 DEBUG: Resposta recebida em {duration:.2f}s")
+            logger.info(f"   Status Code: {response.status_code}")
+            logger.info(f"   Headers: {dict(response.headers)}")
+            logger.info(f"   Response Body: {response.text[:500]}...")
             
             if response.status_code == 200:
-                journeys = response.json()
-                logger.debug(f"Encontradas {len(journeys)} jornadas pendentes")
-                return journeys
+                try:
+                    journeys = response.json()
+                    logger.info(f"✅ DEBUG: {len(journeys)} jornadas pendentes encontradas")
+                    if journeys:
+                        logger.info(f"   Primeira jornada: {journeys[0] if journeys else 'N/A'}")
+                    return journeys
+                except Exception as json_err:
+                    logger.error(f"🚨 DEBUG: Erro ao fazer parse JSON: {json_err}")
+                    logger.error(f"   Response text: {response.text}")
+                    return []
             elif response.status_code == 401:
-                logger.warning("Token inválido ao buscar jornadas pendentes")
+                logger.error("🚨 DEBUG: HTTP 401 - Token inválido ou expirado")
+                logger.error(f"   Response: {response.text}")
+                logger.error(f"   Headers enviados: {dict(self.session.headers) if hasattr(self.session, 'headers') else 'N/A'}")
                 return []
             else:
-                logger.warning(f"Erro ao buscar jornadas: {response.status_code}")
+                logger.error(f"🚨 DEBUG: HTTP {response.status_code} - Erro inesperado")
+                logger.error(f"   Response: {response.text}")
                 return []
                 
         except Exception as e:
-            logger.error(f"Erro ao buscar jornadas pendentes: {e}")
+            logger.error(f"🚨 DEBUG: Exception ao buscar jornadas pendentes: {e}")
+            logger.error(f"   Tipo: {type(e)}")
+            logger.error(f"   Args: {e.args}")
+            import traceback
+            logger.error(f"   Traceback: {traceback.format_exc()}")
             return []
 
     def execute_nmap_scan(self, target, options=None):
