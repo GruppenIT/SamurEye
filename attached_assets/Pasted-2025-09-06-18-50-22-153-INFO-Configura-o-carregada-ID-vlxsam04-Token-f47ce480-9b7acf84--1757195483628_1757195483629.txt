@@ -1,0 +1,13 @@
+2025-09-06 18:50:22,153 - INFO - Configuração carregada - ID: vlxsam04, Token: f47ce480...9b7acf84
+2025-09-06 18:50:23,163 - INFO - 🔍 DEBUG: Fazendo requisição para buscar jornadas pendentes...
+2025-09-06 18:50:23,163 - INFO -    URL: https://api.samureye.com.br/collector-api/journeys/pending
+2025-09-06 18:50:23,163 - INFO -    collector_id: vlxsam04
+2025-09-06 18:50:23,163 - INFO -    token: f47ce480...9b7acf84
+2025-09-06 18:50:23,163 - INFO -    URL completa: https://api.samureye.com.br/collector-api/journeys/pending?collector_id=vlxsam04&token=f47ce480...9b7acf84
+2025-09-06 18:50:23,167 - INFO - 🔍 DEBUG: Resposta recebida em 0.00s
+2025-09-06 18:50:23,167 - INFO -    Status Code: 401
+2025-09-06 18:50:23,167 - INFO -    Headers: {'Server': 'nginx', 'Date': 'Sat, 06 Sep 2025 21:50:23 GMT', 'Content-Type': 'application/json; charset=utf-8', 'Content-Length': '40', 'Connection': 'keep-alive', 'X-Powered-By': 'Express', 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, PATCH, OPTIONS', 'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept, Authorization', 'Access-Control-Allow-Credentials': 'true', 'ETag': 'W/"28-N8PGAMIO2LFC0fdRAU58E4gQ5mo"', 'Strict-Transport-Security': 'max-age=63072000; includeSubDomains; preload', 'X-Frame-Options': 'DENY', 'X-Content-Type-Options': 'nosniff', 'X-XSS-Protection': '1; mode=block', 'Referrer-Policy': 'strict-origin-when-cross-origin', 'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' ws: wss:;"}
+2025-09-06 18:50:23,167 - INFO -    Response Body: {"message":"Invalid collector or token"}...
+2025-09-06 18:50:23,167 - ERROR - 🚨 DEBUG: HTTP 401 - Token inválido ou expirado
+2025-09-06 18:50:23,167 - ERROR -    Response: {"message":"Invalid collector or token"}
+2025-09-06 18:50:23,167 - ERROR -    Headers enviados: {'User-Agent': 'python-requests/2.31.0', 'Accept-Encoding': 'gzip, deflate', 'Accept': '*/*', 'Connection': 'keep-alive'}
