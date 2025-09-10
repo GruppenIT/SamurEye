@@ -1119,7 +1119,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Journey not found" });
       }
 
+      // Update journey status to running
       await storage.updateJourneyStatus(journey.id, 'running');
+
+      // CORREÇÃO CRÍTICA: Criar execução automaticamente para jornadas on-demand
+      if (journey.scheduleType === 'on_demand') {
+        // Get current execution count to determine execution number
+        const existingExecutions = await storage.getJourneyExecutions(journey.id);
+        const executionNumber = existingExecutions.length + 1;
+
+        // Create a journey execution for the collector to pick up
+        await storage.createJourneyExecution({
+          journeyId: journey.id,
+          status: 'queued',
+          executionNumber,
+          scheduledFor: new Date(), // Execute immediately
+          collectorId: journey.collectorId,
+          metadata: {
+            triggeredBy: 'manual_start',
+            userId: req.localUser.id,
+            tenantId: req.tenant.id
+          }
+        });
+        
+        console.log(`Created execution for on-demand journey ${journey.name} (${journey.id})`);
+      }
 
       // Log activity
       await storage.createActivity({
