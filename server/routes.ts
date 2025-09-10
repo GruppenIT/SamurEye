@@ -1162,6 +1162,121 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Stop journey execution
+  app.post('/api/journeys/:id/stop', isLocalUserAuthenticated, requireLocalUserTenant, async (req: any, res) => {
+    try {
+      const journey = await storage.getJourney(req.params.id);
+      if (!journey || journey.tenantId !== req.tenant.id) {
+        return res.status(404).json({ message: "Journey not found" });
+      }
+
+      // Update journey status to pending (stopped)
+      await storage.updateJourneyStatus(journey.id, 'pending');
+
+      // Cancel any queued executions for this journey
+      const queuedExecutions = await storage.getExecutionsByStatus('queued');
+      const journeyQueuedExecutions = queuedExecutions.filter(e => e.journeyId === journey.id);
+      
+      for (const execution of journeyQueuedExecutions) {
+        await storage.updateJourneyExecutionStatus(execution.id, 'cancelled', null, 'Journey stopped by user');
+      }
+
+      // Log activity
+      await storage.createActivity({
+        tenantId: req.tenant.id,
+        userId: req.localUser.id,
+        action: 'stop',
+        resource: 'journey',
+        resourceId: journey.id,
+        metadata: { journeyName: journey.name }
+      });
+
+      console.log(`Journey ${journey.name} stopped by user ${req.localUser.id}`);
+      res.json({ message: "Journey stopped" });
+    } catch (error) {
+      console.error("Error stopping journey:", error);
+      res.status(500).json({ message: "Failed to stop journey" });
+    }
+  });
+
+  // Cancel journey (sets to cancelled status)
+  app.post('/api/journeys/:id/cancel', isLocalUserAuthenticated, requireLocalUserTenant, async (req: any, res) => {
+    try {
+      const journey = await storage.getJourney(req.params.id);
+      if (!journey || journey.tenantId !== req.tenant.id) {
+        return res.status(404).json({ message: "Journey not found" });
+      }
+
+      // Update journey status to cancelled
+      await storage.updateJourneyStatus(journey.id, 'cancelled');
+
+      // Cancel any running or queued executions for this journey
+      const activeExecutions = await storage.getExecutionsByStatus('queued');
+      const runningExecutions = await storage.getExecutionsByStatus('running');
+      const allActiveExecutions = [...activeExecutions, ...runningExecutions];
+      const journeyActiveExecutions = allActiveExecutions.filter(e => e.journeyId === journey.id);
+      
+      for (const execution of journeyActiveExecutions) {
+        await storage.updateJourneyExecutionStatus(execution.id, 'cancelled', null, 'Journey cancelled by user');
+      }
+
+      // Log activity
+      await storage.createActivity({
+        tenantId: req.tenant.id,
+        userId: req.localUser.id,
+        action: 'cancel',
+        resource: 'journey',
+        resourceId: journey.id,
+        metadata: { journeyName: journey.name }
+      });
+
+      console.log(`Journey ${journey.name} cancelled by user ${req.localUser.id}`);
+      res.json({ message: "Journey cancelled" });
+    } catch (error) {
+      console.error("Error cancelling journey:", error);
+      res.status(500).json({ message: "Failed to cancel journey" });
+    }
+  });
+
+  // Pause/Resume journey (toggle isActive for recurring journeys)
+  app.post('/api/journeys/:id/pause', isLocalUserAuthenticated, requireLocalUserTenant, async (req: any, res) => {
+    try {
+      const journey = await storage.getJourney(req.params.id);
+      if (!journey || journey.tenantId !== req.tenant.id) {
+        return res.status(404).json({ message: "Journey not found" });
+      }
+
+      if (journey.scheduleType !== 'recurring') {
+        return res.status(400).json({ message: "Only recurring journeys can be paused/resumed" });
+      }
+
+      // Toggle isActive status
+      const newIsActive = !journey.isActive;
+      await storage.updateJourneySchedule(journey.id, journey.scheduleType, journey.scheduledAt, {
+        ...journey.scheduleConfig,
+        isActive: newIsActive
+      });
+
+      const action = newIsActive ? 'resume' : 'pause';
+      
+      // Log activity
+      await storage.createActivity({
+        tenantId: req.tenant.id,
+        userId: req.localUser.id,
+        action,
+        resource: 'journey',
+        resourceId: journey.id,
+        metadata: { journeyName: journey.name, isActive: newIsActive }
+      });
+
+      console.log(`Journey ${journey.name} ${action}d by user ${req.localUser.id}`);
+      res.json({ message: `Journey ${action}d`, isActive: newIsActive });
+    } catch (error) {
+      console.error("Error pausing/resuming journey:", error);
+      res.status(500).json({ message: "Failed to pause/resume journey" });
+    }
+  });
+
   // Update journey scheduling
   app.put('/api/journeys/:id/schedule', isLocalUserAuthenticated, requireLocalUserTenant, async (req: any, res) => {
     try {
