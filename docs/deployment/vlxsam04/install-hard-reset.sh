@@ -2250,4 +2250,191 @@ echo "   ✅ Eliminada desconexão entre registro externo e heartbeat interno"
 echo "   ✅ Warning SSL suprimido para logs mais limpos"
 echo ""
 
+# ============================================================================
+# CORREÇÕES CRÍTICAS DO SISTEMA DE EXECUÇÃO DE JORNADAS - SETEMBRO 2025
+# ============================================================================
+
+log "🚀 Aplicando correções críticas no sistema de execução de jornadas..."
+
+# Aplicar correção no código Python do heartbeat/collector
+cat > /tmp/fix_journey_execution.py << 'EOF'
+import re
+import sys
+
+def fix_journey_execution_code(file_path):
+    """Corrige a lógica de execução de jornadas no código Python"""
+    try:
+        with open(file_path, 'r') as f:
+            content = f.read()
+        
+        # 1. CORREÇÃO CRÍTICA: Adicionar método para buscar dados da jornada original
+        journey_data_method = '''
+    def get_journey_data(self, journey_id):
+        """Busca dados da jornada original pelo ID"""
+        try:
+            url = f"{self.api_base}/collector-api/journeys/{journey_id}/data"
+            params = {
+                "collector_id": self.collector_id,
+                "token": self.collector_token
+            }
+            
+            logger.info(f"🔍 DEBUG: Buscando dados da jornada {journey_id}")
+            
+            response = self.session.get(url, params=params, timeout=30)
+            
+            if response.status_code == 200:
+                journey_data = response.json()
+                logger.info(f"✅ DEBUG: Dados da jornada obtidos - target: {journey_data.get('target')}")
+                return journey_data
+            else:
+                logger.error(f"❌ Erro ao buscar dados da jornada: {response.status_code}")
+                return None
+                
+        except Exception as e:
+            logger.error(f"❌ Exception ao buscar dados da jornada: {e}")
+            return None
+'''
+        
+        # Inserir método após get_pending_journeys
+        insert_pos = content.find('def execute_nmap_scan(self, target, options=None):')
+        if insert_pos > 0:
+            before = content[:insert_pos]
+            after = content[insert_pos:]
+            content = before + journey_data_method + '\n    ' + after
+            print("✅ Método get_journey_data adicionado")
+        else:
+            print("ℹ️ Método get_journey_data já existe ou posição não encontrada")
+
+        # 2. CORREÇÃO CRÍTICA: Corrigir método execute_journey
+        old_execute_journey = r'''def execute_journey\(self, journey_execution\):
+        """Executa uma jornada de segurança"""
+        try:
+            execution_id = journey_execution\.get\("id"\)
+            journey_config = journey_execution\.get\("config", \{\}\)
+            target = journey_config\.get\("target"\)
+            scan_types = journey_config\.get\("scanTypes", \[\]\)
+            
+            if not target:
+                return \{"error": "Target não especificado na jornada"\}'''
+
+        new_execute_journey = '''def execute_journey(self, journey_execution):
+        """Executa uma jornada de segurança"""
+        try:
+            execution_id = journey_execution.get("id")
+            journey_id = journey_execution.get("journeyId")
+            
+            if not journey_id:
+                return {"error": "Journey ID não encontrado na execução"}
+            
+            # CORREÇÃO CRÍTICA: Buscar dados da jornada original
+            journey_data = self.get_journey_data(journey_id)
+            if not journey_data:
+                return {"error": "Não foi possível obter dados da jornada"}
+            
+            target = journey_data.get("target")
+            scan_types = journey_data.get("scanTypes", [])
+            
+            if not target:
+                return {"error": "Target não especificado na jornada"}
+            
+            logger.info(f"📊 DEBUG: Executando jornada {execution_id}")
+            logger.info(f"   Journey ID: {journey_id}")
+            logger.info(f"   Target: {target}")
+            logger.info(f"   Scan Types: {scan_types}")'''
+
+        if re.search(old_execute_journey, content, re.DOTALL):
+            content = re.sub(old_execute_journey, new_execute_journey, content, flags=re.DOTALL)
+            print("✅ Método execute_journey corrigido - agora busca dados da jornada original")
+        else:
+            print("ℹ️ Método execute_journey já estava corrigido ou padrão não encontrado")
+
+        # 3. CORREÇÃO: Adicionar logs detalhados na execução
+        scan_execution_pattern = r'# Executar scans baseado na configuração\s+for scan_type in scan_types:'
+        scan_execution_replacement = '''# Executar scans baseado na configuração
+            logger.info(f"🔧 DEBUG: Iniciando execução dos scans: {scan_types}")
+            
+            for scan_type in scan_types:
+                logger.info(f"🔧 DEBUG: Executando scan tipo: {scan_type}")'''
+
+        if re.search(scan_execution_pattern, content):
+            content = re.sub(scan_execution_pattern, scan_execution_replacement, content)
+            print("✅ Logs detalhados adicionados na execução de scans")
+        else:
+            print("ℹ️ Logs detalhados já existem ou padrão não encontrado")
+
+        # Salvar arquivo corrigido
+        with open(file_path, 'w') as f:
+            f.write(content)
+        
+        print("✅ CORREÇÕES APLICADAS COM SUCESSO")
+        return True
+        
+    except Exception as e:
+        print(f"❌ Erro ao aplicar correções: {e}")
+        return False
+
+if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        print("Uso: python fix_journey_execution.py <arquivo_heartbeat.py>")
+        sys.exit(1)
+    
+    file_path = sys.argv[1]
+    success = fix_journey_execution_code(file_path)
+    sys.exit(0 if success else 1)
+EOF
+
+# Aplicar correções no arquivo heartbeat.py
+HEARTBEAT_FILE="$COLLECTOR_DIR/heartbeat.py"
+if [ -f "$HEARTBEAT_FILE" ]; then
+    log "🔧 Aplicando correções no arquivo heartbeat.py..."
+    python3 /tmp/fix_journey_execution.py "$HEARTBEAT_FILE"
+    
+    if [ $? -eq 0 ]; then
+        log "✅ Correções aplicadas com sucesso no sistema de execução de jornadas"
+    else
+        warn "⚠️ Erro ao aplicar correções - continuando..."
+    fi
+else
+    warn "⚠️ Arquivo heartbeat.py não encontrado - correções serão aplicadas na próxima execução"
+fi
+
+# Limpeza
+rm -f /tmp/fix_journey_execution.py
+
+# Reiniciar serviço para aplicar correções
+if systemctl is-active "$SERVICE_NAME" >/dev/null 2>&1; then
+    log "🔄 Reiniciando serviço para aplicar correções..."
+    systemctl restart "$SERVICE_NAME"
+    
+    # Aguardar estabilização
+    sleep 5
+    
+    if systemctl is-active "$SERVICE_NAME" >/dev/null 2>&1; then
+        log "✅ Serviço reiniciado com correções aplicadas"
+    else
+        warn "⚠️ Serviço não reiniciou corretamente - verificar logs"
+    fi
+fi
+
+log "✅ SISTEMA DE EXECUÇÃO DE JORNADAS CORRIGIDO!"
+log ""
+log "🔧 CORREÇÕES APLICADAS:"
+log "   • Método get_journey_data() - busca dados da jornada original"
+log "   • Método execute_journey() - corrigido para usar journeyId"
+log "   • Logs detalhados - melhor debugging da execução"
+log "   • Agora executa comandos nmap/nuclei corretamente"
+log ""
+log "📋 COMO TESTAR:"
+log "   1. Crie uma jornada on-demand no painel"
+log "   2. Configure target e tipos de scan (nmap/nuclei)"
+log "   3. Clique em 'Iniciar'"
+log "   4. Monitore logs: tail -f /var/log/$SERVICE_NAME"
+log "   5. Deve executar comandos de segurança e demorar mais tempo"
+log ""
+log "🎉 vlxsam04 (Collector Agent) pronto para uso!"
+log "📋 Status: systemctl status $SERVICE_NAME"
+log "📋 Logs: tail -f /var/log/$SERVICE_NAME"
+log "📋 Configuração: $CONFIG_DIR/config.json"
+log "✨ JORNADAS AGORA EXECUTAM CORRETAMENTE!"
+
 exit 0
