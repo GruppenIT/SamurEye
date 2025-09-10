@@ -7,32 +7,35 @@
 echo "🔍 DIAGNÓSTICO: Token do Collector vlxsam04"
 echo "=============================================="
 
-# Verificar arquivo .env da aplicação
+# Verificar arquivo .env da aplicação (baseado no install-hard-reset vlxsam02)
 echo ""
 echo "1️⃣ Verificando configuração do banco..."
-if [ -f "/etc/samureye/.env" ]; then
-    echo "📄 Arquivo .env encontrado em /etc/samureye/"
-    echo "   DATABASE_URL: $(grep DATABASE_URL /etc/samureye/.env | cut -d'=' -f2 | cut -c1-30)..."
+ENV_FILE="/opt/samureye/SamurEye/.env"
+
+if [ -f "$ENV_FILE" ]; then
+    echo "📄 Arquivo .env encontrado: $ENV_FILE"
+    echo "   DATABASE_URL: $(grep DATABASE_URL "$ENV_FILE" | cut -d'=' -f2 | cut -c1-40)..."
     
-    # Extrair parâmetros do DATABASE_URL
-    DB_HOST="172.24.1.153"
-    DB_PORT="5432"
-    DB_USER="samureye"
-    DB_NAME="samureye"
-    DB_PASS="SamurEye2024!"
+    # Extrair DATABASE_URL real do arquivo
+    DATABASE_URL=$(grep "^DATABASE_URL=" "$ENV_FILE" | cut -d'=' -f2 | tr -d '"')
     
-    echo "   Conectando a: ${DB_HOST}:${DB_PORT}"
-elif [ -f "/opt/samureye/.env" ]; then
-    echo "📄 Arquivo .env encontrado em /opt/samureye/"
-    echo "   DATABASE_URL: $(grep DATABASE_URL /opt/samureye/.env | cut -d'=' -f2 | cut -c1-30)..."
-    
-    DB_HOST="172.24.1.153"
-    DB_PORT="5432"
-    DB_USER="samureye"
-    DB_NAME="samureye"
-    DB_PASS="SamurEye2024!"
+    # Extrair parâmetros do DATABASE_URL real
+    if [[ $DATABASE_URL =~ postgresql://([^:]+):([^@]+)@([^:]+):([^/]+)/(.+) ]]; then
+        DB_USER="${BASH_REMATCH[1]}"
+        DB_PASS="${BASH_REMATCH[2]}"
+        DB_HOST="${BASH_REMATCH[3]}"
+        DB_PORT="${BASH_REMATCH[4]}"
+        DB_NAME="${BASH_REMATCH[5]}"
+        
+        echo "   Conectando a: ${DB_HOST}:${DB_PORT}"
+        echo "   Usuário: ${DB_USER}"
+        echo "   Banco: ${DB_NAME}"
+    else
+        echo "❌ Erro ao analisar DATABASE_URL"
+        exit 1
+    fi
 else
-    echo "❌ Arquivo .env não encontrado"
+    echo "❌ Arquivo .env não encontrado em: $ENV_FILE"
     exit 1
 fi
 
