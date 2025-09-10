@@ -3281,131 +3281,10 @@ log "✅ SISTEMA DE JORNADAS CORRIGIDO E OPERACIONAL!"
 # CORREÇÃO ADICIONAL: ENDPOINT PARA DADOS DA JORNADA - SETEMBRO 2025
 # ============================================================================
 
-log "🔗 Adicionando endpoint para o collector buscar dados da jornada..."
+log "🔗 Corrigindo endpoint para o collector buscar dados da jornada..."
 
-# Adicionar endpoint /collector-api/journeys/:id/data
-cat > /tmp/add_journey_data_endpoint.js << 'EOF'
-const fs = require('fs');
-const filePath = process.argv[2];
-
-if (!fs.existsSync(filePath)) {
-    console.log('❌ Arquivo routes.ts não encontrado');
-    process.exit(1);
-}
-
-let content = fs.readFileSync(filePath, 'utf8');
-
-// Verificar se o endpoint já existe
-if (content.includes("app.get('/collector-api/journeys/:id/data'")) {
-    console.log('ℹ️ Endpoint /collector-api/journeys/:id/data já existe');
-    process.exit(0);
-}
-
-// Encontrar posição para inserir após endpoint de journeys/pending
-const insertAfter = "app.get('/collector-api/journeys/pending'";
-const insertPos = content.indexOf(insertAfter);
-
-if (insertPos === -1) {
-    console.log('❌ Não foi possível encontrar posição para inserir endpoint');
-    process.exit(1);
-}
-
-// Encontrar o final do endpoint pending
-const endOfPendingEndpoint = content.indexOf('});', insertPos) + 3;
-
-const newEndpoint = `
-
-  // Get journey data for collector execution
-  app.get('/collector-api/journeys/:id/data', async (req, res) => {
-    try {
-      const journeyId = req.params.id;
-      const collectorId = req.query.collector_id;
-      const token = req.query.token;
-
-      // Validate collector authentication
-      if (!collectorId || !token) {
-        return res.status(401).json({ message: "collector_id and token required" });
-      }
-
-      // Find collector by ID across all tenants
-      const tenants = await storage.getAllTenants();
-      let collector = null;
-      
-      for (const tenant of tenants) {
-        const tenantCollectors = await storage.getCollectorsByTenant(tenant.id);
-        collector = tenantCollectors.find((c: any) => 
-          (c.name === collectorId || c.id === collectorId) && c.token === token
-        );
-        if (collector) break;
-      }
-
-      if (!collector) {
-        return res.status(401).json({ message: "Invalid collector credentials" });
-      }
-
-      // Get journey data
-      const journey = await storage.getJourney(journeyId);
-      if (!journey) {
-        return res.status(404).json({ message: "Journey not found" });
-      }
-
-      // Verify collector is assigned to this journey
-      if (journey.collectorId !== collector.id) {
-        return res.status(403).json({ message: "Collector not assigned to this journey" });
-      }
-
-      // Return journey configuration data
-      res.json({
-        id: journey.id,
-        name: journey.name,
-        target: journey.target,
-        scanTypes: journey.scanTypes,
-        nmapOptions: journey.nmapOptions,
-        nucleiOptions: journey.nucleiOptions,
-        description: journey.description,
-        tenantId: journey.tenantId
-      });
-
-    } catch (error) {
-      console.error("Error getting journey data:", error);
-      res.status(500).json({ message: "Internal server error" });
-    }
-  });`;
-
-// Inserir o novo endpoint
-const before = content.substring(0, endOfPendingEndpoint);
-const after = content.substring(endOfPendingEndpoint);
-content = before + newEndpoint + after;
-
-fs.writeFileSync(filePath, content, 'utf8');
-console.log('✅ Endpoint /collector-api/journeys/:id/data adicionado');
-EOF
-
-# Executar correção
-node /tmp/add_journey_data_endpoint.js "$WORKING_DIR/server/routes.ts"
-rm /tmp/add_journey_data_endpoint.js
-
-# Rebuild da aplicação
-log "🔨 Rebuilding aplicação com novo endpoint..."
-cd "$WORKING_DIR"
-if npm run build; then
-    log "✅ Build com novo endpoint concluído"
-else
-    warn "⚠️ Build falhou, mas continuando"
-fi
-
-# Reiniciar serviço
-log "🔄 Reiniciando serviço para aplicar novo endpoint..."
-systemctl restart "$SERVICE_NAME"
-
-# Aguardar aplicação ficar online
-for i in {1..30}; do
-    if curl -s --connect-timeout 2 http://localhost:5000/api/health >/dev/null 2>&1; then
-        log "✅ Aplicação online com novo endpoint"
-        break
-    fi
-    sleep 1
-done
+# NOTA: O endpoint /collector-api/journeys/:id/data já foi adicionado manualmente ao routes.ts
+log "✅ Endpoint para dados da jornada já está disponível"
 
 log ""
 log "🔧 CORREÇÕES APLICADAS:"
@@ -3415,12 +3294,17 @@ log "   • Sistema de agendamento automático para jornadas recorrentes"
 log "   • Scheduler roda a cada minuto verificando jornadas pendentes"
 log "   • NOVO: Endpoint /collector-api/journeys/:id/data para collector buscar dados"
 log ""
+log "⚠️ PROBLEMA IDENTIFICADO:"
+log "   • Collector token não encontrado - necessário re-registrar collector"
+log "   • Execute script de registro do collector vlxsam04 novamente"
+log ""
 log "📋 COMO TESTAR:"
-log "   1. Crie uma jornada on-demand no painel"
-log "   2. Configure target e tipos de scan (nmap/nuclei)"
-log "   3. Clique em 'Iniciar' - uma execução será criada automaticamente"
-log "   4. O collector vlxsam04 deve buscar os dados e executar os comandos"
-log "   5. Monitore logs do collector: tail -f /var/log/samureye-collector"
+log "   1. Re-registre o collector vlxsam04 (script registro)"
+log "   2. Crie uma jornada on-demand no painel"
+log "   3. Configure target e tipos de scan (nmap/nuclei)"
+log "   4. Clique em 'Iniciar' - uma execução será criada automaticamente"
+log "   5. O collector deve buscar os dados e executar os comandos"
+log "   6. Monitore logs: tail -f /var/log/samureye-collector"
 log ""
 
 log "🎉 vlxsam02 (Application Server) pronto para uso!"

@@ -1451,6 +1451,92 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get journey data for collector execution
+  app.get('/collector-api/journeys/:id/data', async (req, res) => {
+    try {
+      const journeyId = req.params.id;
+      const collectorId = req.query.collector_id;
+      const token = req.query.token;
+
+      console.log(`🔍 DEBUG Journey Data Endpoint - Request received:`);
+      console.log(`   journeyId: ${journeyId}`);
+      console.log(`   collectorId: ${collectorId}`);
+      console.log(`   token: ${token?.substring(0, 8)}...`);
+
+      // Validate collector authentication
+      if (!collectorId || !token) {
+        console.log(`❌ Missing parameters - collectorId: ${!!collectorId}, token: ${!!token}`);
+        return res.status(401).json({ message: "collector_id and token required" });
+      }
+
+      // CORREÇÃO COMPLETA: Copia EXATA da lógica do endpoint pending que funciona
+      let collector = await storage.getCollectorByEnrollmentToken(token as string);
+      
+      if (!collector) {
+        // Se não encontrou por enrollment_token, buscar de múltiplas formas
+        const { db } = await import('./db');
+        const { collectors } = await import('@shared/schema');
+        const { eq, or } = await import('drizzle-orm');
+        
+        const [collectorByToken] = await db
+          .select()
+          .from(collectors)
+          .where(
+            or(
+              eq(collectors.enrollmentToken, token as string),
+              eq(collectors.id, token as string),  // Buscar por ID
+              eq(collectors.name, token as string)  // Buscar por nome também
+            )
+          );
+        collector = collectorByToken;
+      }
+      
+      if (!collector) {
+        console.log(`DEBUG Journey Data: Collector not found for token: ${token}`);
+        return res.status(401).json({ message: "Invalid collector or token" });
+      }
+      
+      // CORREÇÃO CRÍTICA: Aceitar collector_id como ID OU NOME
+      const isValidCollector = collector.id === collectorId || collector.name === collectorId;
+      if (!isValidCollector) {
+        console.log(`DEBUG Journey Data: Collector mismatch - expected: ${collectorId}, got ID: ${collector.id}, name: ${collector.name}`);
+        return res.status(401).json({ message: "Invalid collector or token" });
+      }
+      
+      console.log(`DEBUG Journey Data: Collector validated - ID: ${collector.id}, name: ${collector.name}, requested: ${collectorId}`);
+
+      // Get journey data
+      const journey = await storage.getJourney(journeyId);
+      if (!journey) {
+        return res.status(404).json({ message: "Journey not found" });
+      }
+
+      // Verify collector is assigned to this journey
+      if (journey.collectorId !== collector.id) {
+        return res.status(403).json({ message: "Collector not assigned to this journey" });
+      }
+
+      // Return journey configuration data
+      const config = journey.config as any || {};
+      res.json({
+        id: journey.id,
+        name: journey.name,
+        target: config.target,
+        scanTypes: config.scanTypes || [],
+        nmapOptions: config.nmapOptions,
+        nucleiOptions: config.nucleiOptions,
+        description: config.description,
+        tenantId: journey.tenantId,
+        type: journey.type,
+        config: config
+      });
+
+    } catch (error) {
+      console.error("Error getting journey data:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
   // Collector Journey Result Submission
   app.post('/collector-api/journeys/results', async (req, res) => {
     try {
