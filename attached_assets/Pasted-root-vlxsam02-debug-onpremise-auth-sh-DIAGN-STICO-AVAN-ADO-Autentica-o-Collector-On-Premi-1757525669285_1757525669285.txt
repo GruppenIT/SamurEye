@@ -1,0 +1,51 @@
+root@vlxsam02:~# ./debug-onpremise-auth.sh
+🔍 DIAGNÓSTICO AVANÇADO: Autenticação Collector On-Premise
+===========================================================
+
+1️⃣ Verificando serviço...
+✅ Serviço samureye-app está ativo
+   Status:      Active: active (running) since Wed 2025-09-10 11:56:34 -03; 2h 38min ago
+
+2️⃣ Verificando configuração do banco...
+✅ Arquivo .env encontrado
+   DATABASE_URL: postgresql://samureye_user:samureye_secure_2024@17...
+
+3️⃣ Testando conexão ao banco...
+✅ Conexão ao banco PostgreSQL OK
+
+4️⃣ Verificando dados do collector no banco...
+        info         |                  id                  |   name   | token_preview | status |         created_at
+---------------------+--------------------------------------+----------+---------------+--------+----------------------------
+ Collector vlxsam04: | 5a774b05-8a8e-4e40-9f83-981320752086 | vlxsam04 | 5a774b05...   | online | 2025-09-10 14:57:36.877918
+(1 row)
+
+
+5️⃣ Testando endpoint da aplicação...
+🔑 Token encontrado no banco: 5a774b05...
+
+   Testando /collector-api/journeys/pending...
+   Resposta: []
+
+   Testando /collector-api/journeys/test/data...
+   Resposta: <!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" con
+
+6️⃣ Logs recentes da aplicação...
+📋 Últimas 10 linhas dos logs:
+Sep 10 11:54:29 vlxsam02 systemd[1]: samureye-app.service: Scheduled restart job, restart counter is at 1.
+Sep 10 11:54:29 vlxsam02 systemd[1]: Started samureye-app.service - SamurEye Application Server.
+Sep 10 11:55:38 vlxsam02 systemd[1]: Stopping samureye-app.service - SamurEye Application Server...
+Sep 10 11:55:38 vlxsam02 systemd[1]: samureye-app.service: Killing process 545631 (node) with signal SIGKILL.
+Sep 10 11:55:38 vlxsam02 systemd[1]: samureye-app.service: Failed to kill control group /system.slice/samureye-app.service, ignoring: Invalid argument
+Sep 10 11:55:38 vlxsam02 systemd[1]: samureye-app.service: Deactivated successfully.
+Sep 10 11:55:38 vlxsam02 systemd[1]: samureye-app.service: Unit process 545631 (node) remains running after unit stopped.
+Sep 10 11:55:38 vlxsam02 systemd[1]: Stopped samureye-app.service - SamurEye Application Server.
+Sep 10 11:55:38 vlxsam02 systemd[1]: samureye-app.service: Consumed 1.023s CPU time, 82.2M memory peak, 0B memory swap peak.
+Sep 10 11:56:34 vlxsam02 systemd[1]: Started samureye-app.service - SamurEye Application Server.
+
+==========================================
+🏁 DIAGNÓSTICO AVANÇADO CONCLUÍDO
+root@vlxsam02:~#

@@ -3283,8 +3283,134 @@ log "✅ SISTEMA DE JORNADAS CORRIGIDO E OPERACIONAL!"
 
 log "🔗 Corrigindo endpoint para o collector buscar dados da jornada..."
 
-# NOTA: O endpoint /collector-api/journeys/:id/data já foi adicionado manualmente ao routes.ts
-log "✅ Endpoint para dados da jornada já está disponível"
+# CORREÇÃO CRÍTICA: Endpoint /collector-api/journeys/:id/data sendo sobreposto pelo Vite
+log "🔧 Corrigindo problema de roteamento do endpoint de dados da jornada..."
+
+# O problema é que o endpoint está sendo registrado após o middleware do Vite
+# Precisamos mover todos os endpoints /collector-api para ANTES do Vite middleware
+cat > /tmp/fix_collector_api_routes.js << 'EOF'
+const fs = require('fs');
+const filePath = process.argv[2];
+
+if (!fs.existsSync(filePath)) {
+    console.log('❌ Arquivo routes.ts não encontrado');
+    process.exit(1);
+}
+
+let content = fs.readFileSync(filePath, 'utf8');
+
+// Encontrar todos os endpoints collector-api
+const collectorApiEndpoints = [];
+const lines = content.split('\n');
+let inCollectorEndpoint = false;
+let currentEndpoint = [];
+let braceCount = 0;
+
+for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    
+    if (line.includes("app.get('/collector-api/")) {
+        inCollectorEndpoint = true;
+        currentEndpoint = [line];
+        braceCount = 0;
+        continue;
+    }
+    
+    if (inCollectorEndpoint) {
+        currentEndpoint.push(line);
+        
+        // Contar chaves para saber quando o endpoint termina
+        for (const char of line) {
+            if (char === '{') braceCount++;
+            if (char === '}') braceCount--;
+        }
+        
+        // Se braceCount volta a 0 depois de ter subido, o endpoint terminou
+        if (braceCount === 0 && currentEndpoint.length > 1) {
+            collectorApiEndpoints.push(currentEndpoint.join('\n'));
+            currentEndpoint = [];
+            inCollectorEndpoint = false;
+        }
+    }
+}
+
+if (collectorApiEndpoints.length === 0) {
+    console.log('❌ Nenhum endpoint collector-api encontrado');
+    process.exit(1);
+}
+
+console.log(`✅ Encontrados ${collectorApiEndpoints.length} endpoints collector-api`);
+
+// Remover endpoints collector-api do conteúdo atual
+let newContent = content;
+for (const endpoint of collectorApiEndpoints) {
+    newContent = newContent.replace(endpoint, '');
+}
+
+// Encontrar onde inserir os endpoints (após as importações, antes do Vite)
+const insertAfter = 'export default function createServer() {';
+const insertPos = newContent.indexOf(insertAfter);
+
+if (insertPos === -1) {
+    console.log('❌ Não foi possível encontrar posição para inserir endpoints');
+    process.exit(1);
+}
+
+const endOfLine = newContent.indexOf('\n', insertPos) + 1;
+
+// Inserir endpoints collector-api no início
+const collectorApiSection = `
+  // ============================================================================
+  // COLLECTOR API ENDPOINTS - DEVE VIR ANTES DO VITE MIDDLEWARE
+  // ============================================================================
+  
+${collectorApiEndpoints.join('\n\n')}
+
+  // ============================================================================
+  // APLICAÇÃO WEB - MIDDLEWARE VITE E ROTAS PRINCIPAIS
+  // ============================================================================
+`;
+
+const before = newContent.substring(0, endOfLine);
+const after = newContent.substring(endOfLine);
+newContent = before + collectorApiSection + after;
+
+// Limpar linhas em branco excessivas
+newContent = newContent.replace(/\n\n\n+/g, '\n\n');
+
+fs.writeFileSync(filePath, newContent, 'utf8');
+console.log('✅ Endpoints collector-api movidos para o início do arquivo');
+EOF
+
+# Executar correção
+node /tmp/fix_collector_api_routes.js "$WORKING_DIR/server/routes.ts"
+rm /tmp/fix_collector_api_routes.js
+
+# Reiniciar serviço para aplicar mudanças
+log "🔄 Reiniciando serviço para aplicar correção de roteamento..."
+systemctl restart "$SERVICE_NAME"
+
+# Aguardar aplicação ficar online
+for i in {1..30}; do
+    if curl -s --connect-timeout 2 http://localhost:5000/api/health >/dev/null 2>&1; then
+        log "✅ Aplicação online após correção de roteamento"
+        break
+    fi
+    sleep 1
+done
+
+# Testar correção
+log "🧪 Testando correção do endpoint de dados..."
+if [ -n "$REAL_TOKEN" ]; then
+    TEST_RESPONSE=$(curl -s "http://localhost:5000/collector-api/journeys/test/data?collector_id=vlxsam04&token=${REAL_TOKEN}" 2>/dev/null)
+    if [[ "$TEST_RESPONSE" == *"Journey not found"* ]] || [[ "$TEST_RESPONSE" == *"{"* ]]; then
+        log "✅ Endpoint de dados da jornada corrigido - retorna JSON"
+    else
+        warn "⚠️ Endpoint ainda retorna HTML - pode precisar de correção adicional"
+    fi
+fi
+
+log "✅ Correção de roteamento aplicada"
 
 log ""
 log "🔧 CORREÇÕES APLICADAS:"
