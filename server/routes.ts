@@ -123,14 +123,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           } else if (journey.scheduleType === 'recurring') {
             // Calculate next execution time for recurring journeys
             // This is a basic implementation - could be enhanced with cron expressions
-            const config = journey.scheduleConfig || {};
+            const config = journey.scheduleConfig as any || {};
             const intervalMinutes = config.intervalMinutes || 60; // Default 1 hour
             const nextExecution = new Date(now.getTime() + (intervalMinutes * 60 * 1000));
             
             await storage.updateJourneySchedule(
               journey.id,
               journey.scheduleType,
-              journey.scheduledAt,
+              journey.scheduledAt || undefined,
               {
                 ...config,
                 nextExecutionAt: nextExecution
