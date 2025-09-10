@@ -77,6 +77,74 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error('Error checking collector status:', error);
     }
   }, 2 * 60 * 1000); // Check every 2 minutes
+
+  // Journey Scheduler - check for scheduled journeys every minute
+  setInterval(async () => {
+    try {
+      const now = new Date();
+      const scheduledJourneys = await storage.getScheduledJourneys();
+      
+      for (const journey of scheduledJourneys) {
+        let shouldExecute = false;
+        
+        if (journey.scheduleType === 'one_shot' && journey.scheduledAt && journey.status === 'pending') {
+          // Check if one-shot journey should run now
+          shouldExecute = journey.scheduledAt <= now;
+        } else if (journey.scheduleType === 'recurring' && journey.isActive && journey.nextExecutionAt) {
+          // Check if recurring journey should run now
+          shouldExecute = journey.nextExecutionAt <= now;
+        }
+        
+        if (shouldExecute) {
+          console.log(`Scheduler: Creating execution for ${journey.scheduleType} journey: ${journey.name}`);
+          
+          // Get current execution count to determine execution number
+          const existingExecutions = await storage.getJourneyExecutions(journey.id);
+          const executionNumber = existingExecutions.length + 1;
+          
+          // Create execution for collector to pick up
+          await storage.createJourneyExecution({
+            journeyId: journey.id,
+            status: 'queued',
+            executionNumber,
+            scheduledFor: now,
+            collectorId: journey.collectorId,
+            metadata: {
+              triggeredBy: 'scheduler',
+              scheduleType: journey.scheduleType,
+              originalScheduledTime: journey.scheduleType === 'one_shot' ? journey.scheduledAt : journey.nextExecutionAt
+            }
+          });
+          
+          // Update journey status and next execution time
+          if (journey.scheduleType === 'one_shot') {
+            // One-shot journeys are completed after scheduling
+            await storage.updateJourneyStatus(journey.id, 'completed');
+          } else if (journey.scheduleType === 'recurring') {
+            // Calculate next execution time for recurring journeys
+            // This is a basic implementation - could be enhanced with cron expressions
+            const config = journey.scheduleConfig || {};
+            const intervalMinutes = config.intervalMinutes || 60; // Default 1 hour
+            const nextExecution = new Date(now.getTime() + (intervalMinutes * 60 * 1000));
+            
+            await storage.updateJourneySchedule(
+              journey.id,
+              journey.scheduleType,
+              journey.scheduledAt,
+              {
+                ...config,
+                nextExecutionAt: nextExecution
+              }
+            );
+            
+            console.log(`Scheduler: Next execution for ${journey.name} scheduled for ${nextExecution.toISOString()}`);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error in journey scheduler:', error);
+    }
+  }, 60 * 1000); // Check every minute
   
   // Session middleware
   app.use(session({
@@ -1252,8 +1320,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Toggle isActive status
       const newIsActive = !journey.isActive;
-      await storage.updateJourneySchedule(journey.id, journey.scheduleType, journey.scheduledAt, {
-        ...journey.scheduleConfig,
+      const scheduleConfig = journey.scheduleConfig || {};
+      await storage.updateJourneySchedule(journey.id, journey.scheduleType, journey.scheduledAt || undefined, {
+        ...scheduleConfig,
         isActive: newIsActive
       });
 
