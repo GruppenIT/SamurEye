@@ -3295,16 +3295,52 @@ log "   • Scheduler roda a cada minuto verificando jornadas pendentes"
 log "   • NOVO: Endpoint /collector-api/journeys/:id/data para collector buscar dados"
 log ""
 log "⚠️ PROBLEMA IDENTIFICADO:"
-log "   • Collector token não encontrado - necessário re-registrar collector"
-log "   • Execute script de registro do collector vlxsam04 novamente"
+log "   • Collector token não encontrado - necessário corrigir enrollment_token"
+log "   • Aplicando correção automática..."
+
+# CORREÇÃO: Popular enrollment_token vazio com o ID do collector
+log "🔧 Corrigindo enrollment_token para collectors registrados..."
+
+# Script para corrigir enrollment_token vazio
+cat > /tmp/fix_collector_tokens.sql << 'EOF'
+-- Atualizar collectors com enrollment_token vazio para usar o próprio ID como token
+UPDATE collectors 
+SET enrollment_token = id 
+WHERE enrollment_token IS NULL OR enrollment_token = '' OR LENGTH(TRIM(enrollment_token)) = 0;
+
+-- Verificar resultado
+SELECT 
+    id,
+    name,
+    substring(enrollment_token, 1, 8) || '...' as token_preview,
+    status,
+    created_at
+FROM collectors 
+WHERE name = 'vlxsam04' OR id LIKE '%vlxsam04%'
+ORDER BY created_at DESC;
+EOF
+
+# Executar correção
+export PGPASSWORD="${POSTGRES_PASSWORD}"
+if psql -h "${POSTGRES_HOST}" -p "${POSTGRES_PORT}" -U "${POSTGRES_USER}" -d "${POSTGRES_DB}" -f /tmp/fix_collector_tokens.sql >/dev/null 2>&1; then
+    log "✅ Correção de enrollment_token aplicada"
+else
+    warn "⚠️ Erro ao aplicar correção de enrollment_token"
+fi
+
+# Limpar arquivo temporário
+rm -f /tmp/fix_collector_tokens.sql
 log ""
 log "📋 COMO TESTAR:"
-log "   1. Re-registre o collector vlxsam04 (script registro)"
+log "   1. Collector vlxsam04 deve ter token corrigido automaticamente"
 log "   2. Crie uma jornada on-demand no painel"
 log "   3. Configure target e tipos de scan (nmap/nuclei)"
 log "   4. Clique em 'Iniciar' - uma execução será criada automaticamente"
 log "   5. O collector deve buscar os dados e executar os comandos"
 log "   6. Monitore logs: tail -f /var/log/samureye-collector"
+log ""
+log "🔬 VERIFICAR CORREÇÃO:"
+log "   curl 'http://localhost:5000/collector-api/journeys/pending?collector_id=vlxsam04&token=5a774b05-8a8e-4e40-9f83-981320752086'"
 log ""
 
 log "🎉 vlxsam02 (Application Server) pronto para uso!"
