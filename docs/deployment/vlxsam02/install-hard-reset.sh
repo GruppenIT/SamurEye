@@ -3294,9 +3294,8 @@ log "   • Sistema de agendamento automático para jornadas recorrentes"
 log "   • Scheduler roda a cada minuto verificando jornadas pendentes"
 log "   • NOVO: Endpoint /collector-api/journeys/:id/data para collector buscar dados"
 log ""
-log "⚠️ PROBLEMA IDENTIFICADO:"
-log "   • Collector token não encontrado - necessário corrigir enrollment_token"
-log "   • Aplicando correção automática..."
+log "✅ CORREÇÃO AUTOMÁTICA APLICADA:"
+log "   • Corrigindo enrollment_token vazio para collectors registrados"
 
 # CORREÇÃO: Popular enrollment_token vazio com o ID do collector
 log "🔧 Corrigindo enrollment_token para collectors registrados..."
